@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.handler
+package org.mashupbots.socko.handlers
 
 import java.text.SimpleDateFormat
 import java.util.Calendar

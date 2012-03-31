@@ -33,6 +33,10 @@ case class EndPoint(
   host: String,
   uri: String) {
 
+  require(method != null && method != "", "EndPoint method cannot be null or empty string")
+  require(host != null && host != "", "EndPoint host cannot be null or empty string")
+  require(uri != null && uri != "", "EndPoint uri cannot be null or empty string")
+
   /**
    * Path portion of the request URI without the query string. For example: `/folder/file.html`
    */
@@ -55,11 +59,15 @@ case class EndPoint(
    * @return `Some(String)` or `None` if there is no such name
    */
   def getQueryString(name: String): Option[String] = {
-    val v = queryStringMap(name)
-    if (v == null)
-      None
-    else
-      Some(v.get(0))
+    try {
+      val v = queryStringMap(name)
+      if (v == null)
+        None
+      else
+        Some(v.get(0))
+    } catch {
+      case ex:NoSuchElementException => None
+    }
   }
 
 }
