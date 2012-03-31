@@ -7,9 +7,9 @@ A lightweight [Scala](http://www.scala-lang.org/) web server powered by
 We designed MashupBots to be an HTML5 style app. 
 
 Our fat html/css/javascript client is going to be served as static files from the web server. 
-No server side HTML templating will be required because it will all happen in the browser using javascript.
+Server side HTML templating will be not required because it will all happen in the browser using javascript.
 
-Our fat client will communicate with the business logic/database via a HTTP REST base API served off 
+Our fat client will communicate with the business logic/database via a HTTP REST based API served off 
 the same web server.
 
 We could not find a lightweight asynchronous web server that exactly meets our requirements so we decided 
@@ -23,7 +23,7 @@ We hope you find it as useful as we do.
 
 * Socko runs on top of the asynchronous event driven Netty framework.
 
-* Socko expects all processing to be performed by AKKA actors.
+* Socko expects all processing of requests to be performed by AKKA actors.
 
 * Socko has no external dependencies outside AKKA 2.0 (note that Netty is a dependency of AKKA 2.0 Remote)
 
@@ -41,13 +41,12 @@ We hope you find it as useful as we do.
 
 ## What Socko does not and will not support
 
-* Socko does not run in a servlet
+* Socko does not run in a servlet. We use Netty instead.
   
 * Socko is not a web application or MVC framework like Lift or Play. It does not perform server based
-  HTML templating. We believe that the view layer logic should be implemented in javascript and 
-  executed in the browser.
+  HTML templating. We use client side javascript libraries like EmberJS and BackboneJS instead.
     
-* Socko does not store session data or caching of application data. HTML5 local storage provides for that.
+* Socko does not store session data or cache application data. We use HTML5 local storage instead.
 
 ## Quick Start
 
