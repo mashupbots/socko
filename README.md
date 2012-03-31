@@ -1,7 +1,7 @@
 # SOCKO
 
-A lightweight web server written in [Scala](http://www.scala-lang.org/), 
-runs on top of [Netty](http://netty.io/) and processes requests using [AKKA](http://akka.io/).
+A lightweight [Scala](http://www.scala-lang.org/) web server powered by
+[Netty](http://netty.io/) networking and [AKKA](http://akka.io/) processing.
 
 ## Background
 We designed MashupBots to be an HTML5 style app. 
