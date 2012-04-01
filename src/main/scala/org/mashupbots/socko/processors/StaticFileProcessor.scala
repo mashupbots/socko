@@ -23,11 +23,14 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.RandomAccessFile
 import java.security.MessageDigest
+import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.GZIPOutputStream
 import java.util.Date
 
 import scala.Array.canBuildFrom
+import scala.collection.JavaConversions.asScalaConcurrentMap
+import scala.collection.mutable.ConcurrentMap
 
 import org.jboss.netty.channel.ChannelFuture
 import org.jboss.netty.channel.ChannelFutureListener
@@ -46,18 +49,18 @@ import akka.event.Logging
 
 /**
  * A processor that handles downloading of static files.
- * 
+ *
  * It performs HTTP compression and also uses If-Modified-Since header for caching.
  *
  * This processor contains lots of disk IO (blocking code). Please run it with a router and
  * in its own `PinnedDispatcher` (a thread per actor) or `BalancingDispatcher`.
- * 
+ *
  * For example:
  * {{{
  *   router = actorSystem.actorOf(Props[StaticFileProcessor]
  *            .withRouter(FromConfig()).withDispatcher("myDispatcher"), "myRouter")
  * }}}
- * 
+ *
  * Configuration in `application.conf`:
  * {{{
  *   myDispatcher {
@@ -167,9 +170,9 @@ class StaticFileProcessor extends Actor {
     }
 
     // Download file if it has not been modified
-    val lastModified = file.lastModified()
-    if (hasFileBeenModified(request, file, lastModified)) {
-      downloadFile(request, file, lastModified, request.browserCacheSeconds)
+    val lastModified = FileLastModifiedCache.get(file, request.fileLastModifiedCacheTimeoutSeconds)
+    if (hasFileBeenModified(request, lastModified)) {
+      downloadFile(request, file, lastModified, request.browserCacheTimeoutSeconds)
     } else {
       request.context.writeErrorResponse(HttpResponseStatus.NOT_MODIFIED)
     }
@@ -179,11 +182,10 @@ class StaticFileProcessor extends Actor {
    * Check if a file has been modified when compared against the timestamp sent by caller
    *
    * @param request Static file request
-   * @param file File to download
    * @param lastModified Last modified timestamp
    * @returns `true` if and only if the file at the browser has been modified
    */
-  private def hasFileBeenModified(request: StaticFileRequest, file: File, lastModified: Long): Boolean = {
+  private def hasFileBeenModified(request: StaticFileRequest, lastModified: Long): Boolean = {
     val ifModifiedSinceDate = request.context.getIfModifiedSinceHeader()
     if (ifModifiedSinceDate.isDefined) {
       // When file timestamp is the same as what the browser is sending up
@@ -221,13 +223,17 @@ class StaticFileProcessor extends Actor {
 
       if (contentEncoding.length > 0) {
         val compressedFile = compressFile(request, contentEncoding, file)
-        if (compressedFile.isDefined) fileToDownload = compressedFile.get
+        if (compressedFile.isDefined) {
+          fileToDownload = compressedFile.get
+        } else {
+          contentEncoding = "" // No compression due to error
+        }
       }
     }
 
     // Get file
     try {
-      raf = new RandomAccessFile(fileToDownload, "r");
+      raf = new RandomAccessFile(fileToDownload, "r")
     } catch {
       case e: FileNotFoundException => {
         request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
@@ -259,22 +265,22 @@ class StaticFileProcessor extends Actor {
       writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192))
     } else {
       // No encryption - use zero-copy.
-      val region = new DefaultFileRegion(raf.getChannel(), 0, fileLength);
-      writeFuture = ch.write(region);
+      val region = new DefaultFileRegion(raf.getChannel(), 0, fileLength)
+      writeFuture = ch.write(region)
       writeFuture.addListener(new ChannelFutureProgressListener() {
         override def operationComplete(future: ChannelFuture) {
-          region.releaseExternalResources();
+          region.releaseExternalResources()
         }
         override def operationProgressed(
           future: ChannelFuture, amount: Long, current: Long, total: Long) {
           log.debug("{}: {} / {} (+{})%n", Array(file.getName, current, total, amount))
         }
-      });
+      })
     }
 
     // Decide whether to close the connection or not.
     if (!request.context.isKeepAlive) {
-      writeFuture.addListener(ChannelFutureListener.CLOSE);
+      writeFuture.addListener(ChannelFutureListener.CLOSE)
     }
   }
 
@@ -296,8 +302,8 @@ class StaticFileProcessor extends Actor {
     log.debug("Compressed file name: {}", compressedFile.getCanonicalPath)
 
     if (!compressedFile.exists) {
-      var fileIn: BufferedInputStream = null;
-      var compressedOut: DeflaterOutputStream = null;
+      var fileIn: BufferedInputStream = null
+      var compressedOut: DeflaterOutputStream = null
 
       try {
         // Create output file
@@ -344,7 +350,7 @@ class StaticFileProcessor extends Actor {
 
   /**
    * Calculate an MD5 has of a string. Used to hashing a file name
-   * 
+   *
    * @param s String to MD5 hash
    * @returns MD5 hash of specified string
    */
@@ -362,13 +368,48 @@ class StaticFileProcessor extends Actor {
  * @param context HTTP Request context
  * @param rootFileDir Root directory from which files will be served. Used to check validity of `filePath`
  * @param file file to download
- * browserCacheSeconds Number of seconds to cache the file in the browser
- * @@param tempDir temporary directory where compressed version of files can be stored
+ * @param tempDir temporary directory where compressed version of files can be stored
+ * @param browserCacheTimeoutSeconds Number of seconds to cache the file in the browser. Defaults to 1 hour.
+ * @param fileLastModifiedCacheTimeoutSeconds Number of seconds to cache file last modified timestamp.
+ *  Defaults to 5 minutes.
  */
 case class StaticFileRequest(
   context: HttpRequestProcessingContext,
   rootFileDir: File,
   file: File,
-  browserCacheSeconds: Int,
-  tempDir: File)
+  tempDir: File,
+  browserCacheTimeoutSeconds: Int = 3600,
+  fileLastModifiedCacheTimeoutSeconds: Int = 300)
+
+/**
+ * Cache for a file's last modified date. Caching this value means that we wont have to keep reading the file and
+ * hence we reduce a blocking IO.
+ */
+object FileLastModifiedCache {
+  private val cache: ConcurrentMap[String, FileLastModified] = new ConcurrentHashMap[String, FileLastModified]
+
+  /**
+   * Gets a file's last modified date from cache. If not in the cache, the file will be read and its last modified
+   * date will be cached
+   *
+   * @param file File to read last modified date
+   * @param timeoutSeconds Seconds before this cache entry expires
+   * @returns the file's last modified time
+   */
+  def get(file: File, timeoutSeconds: Int): Long = {
+    val r = cache.get(file.getCanonicalPath)
+    if (r.isDefined && new Date().getTime < r.get.timeout) {
+      r.get.lastModified
+    } else {
+      cache.put(file.getCanonicalPath,
+        FileLastModified(file.getCanonicalPath, file.lastModified, new Date().getTime + (timeoutSeconds * 1000)))
+      file.lastModified
+    }
+  }
+
+  case class FileLastModified(
+    filePath: String,
+    lastModified: Long,
+    timeout: Long)
+}
 

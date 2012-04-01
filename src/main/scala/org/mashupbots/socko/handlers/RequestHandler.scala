@@ -43,9 +43,9 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.util.CharsetUtil
-import org.mashupbots.socko.context.EndPoint
 import org.mashupbots.socko.context.HttpChunkProcessingContext
 import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.OriginalHttpRequest
 import org.mashupbots.socko.context.ProcessingContext
 import org.mashupbots.socko.context.WsHandshakeProcessingContext
 import org.mashupbots.socko.context.WsProcessingContext
@@ -67,19 +67,9 @@ class RequestHandler(
   private var wsHandshaker: WebSocketServerHandshaker = null
 
   /**
-   * The end point of the original HttpRequest that was the first Chunk or WebSocket handshake
-   *
-   * Only used in Chunk and WebSocket processing
+   * Details of the original HTTP that kicked off HTTP Chunk or WebSocket processing
    */
-  private var originalEndPoint: Option[EndPoint] = None
-
-  /**
-   * Flag indicating if the connection is to be kept alive as specified in the original HTTP request
-   * that was the first Chunk or WebSocket handshake.
-   *
-   * Only used in Chunk and WebSocket processing
-   */
-  private var originalKeepAlive: Option[Boolean] = None
+  private var originalHttpRequest: Option[OriginalHttpRequest] = None
 
   /**
    * Dispatch message to actor system for processing
@@ -96,18 +86,19 @@ class RequestHandler(
 
         if (ctx.isChunked) {
           validateFirstChunk(ctx)
-        }
-
-        if (ctx.isWebSocketUpgrade) {
+          routes(ctx)
+          originalHttpRequest = Some(new OriginalHttpRequest(ctx))
+        } else if (ctx.isWebSocketUpgrade) {
           var wsctx = WsHandshakeProcessingContext(e.getChannel, httpRequest)
           routes(wsctx)
           doWebSocketHandshake(wsctx)
+          originalHttpRequest = Some(new OriginalHttpRequest(ctx))
         } else {
           routes(ctx)
         }
 
       case httpChunk: HttpChunk =>
-        var ctx = HttpChunkProcessingContext(e.getChannel, originalEndPoint.get, originalKeepAlive.get, httpChunk)
+        var ctx = HttpChunkProcessingContext(e.getChannel, originalHttpRequest.get, httpChunk)
         log.debug("CHUNK {} {} {} CHANNEL={}",
           Array[Object](ctx.endPoint.method, ctx.endPoint.host, ctx.endPoint.path, e.getChannel.getId))
 
@@ -118,7 +109,7 @@ class RequestHandler(
         }
 
       case wsFrame: WebSocketFrame =>
-        var ctx = WsProcessingContext(e.getChannel, originalEndPoint.get, wsFrame)
+        var ctx = WsProcessingContext(e.getChannel, originalHttpRequest.get.endPoint, wsFrame)
         log.debug("WS {} {} {} CHANNEL={}",
           Array[Object](ctx.endPoint.method, ctx.endPoint.host, ctx.endPoint.path, e.getChannel.getId))
 
@@ -146,13 +137,11 @@ class RequestHandler(
   private def validateFirstChunk(ctx: HttpRequestProcessingContext) {
     if (isAggreatingChunks(ctx.channel)) {
       if (ctx.httpRequest.isChunked) {
-        if (originalEndPoint.isDefined) {
+        if (originalHttpRequest.isDefined) {
           throw new IllegalStateException("New chunk started before the previous chunk ended")
         }
-        originalEndPoint = Some(ctx.endPoint)
-        originalKeepAlive = Some(HttpHeaders.isKeepAlive(ctx.httpRequest))
       }
-      if (!ctx.httpRequest.isChunked && originalEndPoint.isDefined) {
+      if (!ctx.httpRequest.isChunked && originalHttpRequest.isDefined) {
         throw new IllegalStateException("New request received before the previous chunk ended")
       }
     } else if (ctx.httpRequest.isChunked) {
@@ -166,8 +155,7 @@ class RequestHandler(
   private def validateLastChunk(ctx: HttpChunkProcessingContext) {
     if (isAggreatingChunks(ctx.channel)) {
       if (ctx.isLastChunk) {
-        originalEndPoint = None
-        originalKeepAlive = None
+        originalHttpRequest = None
       }
     } else {
       throw new IllegalStateException("Received a chunk when chunks should have been aggreated")
@@ -191,7 +179,7 @@ class RequestHandler(
       case ex => {
         try {
           log.debug("Error handling request", ex)
-          e.getChannel().close();
+          e.getChannel().close()
         } catch {
           case ex2 => log.debug("Error closing channel", ex2)
         }
@@ -215,16 +203,16 @@ class RequestHandler(
       sf.format(Calendar.getInstance().getTime()))
 
     // Write HTTP Response
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status);
-    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8");
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status)
+    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
     response.setContent(ChannelBuffers.copiedBuffer(
       "Failure: " + status.toString() + "\r\n\r\n" + ex.getMessage + "\r\n",
-      CharsetUtil.UTF_8));
+      CharsetUtil.UTF_8))
 
     // Close the connection as soon as the error message is sent.
     val ch = ctx.getChannel
     if (ch.isConnected) {
-      ch.write(response).addListener(ChannelFutureListener.CLOSE);
+      ch.write(response).addListener(ChannelFutureListener.CLOSE)
     }
   }
 
@@ -262,14 +250,12 @@ class RequestHandler(
       throw new UnsupportedOperationException("Websocket not supported at this end point")
     }
 
-    val wsFactory = new WebSocketServerHandshakerFactory(createWebSocketLocation(ctx), null, false);
+    val wsFactory = new WebSocketServerHandshakerFactory(createWebSocketLocation(ctx), null, false)
     wsHandshaker = wsFactory.newHandshaker(ctx.httpRequest)
     if (wsHandshaker == null) {
-      wsFactory.sendUnsupportedWebSocketVersionResponse(ctx.channel);
+      wsFactory.sendUnsupportedWebSocketVersionResponse(ctx.channel)
     } else {
-      wsHandshaker.handshake(ctx.channel, ctx.httpRequest);
-      originalEndPoint = Some(ctx.endPoint)
-      originalKeepAlive = Some(HttpHeaders.isKeepAlive(ctx.httpRequest))
+      wsHandshaker.handshake(ctx.channel, ctx.httpRequest)
     }
   }
 
@@ -286,4 +272,5 @@ class RequestHandler(
   private def isAggreatingChunks(channel: Channel): Boolean = {
     (channel.getPipeline().get(classOf[HttpChunkAggregator]) != null)
   }
+
 }

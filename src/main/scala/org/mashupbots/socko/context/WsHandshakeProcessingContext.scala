@@ -58,6 +58,32 @@ case class WsHandshakeProcessingContext(
   val endPoint = EndPoint(httpRequest.getMethod.toString, HttpHeaders.getHost(httpRequest), httpRequest.getUri)
 
   /**
+   * `True` if and only if is connection is to be kept alive and the channel should NOT be closed
+   * after a response is returned.
+   *
+   * This flag is controlled by the existence of the keep alive HTTP header.
+   * {{{
+   * Connection: keep-alive
+   * }}}
+   */
+  val isKeepAlive = HttpHeaders.isKeepAlive(httpRequest)
+
+  /**
+   * Array of accepted encoding for content compression from the HTTP header
+   *
+   * For example, give then header `Accept-Encoding: gzip, deflate`, then an array containing
+   * `gzip` and `defalte` will be returned.
+   */
+  val acceptedEncodings: Array[String] = {
+    val s = this.getHeader(HttpHeaders.Names.ACCEPT_ENCODING)
+    if (s.isDefined) {
+      s.get.replace(" ", "").split(",")
+    } else {
+      Array()
+    }
+  }
+
+  /**
    * HTTP headers
    */
   val headers = httpRequest.getHeaders
@@ -74,17 +100,6 @@ case class WsHandshakeProcessingContext(
     val v = httpRequest.getHeader(name)
     if (v == null || v == "") None else Some(v)
   }
-
-  /**
-   * `True` if and only if is connection is to be kept alive and the channel should NOT be closed
-   * after a response is returned.
-   *
-   * This flag is controlled by the existence of the keep alive HTTP header.
-   * {{{
-   * Connection: keep-alive
-   * }}}
-   */
-  val isKeepAlive = HttpHeaders.isKeepAlive(httpRequest)
 
   /**
    * Flag to be set to `True` by the route to indicate if the upgrade to a web socket connection is permitted or not

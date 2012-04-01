@@ -39,6 +39,11 @@ case class HttpRequestProcessingContext(
   httpRequest: HttpRequest) extends HttpProcessingContext {
 
   /**
+   * HTTP End point
+   */
+  val endPoint = EndPoint(httpRequest.getMethod.toString, HttpHeaders.getHost(httpRequest), httpRequest.getUri)
+
+  /**
    * `True` if and only if is connection is to be kept alive and the channel should NOT be closed
    * after a response is returned.
    *
@@ -50,15 +55,25 @@ case class HttpRequestProcessingContext(
   val isKeepAlive = HttpHeaders.isKeepAlive(httpRequest)
 
   /**
-   * HTTP End point
+   * Array of accepted encoding for content compression from the HTTP header
+   *
+   * For example, give then header `Accept-Encoding: gzip, deflate`, then an array containing
+   * `gzip` and `defalte` will be returned.
    */
-  val endPoint = EndPoint(httpRequest.getMethod.toString, HttpHeaders.getHost(httpRequest), httpRequest.getUri)
-
+  val acceptedEncodings: Array[String] = {
+    val s = this.getHeader(HttpHeaders.Names.ACCEPT_ENCODING)
+    if (s.isDefined) {
+      s.get.replace(" ", "").split(",")
+    } else {
+      Array()
+    }
+  }
+  
   /**
    * List of HTTP request headers
    */
   val headers = httpRequest.getHeaders
-
+  
   /**
    * Returns the header value with the specified header name.  If there are
    * more than one header value for the specified header name, the first
@@ -123,23 +138,8 @@ case class HttpRequestProcessingContext(
    * Sends a 100 continue to the client
    */
   def write100Continue() {
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE);
-    channel.write(response);
-  }
-
-  /**
-   * Array of accepted encoding for content compression from the HTTP header
-   *
-   * For example, give then header `Accept-Encoding: gzip, deflate`, then an array containing
-   * `gzip` and `defalte` will be returned.
-   */
-  val acceptedEncodings: Array[String] = {
-    val s = this.getHeader(HttpHeaders.Names.ACCEPT_ENCODING)
-    if (s.isDefined) {
-      s.get.replace(" ", "").split(",")
-    } else {
-      Array()
-    }
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE)
+    channel.write(response)
   }
 
   /**

@@ -56,7 +56,7 @@ class SslManager(server: WebServer) {
         val tis = new FileInputStream(sslConfig.trustStoreFile.get)
         ts.load(is, sslConfig.trustStorePassword.get.toCharArray())
 
-        val trustManagerFactory = TrustManagerFactory.getInstance("SunX509", "SunJSSE");
+        val trustManagerFactory = TrustManagerFactory.getInstance("SunX509", "SunJSSE")
         trustManagerFactory.init(ts)
 
         trustManagerFactory.getTrustManagers

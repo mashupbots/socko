@@ -39,7 +39,7 @@ class PipelineFactory(server: WebServer) extends ChannelPipelineFactory {
     val newPipeline = Channels.pipeline()
 
     if (server.sslEngine.isDefined) {
-      newPipeline.addLast("ssl", new SslHandler(server.sslEngine.get));
+      newPipeline.addLast("ssl", new SslHandler(server.sslEngine.get))
     }
 
     newPipeline.addLast("decoder", new HttpRequestDecoder(4096, 8192, 8192))
@@ -50,7 +50,7 @@ class PipelineFactory(server: WebServer) extends ChannelPipelineFactory {
     }
 
     newPipeline.addLast("encoder", new HttpResponseEncoder())
-    newPipeline.addLast("chunkWriter", new ChunkedWriteHandler());
+    newPipeline.addLast("chunkWriter", new ChunkedWriteHandler())
 
     newPipeline.addLast("handler", new RequestHandler(server.routes, server.allChannels))
 

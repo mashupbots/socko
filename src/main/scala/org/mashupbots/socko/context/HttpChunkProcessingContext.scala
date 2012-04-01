@@ -38,9 +38,32 @@ import org.jboss.netty.util.CharsetUtil
  */
 case class HttpChunkProcessingContext(
   channel: Channel,
-  endPoint: EndPoint,
-  isKeepAlive: Boolean,
+  originalHttpRequest: OriginalHttpRequest,
   httpChunk: HttpChunk) extends HttpProcessingContext {
+
+  /**
+   * HTTP End point
+   */
+  val endPoint = originalHttpRequest.endPoint
+
+  /**
+   * `True` if and only if is connection is to be kept alive and the channel should NOT be closed
+   * after a response is returned.
+   *
+   * This flag is controlled by the existence of the keep alive HTTP header.
+   * {{{
+   * Connection: keep-alive
+   * }}}
+   */
+  val isKeepAlive = originalHttpRequest.isKeepAlive
+
+  /**
+   * Array of accepted encoding for content compression from the HTTP header
+   *
+   * For example, give then header `Accept-Encoding: gzip, deflate`, then an array containing
+   * `gzip` and `defalte` will be returned.
+   */
+  val acceptedEncodings = originalHttpRequest.acceptedEncodings
 
   /**
    * Flag to indicate if this is the last chunk

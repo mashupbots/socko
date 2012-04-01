@@ -71,13 +71,13 @@ class SnoopProcessor extends Actor {
     }
 
     val buf = new StringBuilder()
-    buf.append("Snoop Processor\r\n");
-    buf.append("===============\r\n");
+    buf.append("Snoop Processor\r\n")
+    buf.append("===============\r\n")
 
-    buf.append("VERSION: " + request.getProtocolVersion + "\r\n");
-    buf.append("METHOD: " + ctx.endPoint.method + "\r\n");
-    buf.append("HOSTNAME: " + ctx.endPoint.host + "\r\n");
-    buf.append("REQUEST_URI: " + ctx.endPoint.path + "\r\n\r\n");
+    buf.append("VERSION: " + request.getProtocolVersion + "\r\n")
+    buf.append("METHOD: " + ctx.endPoint.method + "\r\n")
+    buf.append("HOSTNAME: " + ctx.endPoint.host + "\r\n")
+    buf.append("REQUEST_URI: " + ctx.endPoint.path + "\r\n\r\n")
 
     val headers = request.getHeaders().toList
     headers.foreach(h => buf.append("HEADER: " + h.getKey() + " = " + h.getValue() + "\r\n"))
@@ -89,7 +89,7 @@ class SnoopProcessor extends Actor {
           values.foreach(v => buf.append("QUERYSTRING PARAM: " + key + " = " + v + "\r\n"))
         }
       })
-      buf.append("\r\n");
+      buf.append("\r\n")
     }
 
     // If post, then try to parse the data
@@ -97,7 +97,7 @@ class SnoopProcessor extends Actor {
     if (contentType.isDefined &&
       (contentType.get.startsWith("multipart/form-data") ||
         contentType.get.startsWith("application/x-www-form-urlencoded"))) {
-      buf.append("FORM DATA\r\n");
+      buf.append("FORM DATA\r\n")
       val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, ctx.httpRequest)
       val datas = decoder.getBodyHttpDatas().toList
       datas.foreach(data => {
@@ -107,7 +107,7 @@ class SnoopProcessor extends Actor {
           buf.append("  " + data.getName + "=" + attribute.getValue + "\r\n")
         } else if (data.getHttpDataType() == HttpDataType.FileUpload) {
           // File upload
-          val fileUpload = data.asInstanceOf[FileUpload];
+          val fileUpload = data.asInstanceOf[FileUpload]
           buf.append("  File Field=" + fileUpload.getName + "\r\n")
           buf.append("  File Name=" + fileUpload.getFilename + "\r\n")
           buf.append("  File MIME Type=" + fileUpload.getContentType + "\r\n")
@@ -140,14 +140,14 @@ class SnoopProcessor extends Actor {
     }
 
     if (ctx.isLastChunk) {
-      buf.append("END OF CONTENT\r\n");
+      buf.append("END OF CONTENT\r\n")
       ctx.lastChunkHeaders.foreach(h => buf.append("HEADER: " + h.getKey + " = " + h.getValue + "\r\n"))
-      buf.append("\r\n");
+      buf.append("\r\n")
 
       log.info("HttpChunk: " + buf.toString)
       ctx.writeResponse(buf.toString)
     } else {
-      buf.append("CHUNK: " + ctx.readStringContent + "\r\n");
+      buf.append("CHUNK: " + ctx.readStringContent + "\r\n")
     }
   }
 

@@ -87,13 +87,13 @@ class WebServer(
    * Stop server
    */
   def stop(): Unit = {
-    val future = allChannels.close();
-    future.awaitUninterruptibly();
+    val future = allChannels.close()
+    future.awaitUninterruptibly()
 
     allChannels.clear()
 
-    channelFactory.releaseExternalResources();
-    channelFactory = null;
+    channelFactory.releaseExternalResources()
+    channelFactory = null
 
     log.info("Socko server '{}' stopped", config.serverName)
   }

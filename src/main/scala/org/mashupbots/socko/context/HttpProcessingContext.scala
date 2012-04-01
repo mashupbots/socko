@@ -23,7 +23,6 @@ import java.util.Date
 import java.util.GregorianCalendar
 import java.util.Locale
 import java.util.TimeZone
-
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse
@@ -32,8 +31,10 @@ import org.jboss.netty.handler.codec.http.HttpResponse
 import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.util.CharsetUtil
-
 import javax.activation.MimetypesFileTypeMap
+import java.util.zip.DeflaterOutputStream
+import java.util.zip.GZIPOutputStream
+import java.io.ByteArrayOutputStream
 
 /**
  * Abstract context for reading HTTP requests and writing HTTP responses
@@ -41,12 +42,105 @@ import javax.activation.MimetypesFileTypeMap
 abstract class HttpProcessingContext() extends ProcessingContext {
 
   /**
-   * `True` if and only the connection is to be left open after processing this request.
+   * HTTP End point
+   */
+  def endPoint: EndPoint
+
+  /**
+   * `True` if and only if is connection is to be kept alive and the channel should NOT be closed
+   * after a response is returned.
+   *
+   * This flag is controlled by the existence of the keep alive HTTP header.
+   * {{{
+   * Connection: keep-alive
+   * }}}
    */
   def isKeepAlive: Boolean
 
   /**
-   * Sends a HTTP response to the client with a status of "200 OK".
+   * Array of accepted encoding for content compression from the HTTP header
+   *
+   * For example, give then header `Accept-Encoding: gzip, deflate`, then an array containing
+   * `gzip` and `defalte` will be returned.
+   */
+  def acceptedEncodings: Array[String]
+
+  /**
+   * Sends a binary HTTP response to the client with a status of "200 OK".
+   *
+   * @param content String to send
+   * @param contentType MIME content type to set in the response header. For example, "image/gif"
+   * @param headers Additional headers to add to the HTTP response. Defaults to empty map; i.e. no additional headers.
+   */
+  def writeResponse(
+    content: Array[Byte],
+    contentType: String,
+    headers: Map[String, String]): Unit = {
+
+    // Build the response object.
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+
+    // Content
+    setContent(response, content)
+
+    // Headers
+    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
+    if (headers != null && !headers.isEmpty) {
+      headers.foreach { kv => response.setHeader(kv._1, kv._2) }
+    }
+    if (this.isKeepAlive) {
+      // Add 'Content-Length' header only for a keep-alive connection.
+      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent().readableBytes())
+      // Add keep alive header as per HTTP 1.1 specifications
+      setKeepAliveHeader(response)
+    }
+
+    // Write the response.
+    val future = channel.write(response)
+
+    // Close the non-keep-alive connection after the write operation is done.
+    if (!this.isKeepAlive) {
+      future.addListener(ChannelFutureListener.CLOSE)
+    }
+  }
+
+  /**
+   * Set the content in the HTTP response
+   *
+   * @param response HTTP response
+   * @param content Binary content to return in the response
+   */
+  private def setContent(response: HttpResponse, content: Array[Byte]) {
+    val compressBytes = new ByteArrayOutputStream
+    var compressedOut: DeflaterOutputStream = null
+
+    try {
+      if (acceptedEncodings.contains("gzip")) {
+        compressedOut = new GZIPOutputStream(compressBytes)
+        compressedOut.write(content, 0, content.length)
+        response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
+        response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "gzip")
+      } else if (acceptedEncodings.contains("deflate")) {
+        compressedOut = new DeflaterOutputStream(compressBytes)
+        compressedOut.write(content, 0, content.length)
+        response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
+        response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "deflate")
+      } else {
+        // No compression
+        response.setContent(ChannelBuffers.copiedBuffer(content))
+      }
+    } catch {
+      // If error, then just write without compression
+      case ex => response.setContent(ChannelBuffers.copiedBuffer(content))
+    } finally {
+      if (compressedOut != null) {
+        compressedOut.close()
+      }
+    }
+  }
+
+  /**
+   * Sends a string HTTP response to the client with a status of "200 OK".
    *
    * @param content String to send
    * @param contentType MIME content type to set in the response header. Defaults to "text/plain; charset=UTF-8".
@@ -57,30 +151,9 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     content: String,
     contentType: String = "text/plain; charset=UTF-8",
     charset: Charset = CharsetUtil.UTF_8,
-    headers: Map[String, String] = Map.empty) = {
+    headers: Map[String, String] = Map.empty): Unit = {
 
-    // Build the response object.
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-    response.setContent(ChannelBuffers.copiedBuffer(content, charset));
-    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType);
-    if (!headers.isEmpty) {
-      headers.foreach { kv => response.setHeader(kv._1, kv._2) }
-    }
-
-    if (this.isKeepAlive) {
-      // Add 'Content-Length' header only for a keep-alive connection.
-      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent().readableBytes());
-      // Add keep alive header as per HTTP 1.1 specifications
-      setKeepAliveHeader(response)
-    }
-
-    // Write the response.
-    val future = channel.write(response);
-
-    // Close the non-keep-alive connection after the write operation is done.
-    if (!this.isKeepAlive) {
-      future.addListener(ChannelFutureListener.CLOSE);
-    }
+    writeResponse(content.getBytes(charset), contentType, headers)
   }
 
   /**
@@ -98,17 +171,17 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     val msgToWrite = if (msg == null) status.toString() else msg
     response.setContent(ChannelBuffers.copiedBuffer("Error: " + msgToWrite + "\r\n", CharsetUtil.UTF_8))
 
-    setDateHeader(response);
+    setDateHeader(response)
     setContentTypeHeader(response, "text/plain; charset=UTF-8")
     if (!closeChannel) {
       setKeepAliveHeader(response)
-      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent().readableBytes());
+      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent().readableBytes())
     }
 
     // Close the connection as soon as the error message is sent.
-    val future = channel.write(response);
+    val future = channel.write(response)
     if (closeChannel) {
-      future.addListener(ChannelFutureListener.CLOSE);
+      future.addListener(ChannelFutureListener.CLOSE)
     }
   }
 
@@ -154,7 +227,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(time.getTime()))
 
     // Add cache headers
-    time.add(Calendar.SECOND, browserCacheSeconds);
+    time.add(Calendar.SECOND, browserCacheSeconds)
     response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(time.getTime()))
     response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
     response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(lastModified))
@@ -167,7 +240,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    * {{{
    * Content-Type: image/gif
    * }}}
-   * 
+   *
    * @param response  HTTP response
    * @param file file to extract content type
    */
@@ -202,7 +275,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    * {{{
    * Connection: keep-alive
    * }}}
-   * 
+   *
    * @param response HTTP response
    */
   def setKeepAliveHeader(response: HttpResponse) {
@@ -217,5 +290,5 @@ abstract class HttpProcessingContext() extends ProcessingContext {
  */
 object HttpProcessingContext {
   val HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz"
-  val HTTP_DATE_GMT_TIMEZONE = "GMT"    
+  val HTTP_DATE_GMT_TIMEZONE = "GMT"
 }
