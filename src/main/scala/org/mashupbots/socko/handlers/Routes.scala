@@ -21,7 +21,7 @@ import scala.util.matching.Regex
 
 /**
  * A list of PartialFunctions used for routing HTTP requests.
- * 
+ *
  * To assist with routing, use the following extractors:
  *  - HTTP Method: GET, POST, PUT, DELETE, HEAD, CONNECT, OPTIONS, TRACE
  *  - HTTP Path: Path, PathSegments, PathRegex
@@ -68,10 +68,10 @@ import scala.util.matching.Regex
  *     `y` is the path as a string. In other words, the value in between the parentheses is the return value of the
  *     associated `unapply` method.
  *  - `&` chains together extractors like a logical AND
- *  
+ *
  * This [[http://daily-scala.blogspot.com.au/2010/02/chaining-partial-functions-with-orelse.html article]]
  * explains how chaining of `PartialFunction` works using `orElse`.
- *  
+ *
  */
 object Routes {
   def apply(funcList: PartialFunction[ProcessingContext, Unit]*) = {
@@ -196,6 +196,40 @@ object HostSegments {
 class HostRegex(regex: Regex) {
   def unapply(ctx: ProcessingContext) = {
     regex.findFirstMatchIn(ctx.endPoint.host)
+  }
+}
+
+/**
+ * HTTP query string routing. Must be exact match.
+ *
+ * For example:
+ * {{{
+ *   case QueryString("action=save")
+ * }}}
+ */
+object QueryString {
+  def unapply(ctx: ProcessingContext) = Some(ctx.endPoint.queryString)
+  def apply(ctx: ProcessingContext) = ctx.endPoint.queryString
+}
+
+/**
+ * Regular expression matching of HTTP query string
+ *
+ * For example, to match `?name1=value1`, first define your regex as an object:
+ * {{{
+ *    object MyQueryStringRegex extends QueryStringRegex("""name1=([a-z0-9]+)""".r)
+ * }}}
+ *
+ * Then, when defining your Route:
+ * {{{
+ *   case ctx @ case MyQueryStringRegex(m) => {
+ *     assert(m.group(1) == "value1")
+ *   }
+ * }}}
+ */
+class QueryStringRegex(regex: Regex) {
+  def unapply(ctx: ProcessingContext) = {
+    regex.findFirstMatchIn(ctx.endPoint.queryString)
   }
 }
 

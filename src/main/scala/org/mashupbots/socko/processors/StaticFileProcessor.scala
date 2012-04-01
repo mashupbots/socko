@@ -169,7 +169,7 @@ class StaticFileProcessor extends Actor {
     // Download file if it has not been modified
     val lastModified = file.lastModified()
     if (hasFileBeenModified(request, file, lastModified)) {
-      downloadFile(request, file, lastModified, request.cacheSeconds)
+      downloadFile(request, file, lastModified, request.browserCacheSeconds)
     } else {
       request.context.writeErrorResponse(HttpResponseStatus.NOT_MODIFIED)
     }
@@ -344,6 +344,9 @@ class StaticFileProcessor extends Actor {
 
   /**
    * Calculate an MD5 has of a string. Used to hashing a file name
+   * 
+   * @param s String to MD5 hash
+   * @returns MD5 hash of specified string
    */
   private def md5(s: String): String = {
     val md5 = MessageDigest.getInstance("MD5")
@@ -359,13 +362,13 @@ class StaticFileProcessor extends Actor {
  * @param context HTTP Request context
  * @param rootFileDir Root directory from which files will be served. Used to check validity of `filePath`
  * @param file file to download
- * @cacheSeconds Number of seconds to cache the file in the browser
- * @tempDir temporary directory to create compressed version of files
+ * browserCacheSeconds Number of seconds to cache the file in the browser
+ * @@param tempDir temporary directory where compressed version of files can be stored
  */
 case class StaticFileRequest(
   context: HttpRequestProcessingContext,
   rootFileDir: File,
   file: File,
-  cacheSeconds: Int,
+  browserCacheSeconds: Int,
   tempDir: File)
 

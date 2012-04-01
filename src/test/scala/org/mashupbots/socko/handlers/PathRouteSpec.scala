@@ -25,7 +25,7 @@ import org.scalatest.GivenWhenThen
 @RunWith(classOf[JUnitRunner])
 class PathRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
 
-  "Routes on the request path" should {
+  "Path route extractors" should {
     "route on exact path match" in {
       var result = ""
       val r = Routes({

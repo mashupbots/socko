@@ -25,7 +25,7 @@ import org.scalatest.GivenWhenThen
 @RunWith(classOf[JUnitRunner])
 class HostRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
 
-  "Routes on the request host" should {
+  "Host route extractors" should {
     "route on exact host match" in {
       var result = ""
       val r = Routes({
