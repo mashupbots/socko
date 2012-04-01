@@ -24,7 +24,7 @@ import org.mashupbots.socko.context.EndPoint
 @RunWith(classOf[JUnitRunner])
 class MethodRouteSpec extends WordSpec with ShouldMatchers {
 
-  "Routes on Method" should {
+  "Routes on the request method" should {
     "route GET method" in {
       var result = false
       val r = Routes({ case GET(x) => result = true })
