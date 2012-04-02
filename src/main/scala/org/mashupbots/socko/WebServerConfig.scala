@@ -23,7 +23,7 @@ import java.io.File
  * @param serverName Human friendly name of this server. Helpful in error messages
  * @param hostname Hostname or IP address to bind. `0.0.0.0` will bind to all addresses.
  * 	You can also specify comma separated hostnames/ip address. E.g. `localhost,192.168.1.1`
- * @param port Port to bind to. Defaults to `8888`. 
+ * @param port Port to bind to. Defaults to `8888`.
  * @param sslConfig SSL configuration. If None, then SSL will not be turned on.
  * @param processingConfig HTTP request processing configuration
  */
@@ -61,23 +61,29 @@ case class WebServerConfig(
       }
 
       if (sslConfig.get.trustStoreFile.isDefined) {
+        if (sslConfig.get.trustStoreFile == null || sslConfig.get.trustStoreFile.get == null) {
+          throw new IllegalArgumentException("trustStoreFile must be specified")
+        }
         if (!sslConfig.get.trustStoreFile.get.exists) {
           throw new IllegalArgumentException("trustStoreFile does not exist")
         }
         if (!sslConfig.get.trustStoreFile.get.isFile) {
           throw new IllegalArgumentException("trustStoreFile is not a file")
         }
-        if (sslConfig.get.trustStorePassword.isEmpty || sslConfig.get.trustStorePassword.get == "") {
+        if (sslConfig.get.trustStorePassword == null ||
+            sslConfig.get.trustStorePassword.isEmpty ||
+            sslConfig.get.trustStorePassword.get == null ||
+            sslConfig.get.trustStorePassword.get == "") {
           throw new IllegalArgumentException("trustStorePassword must be specified")
         }
       }
     }
 
     if (processingConfig == null) {
-      throw new IllegalArgumentException("requestConfig must be specified")
+      throw new IllegalArgumentException("processingConfig must be specified")
     }
     if (processingConfig.maxLengthInMB <= 0) {
-      throw new IllegalArgumentException("HTTP Processing Config maxLengthInMB must be specified and > 0")
+      throw new IllegalArgumentException("processingConfig maxLengthInMB must be specified and > 0")
     }
 
   }
@@ -103,7 +109,7 @@ case class SslConfig(
 /**
  * HTTP Request configuration
  *
- * @param maxLengthInMB Maximum size of HTTP request in megabytes. Defaults to 4MB. 
+ * @param maxLengthInMB Maximum size of HTTP request in megabytes. Defaults to 4MB.
  * @param aggreateChunks Flag to indicate if we want to aggregate chunks. If `false`, your processor actors must be
  *  able to handle `HttpChunkProcessingContext`
  */
