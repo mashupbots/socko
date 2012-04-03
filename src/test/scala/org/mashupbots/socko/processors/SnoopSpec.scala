@@ -1,5 +1,5 @@
 //
-// Copyright 2012 Vibul Imtarnasan and David Bolton.
+// Copyright 2012 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,25 +15,27 @@
 //
 package org.mashupbots.socko.processors
 
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.Hashtable
+
+import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.WordSpec
-import org.mashupbots.socko.context.EndPoint
-import org.scalatest.GivenWhenThen
-import akka.actor.ActorSystem
-import org.scalatest.BeforeAndAfterAll
-import org.mashupbots.socko.WebServer
-import org.mashupbots.socko.handlers.Routes
-import org.mashupbots.socko.handlers.Path
-import akka.actor.Props
 import org.mashupbots.socko.context.WsHandshakeProcessingContext
 import org.mashupbots.socko.context.WsProcessingContext
+import org.mashupbots.socko.handlers.Path
+import org.mashupbots.socko.handlers.Routes
+import org.mashupbots.socko.WebServer
 import org.mashupbots.socko.WebServerConfig
-import java.net.URL
-import java.net.HttpURLConnection
-import org.jboss.netty.util.CharsetUtil
-import java.util.Hashtable
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.GivenWhenThen
+import org.scalatest.WordSpec
+
+import akka.actor.actorRef2Scala
+import akka.actor.ActorSystem
+import akka.actor.Props
 
 /**
  * Test

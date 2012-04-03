@@ -1,5 +1,5 @@
 //
-// Copyright 2012 Vibul Imtarnasan and David Bolton.
+// Copyright 2012 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,30 +15,31 @@
 //
 package org.mashupbots.socko.processors
 
+import java.net.InetSocketAddress
+import java.net.URI
+import java.util.concurrent.Executors
+
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
-import java.util.concurrent.Executors
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory
-import java.net.URI
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketVersion
-import org.jboss.netty.channel.ChannelPipelineFactory
-import org.jboss.netty.channel.Channels
-import org.jboss.netty.handler.codec.http.HttpResponseDecoder
-import org.jboss.netty.handler.codec.http.HttpRequestEncoder
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketClientHandshaker
-import org.jboss.netty.channel.ChannelPipeline
-import java.net.InetSocketAddress
 import org.jboss.netty.channel.Channel
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler
 import org.jboss.netty.channel.ChannelHandlerContext
+import org.jboss.netty.channel.ChannelPipeline
+import org.jboss.netty.channel.ChannelPipelineFactory
 import org.jboss.netty.channel.ChannelStateEvent
-import org.jboss.netty.channel.MessageEvent
-import org.jboss.netty.handler.codec.http.HttpResponse
-import org.jboss.netty.util.CharsetUtil
-import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.PongWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
+import org.jboss.netty.channel.Channels
 import org.jboss.netty.channel.ExceptionEvent
+import org.jboss.netty.channel.MessageEvent
+import org.jboss.netty.channel.SimpleChannelUpstreamHandler
+import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
+import org.jboss.netty.handler.codec.http.websocketx.PongWebSocketFrame
+import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
+import org.jboss.netty.handler.codec.http.websocketx.WebSocketClientHandshaker
+import org.jboss.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory
+import org.jboss.netty.handler.codec.http.websocketx.WebSocketVersion
+import org.jboss.netty.handler.codec.http.HttpRequestEncoder
+import org.jboss.netty.handler.codec.http.HttpResponse
+import org.jboss.netty.handler.codec.http.HttpResponseDecoder
+import org.jboss.netty.util.CharsetUtil
 import org.mashupbots.socko.Logger
 
 /**
