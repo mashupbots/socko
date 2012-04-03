@@ -33,7 +33,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
 
   val aFileNotFound = new File("/tmp/notexist")
 
-  val aFile = new File("/tmp/file.txt");
+  val aFile = new File("/tmp/WebServerConfigSpec.txt");
   private val out = new java.io.FileWriter(aFile)
   out.write("test")
   out.close

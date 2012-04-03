@@ -66,6 +66,23 @@ abstract class HttpProcessingContext() extends ProcessingContext {
   def acceptedEncodings: Array[String]
 
   /**
+   * Sends a string HTTP response to the client with a status of "200 OK".
+   *
+   * @param content String to send
+   * @param contentType MIME content type to set in the response header. Defaults to "text/plain; charset=UTF-8".
+   * @param charset Character set encoding. Defaults to "UTF-8"
+   * @param headers Additional headers to add to the HTTP response. Defaults to empty map; i.e. no additional headers.
+   */
+  def writeResponse(
+    content: String,
+    contentType: String = "text/plain; charset=UTF-8",
+    charset: Charset = CharsetUtil.UTF_8,
+    headers: Map[String, String] = Map.empty): Unit = {
+
+    writeResponse(content.getBytes(charset), contentType, headers)
+  }
+  
+  /**
    * Sends a binary HTTP response to the client with a status of "200 OK".
    *
    * @param content String to send
@@ -84,6 +101,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     setContent(response, content)
 
     // Headers
+    setDateHeader(response)
     response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
     if (headers != null && !headers.isEmpty) {
       headers.foreach { kv => response.setHeader(kv._1, kv._2) }
@@ -118,11 +136,15 @@ abstract class HttpProcessingContext() extends ProcessingContext {
       if (acceptedEncodings.contains("gzip")) {
         compressedOut = new GZIPOutputStream(compressBytes)
         compressedOut.write(content, 0, content.length)
+        compressedOut.close()
+        compressedOut = null
         response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
         response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "gzip")
       } else if (acceptedEncodings.contains("deflate")) {
         compressedOut = new DeflaterOutputStream(compressBytes)
         compressedOut.write(content, 0, content.length)
+        compressedOut.close()
+        compressedOut = null
         response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
         response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "deflate")
       } else {
@@ -137,23 +159,6 @@ abstract class HttpProcessingContext() extends ProcessingContext {
         compressedOut.close()
       }
     }
-  }
-
-  /**
-   * Sends a string HTTP response to the client with a status of "200 OK".
-   *
-   * @param content String to send
-   * @param contentType MIME content type to set in the response header. Defaults to "text/plain; charset=UTF-8".
-   * @param charset Character set encoding. Defaults to "UTF-8"
-   * @param headers Additional headers to add to the HTTP response. Defaults to empty map; i.e. no additional headers.
-   */
-  def writeResponse(
-    content: String,
-    contentType: String = "text/plain; charset=UTF-8",
-    charset: Charset = CharsetUtil.UTF_8,
-    headers: Map[String, String] = Map.empty): Unit = {
-
-    writeResponse(content.getBytes(charset), contentType, headers)
   }
 
   /**

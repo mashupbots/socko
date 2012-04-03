@@ -43,6 +43,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedFile
 import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.Logger
 
 import akka.actor.Actor
 import akka.event.Logging
@@ -170,7 +171,7 @@ class StaticFileProcessor extends Actor {
     }
 
     // Download file if it has not been modified
-    val lastModified = FileLastModifiedCache.get(file, request.fileLastModifiedCacheTimeoutSeconds)
+    val lastModified = StaticFileLastModifiedCache.get(file, request.fileLastModifiedCacheTimeoutSeconds)
     if (hasFileBeenModified(request, lastModified)) {
       downloadFile(request, file, lastModified, request.browserCacheTimeoutSeconds)
     } else {
@@ -385,7 +386,7 @@ case class StaticFileRequest(
  * Cache for a file's last modified date. Caching this value means that we wont have to keep reading the file and
  * hence we reduce a blocking IO.
  */
-object FileLastModifiedCache {
+object StaticFileLastModifiedCache extends Logger {
   private val cache: ConcurrentMap[String, FileLastModified] = new ConcurrentHashMap[String, FileLastModified]
 
   /**
@@ -394,13 +395,17 @@ object FileLastModifiedCache {
    *
    * @param file File to read last modified date
    * @param timeoutSeconds Seconds before this cache entry expires
-   * @returns the file's last modified time
+   * @returns the file's last modified time. `0` is returned if file is not found.
    */
   def get(file: File, timeoutSeconds: Int): Long = {
+    require(file != null, "file cannot be null")
+
     val r = cache.get(file.getCanonicalPath)
     if (r.isDefined && new Date().getTime < r.get.timeout) {
+      //log.debug("Getting from cache")
       r.get.lastModified
     } else {
+      //log.debug("Read new value")
       cache.put(file.getCanonicalPath,
         FileLastModified(file.getCanonicalPath, file.lastModified, new Date().getTime + (timeoutSeconds * 1000)))
       file.lastModified
