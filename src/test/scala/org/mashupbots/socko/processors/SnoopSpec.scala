@@ -68,7 +68,7 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
   })
 
   override def beforeAll(configMap: Map[String, Any]) {
-    webServer = new WebServer(WebServerConfig(port = 9000), routes)
+    webServer = new WebServer(WebServerConfig(port = port), routes)
     webServer.start()
 
     // Wait for start

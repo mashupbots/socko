@@ -166,9 +166,10 @@ class StaticFileProcessor extends Actor {
     }
     if (!file.isFile()) {
       log.debug("File '{}' is not a file", file.getCanonicalPath)
-      request.context.writeErrorResponse(HttpResponseStatus.FORBIDDEN)
+      request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
       return
     }
+    log.debug("Getting {}", file)
 
     // Download file if it has not been modified
     val lastModified = StaticFileLastModifiedCache.get(file, request.fileLastModifiedCacheTimeoutSeconds)
