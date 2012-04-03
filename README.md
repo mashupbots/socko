@@ -17,17 +17,17 @@ to write one. (Besides, it is a great way to come up to speed with Scala and AKK
 
 We hope you find it as useful as we do.
 
-## What is Socko?
+## Features
 
 * Socko is written in Scala 
 
 * Socko runs on top of the asynchronous event driven Netty framework.
 
-* Socko expects all processing of requests to be performed by AKKA actors.
+* Socko processes requests using AKKA actors.
 
 * Socko has no external dependencies outside AKKA 2.0 (note that Netty is a dependency of AKKA 2.0 Remote)
 
-* Socko can be started as a standard Scala app.
+* Socko can be started as a standard Scala application.
 
 * Out of the box, Socko supports
   * HTTP and WebSockets
@@ -39,18 +39,20 @@ We hope you find it as useful as we do.
   * Serving of static files
 
 
-## What Socko does not and will not support
+## Anti-Features
 
-* Socko does not run in a servlet. We use Netty instead.
+* Socko is not a servlet. We use Netty instead.
   
-* Socko is not a web application or MVC framework like Lift or Play. It does not perform server based
+* Socko is not a web application or MVC framework like Lift or Play. It does not perform server side
   HTML templating. We use client side javascript libraries like EmberJS and BackboneJS instead.
     
 * Socko does not store session data or cache application data. We use HTML5 local storage instead.
 
+
 ## Quick Start
 
 Coming soon
+
 
 ## RoadMap
 
