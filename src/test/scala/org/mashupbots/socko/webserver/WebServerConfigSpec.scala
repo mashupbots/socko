@@ -65,8 +65,8 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     }
 
     "throw Exception when server name is not supplied" in {
-      checkForIllegalArgumentException(WebServerConfig(null), "serverName")
-      checkForIllegalArgumentException(WebServerConfig(""), "serverName")
+      checkForIllegalArgumentException(WebServerConfig(null), "server name")
+      checkForIllegalArgumentException(WebServerConfig(""), "server name")
     }
 
     "throw Exception when host name is not supplied" in {
@@ -87,55 +87,55 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     "throw Exception if keystore file is invalid" in {
       when("keystore file not specified")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(null, null, null, null))), "keyStoreFile")
+        WebServerConfig(sslConfig = Some(SslConfig(null, null, null, null))), "key store file")
 
       when("keystore file a directory and not a file")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aDirectory, null, null, null))), "keyStoreFile")
+        WebServerConfig(sslConfig = Some(SslConfig(aDirectory, null, null, null))), "key store file")
 
       when("keystore file does not exist")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFileNotFound, null, null, null))), "keyStoreFile")
+        WebServerConfig(sslConfig = Some(SslConfig(aFileNotFound, null, null, null))), "key store file")
     }
 
     "throw Exception if keystore password is not supplied" in {
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, null, null, null))), "keyStorePassword")
+        WebServerConfig(sslConfig = Some(SslConfig(aFile, null, null, null))), "key store password")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "", null, null))), "keyStorePassword")
+        WebServerConfig(sslConfig = Some(SslConfig(aFile, "", null, null))), "key store password")
     }
 
     "throw Exception if truststore file is invalid" in {
       when("truststore file not specified")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(null), null))), "trustStoreFile")
+        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(null), null))), "trust store file")
 
       when("truststore file a directory and not a file")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aDirectory), null))), "trustStoreFile")
+        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aDirectory), null))), "trust store file")
 
       when("truststore file does not exist")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFileNotFound), null))), "trustStoreFile")
+        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFileNotFound), null))), "trust store file")
     }
 
     "throw Exception if truststore password is not supplied" in {
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFile), null))), "trustStorePassword")
+        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFile), null))), "trust store password")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFile), Some(null)))), "trustStorePassword")
+        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFile), Some(null)))), "trust store password")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFile), Some("")))), "trustStorePassword")
+        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFile), Some("")))), "trust store password")
     }
 
     "throw Exception if ProcessingConfig is not supplied" in {
       checkForIllegalArgumentException(
-        WebServerConfig(processingConfig = null), "processingConfig")
+        WebServerConfig(processingConfig = null), "processing config")
     }
 
     "throw Exception if ProcessingConfig.maxLengthInMB is invalid" in {
       checkForIllegalArgumentException(
-        WebServerConfig(processingConfig = ProcessingConfig(0, false)), "processingConfig")
+        WebServerConfig(processingConfig = ProcessingConfig(0, false)), "processing config")
     }
     
   }
