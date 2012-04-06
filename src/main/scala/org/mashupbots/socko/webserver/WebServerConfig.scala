@@ -21,6 +21,8 @@ import akka.actor.ExtensionIdProvider
 import akka.actor.ExtendedActorSystem
 import akka.actor.Extension
 import com.typesafe.config.Config
+import org.mashupbots.socko.utils.Logger
+import com.typesafe.config.ConfigException
 
 /**
  * Web server configuration
@@ -156,11 +158,10 @@ case class ProcessingConfig(
 
 }
 
-
 /**
  * Methods for reading configuration
  */
-object WebServerConfig {
+object WebServerConfig extends Logger {
 
   /**
    * Returns an optional file configuration value. It is assumed that the value of the configuration name is the full
@@ -207,7 +208,13 @@ object WebServerConfig {
         new ProcessingConfig(config, name)
       }
     } catch {
-      case _ => new ProcessingConfig()
+      case ex: ConfigException.Missing => {
+        new ProcessingConfig()
+      }
+      case ex => {
+        log.error("Error parsing processing config. Defaults will be used.", ex)
+        new ProcessingConfig()
+      }
     }
   }
 
@@ -223,7 +230,13 @@ object WebServerConfig {
         Some(new SslConfig(config, name))
       }
     } catch {
-      case _ => None
+      case ex: ConfigException.Missing =>  {
+        None
+      }
+      case ex => {
+        log.error("Error parsing SSL config. SSL is turned off.", ex)
+        None
+      }
     }
   }
 

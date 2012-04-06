@@ -22,7 +22,11 @@ import org.scalatest.WordSpec
 import org.mashupbots.socko.context.EndPoint
 import org.scalatest.GivenWhenThen
 import java.io.File
-
+import akka.actor.ExtensionId
+import akka.actor.ExtensionIdProvider
+import akka.actor.ExtendedActorSystem
+import akka.actor.ActorSystem
+import com.typesafe.config.ConfigFactory
 
 @RunWith(classOf[JUnitRunner])
 class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
@@ -137,6 +141,64 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       checkForIllegalArgumentException(
         WebServerConfig(processingConfig = ProcessingConfig(0, false)), "processing config")
     }
-    
+
+    "load from Akka Config" in {
+      val actorConfig = "barebones-webserver {\n" +
+        "  server-name=BareBonesTest\n" +
+        "  hostname=\"192.168.0.1\"\n" +
+        "  port=9999\n" +
+        "}\n" +
+        "all-config-webserver {\n" +
+        "  server-name = allTest\n" +
+        "  hostname = localhost\n" +
+        "  port=10000\n" +
+        "  ssl-config {\n" +
+        "    key-store-file=/tmp/ks.dat\n" +
+        "    key-store-password=kspwd\n" +
+        "    trust-store-file=/tmp/ts.dat\n" +
+        "    trust-store-password=tspwd\n" +
+        "  }\n" +
+        "  processing-config {\n" +
+        "    max-length-in-mb=10\n" +
+        "    aggreate-chunks=false\n" +
+        "  }\n" +
+        "}"
+
+      val actorSystem = ActorSystem("WebServerConfigSpec", ConfigFactory.parseString(actorConfig))
+      
+      val barebones = BareBonesWebServerConfig(actorSystem)
+      barebones.serverName should equal("BareBonesTest")
+      barebones.hostname should equal("192.168.0.1")
+      barebones.port should equal(9999)
+      barebones.sslConfig should equal(None)
+      barebones.processingConfig.maxLengthInMB should be(4)
+      barebones.processingConfig.aggreateChunks should be(true)
+      
+      val all = AllWebServerConfig(actorSystem)
+      all.serverName should equal("allTest")
+      all.hostname should equal("localhost")
+      all.port should equal(10000)
+      all.sslConfig.get.keyStoreFile.getCanonicalPath should equal("/tmp/ks.dat")
+      all.sslConfig.get.keyStorePassword should equal("kspwd")
+      all.sslConfig.get.trustStoreFile.get.getCanonicalPath should equal("/tmp/ts.dat")
+      all.sslConfig.get.trustStorePassword.get should equal("tspwd")
+      all.processingConfig.maxLengthInMB should be(10)
+      all.processingConfig.aggreateChunks should be(false)
+      
+      actorSystem.shutdown()
+    }
   }
 }
+
+object BareBonesWebServerConfig extends ExtensionId[WebServerConfig] with ExtensionIdProvider {
+  override def lookup = BareBonesWebServerConfig
+  override def createExtension(system: ExtendedActorSystem) =
+    new WebServerConfig(system.settings.config, "barebones-webserver")
+}
+
+object AllWebServerConfig extends ExtensionId[WebServerConfig] with ExtensionIdProvider {
+  override def lookup = AllWebServerConfig
+  override def createExtension(system: ExtendedActorSystem) =
+    new WebServerConfig(system.settings.config, "all-config-webserver")
+}
+
