@@ -43,7 +43,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedFile
 import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.mashupbots.socko.Logger
+import org.mashupbots.socko.utils.Logger
 
 import akka.actor.Actor
 import akka.event.Logging

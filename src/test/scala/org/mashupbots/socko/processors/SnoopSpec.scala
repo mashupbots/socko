@@ -25,8 +25,8 @@ import org.mashupbots.socko.context.WsHandshakeProcessingContext
 import org.mashupbots.socko.context.WsProcessingContext
 import org.mashupbots.socko.handlers.Path
 import org.mashupbots.socko.handlers.Routes
-import org.mashupbots.socko.WebServer
-import org.mashupbots.socko.WebServerConfig
+import org.mashupbots.socko.webserver.WebServer
+import org.mashupbots.socko.webserver.WebServerConfig
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.BeforeAndAfterAll

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko
+package org.mashupbots.socko.webserver
 
 import java.util.concurrent.Executors
 
@@ -21,6 +21,7 @@ import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.mashupbots.socko.context.ProcessingContext
+import org.mashupbots.socko.utils.Logger
 
 import javax.net.ssl.SSLEngine
 

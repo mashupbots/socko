@@ -49,7 +49,7 @@ import org.mashupbots.socko.context.OriginalHttpRequest
 import org.mashupbots.socko.context.ProcessingContext
 import org.mashupbots.socko.context.WsHandshakeProcessingContext
 import org.mashupbots.socko.context.WsProcessingContext
-import org.mashupbots.socko.Logger
+import org.mashupbots.socko.utils.Logger
 
 /**
  * Handles incoming HTTP messages from Netty

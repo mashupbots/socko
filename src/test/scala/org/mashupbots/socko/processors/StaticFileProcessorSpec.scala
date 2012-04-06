@@ -16,31 +16,35 @@
 package org.mashupbots.socko.processors
 
 import java.io.File
-import java.util.Date
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.GivenWhenThen
-import org.scalatest.WordSpec
-import org.mashupbots.socko.Logger
-import java.net.URL
+import java.io.PrintStream
 import java.net.HttpURLConnection
-import org.scalatest.BeforeAndAfterAll
-import org.mashupbots.socko.WebServer
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import org.mashupbots.socko.handlers.Routes
+import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.TimeZone
+
+import org.junit.runner.RunWith
+import org.mashupbots.socko.context.HttpRequestProcessingContext
 import org.mashupbots.socko.handlers.GET
 import org.mashupbots.socko.handlers.Path
 import org.mashupbots.socko.handlers.PathSegments
-import akka.actor.Props
-import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.mashupbots.socko.WebServerConfig
-import akka.routing.FromConfig
+import org.mashupbots.socko.handlers.Routes
+import org.mashupbots.socko.utils.Logger
+import org.mashupbots.socko.webserver.WebServer
+import org.mashupbots.socko.webserver.WebServerConfig
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.GivenWhenThen
+import org.scalatest.WordSpec
+
 import com.typesafe.config.ConfigFactory
-import java.io.PrintStream
-import java.text.SimpleDateFormat
-import java.util.TimeZone
+
+import akka.actor.actorRef2Scala
+import akka.actor.ActorRef
+import akka.actor.ActorSystem
+import akka.actor.Props
+import akka.routing.FromConfig
 
 @RunWith(classOf[JUnitRunner])
 class StaticFileProcessorSpec

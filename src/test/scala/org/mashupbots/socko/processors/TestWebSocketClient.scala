@@ -40,7 +40,7 @@ import org.jboss.netty.handler.codec.http.HttpRequestEncoder
 import org.jboss.netty.handler.codec.http.HttpResponse
 import org.jboss.netty.handler.codec.http.HttpResponseDecoder
 import org.jboss.netty.util.CharsetUtil
-import org.mashupbots.socko.Logger
+import org.mashupbots.socko.utils.Logger
 
 /**
  * Encapsulates a web socket client for use in testing

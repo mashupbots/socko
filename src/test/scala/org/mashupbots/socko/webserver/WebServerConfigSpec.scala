@@ -22,9 +22,7 @@ import org.scalatest.WordSpec
 import org.mashupbots.socko.context.EndPoint
 import org.scalatest.GivenWhenThen
 import java.io.File
-import org.mashupbots.socko.WebServerConfig
-import org.mashupbots.socko.ProcessingConfig
-import org.mashupbots.socko.SslConfig
+
 
 @RunWith(classOf[JUnitRunner])
 class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
