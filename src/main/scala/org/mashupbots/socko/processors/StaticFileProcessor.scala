@@ -396,7 +396,7 @@ object StaticFileLastModifiedCache extends Logger {
    *
    * @param file File to read last modified date
    * @param timeoutSeconds Seconds before this cache entry expires
-   * @returns the file's last modified time. `0` is returned if file is not found.
+   * @return the file's last modified time. `0` is returned if file is not found.
    */
   def get(file: File, timeoutSeconds: Int): Long = {
     require(file != null, "file cannot be null")
