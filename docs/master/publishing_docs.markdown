@@ -13,7 +13,7 @@ The socko-docs/publish.sh script can be used to publish documentation to the
 the following way:
 - Finds the current branch or tag if available
 - Checks out the gh-pages branch
-- Use git archive to export the docs from the identified branch or tag to a
-  docs directory namespaced by the branch/tag name
+- Use git archive to export the socko-docs/docs directory from the identified
+  branch or tag to a docs directory namespaced by the branch/tag name
 
 
