@@ -1,3 +1,7 @@
+---
+layout: default
+title: Publishing the documentation
+---
 # Publishing the documentation
 
 The documentation for Socko is hosted on [GitHub
