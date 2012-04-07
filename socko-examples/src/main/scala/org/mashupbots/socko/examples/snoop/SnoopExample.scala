@@ -28,7 +28,7 @@ import akka.actor.Props
 /**
  * This example shows how to setup a simple route and snoop actor.
  * 
- * Run this class as a Scala Application, start your browser and navigate to `http://localhost:9999/`.
+ * Run this class as a Scala Application, start your browser and navigate to `http://localhost:9991/`.
  *
  * Socko uses Netty to handle incoming requests and AKKA to process them
  *  - Incoming requests are initial executed using threads from the Netty thread pool
@@ -53,7 +53,7 @@ object SnoopExample extends Logger {
       override def run { webServer.stop() }
     })
     
-    webServer = new WebServer(WebServerConfig(port = 9999), routes)
+    webServer = new WebServer(WebServerConfig(port = 9991), routes)
     webServer.start()
   }
 

@@ -51,6 +51,11 @@ We hope you find it as useful as we do.
 
 ## Quick Start
 
+To Do
+
+
+## Developer Information
+
 ### Getting the Source
 
 Get the source code from github
@@ -76,7 +81,7 @@ Get the source code from github
 
 * Generate eclipse project files: `sbt eclispse`
 
-* Start Eclipse
+* Start `Eclipse`
 
 * From the top memu, select `File` | `Import`
   * Select `General` | `Existing Projects into Workspace`. 
