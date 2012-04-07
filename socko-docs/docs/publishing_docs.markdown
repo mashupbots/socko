@@ -13,7 +13,7 @@ This document explains how to publish documentation for the project.
 ## The publish script
 
 The socko-docs/publish.sh script can be used to publish documentation to the
-[project site](http://) for either the current branch or a tag. It works in
+[project site](http://mashupbots.github.com/socko) for either the current branch or a tag. It works in
 the following way:
 - Finds the current branch or tag if available
 - Checks out the gh-pages branch
