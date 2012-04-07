@@ -15,57 +15,46 @@
 //
 package org.mashupbots.socko.examples.snoop
 
-import org.mashupbots.socko.webserver.WebServer
-import akka.actor.ActorRef
-import java.io.File
-import akka.actor.ActorSystem
-import org.mashupbots.socko.handlers.Routes
 import org.mashupbots.socko.handlers.GET
-import org.mashupbots.socko.handlers.Path
-import org.mashupbots.socko.handlers.PathSegments
-import org.mashupbots.socko.processors.StaticFileRequest
-import org.mashupbots.socko.context.HttpRequestProcessingContext
-import akka.actor.Props
-import org.mashupbots.socko.processors.StaticFileProcessor
-import org.mashupbots.socko.webserver.WebServerConfig
-import akka.routing.FromConfig
+import org.mashupbots.socko.handlers.Routes
+import org.mashupbots.socko.processors.SnoopProcessor
 import org.mashupbots.socko.utils.Logger
+import org.mashupbots.socko.webserver.WebServer
+import org.mashupbots.socko.webserver.WebServerConfig
 
+import akka.actor.ActorSystem
+import akka.actor.Props
+
+/**
+ * This example shows how to setup a simple route and snoop actor.
+ * 
+ * Run this class as a Scala Application, start your browser and navigate to `http://localhost:9999/`.
+ *
+ * Socko uses Netty to handle incoming requests and AKKA to process them
+ *  - Incoming requests are initial executed using threads from the Netty thread pool
+ *  - As part of handling a request, `routes` will be called to dispatch it for processing
+ *  - Inside our route definition, we instance a new `SnoopProcessor` actor and pass the context to it
+ *  - The `SnoopProcessor` actor is executed in AKKA's default thread pool
+ */
 object SnoopExample extends Logger {
 
   private var webServer: WebServer = null
-  val port = 8889
-  val path = "http://localhost:" + port + "/"
-  var router: ActorRef = null
-  var rootDir: File = new File("/home/vibul/tmp/vvv")
-  var tempDir: File = new File("/home/vibul/tmp/tmp")
-  var browserCacheSeconds = 60 * 60 * 24
 
   val actorSystem = ActorSystem("SnoopExampleActorSystem")
 
   val routes = Routes({
-    case ctx @ GET(Path(PathSegments("files" :: relativePath))) => {
-      val request = new StaticFileRequest(
-        ctx.asInstanceOf[HttpRequestProcessingContext],
-        rootDir,
-        new File(rootDir, relativePath.mkString("/", "/", "")),
-        tempDir,
-        60,
-        60)
-      router ! request
+    case ctx @ _ => {
+      actorSystem.actorOf(Props[SnoopProcessor]) ! ctx
     }
   })
 
-  def main(args: Array[String]) {
-    // Start routers
-    router = actorSystem.actorOf(Props[StaticFileProcessor]
-      .withRouter(FromConfig()).withDispatcher("id"), "a")
-
-    log.debug("hello")
+  def main(args: Array[String]) {    
+    Runtime.getRuntime.addShutdownHook(new Thread {
+      override def run { webServer.stop() }
+    })
     
     webServer = new WebServer(WebServerConfig(port = 9999), routes)
     webServer.start()
-    
   }
-   
+
 }

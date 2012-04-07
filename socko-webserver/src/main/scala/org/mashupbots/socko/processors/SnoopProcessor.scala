@@ -71,8 +71,8 @@ class SnoopProcessor extends Actor {
     }
 
     val buf = new StringBuilder()
-    buf.append("Snoop Processor\r\n")
-    buf.append("===============\r\n")
+    buf.append("Socko Snoop Processor\r\n")
+    buf.append("=====================\r\n")
 
     buf.append("VERSION: " + request.getProtocolVersion + "\r\n")
     buf.append("METHOD: " + ctx.endPoint.method + "\r\n")

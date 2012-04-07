@@ -17,7 +17,7 @@ to write one. (Besides, it is a great way to come up to speed with Scala and AKK
 
 We hope you find it as useful as we do.
 
-## Features
+## What is Socko?
 
 * Socko is written in Scala 
 
@@ -39,7 +39,7 @@ We hope you find it as useful as we do.
   * Serving of static files
 
 
-## Anti-Features
+## What Socko is NOT
 
 * Socko is not a servlet. We use Netty instead.
   
@@ -51,12 +51,47 @@ We hope you find it as useful as we do.
 
 ## Quick Start
 
-Coming soon
+### Getting the Source
+
+Get the source code from github
+
+    $ git clone git@github.com:mashupbots/socko.git
+    $ cd socko
+
+### Run Unit Tests
+
+    $ sbt test
+
+### Run Examples
+
+    $ sbt 
+    > project socko-examples
+    > run org.mashupbots.socko.examples.snoop.SnoopExample
 
 
-## RoadMap
+### Editing the Source Code
 
-This project currently in development.
+* We are currently using [Eclipse 3.7 Indigo](http://www.eclipse.org/downloads/packages/eclipse-ide-javascript-web-developers/indigosr2) 
+  with [Scala IDE nightly build](http://scala-ide.org/download/nightly.html)
+
+* Generate eclipse project files: `sbt eclispse`
+
+* Start Eclipse
+
+* From the top memu, select `File` | `Import`
+  * Select `General` | `Existing Projects into Workspace`. 
+  * Click `Next`.
+  * Select the `socko` source code directory as the root
+  * Should see `socko-examples` and `socko-webserver` under `Projects`
+  * Click `Finish`
+
+* To run the scalatest unit test cases, just right click on a test class file and select `Run As JUnit Test`.
+
+
+## Other Info
+
+* [Issues] (https://github.com/mashupbots/socko/issues?milestone=&sort=created&direction=desc&state=open)
+* [Road Map](https://github.com/mashupbots/socko/issues/milestones)
 
 
 

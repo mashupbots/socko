@@ -52,7 +52,7 @@ object Dependency {
   val akkaRemote    = "com.typesafe.akka"           % "akka-remote"            % "2.0"
   val akkaSlf4j     = "com.typesafe.akka"           % "akka-slf4j"             % "2.0"
   val akkaTestKit   = "com.typesafe.akka"           % "akka-testkit"           % "2.0"
-  val logback       = "ch.qos.logback"              % "logback-classic"        % "1.0.0"   % "runtime"
+  val logback       = "ch.qos.logback"              % "logback-classic"        % "1.0.0"
   val junit         = "junit"                       % "junit"                  % "4.9"     % "test"
   val scalatest     = "org.scalatest"               %% "scalatest"             % "1.7.1"   % "test"
 }
