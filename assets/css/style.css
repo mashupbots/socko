@@ -474,6 +474,22 @@ p, ul {
 	top: 12px;
 }
 
+/* content sec */
+#content {
+  margin-top: 10px;
+}
+#content h1, #content h2 {
+	color: #373b43;
+  margin-bottom: 10px;
+}
+#content ul {
+  list-style: disc;
+  list-style-position: outside;
+}
+#content li {
+  margin-left: 16px;
+}
+
 /* Sign up sec */
 #sign_up_sec { 
 	background: #FFF;
