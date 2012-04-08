@@ -13,11 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.handlers
+package org.mashupbots.socko.webserver
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
-
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.group.ChannelGroup
 import org.jboss.netty.channel.Channel

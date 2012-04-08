@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.handlers
+package org.mashupbots.socko.routes
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

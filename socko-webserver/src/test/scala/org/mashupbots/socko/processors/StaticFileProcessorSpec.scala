@@ -25,10 +25,10 @@ import java.util.TimeZone
 
 import org.junit.runner.RunWith
 import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.mashupbots.socko.handlers.GET
-import org.mashupbots.socko.handlers.Path
-import org.mashupbots.socko.handlers.PathSegments
-import org.mashupbots.socko.handlers.Routes
+import org.mashupbots.socko.routes.GET
+import org.mashupbots.socko.routes.Path
+import org.mashupbots.socko.routes.PathSegments
+import org.mashupbots.socko.routes.Routes
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig

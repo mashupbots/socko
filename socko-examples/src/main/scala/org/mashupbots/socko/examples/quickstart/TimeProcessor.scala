@@ -39,7 +39,12 @@ class TimeProcessor extends Actor {
   val log = Logging(context.system, this)
 
   /**
-   * Process incoming messages
+   * Returns the time in the specified timezone.
+   *
+   * This actor only receives 1 time of message: `TimeRequest`.
+   *
+   * The message contains the `HttpRequestProcessingContext` that contains request data and will be used to
+   * write the response.
    */
   def receive = {
     case request: TimeRequest =>
@@ -71,9 +76,9 @@ class TimeProcessor extends Actor {
 }
 
 /**
- * Message
+ * Request Message
  *
- * @param context HTTP Request context
+ * @param context HTTP Request context containing request data and context for writing response
  * @param timzone The requested timezone
  */
 case class TimeRequest(

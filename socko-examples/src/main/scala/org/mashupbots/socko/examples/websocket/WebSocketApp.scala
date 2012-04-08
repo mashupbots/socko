@@ -15,19 +15,20 @@
 //
 package org.mashupbots.socko.examples.websocket
 
-import org.mashupbots.socko.handlers.GET
-import org.mashupbots.socko.handlers.Routes
-import org.mashupbots.socko.processors.SnoopProcessor
+import org.jboss.netty.handler.codec.http.HttpResponseStatus
+import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.WsHandshakeProcessingContext
+import org.mashupbots.socko.context.WsProcessingContext
+import org.mashupbots.socko.routes.GET
+import org.mashupbots.socko.routes.Path
+import org.mashupbots.socko.routes.Routes
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
+
+import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
-import org.mashupbots.socko.handlers.Path
-import org.mashupbots.socko.context.WsHandshakeProcessingContext
-import org.mashupbots.socko.context.WsProcessingContext
-import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
 
 /**
  * This example shows how to use web sockets with Socko.

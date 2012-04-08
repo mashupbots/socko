@@ -13,14 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.handlers
+package org.mashupbots.socko.routes
 
 import org.junit.runner.RunWith
+import org.mashupbots.socko.context.EndPoint
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.WordSpec
-import org.mashupbots.socko.context.EndPoint
 import org.scalatest.GivenWhenThen
+import org.scalatest.WordSpec
 
 @RunWith(classOf[JUnitRunner])
 class ConcatenateRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {

@@ -23,8 +23,8 @@ import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
 import org.mashupbots.socko.context.WsHandshakeProcessingContext
 import org.mashupbots.socko.context.WsProcessingContext
-import org.mashupbots.socko.handlers.Path
-import org.mashupbots.socko.handlers.Routes
+import org.mashupbots.socko.routes.Path
+import org.mashupbots.socko.routes.Routes
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 import org.scalatest.junit.JUnitRunner

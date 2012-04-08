@@ -23,7 +23,6 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedWriteHandler
-import org.mashupbots.socko.handlers.RequestHandler
 
 /**
  * Creates a new channel pipeline for each Netty channel (network connection)

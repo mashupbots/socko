@@ -15,23 +15,18 @@
 //
 package org.mashupbots.socko.examples.quickstart
 
-import org.mashupbots.socko.handlers.GET
-import org.mashupbots.socko.handlers.Routes
-import org.mashupbots.socko.processors.SnoopProcessor
+import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.routes._
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
+
+import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
-import org.mashupbots.socko.handlers.Path
-import org.mashupbots.socko.handlers.PathSegments
-import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.mashupbots.socko.handlers.QueryString
-import org.mashupbots.socko.handlers.&
-import org.mashupbots.socko.handlers.QueryStringRegex
 
 /**
- * This example shows how to setup a simple route and create a simple actor.
+ * This example shows how to setup a simple route and create a simple processor actor.
  *  - Run this class as a Scala Application
  *  - Open your browser and navigate to `http://localhost:9999/time/` to get the local time.
  *  - You can also get timezone specific by navigate to `http://localhost:9999/time/{location}`.
