@@ -23,19 +23,19 @@
 	</div><!--/top support-->
 <!--/Top Support-->
 	
-<!--Header-->
-	<div id="header">
+  <header>
     <div class="page_wrap">
       <h1>Socko - a lightweight Scala web server</h1>
-			<ul>
-				<li><a href="#">Home</a></li>
-				<li><a href="https://github.com/mashupbots/socko/blob/master/README.md">About</a></li>
-				<li><a href="docs.html">Documentation</a></li>
-				<li><a href="https://github.com/mashupbots/socko">GitHub</a></li>
-			</ul>
-		</div><!--/page wrap-->
-	</div><!--/header-->
-<!--/Header-->
+      <nav>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="https://github.com/mashupbots/socko/blob/master/README.md">About</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+        <li><a href="https://github.com/mashupbots/socko">GitHub</a></li>
+      </ul>
+      </nav>
+    </div>
+  </header>
 	
 	<!-- Masthead -->
 		<div id="masthead">
@@ -129,48 +129,17 @@
 		</div><!--/testimonials-->
 	<!--/Testimonials-->
 
-	<!--Footer-->
-		<div id="footer">
-			<div class="page_wrap">
-				<ul>
-					<li><a href="#">Home</a></li>
-					<li><a href="#">About</a></li>
-					<li><a href="#">Documentation</a></li>
-					<li><a href="https://github.com/mashupbots/socko">GitHub</a></li>
-				</ul>
-				<p>Copyright 2012 Vibul Imtarnasan and David Bolton</p>
-				<div class="clear"></div>
-			</div><!--/page wrap-->
-		</div><!--/footer-->
-	<!--/Footer-->
-	
-	<script src="assets/js/jquery-1.6.1.min.js" type="text/javascript"></script>
-	<script src="assets/js/jquery.slider.js" type="text/javascript"></script>
-	<script type="text/javascript">
-		$(document).ready(function() {
-			// Slider
-			$('#slider').slider();
-			
-			// Placeholder input fields 
-			$('.placeholder').each(function() {
-		        var $this = $(this);
-		        var defaultVal = $this.attr('title');
-
-		        $this.focus(function() {
-		            if ($this.val() === defaultVal) {
-		                $this.val('');
-		            }
-		        });
-
-		        $this.blur(function() {
-		            if ($this.val().length === 0) {
-		                $this.val(defaultVal);
-		            }
-		        });
-		    });
-				
-		});
-	</script>
-	
+  <footer>
+    <div class="page_wrap">
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Documentation</a></li>
+        <li><a href="https://github.com/mashupbots/socko">GitHub</a></li>
+      </ul>
+      <p>Copyright 2012 Vibul Imtarnasan and David Bolton</p>
+      <div class="clear"></div>
+    </div><!--/page wrap-->
+  </footer>
 </body>
 </html>
