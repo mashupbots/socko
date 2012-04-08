@@ -222,7 +222,7 @@ object QueryString {
  *
  * Then, when defining your Route:
  * {{{
- *   case ctx @ case MyQueryStringRegex(m) => {
+ *   case ctx @ MyQueryStringRegex(m) => {
  *     assert(m.group(1) == "value1")
  *   }
  * }}}

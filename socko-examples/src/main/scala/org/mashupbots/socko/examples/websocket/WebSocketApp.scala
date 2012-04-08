@@ -37,7 +37,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus
  *
  * This is a port of the Netty project web socket server example.
  */
-object WebSocketExample extends Logger {
+object WebSocketApp extends Logger {
   private var webServer: WebServer = null
 
   //

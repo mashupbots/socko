@@ -71,7 +71,7 @@ Get the source code from github
 
     $ sbt 
     > project socko-examples
-    > run org.mashupbots.socko.examples.snoop.SnoopExample
+    > run org.mashupbots.socko.examples.snoop.SnoopApp
 
 
 ### Editing the Source Code

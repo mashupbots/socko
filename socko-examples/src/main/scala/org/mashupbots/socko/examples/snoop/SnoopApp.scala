@@ -29,14 +29,8 @@ import akka.actor.Props
  * This example shows how to setup a simple route and snoop actor.
  *  - Run this class as a Scala Application
  *  - Open your browser and navigate to `http://localhost:9991/`.
- *
- * Socko uses Netty to handle incoming requests and AKKA to process them
- *  - Incoming requests are initial executed using threads from the Netty thread pool
- *  - As part of handling a request, `routes` will be called to dispatch it for processing
- *  - Inside our route definition, we instance a new `SnoopProcessor` actor and pass the context to it
- *  - The `SnoopProcessor` actor is executed in AKKA's default thread pool
  */
-object SnoopExample extends Logger {
+object SnoopApp extends Logger {
 
   private var webServer: WebServer = null
 
@@ -61,11 +55,11 @@ object SnoopExample extends Logger {
   // Step #3
   // Instance WebServer and start it. Stop WebServer upon shutdown
   //
-  def main(args: Array[String]) {    
+  def main(args: Array[String]) {
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run { webServer.stop() }
     })
-    
+
     webServer = new WebServer(WebServerConfig(port = 9991), routes)
     webServer.start()
   }
