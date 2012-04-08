@@ -80,8 +80,8 @@ class RequestHandler(
     e.getMessage match {
       case httpRequest: HttpRequest =>
         var ctx = HttpRequestProcessingContext(e.getChannel, httpRequest)
-        log.debug("HTTP {} {} {} CHANNEL={}",
-          Array[Object](ctx.endPoint.method, ctx.endPoint.host, ctx.endPoint.path, e.getChannel.getId))
+        log.debug("HTTP {} CHANNEL={}",
+          Array[Object](ctx.endPoint, e.getChannel.getId))
 
         if (ctx.isChunked) {
           validateFirstChunk(ctx)
@@ -98,8 +98,8 @@ class RequestHandler(
 
       case httpChunk: HttpChunk =>
         var ctx = HttpChunkProcessingContext(e.getChannel, originalHttpRequest.get, httpChunk)
-        log.debug("CHUNK {} {} {} CHANNEL={}",
-          Array[Object](ctx.endPoint.method, ctx.endPoint.host, ctx.endPoint.path, e.getChannel.getId))
+        log.debug("CHUNK {} CHANNEL={}",
+          Array[Object](ctx.endPoint, e.getChannel.getId))
 
         routes(ctx)
 
@@ -109,8 +109,8 @@ class RequestHandler(
 
       case wsFrame: WebSocketFrame =>
         var ctx = WsProcessingContext(e.getChannel, originalHttpRequest.get.endPoint, wsFrame)
-        log.debug("WS {} {} {} CHANNEL={}",
-          Array[Object](ctx.endPoint.method, ctx.endPoint.host, ctx.endPoint.path, e.getChannel.getId))
+        log.debug("WS {} CHANNEL={}",
+          Array[Object](ctx.endPoint, e.getChannel.getId))
 
         if (wsFrame.isInstanceOf[CloseWebSocketFrame]) {
           // This will also close the channel

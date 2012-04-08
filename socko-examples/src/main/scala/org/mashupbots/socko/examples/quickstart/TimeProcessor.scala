@@ -50,7 +50,8 @@ class TimeProcessor extends Actor {
     case request: TimeRequest =>
 
       val tz = if (request.timezone.isDefined) {
-        val tzid = TimeZone.getAvailableIDs.find(s => s.toLowerCase().contains(request.timezone.get.toLowerCase))
+        val tzid = TimeZone.getAvailableIDs.find(s => 
+          s.toLowerCase().contains(request.timezone.get.replace("%20", "_").toLowerCase))
         if (tzid.isDefined) {
           TimeZone.getTimeZone(tzid.get)
         } else {

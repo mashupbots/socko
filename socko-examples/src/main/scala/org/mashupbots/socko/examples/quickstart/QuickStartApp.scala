@@ -15,6 +15,7 @@
 //
 package org.mashupbots.socko.examples.quickstart
 
+import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.mashupbots.socko.context.HttpRequestProcessingContext
 import org.mashupbots.socko.routes._
 import org.mashupbots.socko.utils.Logger
@@ -29,7 +30,8 @@ import akka.actor.Props
  * This example shows how to setup a simple route and create a simple processor actor.
  *  - Run this class as a Scala Application
  *  - Open your browser and navigate to `http://localhost:9999/time/` to get the local time.
- *  - You can also get timezone specific by navigate to `http://localhost:9999/time/{location}`.
+ *  - You can also get a specific timezone by navigate to `http://localhost:9999/time/{tz}`.
+ *    or to `http://localhost:9999/time?tz={tz}` where tz is the timezone id  or city name.
  *
  * Socko uses Netty to handle incoming requests and AKKA to process them
  *  - Incoming requests are initial executed using threads from the Netty thread pool
@@ -54,7 +56,7 @@ object QuickStartApp extends Logger {
   //
   val routes = Routes({
     case ctx @ GET(Path("/time")) & TimezoneQueryStringRegex(m) => {
-      // If the timezone is specified on the query string, (like "/time?tz=pst"), pass the
+      // If the timezone is specified on the query string, (like "/time?tz=sydney"), pass the
       // timezone to the TimeProcessor
       val timezone = m.group(1)
       val request = TimeRequest(ctx.asInstanceOf[HttpRequestProcessingContext], Some(timezone))
@@ -71,6 +73,11 @@ object QuickStartApp extends Logger {
       val request = TimeRequest(ctx.asInstanceOf[HttpRequestProcessingContext], None)
       actorSystem.actorOf(Props[TimeProcessor]) ! request
     }
+    case ctx @ Path("/favicon.ico") => {
+      // If favicon.ico, just return a 404 because we don't have that file
+      val httpContext = ctx.asInstanceOf[HttpRequestProcessingContext]
+      httpContext.writeErrorResponse(HttpResponseStatus.NOT_FOUND, false, "")
+    }    
   })
   
   object TimezoneQueryStringRegex extends QueryStringRegex("""tz=([a-zA-Z0-9/]+)""".r)
