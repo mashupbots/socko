@@ -21,7 +21,10 @@ object SockoBuild extends Build {
 
   lazy val examples = Project(id = "socko-examples",
                          base = file("socko-examples"),
-                         dependencies = Seq(webserver))
+                         dependencies = Seq(webserver),
+                         settings = defaultSettings ++ Seq(
+                           libraryDependencies ++= Dependencies.examples
+                         ))
                           
   lazy val defaultSettings = Defaults.defaultSettings  ++ Seq(
     // Repositories
@@ -45,6 +48,10 @@ object Dependencies {
     Dependency.akkaActor, Dependency.akkaRemote, Dependency.akkaSlf4j, Dependency.akkaTestKit,
     Dependency.logback, Dependency.junit, Dependency.scalatest
   )
+  
+  val examples = Seq(
+    Dependency.logback
+  )  
 }
 
 object Dependency {
@@ -52,7 +59,7 @@ object Dependency {
   val akkaRemote    = "com.typesafe.akka"           % "akka-remote"            % "2.0"
   val akkaSlf4j     = "com.typesafe.akka"           % "akka-slf4j"             % "2.0"
   val akkaTestKit   = "com.typesafe.akka"           % "akka-testkit"           % "2.0"
-  val logback       = "ch.qos.logback"              % "logback-classic"        % "1.0.0"
+  val logback       = "ch.qos.logback"              % "logback-classic"        % "1.0.0"   % "runtime"
   val junit         = "junit"                       % "junit"                  % "4.9"     % "test"
   val scalatest     = "org.scalatest"               %% "scalatest"             % "1.7.1"   % "test"
 }
