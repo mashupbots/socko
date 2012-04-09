@@ -32,8 +32,8 @@ import akka.actor.Props
  * Socko uses Netty to handle incoming requests and AKKA to process them
  *  - Incoming requests are initial executed using threads from the Netty thread pool
  *  - As part of handling a request, `routes` will be called to dispatch it for processing
- *  - Inside our route definition, we instance a new `SnoopProcessor` actor and pass the context to it
- *  - The `SnoopProcessor` actor is executed in AKKA's default thread pool
+ *  - Inside our route definition, we instance a new `HelloProcessor` actor and pass the context to it
+ *  - The `HelloProcessor` actor is executed in AKKA's default thread pool
  */
 object HelloApp extends Logger {
   //
