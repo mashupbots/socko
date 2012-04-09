@@ -475,18 +475,18 @@ header ul li a:hover, header ul li a.active {
 }
 
 /* article sec */
-#article {
+article {
   margin-top: 10px;
 }
-#article h1, #article h2 {
+article h1, article h2 {
 	color: #373b43;
   margin-bottom: 10px;
 }
-#article ul {
+article ul {
   list-style: disc;
   list-style-position: outside;
 }
-#article li {
+article li {
   margin-left: 16px;
 }
 
