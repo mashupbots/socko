@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.examples.quickstart
+package org.mashupbots.socko.examples.routes
 
 import scala.collection.JavaConversions.asScalaBuffer
 import org.apache.http.HttpHeaders

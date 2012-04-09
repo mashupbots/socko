@@ -55,6 +55,34 @@ class QueryStringRouteSpec extends WordSpec with ShouldMatchers with GivenWhenTh
       result should equal("1")
     }
 
+    "route on querystring match" in {
+      object QueryStringMatcher extends QueryStringMatcher("name1")
+
+      var result = ""
+      val r = Routes({
+        case QueryStringMatcher(value) => {
+          value should equal("value1")
+          result = "1"
+        }
+      })
+
+      when("there is only 1 name-value pair")
+      r(TestContext(EndPoint("GET", "www.def.com", "/path/to/file?name1=value1")))
+      result should equal("1")      
+
+      when("there are 2 values for the same name")
+      r(TestContext(EndPoint("GET", "www.def.com", "/path/to/file?name1=value1&name1=value2")))
+      result should equal("1")      
+
+      when("there are 2 name-value pairs")
+      r(TestContext(EndPoint("PUT", "www.def.com", "/path/to/file?name1=value1&name2=value2")))
+      result should equal("1")
+      
+      when("there are 2 name-value pairs is different order")
+      r(TestContext(EndPoint("GET", "www.def.com", "/path/to/file?name2=value2&name1=value1")))
+      result should equal("1")      
+    }
+    
     "throw MatchError" in {
       var result = ""
       val r = Routes({

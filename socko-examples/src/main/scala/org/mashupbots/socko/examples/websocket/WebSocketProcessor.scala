@@ -76,7 +76,7 @@ class WebSocketProcessor extends Actor {
     buf.append("    window.WebSocket = window.MozWebSocket;\n")
     buf.append("  }\n")
     buf.append("  if (window.WebSocket) {\n")
-    buf.append("    socket = new WebSocket(\"ws://localhost:9992/websocket/\");\n") // Note the address must match the route
+    buf.append("    socket = new WebSocket(\"ws://localhost:8888/websocket/\");\n") // Note the address must match the route
     buf.append("    socket.onmessage = function(event) { var ta = document.getElementById('responseText'); ta.value = ta.value + '\\n' + event.data };\n")
     buf.append("    socket.onopen = function(event) { var ta = document.getElementById('responseText'); ta.value = \"Web Socket opened!\"; };\n")
     buf.append("    socket.onclose = function(event) { var ta = document.getElementById('responseText'); ta.value = ta.value + \"Web Socket closed\"; };\n")

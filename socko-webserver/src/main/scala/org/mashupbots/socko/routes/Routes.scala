@@ -233,6 +233,29 @@ class QueryStringRegex(regex: Regex) {
 }
 
 /**
+ * Match of a query string name and returns the first matched value.
+ *
+ * For example, to match `?name1=value1`, first define your match as an object:
+ * {{{
+ *    object MyQueryStringName extends QueryStringName("name1")
+ * }}}
+ *
+ * Then, when defining your Route:
+ * {{{
+ *   case ctx @ MyQueryStringName(value) => {
+ *     assert(value == "value1")
+ *   }
+ * }}}
+ */
+class QueryStringMatcher(name: String) {
+  def unapply(ctx: ProcessingContext) = {
+    ctx.endPoint.getQueryString(name)
+  }
+}
+
+
+
+/**
  * Concatenates 2 extractors in a case statement
  */
 object & { def unapply[A](a: A) = Some(a, a) }

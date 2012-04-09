@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.examples.quickstart
+package org.mashupbots.socko.examples.routes
 
 import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.mashupbots.socko.context.HttpRequestProcessingContext
@@ -27,72 +27,75 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 
 /**
- * This example shows how to setup a simple route and create a simple processor actor.
+ * This example shows how use route extractors.
  *  - Run this class as a Scala Application
- *  - Open your browser and navigate to `http://localhost:9999/time/` to get the local time.
- *  - You can also get a specific timezone by navigate to `http://localhost:9999/time/{tz}`.
- *    or to `http://localhost:9999/time?tz={tz}` where tz is the timezone id  or city name.
- *
- * Socko uses Netty to handle incoming requests and AKKA to process them
- *  - Incoming requests are initial executed using threads from the Netty thread pool
- *  - As part of handling a request, `routes` will be called to dispatch it for processing
- *  - Inside our route definition, we instance a new `SnoopProcessor` actor and pass the context to it
- *  - The `SnoopProcessor` actor is executed in AKKA's default thread pool
+ *  - Open your browser and navigate to `http://localhost:8888/time/` to get the local time.
+ *  - You can also get a specific timezone by specifying a city name
+ *    - `http://localhost:8888/time/sydney`, or
+ *    - `http://localhost:8888/time?tz=london`
+ *    
+ * Refer to our unit test cases for more examples of routes and different route extractors.
  */
 object QuickStartApp extends Logger {
-
-  private var webServer: WebServer = null
-
   //
-  // Step #1
-  // Start AKKA system
+  // STEP #1 - Define actors and start AKKA
+  // See `TimeProcessor`
   //
-  val actorSystem = ActorSystem("QuickStartExampleActorSystem")
+  val actorSystem = ActorSystem("RouteExampleActorSystem")
 
   //
-  // Step #2
-  // Define routes. Each route dispatches the request to a newly instanced `TimeProcessor` actor for processing.
+  // STEP #2 - Define routes. 
+  // Each route dispatches the request to a newly instanced `TimeProcessor` actor for processing.
   // `TimeProcessor` will `stop()` itself after processing each request.
   //
   val routes = Routes({
-    case ctx @ GET(Path("/time")) & TimezoneQueryStringRegex(m) => {
-      // If the timezone is specified on the query string, (like "/time?tz=sydney"), pass the
-      // timezone to the TimeProcessor
-      val timezone = m.group(1)
+
+    // *** HOW TO EXTRACT QUERYSTRING VARIABLES AND USE CONCATENATION ***
+    // If the timezone is specified on the query string, (like "/time?tz=sydney"), pass the
+    // timezone to the TimeProcessor    
+    case ctx @ GET(Path("/time")) & TimezoneQueryString(timezone) => {
       val request = TimeRequest(ctx.asInstanceOf[HttpRequestProcessingContext], Some(timezone))
       actorSystem.actorOf(Props[TimeProcessor]) ! request
     }
+
+    // *** HOW TO MATCH AND EXTRACT A PATH SEGMENT ***
+    // If the timezone is specified on the path (like "/time/sydney"), pass the
+    // timezone to the TimeProcessor
     case ctx @ GET(Path(PathSegments("time" :: timezone :: Nil))) => {
-      // If the timezone is specified on the path (like "/time/pst"), pass the
-      // timezone to the TimeProcessor
       val request = TimeRequest(ctx.asInstanceOf[HttpRequestProcessingContext], Some(timezone))
       actorSystem.actorOf(Props[TimeProcessor]) ! request
     }
+
+    // *** HOW TO MATCH AN EXACT PATH ***
+    // No timezone specified, make TimeProcessor return the time in the default timezone
     case ctx @ GET(Path("/time")) => {
-      // No timezone specified, get the TimeProcessor return the time in the default timezone
       val request = TimeRequest(ctx.asInstanceOf[HttpRequestProcessingContext], None)
       actorSystem.actorOf(Props[TimeProcessor]) ! request
     }
+
+    // If favicon.ico, just return a 404 because we don't have that file
     case ctx @ Path("/favicon.ico") => {
-      // If favicon.ico, just return a 404 because we don't have that file
       val httpContext = ctx.asInstanceOf[HttpRequestProcessingContext]
       httpContext.writeErrorResponse(HttpResponseStatus.NOT_FOUND, false, "")
-    }    
+    }
   })
-  
-  object TimezoneQueryStringRegex extends QueryStringRegex("""tz=([a-zA-Z0-9/]+)""".r)
+
+  object TimezoneQueryString extends QueryStringMatcher("tz")
 
   //
-  // Step #3
-  // Instance WebServer and start it. Stop WebServer upon shutdown
+  // STEP #3 - Instance WebServer and start it. Stop WebServer upon shutdown.
   //
   def main(args: Array[String]) {
+    val webServer = new WebServer(WebServerConfig(), routes)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run { webServer.stop() }
     })
-
-    webServer = new WebServer(WebServerConfig(port = 9999), routes)
     webServer.start()
+
+    System.out.println("Open your browser and navigate to: ");    
+    System.out.println("  http://localhost:8888/time");    
+    System.out.println("  http://localhost:8888/time/sydney");    
+    System.out.println("  http://localhost:8888/time?tz=london");    
   }
 
 }

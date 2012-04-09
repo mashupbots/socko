@@ -13,10 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.examples.snoop
+package org.mashupbots.socko.examples.quickstart
 
-import org.mashupbots.socko.processors.SnoopProcessor
-import org.mashupbots.socko.routes.Routes
+import org.mashupbots.socko.routes._
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
@@ -26,25 +25,29 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 
 /**
- * This example shows how to setup a simple route and snoop actor.
+ * This example shows how to setup a simple route and create a simple processor actor.
  *  - Run this class as a Scala Application
- *  - Open your browser and navigate to `http://localhost:8888/`.
+ *  - Open your browser and navigate to `http://localhost:8888/`
+ *
+ * Socko uses Netty to handle incoming requests and AKKA to process them
+ *  - Incoming requests are initial executed using threads from the Netty thread pool
+ *  - As part of handling a request, `routes` will be called to dispatch it for processing
+ *  - Inside our route definition, we instance a new `SnoopProcessor` actor and pass the context to it
+ *  - The `SnoopProcessor` actor is executed in AKKA's default thread pool
  */
-object SnoopApp extends Logger {
+object HelloApp extends Logger {
   //
-  // STEP #1 - Define actors and start AKKA.
-  // `SnoopProcessor` actor already defined.
+  // STEP #1 - Define actors and start AKKA
+  // See `HelloProcessor`
   //
-  val actorSystem = ActorSystem("SnoopExampleActorSystem")
+  val actorSystem = ActorSystem("HelloExampleActorSystem")
 
   //
   // STEP #2 - Define routes. 
-  // Each route dispatches the request to a newly instanced `SnoopProcessor` actor for processing.
-  // `SnoopProcessor` will `stop()` itself after processing each request.
   //
   val routes = Routes({
-    case ctx @ _ => {
-      actorSystem.actorOf(Props[SnoopProcessor]) ! ctx
+    case ctx @ GET(_) => {
+      actorSystem.actorOf(Props[HelloProcessor]) ! ctx
     }
   })
 
@@ -53,12 +56,11 @@ object SnoopApp extends Logger {
   //
   def main(args: Array[String]) {
     val webServer = new WebServer(WebServerConfig(), routes)
+    webServer.start()
+
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run { webServer.stop() }
     })
-    webServer.start()
-    
-    System.out.println("Open your browser and navigate to http://localhost:8888");    
   }
 
 }

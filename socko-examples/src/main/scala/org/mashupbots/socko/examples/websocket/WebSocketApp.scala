@@ -32,24 +32,22 @@ import akka.actor.Props
 
 /**
  * This example shows how to use web sockets with Socko.
- *  - Open your browser and navigate to `http://localhost:9992/html`.
+ *  - Open your browser and navigate to `http://localhost:8888/html`.
  *  - A HTML page will be displayed
- *  - It will make a web socket connection to `ws://localhost:9992/websocket/`
+ *  - It will make a web socket connection to `ws://localhost:8888/websocket/`
  *
  * This is a port of the Netty project web socket server example.
  */
 object WebSocketApp extends Logger {
-  private var webServer: WebServer = null
-
   //
-  // Step #1
-  // Start AKKA system
+  // STEP #1 - Define actors and start AKKA
+  // See `WebSocketProcessor`.
   //
   val actorSystem = ActorSystem("WebSocketExampleActorSystem")
 
   //
-  // Step #2
-  // Define routes. Each route dispatches the request to a newly instanced `WebSocketProcessor` actor for processing.
+  // STEP #2 - Define routes. 
+  // Each route dispatches the request to a newly instanced `WebSocketProcessor` actor for processing.
   // `WebSocketProcessor` will `stop()` itself after processing the request. 
   //
   val routes = Routes({
@@ -77,15 +75,16 @@ object WebSocketApp extends Logger {
   })
 
   //
-  // Step #3
-  // Instance WebServer and start it. Stop WebServer upon shutdown
-  //  
+  // STEP #3 - Instance WebServer and start it. Stop WebServer upon shutdown
+  //
+
   def main(args: Array[String]) {
+    val webServer = new WebServer(WebServerConfig(), routes)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run { webServer.stop() }
     })
-
-    webServer = new WebServer(WebServerConfig(port = 9992), routes)
     webServer.start()
+        
+    System.out.println("Open your browser and navigate to http://localhost:8888/html");
   }
 }
