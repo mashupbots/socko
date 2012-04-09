@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: docs
 title: Publishing the documentation
 ---
 # Publishing the documentation
