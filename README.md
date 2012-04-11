@@ -63,37 +63,27 @@ Socko is:
 
 ## Quick Start
 
-### Step 1 - Define actors and start Akka.
 ```scala
-class HelloProcessor extends Actor {
-  def receive = {
-    case request: HttpRequestProcessingContext =>
-      request.writeResponse("Hello from Socko (" + new Date().toString + ")")
-      context.stop(self)
-  }
-}
-    
 object HelloApp extends Logger {
+
+  //
+  // STEP #1 - Define actors and start Akka
+  // See `HelloProcessor` below
+  //
   val actorSystem = ActorSystem("HelloExampleActorSystem")
-}
-```
-    
-### Step 2 - Define routes.
-```scala
-object HelloApp extends Logger {
-  ...
+  
+  //
+  // STEP #2 - Define routes. 
+  //
   val routes = Routes({
     case ctx @ GET(_) => {
       actorSystem.actorOf(Props[HelloProcessor]) ! ctx
     }
   })
-}
-```
 
-### Step 3 - Start and Stop.
-```scala
-object HelloApp extends Logger {
-  ...
+  //
+  // STEP #3 - Start and Stop web server.
+  //
   def main(args: Array[String]) {
     val webServer = new WebServer(WebServerConfig(), routes)
     webServer.start()
@@ -103,6 +93,14 @@ object HelloApp extends Logger {
     })
 
     System.out.println("Open your browser and navigate to http://localhost:8888"); 
+  }
+}
+
+class HelloProcessor extends Actor {
+  def receive = {
+    case request: HttpRequestProcessingContext =>
+      request.writeResponse("Hello from Socko (" + new Date().toString + ")")
+      context.stop(self)
   }
 }
 ```

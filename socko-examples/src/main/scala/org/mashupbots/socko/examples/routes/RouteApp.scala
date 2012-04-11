@@ -38,13 +38,13 @@ import akka.actor.Props
  */
 object RouteApp extends Logger {
   //
-  // STEP #1 - Define actors and start Akka
+  // STEP #1 - Define Actors and Start Akka
   // See `TimeProcessor`
   //
   val actorSystem = ActorSystem("RouteExampleActorSystem")
 
   //
-  // STEP #2 - Define routes. 
+  // STEP #2 - Define Routes
   // Each route dispatches the request to a newly instanced `TimeProcessor` actor for processing.
   // `TimeProcessor` will `stop()` itself after processing each request.
   //
@@ -83,7 +83,7 @@ object RouteApp extends Logger {
   object TimezoneQueryString extends QueryStringMatcher("tz")
 
   //
-  // STEP #3 - Start and Stop.
+  // STEP #3 - Start and Stop Socko Web Server
   //
   def main(args: Array[String]) {
     val webServer = new WebServer(WebServerConfig(), routes)

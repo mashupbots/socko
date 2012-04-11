@@ -37,13 +37,13 @@ import akka.actor.Props
  */
 object HelloApp extends Logger {
   //
-  // STEP #1 - Define actors and start Akka
+  // STEP #1 - Define Actors and Start Akka
   // See `HelloProcessor`
   //
   val actorSystem = ActorSystem("HelloExampleActorSystem")
 
   //
-  // STEP #2 - Define routes. 
+  // STEP #2 - Define Routes
   //
   val routes = Routes({
     case ctx @ GET(_) => {
@@ -52,7 +52,7 @@ object HelloApp extends Logger {
   })
 
   //
-  // STEP #3 - Start and Stop.
+  // STEP #3 - Start and Stop Socko Web Server
   //
   def main(args: Array[String]) {
     val webServer = new WebServer(WebServerConfig(), routes)

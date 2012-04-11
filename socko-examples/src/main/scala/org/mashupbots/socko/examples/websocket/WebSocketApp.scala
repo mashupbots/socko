@@ -40,13 +40,13 @@ import akka.actor.Props
  */
 object WebSocketApp extends Logger {
   //
-  // STEP #1 - Define actors and start Akka
+  // STEP #1 - Define Actors and Start Akka
   // See `WebSocketProcessor`.
   //
   val actorSystem = ActorSystem("WebSocketExampleActorSystem")
 
   //
-  // STEP #2 - Define routes. 
+  // STEP #2 - Define Routes
   // Each route dispatches the request to a newly instanced `WebSocketProcessor` actor for processing.
   // `WebSocketProcessor` will `stop()` itself after processing the request. 
   //
@@ -75,7 +75,7 @@ object WebSocketApp extends Logger {
   })
 
   //
-  // STEP #3 - Start and Stop.
+  // STEP #3 - Start and Stop Socko Web Server
   //
 
   def main(args: Array[String]) {
