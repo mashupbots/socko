@@ -28,27 +28,28 @@ Socko is:
 
 * Fast-ish and efficient???
   * TO DO - benchmarking
-  * Socko handles incoming HTTP requests in an asynchronous and event driven thanks to the Netty framework.
-  * Processing requests is also performed in an asynchronous and event driven manner using Akka.
-  * If you have blocking IO, for example reading files or database interaction, you can configure Akka
-    to use a thread pool in order to support blocking IO.
+  * Socko handles and processes incoming HTTP requests in an asynchronous and event driven manner thanks to
+    Netty and Akka.
+  * Socko also supports blocking IO, for example reading files or database interaction, you can configure Akka
+    to use a thread pool instead.
 
 * Lightweight (assuming you are already using Akka)
   * > 1,300 lines of Scala code (and ~2,600 lines of Java code which will be removed once Akka 
-    moves to Netty 4.0).
+    moves to the upcoming Netty 4.0).
   * Socko runs in a standard Scala application. No servlet containers required.
   * Socko has no external dependencies outside Akka 2.0 and Netty (which is a dependency of Akka 2.0 Remote).
   
 * Supportive of HTTP Standards
   * HTTP/S and WebSockets
   * HTTP compression
+  * Http headers
   * Decoding HTTP POST, file uploads and query strings
 
-* Easy
+* Trying to be as Simple and as Easy as possible
   * Routing DSL like [Unfilted HTTP ToolKit](http://unfiltered.databinder.net/Unfiltered.html) and 
     [Play Mini](https://github.com/typesafehub/play2-mini)
   * Configurable from inside your code and/or via settings in Akka's configuration file.
-  * Three steps quick start.
+  * Plenty of [examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
 
 
 ## What Socko is NOT
