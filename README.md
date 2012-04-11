@@ -65,45 +65,46 @@ Socko is:
 
 ### Step 1 - Define actors and start Akka.
 ```scala
-    class HelloProcessor extends Actor {
-      def receive = {
-        case request: HttpRequestProcessingContext =>
-          request.writeResponse("Hello from Socko (" + new Date().toString + ")")
-          context.stop(self)
-      }
-    }
+class HelloProcessor extends Actor {
+  def receive = {
+    case request: HttpRequestProcessingContext =>
+      request.writeResponse("Hello from Socko (" + new Date().toString + ")")
+      context.stop(self)
+  }
+}
     
-    object HelloApp extends Logger {
-      val actorSystem = ActorSystem("HelloExampleActorSystem")
-    }
+object HelloApp extends Logger {
+  val actorSystem = ActorSystem("HelloExampleActorSystem")
+}
 ```
     
 ### Step 2 - Define routes.
 ```scala
-    object HelloApp extends Logger {
-      ...
-      val routes = Routes({
-        case ctx @ GET(_) => {
-          actorSystem.actorOf(Props[HelloProcessor]) ! ctx
-        }
-      })
+object HelloApp extends Logger {
+  ...
+  val routes = Routes({
+    case ctx @ GET(_) => {
+      actorSystem.actorOf(Props[HelloProcessor]) ! ctx
     }
+  })
+}
 ```
 
-### Step 3 - Start and Shutdown.
+### Step 3 - Start and Stop.
 ```scala
-    object HelloApp extends Logger {
-      ...
-      def main(args: Array[String]) {
-        val webServer = new WebServer(WebServerConfig(), routes)
-        webServer.start()
-    
-        Runtime.getRuntime.addShutdownHook(new Thread {
-          override def run { webServer.stop() }
-        })
-    
-        System.out.println("Open your browser and navigate to http://localhost:8888"); 
-      }
+object HelloApp extends Logger {
+  ...
+  def main(args: Array[String]) {
+    val webServer = new WebServer(WebServerConfig(), routes)
+    webServer.start()
+
+    Runtime.getRuntime.addShutdownHook(new Thread {
+      override def run { webServer.stop() }
+    })
+
+    System.out.println("Open your browser and navigate to http://localhost:8888"); 
+  }
+}
 ```
 
 

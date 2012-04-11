@@ -29,15 +29,15 @@ import akka.actor.Props
  *  - Run this class as a Scala Application
  *  - Open your browser and navigate to `http://localhost:8888/`
  *
- * Socko uses Netty to handle incoming requests and AKKA to process them
+ * Socko uses Netty to handle incoming requests and Akka to process them
  *  - Incoming requests are initial executed using threads from the Netty thread pool
  *  - As part of handling a request, `routes` will be called to dispatch it for processing
  *  - Inside our route definition, we instance a new `HelloProcessor` actor and pass the context to it
- *  - The `HelloProcessor` actor is executed in AKKA's default thread pool
+ *  - The `HelloProcessor` actor is executed in Akka default thread pool
  */
 object HelloApp extends Logger {
   //
-  // STEP #1 - Define actors and start AKKA
+  // STEP #1 - Define actors and start Akka
   // See `HelloProcessor`
   //
   val actorSystem = ActorSystem("HelloExampleActorSystem")
@@ -52,7 +52,7 @@ object HelloApp extends Logger {
   })
 
   //
-  // STEP #3 - Instance WebServer and start it. Stop WebServer upon shutdown.
+  // STEP #3 - Start and Stop.
   //
   def main(args: Array[String]) {
     val webServer = new WebServer(WebServerConfig(), routes)

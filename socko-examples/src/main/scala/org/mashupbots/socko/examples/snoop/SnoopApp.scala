@@ -32,7 +32,7 @@ import akka.actor.Props
  */
 object SnoopApp extends Logger {
   //
-  // STEP #1 - Define actors and start AKKA.
+  // STEP #1 - Define actors and start Akka.
   // `SnoopProcessor` actor already defined.
   //
   val actorSystem = ActorSystem("SnoopExampleActorSystem")
@@ -49,7 +49,7 @@ object SnoopApp extends Logger {
   })
 
   //
-  // STEP #3 - Instance WebServer and start it. Stop WebServer upon shutdown.
+  // STEP #3 - Start and Stop.
   //
   def main(args: Array[String]) {
     val webServer = new WebServer(WebServerConfig(), routes)

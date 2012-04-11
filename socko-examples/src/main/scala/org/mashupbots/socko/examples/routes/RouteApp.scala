@@ -38,7 +38,7 @@ import akka.actor.Props
  */
 object RouteApp extends Logger {
   //
-  // STEP #1 - Define actors and start AKKA
+  // STEP #1 - Define actors and start Akka
   // See `TimeProcessor`
   //
   val actorSystem = ActorSystem("RouteExampleActorSystem")
@@ -83,7 +83,7 @@ object RouteApp extends Logger {
   object TimezoneQueryString extends QueryStringMatcher("tz")
 
   //
-  // STEP #3 - Instance WebServer and start it. Stop WebServer upon shutdown.
+  // STEP #3 - Start and Stop.
   //
   def main(args: Array[String]) {
     val webServer = new WebServer(WebServerConfig(), routes)
