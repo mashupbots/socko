@@ -61,6 +61,8 @@ object HelloApp extends Logger {
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run { webServer.stop() }
     })
+    
+    System.out.println("Open your browser and navigate to http://localhost:8888"); 
   }
 
 }
