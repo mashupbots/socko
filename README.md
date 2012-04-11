@@ -1,42 +1,54 @@
 # SOCKO
 
-A lightweight [Scala](http://www.scala-lang.org/) web server powered by
-[Netty](http://netty.io/) networking and [AKKA](http://akka.io/) processing.
+A [Scala](http://www.scala-lang.org/) web server powered by
+[Netty](http://netty.io/) networking and [Akka](http://akka.io/) processing.
 
 ## Background
 We designed MashupBots to be an HTML5 style app. 
 
-Our fat html/css/javascript client is going to be served as static files from the web server. 
+Our fat html5/css/javascript client is going to be served as static files from the web server. 
 Server side HTML templating will be not required because it will all happen in the browser using javascript.
 
-Our fat client will communicate with the business logic/database via a HTTP REST based API served off 
-the same web server.
+Our fat client will communicate with our Akka based business logic and database via a HTTP REST API served 
+off the same web server.
 
-We could not find a lightweight asynchronous web server that exactly meets our requirements so we decided 
-to write one. (Besides, it is a great way to come up to speed with Scala and AKKA).
+We could not find a lightweight, asynchronous web server that exactly meets our requirements so we decided 
+to write one.
 
 We hope you find it as useful as we do.
 
 ## What is Socko?
 
-* Socko is written in Scala 
+Socko is:
 
-* Socko runs on top of the asynchronous event driven Netty framework.
+* Intended for Akka developers
+  * who wish to expose their Akka actors as REST endpoints
+  * who wish to serve static files and/or HTML 5 applications from the same web server hosting 
+    their REST endpoints
 
-* Socko processes requests using AKKA actors.
+* Fast-ish and efficient???
+  * TO DO - benchmarking
+  * Socko handles incoming HTTP requests in an asynchronous and event driven thanks to the Netty framework.
+  * Processing requests is also performed in an asynchronous and event driven manner using Akka.
+  * If you have blocking IO, for example reading files or database interaction, you can configure Akka
+    to use a thread pool in order to support blocking IO.
 
-* Socko has no external dependencies outside AKKA 2.0 (note that Netty is a dependency of AKKA 2.0 Remote)
-
-* Socko can be started as a standard Scala application.
-
-* Out of the box, Socko supports
-  * HTTP and WebSockets
-  * TLS/SSL
-  * Decoding HTTP POST and file uploads
+* Lightweight (assuming you are already using Akka)
+  * > 1,300 lines of Scala code (and ~2,600 lines of Java code which will be removed once Akka 
+    moves to Netty 4.0).
+  * Socko runs in a standard Scala application. No servlet containers required.
+  * Socko has no external dependencies outside Akka 2.0 and Netty (which is a dependency of Akka 2.0 Remote).
+  
+* Supportive of HTTP Standards
+  * HTTP/S and WebSockets
   * HTTP compression
-  * Routing like [Unfilted HTTP ToolKit](http://unfiltered.databinder.net/Unfiltered.html) and 
+  * Decoding HTTP POST, file uploads and query strings
+
+* Easy
+  * Routing DSL like [Unfilted HTTP ToolKit](http://unfiltered.databinder.net/Unfiltered.html) and 
     [Play Mini](https://github.com/typesafehub/play2-mini)
-  * Serving of static files
+  * Configurable from inside your code and/or via settings in Akka's configuration file.
+  * Three steps quick start.
 
 
 ## What Socko is NOT
@@ -51,7 +63,48 @@ We hope you find it as useful as we do.
 
 ## Quick Start
 
-To Do
+### Step 1 - Define actors and start Akka.
+```scala
+    class HelloProcessor extends Actor {
+      def receive = {
+        case request: HttpRequestProcessingContext =>
+          request.writeResponse("Hello from Socko (" + new Date().toString + ")")
+          context.stop(self)
+      }
+    }
+    
+    object HelloApp extends Logger {
+      val actorSystem = ActorSystem("HelloExampleActorSystem")
+    }
+```
+    
+### Step 2 - Define routes.
+```scala
+    object HelloApp extends Logger {
+      ...
+      val routes = Routes({
+        case ctx @ GET(_) => {
+          actorSystem.actorOf(Props[HelloProcessor]) ! ctx
+        }
+      })
+    }
+```
+
+### Step 3 - Start and Shutdown.
+```scala
+    object HelloApp extends Logger {
+      ...
+      def main(args: Array[String]) {
+        val webServer = new WebServer(WebServerConfig(), routes)
+        webServer.start()
+    
+        Runtime.getRuntime.addShutdownHook(new Thread {
+          override def run { webServer.stop() }
+        })
+    
+        System.out.println("Open your browser and navigate to http://localhost:8888"); 
+      }
+```
 
 
 ## Developer Information
