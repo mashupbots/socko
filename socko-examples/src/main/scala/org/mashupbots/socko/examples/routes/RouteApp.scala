@@ -36,7 +36,7 @@ import akka.actor.Props
  *    
  * Refer to our unit test cases for more examples of routes and different route extractors.
  */
-object QuickStartApp extends Logger {
+object RouteApp extends Logger {
   //
   // STEP #1 - Define actors and start AKKA
   // See `TimeProcessor`
