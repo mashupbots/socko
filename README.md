@@ -48,7 +48,7 @@ Socko is:
 * Trying to be as Simple and as Easy as possible
   * Routing DSL like [Unfilted HTTP ToolKit](http://unfiltered.databinder.net/Unfiltered.html) and 
     [Play Mini](https://github.com/typesafehub/play2-mini). Route by HTTP method, host, path and querystring.
-    See [exmaple](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/routes/RouteApp.scala).
+    See [example](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/routes/RouteApp.scala).
   * Configurable from inside your code and/or via settings in Akka's configuration file.
   * Plenty of [examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
 
