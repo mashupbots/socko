@@ -42,7 +42,7 @@ Socko is:
 * Supportive of HTTP Standards
   * HTTP/S and WebSockets
   * HTTP compression
-  * Http headers
+  * HTTP headers
   * Decoding HTTP POST, file uploads and query strings
 
 * Trying to be as Simple and as Easy as possible
