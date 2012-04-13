@@ -35,7 +35,7 @@ class SslManager(server: WebServer) {
   /**
    * Create context for SSLEngine
    */
-  lazy val context: SSLContext = {
+  val context: SSLContext = {
     var sslConfig = server.config.sslConfig.get
 
     // Set up key manager factory to use our key store (server certificates)
@@ -70,17 +70,13 @@ class SslManager(server: WebServer) {
   }
 
   /**
-   * SSL engine encoding/decoding SSL traffic
+   * Creates an SSL engine for encoding/decoding SSL traffic
    */
-  def engine: Option[SSLEngine] = {
-    if (server.config.sslConfig.isDefined) {
-      val ret = context.createSSLEngine()
-      ret.setNeedClientAuth(server.config.sslConfig.get.trustStoreFile != null)
-      ret.setUseClientMode(false)
-      Some(ret)
-    } else {
-      None
-    }
+  def createSSLEngine(): SSLEngine = {
+      val engine = context.createSSLEngine()
+      engine.setNeedClientAuth(server.config.sslConfig.get.trustStoreFile.isDefined)
+      engine.setUseClientMode(false)
+      engine
   }
 
 }

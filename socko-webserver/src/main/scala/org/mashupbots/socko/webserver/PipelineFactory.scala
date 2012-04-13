@@ -37,8 +37,9 @@ class PipelineFactory(server: WebServer) extends ChannelPipelineFactory {
   def getPipeline: ChannelPipeline = {
     val newPipeline = Channels.pipeline()
 
-    if (server.sslEngine.isDefined) {
-      newPipeline.addLast("ssl", new SslHandler(server.sslEngine.get))
+    if (server.sslManager.isDefined) {
+      val sslEngine = server.sslManager.get.createSSLEngine()
+      newPipeline.addLast("ssl", new SslHandler(sslEngine))
     }
 
     newPipeline.addLast("decoder", new HttpRequestDecoder(4096, 8192, 8192))
