@@ -26,7 +26,7 @@ import org.jboss.netty.handler.stream.ChunkedWriteHandler
 
 /**
  * Creates a new channel pipeline for each Netty channel (network connection)
- * 
+ *
  * @param server The web server instancing the pipeline
  */
 class PipelineFactory(server: WebServer) extends ChannelPipelineFactory {
@@ -42,11 +42,13 @@ class PipelineFactory(server: WebServer) extends ChannelPipelineFactory {
       newPipeline.addLast("ssl", new SslHandler(sslEngine))
     }
 
-    newPipeline.addLast("decoder", new HttpRequestDecoder(4096, 8192, 8192))
+    newPipeline.addLast("decoder", new HttpRequestDecoder(
+      server.config.httpConfig.maxInitialLineLength,
+      server.config.httpConfig.maxHeaderSizeInBytes,
+      server.config.httpConfig.maxChunkSizeInBytes))
 
-    if (server.config.processingConfig.aggreateChunks) {
-      newPipeline.addLast("chunkAggregator",
-        new HttpChunkAggregator(server.config.processingConfig.maxLengthInMB * 1024 * 1024))
+    if (server.config.httpConfig.aggreateChunks) {
+      newPipeline.addLast("chunkAggregator", new HttpChunkAggregator(server.config.httpConfig.maxLengthInBytes))
     }
 
     newPipeline.addLast("encoder", new HttpResponseEncoder())

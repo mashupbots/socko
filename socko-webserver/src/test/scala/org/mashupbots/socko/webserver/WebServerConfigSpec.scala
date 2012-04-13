@@ -55,17 +55,17 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     }
 
     "validate with no SSL configuration" in {
-      WebServerConfig("test", "0.0.0.0", 80, None, ProcessingConfig()).validate()
+      WebServerConfig("test", "0.0.0.0", 80, None, HttpConfig()).validate()
     }
 
     "validate with server side (keystore) SSL configuration" in {
       WebServerConfig(
-        "test", "0.0.0.0", 80, Some(SslConfig(aFile, "test", None, None)), ProcessingConfig()).validate()
+        "test", "0.0.0.0", 80, Some(SslConfig(aFile, "test", None, None)), HttpConfig()).validate()
     }
 
     "validate with client (truststore) and server side (keystore) SSL configuration" in {
       WebServerConfig(
-        "test", "0.0.0.0", 80, Some(SslConfig(aFile, "test", Some(aFile), Some("test"))), ProcessingConfig()).validate()
+        "test", "0.0.0.0", 80, Some(SslConfig(aFile, "test", Some(aFile), Some("test"))), HttpConfig()).validate()
     }
 
     "throw Exception when server name is not supplied" in {
@@ -132,14 +132,23 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
         WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFile), Some("")))), "trust store password")
     }
 
-    "throw Exception if ProcessingConfig is not supplied" in {
+    "throw Exception if HttpConfig is not supplied" in {
       checkForIllegalArgumentException(
-        WebServerConfig(processingConfig = null), "processing config")
+        WebServerConfig(httpConfig = null), "HTTP configuration")
     }
 
-    "throw Exception if ProcessingConfig.maxLengthInMB is invalid" in {
+    "throw Exception if HttpConfig settings are invalid" in {
       checkForIllegalArgumentException(
-        WebServerConfig(processingConfig = ProcessingConfig(0, false)), "processing config")
+        WebServerConfig(httpConfig = HttpConfig(0, 0, 0, 0, false)), "HTTP configuration, maximum length in MB")
+
+      checkForIllegalArgumentException(
+        WebServerConfig(httpConfig = HttpConfig(1, -1, 0, 0, false)), "HTTP configuration, maximum initial line length")
+
+      checkForIllegalArgumentException(
+        WebServerConfig(httpConfig = HttpConfig(1, 1, -1, 0, false)), "HTTP configuration, maximum header size")
+
+      checkForIllegalArgumentException(
+        WebServerConfig(httpConfig = HttpConfig(1, 1, 0, -1, false)), "HTTP configuration, maximum chunk size")
     }
 
     "load from Akka Config" in {
@@ -158,22 +167,25 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
         "    trust-store-file=/tmp/ts.dat\n" +
         "    trust-store-password=tspwd\n" +
         "  }\n" +
-        "  processing-config {\n" +
+        "  http-config {\n" +
         "    max-length-in-mb=10\n" +
+        "    max-intial-line-length=20\n" +
+        "    max-header-size-in-bytes=30\n" +
+        "    max-chunk-size-in-bytes=40\n" +
         "    aggreate-chunks=false\n" +
         "  }\n" +
         "}"
 
       val actorSystem = ActorSystem("WebServerConfigSpec", ConfigFactory.parseString(actorConfig))
-      
+
       val barebones = BareBonesWebServerConfig(actorSystem)
       barebones.serverName should equal("BareBonesTest")
       barebones.hostname should equal("192.168.0.1")
       barebones.port should equal(9999)
       barebones.sslConfig should equal(None)
-      barebones.processingConfig.maxLengthInMB should be(4)
-      barebones.processingConfig.aggreateChunks should be(true)
-      
+      barebones.httpConfig.maxLengthInMB should be(4)
+      barebones.httpConfig.aggreateChunks should be(true)
+
       val all = AllWebServerConfig(actorSystem)
       all.serverName should equal("allTest")
       all.hostname should equal("localhost")
@@ -182,9 +194,13 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       all.sslConfig.get.keyStorePassword should equal("kspwd")
       all.sslConfig.get.trustStoreFile.get.getCanonicalPath should equal("/tmp/ts.dat")
       all.sslConfig.get.trustStorePassword.get should equal("tspwd")
-      all.processingConfig.maxLengthInMB should be(10)
-      all.processingConfig.aggreateChunks should be(false)
-      
+      all.httpConfig.maxLengthInMB should be(10)
+      all.httpConfig.maxLengthInBytes should be(10 * 1024 * 1024)
+      all.httpConfig.maxInitialLineLength should be(20)
+      all.httpConfig.maxHeaderSizeInBytes should be(30)
+      all.httpConfig.maxChunkSizeInBytes should be(40)
+      all.httpConfig.aggreateChunks should be(false)
+
       actorSystem.shutdown()
     }
   }

@@ -31,15 +31,15 @@ import com.typesafe.config.ConfigException
  * @param hostname Hostname or IP address to bind. `0.0.0.0` will bind to all addresses.
  * 	You can also specify comma separated hostnames/ip address. E.g. `localhost,192.168.1.1`
  * @param port Port to bind to. Defaults to `8888`.
- * @param sslConfig SSL configuration. If None, then SSL will not be turned on.
- * @param processingConfig HTTP request processing configuration
+ * @param sslConfig SSL protocl configuration. If None, then SSL will not be turned on.
+ * @param httpConfig HTTP protocol configuration.
  */
 case class WebServerConfig(
   serverName: String = "WebServer",
   hostname: String = "localhost",
   port: Int = 8888,
   sslConfig: Option[SslConfig] = None,
-  processingConfig: ProcessingConfig = new ProcessingConfig()) extends Extension {
+  httpConfig: HttpConfig = HttpConfig()) extends Extension {
 
   /**
    * Read configuration from AKKA's `application.conf`
@@ -49,7 +49,7 @@ case class WebServerConfig(
     config.getString(prefix + ".hostname"),
     config.getInt(prefix + ".port"),
     WebServerConfig.getOptionalSslConfig(config, prefix + ".ssl-config"),
-    WebServerConfig.getProcessingConfig(config, prefix + ".processing-config"))
+    WebServerConfig.getProcessingConfig(config, prefix + ".http-config"))
 
   /**
    * Validate current configuration settings
@@ -99,11 +99,20 @@ case class WebServerConfig(
       }
     }
 
-    if (processingConfig == null) {
-      throw new IllegalArgumentException("processing config must be specified")
+    if (httpConfig == null) {
+      throw new IllegalArgumentException("HTTP configuration must be specified")
     }
-    if (processingConfig.maxLengthInMB <= 0) {
-      throw new IllegalArgumentException("processing config maximum length in MB must be specified and > 0")
+    if (httpConfig.maxLengthInMB <= 0) {
+      throw new IllegalArgumentException("HTTP configuration, maximum length in MB, must be specified and > 0")
+    }
+    if (httpConfig.maxInitialLineLength <= 0) {
+      throw new IllegalArgumentException("HTTP configuration, maximum initial line length, must be > 0")
+    }
+    if (httpConfig.maxHeaderSizeInBytes < 0) {
+      throw new IllegalArgumentException("HTTP configuration, maximum header size, must be > 0")
+    }
+    if (httpConfig.maxChunkSizeInBytes < 0) {
+      throw new IllegalArgumentException("HTTP configuration, maximum chunk size, must be > 0")
     }
 
   }
@@ -137,25 +146,33 @@ case class SslConfig(
 }
 
 /**
- * HTTP Request configuration
+ * HTTP protocol handling configuration
  *
  * @param maxLengthInMB Maximum size of HTTP request in megabytes. Defaults to 4MB.
+ * @param maxInitialLineLength Maximum size the initial line. Defaults to 4096 characters.
+ * @param maxHeaderSizeInBytes Maximum size of HTTP headers. Defaults to 8192 bytes.
+ * @param maxChunkSizeInBytes Maximum size of HTTP chunks. Defaults to 8192 bytes.
  * @param aggreateChunks Flag to indicate if we want to aggregate chunks. If `false`, your processor actors must be
  *  able to handle `HttpChunkProcessingContext`
  */
-case class ProcessingConfig(
+case class HttpConfig(
   maxLengthInMB: Int = 4,
+  maxInitialLineLength: Int = 4096, 
+  maxHeaderSizeInBytes: Int = 8192, 
+  maxChunkSizeInBytes: Int = 8192,
   aggreateChunks: Boolean = true) {
 
+  val maxLengthInBytes = maxLengthInMB * 1024 * 1024
+  
   /**
    * Read configuration from AKKA's `application.conf`
    */
   def this(config: Config, prefix: String) = this(
     config.getInt(prefix + ".max-length-in-mb"),
+    config.getInt(prefix + ".max-intial-line-length"),
+    config.getInt(prefix + ".max-header-size-in-bytes"),
+    config.getInt(prefix + ".max-chunk-size-in-bytes"),
     config.getBoolean(prefix + ".aggreate-chunks"))
-
-  def this() = this(4, true)
-
 }
 
 /**
@@ -199,21 +216,21 @@ object WebServerConfig extends Logger {
   /**
    * Returns the defined `ProcessingConfig`. If not defined, then the default `ProcessingConfig` is returned.
    */
-  def getProcessingConfig(config: Config, name: String): ProcessingConfig = {
+  def getProcessingConfig(config: Config, name: String): HttpConfig = {
     try {
       val v = config.getConfig(name)
       if (v == null) {
-        new ProcessingConfig()
+        new HttpConfig()
       } else {
-        new ProcessingConfig(config, name)
+        new HttpConfig(config, name)
       }
     } catch {
       case ex: ConfigException.Missing => {
-        new ProcessingConfig()
+        new HttpConfig()
       }
       case ex => {
         log.error("Error parsing processing config. Defaults will be used.", ex)
-        new ProcessingConfig()
+        new HttpConfig()
       }
     }
   }
