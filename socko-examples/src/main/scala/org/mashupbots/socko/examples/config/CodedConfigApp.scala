@@ -16,30 +16,28 @@
 package org.mashupbots.socko.examples.config
 
 import org.mashupbots.socko.examples.quickstart.HelloProcessor
-import org.mashupbots.socko.routes._
+import org.mashupbots.socko.routes.GET
+import org.mashupbots.socko.routes.Routes
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
 import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
-import akka.actor.ExtendedActorSystem
-import akka.actor.ExtensionId
-import akka.actor.ExtensionIdProvider
 import akka.actor.Props
 
 /**
- * This example shows how load your web server configuration from AKKA's `application.conf`. 
- * It is found in the root class path.  The source file is found in `src/main/resources`.
+ * This example shows how load your web server configuration from code when instancing 
+ * [[org.mashupbots.socko.webserver.WebServerConfig]].
  *  - Run this class as a Scala Application
- *  - Open your browser and navigate to `http://localhost:9000/`
+ *  - Open your browser and navigate to `http://localhost:9001/`
  */
-object AkkaConfigApp extends Logger {
+object CodedConfigApp extends Logger {
   //
   // STEP #1 - Define Actors and Start Akka
   // See `HelloProcessor`
   //
-  val actorSystem = ActorSystem("AkkaConfigActorSystem")
+  val actorSystem = ActorSystem("CodeConfigActorSystem")
 
   //
   // STEP #2 - Define Routes
@@ -55,8 +53,10 @@ object AkkaConfigApp extends Logger {
   //
   def main(args: Array[String]) {
 
-    log.info("Loading configuration from application.conf")
-    val myWebServerConfig = MyWebServerConfig(actorSystem)
+    val myWebServerConfig = WebServerConfig(
+        serverName = "CodedConfigApp",
+        hostname = "localhost",
+        port = 9001)
     log.info("Config is: " + myWebServerConfig.toString)
 
     val webServer = new WebServer(myWebServerConfig, routes)
@@ -66,27 +66,6 @@ object AkkaConfigApp extends Logger {
       override def run { webServer.stop() }
     })
 
-    System.out.println("Open your browser and navigate to http://localhost:9000")
+    System.out.println("Open your browser and navigate to http://localhost:9001")
   }
-}
-
-/**
- * Store of our web server configuration.
- *
- * Note that `WebServerConfig` is instanced with the setting named `akka-config-example`. This name must correspond
- * with `application.conf`.  
- * 
- * For example:
- * {{{
- * akka-config-example {
- *   server-name=AkkaConfigExample
- *   hostname=localhost
- *   port=9000
- * }
- * }}} 
- */
-object MyWebServerConfig extends ExtensionId[WebServerConfig] with ExtensionIdProvider {
-  override def lookup = MyWebServerConfig
-  override def createExtension(system: ExtendedActorSystem) =
-    new WebServerConfig(system.settings.config, "akka-config-example")
 }

@@ -27,17 +27,37 @@ import com.typesafe.config.ConfigException
 /**
  * Web server configuration
  *
- * The configuration can be loaded from Akka's configuration file as follows:
+ * The configuration can be optionally loaded from Akka's application.conf` file.
+ *
+ * The following configuration file:
  * {{{
- * 
+ * akka-config-example {
+ *   server-name=AkkaConfigExample
+ *   hostname=localhost
+ *   port=9000
+ * }
  * }}}
  *
- * @param serverName Human friendly name of this server. Helpful in error messages
+ * can be loaded as follows:
+ * {{{
+ * object MyWebServerConfig extends ExtensionId[WebServerConfig] with ExtensionIdProvider {
+ *  override def lookup = MyWebServerConfig
+ *  override def createExtension(system: ExtendedActorSystem) =
+ *    new WebServerConfig(system.settings.config, "akka-config-example")
+ * }
+ *
+ * val myWebServerConfig = MyWebServerConfig(actorSystem)
+ * }}}
+ *
+ * @param serverName Human friendly name of this server. Defaults to `WebServer`.
  * @param hostname Hostname or IP address to bind. `0.0.0.0` will bind to all addresses.
- * 	You can also specify comma separated hostnames/ip address. E.g. `localhost,192.168.1.1`
+ * 	You can also specify comma separated hostnames/ip address like `localhost,192.168.1.1`.
+ *  Defaults to `localhost`.
  * @param port Port to bind to. Defaults to `8888`.
- * @param sslConfig SSL protocl configuration. If None, then SSL will not be turned on.
- * @param httpConfig HTTP protocol configuration.
+ * @param sslConfig SSL protocl configuration. If `None`, then SSL will not be turned on.
+ *  Defaults to `None`.
+ * @param httpConfig HTTP protocol configuration. Default to a and instance of 
+ *  [[org.mashupbots.socko.webserver.HttpConfig]] with default settings.
  */
 case class WebServerConfig(
   serverName: String = "WebServer",
@@ -57,7 +77,7 @@ case class WebServerConfig(
     WebServerConfig.getHttpConfig(config, prefix + ".http-config"))
 
   /**
-   * Validate current configuration settings
+   * Validate current configuration settings. Throws an exception if configuration has errors.
    */
   def validate() = {
     if (serverName == null || serverName.isEmpty) {
@@ -181,7 +201,7 @@ case class HttpConfig(
 }
 
 /**
- * Methods for reading configuration
+ * Methods for reading configuration from Akka.
  */
 object WebServerConfig extends Logger {
 
@@ -249,7 +269,7 @@ object WebServerConfig extends Logger {
       case _ => defaultValue
     }
   }
-  
+
   /**
    * Returns the defined `ProcessingConfig`. If not defined, then the default `ProcessingConfig` is returned.
    */
@@ -278,7 +298,8 @@ object WebServerConfig extends Logger {
   def getOptionalSslConfig(config: Config, name: String): Option[SslConfig] = {
     try {
       val v = config.getConfig(name)
-      if (v == null) {        None
+      if (v == null) {
+        None
       } else {
         Some(new SslConfig(config, name))
       }
