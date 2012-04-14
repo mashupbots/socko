@@ -33,7 +33,7 @@ import akka.actor.Props
  *  - You can also get a specific timezone by specifying a city name
  *    - `http://localhost:8888/time/sydney`, or
  *    - `http://localhost:8888/time?tz=london`
- *    
+ *
  * Refer to our unit test cases for more examples of routes and different route extractors.
  */
 object RouteApp extends Logger {
@@ -92,10 +92,10 @@ object RouteApp extends Logger {
     })
     webServer.start()
 
-    System.out.println("Open your browser and navigate to: ");    
-    System.out.println("  http://localhost:8888/time");    
-    System.out.println("  http://localhost:8888/time/sydney");    
-    System.out.println("  http://localhost:8888/time?tz=london");    
+    System.out.println("Open your browser and navigate to: ")
+    System.out.println("  http://localhost:8888/time")
+    System.out.println("  http://localhost:8888/time/sydney")
+    System.out.println("  http://localhost:8888/time?tz=london")
   }
 
 }

@@ -27,6 +27,11 @@ import com.typesafe.config.ConfigException
 /**
  * Web server configuration
  *
+ * The configuration can be loaded from Akka's configuration file as follows:
+ * {{{
+ * 
+ * }}}
+ *
  * @param serverName Human friendly name of this server. Helpful in error messages
  * @param hostname Hostname or IP address to bind. `0.0.0.0` will bind to all addresses.
  * 	You can also specify comma separated hostnames/ip address. E.g. `localhost,192.168.1.1`
@@ -49,7 +54,7 @@ case class WebServerConfig(
     config.getString(prefix + ".hostname"),
     config.getInt(prefix + ".port"),
     WebServerConfig.getOptionalSslConfig(config, prefix + ".ssl-config"),
-    WebServerConfig.getProcessingConfig(config, prefix + ".http-config"))
+    WebServerConfig.getHttpConfig(config, prefix + ".http-config"))
 
   /**
    * Validate current configuration settings
@@ -157,22 +162,22 @@ case class SslConfig(
  */
 case class HttpConfig(
   maxLengthInMB: Int = 4,
-  maxInitialLineLength: Int = 4096, 
-  maxHeaderSizeInBytes: Int = 8192, 
+  maxInitialLineLength: Int = 4096,
+  maxHeaderSizeInBytes: Int = 8192,
   maxChunkSizeInBytes: Int = 8192,
   aggreateChunks: Boolean = true) {
 
   val maxLengthInBytes = maxLengthInMB * 1024 * 1024
-  
+
   /**
-   * Read configuration from AKKA's `application.conf`
+   * Read configuration from AKKA's `application.conf`. Supply default values to use if setting not present
    */
   def this(config: Config, prefix: String) = this(
-    config.getInt(prefix + ".max-length-in-mb"),
-    config.getInt(prefix + ".max-intial-line-length"),
-    config.getInt(prefix + ".max-header-size-in-bytes"),
-    config.getInt(prefix + ".max-chunk-size-in-bytes"),
-    config.getBoolean(prefix + ".aggreate-chunks"))
+    WebServerConfig.getInt(config, prefix + ".max-length-in-mb", 4),
+    WebServerConfig.getInt(config, prefix + ".max-initial-line-length", 4096),
+    WebServerConfig.getInt(config, prefix + ".max-header-size-in-bytes", 8192),
+    WebServerConfig.getInt(config, prefix + ".max-chunk-size-in-bytes", 8192),
+    WebServerConfig.getBoolean(config, prefix + ".aggregate-chunks", true))
 }
 
 /**
@@ -214,9 +219,41 @@ object WebServerConfig extends Logger {
   }
 
   /**
+   * Returns the specified setting as an integer. If setting not specified, then the default is returned.
+   */
+  def getInt(config: Config, name: String, defaultValue: Int): Int = {
+    try {
+      val v = config.getString(name)
+      if (v == null || v == "") {
+        defaultValue
+      } else {
+        config.getInt(name)
+      }
+    } catch {
+      case _ => defaultValue
+    }
+  }
+
+  /**
+   * Returns the specified setting as a boolean. If setting not specified, then the default is returned.
+   */
+  def getBoolean(config: Config, name: String, defaultValue: Boolean): Boolean = {
+    try {
+      val v = config.getString(name)
+      if (v == null || v == "") {
+        defaultValue
+      } else {
+        config.getBoolean(name)
+      }
+    } catch {
+      case _ => defaultValue
+    }
+  }
+  
+  /**
    * Returns the defined `ProcessingConfig`. If not defined, then the default `ProcessingConfig` is returned.
    */
-  def getProcessingConfig(config: Config, name: String): HttpConfig = {
+  def getHttpConfig(config: Config, name: String): HttpConfig = {
     try {
       val v = config.getConfig(name)
       if (v == null) {
@@ -241,13 +278,12 @@ object WebServerConfig extends Logger {
   def getOptionalSslConfig(config: Config, name: String): Option[SslConfig] = {
     try {
       val v = config.getConfig(name)
-      if (v == null) {
-        None
+      if (v == null) {        None
       } else {
         Some(new SslConfig(config, name))
       }
     } catch {
-      case ex: ConfigException.Missing =>  {
+      case ex: ConfigException.Missing => {
         None
       }
       case ex => {

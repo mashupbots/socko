@@ -15,15 +15,17 @@
 //
 package org.mashupbots.socko.examples.secure
 
+import java.io.File
+
 import org.mashupbots.socko.routes._
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.SslConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
+
 import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
-import java.io.File
 
 /**
  * This is a clone of the quick start `HelloApp` ... but using HTTPS.

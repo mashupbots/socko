@@ -62,7 +62,7 @@ object HelloApp extends Logger {
       override def run { webServer.stop() }
     })
 
-    System.out.println("Open your browser and navigate to http://localhost:8888");
+    System.out.println("Open your browser and navigate to http://localhost:8888")
   }
 
 }

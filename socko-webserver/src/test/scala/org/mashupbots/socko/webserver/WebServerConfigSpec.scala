@@ -169,10 +169,10 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
         "  }\n" +
         "  http-config {\n" +
         "    max-length-in-mb=10\n" +
-        "    max-intial-line-length=20\n" +
+        "    max-initial-line-length=20\n" +
         "    max-header-size-in-bytes=30\n" +
         "    max-chunk-size-in-bytes=40\n" +
-        "    aggreate-chunks=false\n" +
+        "    aggregate-chunks=false\n" +
         "  }\n" +
         "}"
 

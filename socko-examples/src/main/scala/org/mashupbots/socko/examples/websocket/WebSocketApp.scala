@@ -84,7 +84,7 @@ object WebSocketApp extends Logger {
       override def run { webServer.stop() }
     })
     webServer.start()
-        
-    System.out.println("Open your browser and navigate to http://localhost:8888/html");
+
+    System.out.println("Open your browser and navigate to http://localhost:8888/html")
   }
 }
