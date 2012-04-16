@@ -13,19 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.context
+package org.mashupbots.socko
 
 /**
- * Details of the original HTTP request that kicked off HTTP chunk and WebSocket processing
+ * Processors are Akka actors that receives and processes [[org.mashupbots.socko.context.ProcessingContext]] messages.
+ * 
+ * This package contains our "pre-fabricated" processors.
  */
-case class OriginalHttpRequest(
-  endPoint: EndPoint,
-  isKeepAlive: Boolean,
-  acceptedEncodings: Array[String]) {
-
-  def this(request: HttpRequestProcessingContext) = this(
-    request.endPoint,
-    request.isKeepAlive,
-    request.acceptedEncodings)
-
+package object processors {
 }

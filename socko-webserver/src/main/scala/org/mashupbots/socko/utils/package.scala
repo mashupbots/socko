@@ -16,7 +16,7 @@
 package org.mashupbots.socko
 
 /**
- * Socko example applications.
+ * Utility classes and objects
  */
-package object examples {
+package object utils {
 }

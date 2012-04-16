@@ -64,5 +64,4 @@ object HelloApp extends Logger {
 
     System.out.println("Open your browser and navigate to http://localhost:8888")
   }
-
 }

@@ -13,10 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko
+package org.mashupbots
 
 /**
- * Socko example applications.
+ * Socko is a Scala web server powered by Netty networking and Akka processing.
  */
-package object examples {
+package object socko {
 }

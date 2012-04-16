@@ -17,6 +17,7 @@ package org.mashupbots.socko.webserver
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
+
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.group.ChannelGroup
 import org.jboss.netty.channel.Channel
@@ -44,7 +45,7 @@ import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.util.CharsetUtil
 import org.mashupbots.socko.context.HttpChunkProcessingContext
 import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.mashupbots.socko.context.OriginalHttpRequest
+import org.mashupbots.socko.context.InitialHttpRequest
 import org.mashupbots.socko.context.ProcessingContext
 import org.mashupbots.socko.context.WsHandshakeProcessingContext
 import org.mashupbots.socko.context.WsProcessingContext
@@ -53,7 +54,8 @@ import org.mashupbots.socko.utils.Logger
 /**
  * Handles incoming HTTP messages from Netty
  *
- * @param routes PartialFunction used for routing incoming HTTP messages to actors for processing
+ * @param routes PartialFunction used for routing incoming HTTP messages to actors for processing. See
+ *   [[org.mashupbots.socko.riytes.Routes]]
  * @param allChannels Channel group used for storing all open channels
  */
 class RequestHandler(
@@ -68,7 +70,7 @@ class RequestHandler(
   /**
    * Details of the original HTTP that kicked off HTTP Chunk or WebSocket processing
    */
-  private var originalHttpRequest: Option[OriginalHttpRequest] = None
+  private var originalHttpRequest: Option[InitialHttpRequest] = None
 
   /**
    * Dispatch message to actor system for processing
@@ -86,12 +88,12 @@ class RequestHandler(
         if (ctx.isChunked) {
           validateFirstChunk(ctx)
           routes(ctx)
-          originalHttpRequest = Some(new OriginalHttpRequest(ctx))
+          originalHttpRequest = Some(new InitialHttpRequest(ctx))
         } else if (ctx.isWebSocketUpgrade) {
           var wsctx = WsHandshakeProcessingContext(e.getChannel, httpRequest)
           routes(wsctx)
           doWebSocketHandshake(wsctx)
-          originalHttpRequest = Some(new OriginalHttpRequest(ctx))
+          originalHttpRequest = Some(new InitialHttpRequest(ctx))
         } else {
           routes(ctx)
         }

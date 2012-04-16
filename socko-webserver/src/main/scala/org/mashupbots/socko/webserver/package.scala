@@ -16,7 +16,7 @@
 package org.mashupbots.socko
 
 /**
- * Socko example applications.
+ * Web server built on top of Netty.
  */
-package object examples {
+package object webserver {
 }

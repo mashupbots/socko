@@ -31,22 +31,24 @@ import com.typesafe.config.ConfigException
  *
  * The following configuration file:
  * {{{
- * akka-config-example {
- *   server-name=AkkaConfigExample
- *   hostname=localhost
- *   port=9000
- * }
+ *   akka-config-example {
+ *     server-name=AkkaConfigExample
+ *     hostname=localhost
+ *     port=9000
+ *   }
  * }}}
  *
  * can be loaded as follows:
  * {{{
- * object MyWebServerConfig extends ExtensionId[WebServerConfig] with ExtensionIdProvider {
- *  override def lookup = MyWebServerConfig
- *  override def createExtension(system: ExtendedActorSystem) =
- *    new WebServerConfig(system.settings.config, "akka-config-example")
- * }
+ *   object MyWebServerConfig extends ExtensionId[WebServerConfig] with ExtensionIdProvider {
+ *     override def lookup = MyWebServerConfig
+ *     override def createExtension(system: ExtendedActorSystem) =
+ *       new WebServerConfig(system.settings.config, "akka-config-example")
+ *   }
  *
- * val myWebServerConfig = MyWebServerConfig(actorSystem)
+ *   val myWebServerConfig = MyWebServerConfig(actorSystem)
+ *   val webServer = new WebServer(myWebServerConfig, routes)
+ *   webServer.start()
  * }}}
  *
  * @param serverName Human friendly name of this server. Defaults to `WebServer`.
@@ -54,7 +56,7 @@ import com.typesafe.config.ConfigException
  * 	You can also specify comma separated hostnames/ip address like `localhost,192.168.1.1`.
  *  Defaults to `localhost`.
  * @param port Port to bind to. Defaults to `8888`.
- * @param sslConfig SSL protocl configuration. If `None`, then SSL will not be turned on.
+ * @param sslConfig SSL protocol configuration. If `None`, then SSL will not be turned on.
  *  Defaults to `None`.
  * @param httpConfig HTTP protocol configuration. Default to a and instance of 
  *  [[org.mashupbots.socko.webserver.HttpConfig]] with default settings.

@@ -51,10 +51,12 @@ import akka.event.Logging
 /**
  * A processor that handles downloading of static files.
  *
+ * It receives [[org.mashupbots.socko.processors.StaticFileRequest]] messages. 
+ *
  * It performs HTTP compression and also uses If-Modified-Since header for caching.
  *
  * This processor contains lots of disk IO (blocking code). Please run it with a router and
- * in its own `PinnedDispatcher` (a thread per actor) or `BalancingDispatcher`.
+ * in its own Akka `PinnedDispatcher` (a thread per actor) or `BalancingDispatcher`.
  *
  * For example:
  * {{{
@@ -87,7 +89,7 @@ class StaticFileProcessor extends Actor {
   val log = Logging(context.system, this)
 
   /**
-   * Process incoming messages
+   * Only takes [[org.mashupbots.socko.processors.StaticFileRequest]] messages. 
    */
   def receive = {
     case request: StaticFileRequest => {
@@ -145,7 +147,7 @@ class StaticFileProcessor extends Actor {
    * Content-Encoding: gzip
    * }}}
    */
-  def getFile(request: StaticFileRequest): Unit = {
+  private def getFile(request: StaticFileRequest): Unit = {
     val file = request.file
 
     // Checks
@@ -365,14 +367,16 @@ class StaticFileProcessor extends Actor {
 }
 
 /**
- * Request to download a file
+ * Message to be sent to [[org.mashupbots.socko.processors.StaticFileProcessor]] for it to download the specified file
  *
  * @param context HTTP Request context
- * @param rootFileDir Root directory from which files will be served. Used to check validity of `filePath`
- * @param file file to download
- * @param tempDir temporary directory where compressed version of files can be stored
+ * @param rootFileDir Root directory from which files will be served. `file` must be present under this directory; if
+ *  not a 404 Not Found is returned. This is used to enforce security to make sure that only intended files can be 
+ *  downloaded.
+ * @param file File to download
+ * @param tempDir Temporary directory where compressed version of files can be stored
  * @param browserCacheTimeoutSeconds Number of seconds to cache the file in the browser. Defaults to 1 hour.
- * @param fileLastModifiedCacheTimeoutSeconds Number of seconds to cache file last modified timestamp.
+ * @param fileLastModifiedCacheTimeoutSeconds Number of seconds to cache a file's last modified timestamp.
  *  Defaults to 5 minutes.
  */
 case class StaticFileRequest(
@@ -384,8 +388,8 @@ case class StaticFileRequest(
   fileLastModifiedCacheTimeoutSeconds: Int = 300)
 
 /**
- * Cache for a file's last modified date. Caching this value means that we wont have to keep reading the file and
- * hence we reduce a blocking IO.
+ * Cache for the last modified date of files. Caching this value means that we wont have to keep reading the file and
+ * hence we reduce blocking IO.
  */
 object StaticFileLastModifiedCache extends Logger {
   private val cache: ConcurrentMap[String, FileLastModified] = new ConcurrentHashMap[String, FileLastModified]

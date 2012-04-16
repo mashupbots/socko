@@ -22,8 +22,6 @@ import org.jboss.netty.channel.Channel
 /**
  * When processing a web request, the context provides a uniform way to read request data
  * and write response data.
- * 
- * ProcessingContext are created by Socko handlers and passed to Socko processors via routes.
  */
 abstract class ProcessingContext() {
 

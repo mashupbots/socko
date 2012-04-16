@@ -28,7 +28,15 @@ import javax.net.ssl.SSLEngine
 /**
  * Socko Web Server
  *
- * @param config Server configuration
+ * {{{
+ *   val webServer = new WebServer(myWebServerConfig, routes)
+ *   webServer.start()
+ *   ...
+ *   
+ *   webServer.stop()
+ * }}}
+ * 
+ * @param config Web server configuration
  * @param routes Routes for processing requests
  */
 class WebServer(
@@ -54,7 +62,7 @@ class WebServer(
   val sslManager: Option[SslManager] = if (config.sslConfig.isDefined) Some(new SslManager(this)) else None
 
   /**
-   * Starts server
+   * Starts the server
    */
   def start(): Unit = {
     if (channelFactory != null) {
@@ -85,7 +93,7 @@ class WebServer(
   }
 
   /**
-   * Stop server
+   * Stops the server
    */
   def stop(): Unit = {
     val future = allChannels.close()

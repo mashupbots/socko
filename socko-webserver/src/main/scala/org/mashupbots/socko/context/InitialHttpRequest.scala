@@ -13,10 +13,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko
+package org.mashupbots.socko.context
 
 /**
- * Socko example applications.
+ * Details of the initial HTTP request that triggered HTTP chunk or WebSocket processing
+ * 
+ * @param endPoint HTTP end point used by the request
+ * @param isKeepAlive `True` if and only if this connection is to be kept alive
+ * @param acceptedEncodings Array of accepted encoding for content compression from the HTTP header
  */
-package object examples {
+case class InitialHttpRequest(
+  endPoint: EndPoint,
+  isKeepAlive: Boolean,
+  acceptedEncodings: Array[String]) {
+
+  def this(request: HttpRequestProcessingContext) = this(
+    request.endPoint,
+    request.isKeepAlive,
+    request.acceptedEncodings)
+
 }

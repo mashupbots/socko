@@ -29,7 +29,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.util.CharsetUtil
 
 /**
- * Context established for processing HTTP requests.
+ * Context for processing HTTP requests.
  *
  * @param channel Channel by which the request entered and response will be written
  * @param httpRequest Incoming request for processing
@@ -39,7 +39,7 @@ case class HttpRequestProcessingContext(
   httpRequest: HttpRequest) extends HttpProcessingContext {
 
   /**
-   * HTTP End point
+   * HTTP End point for this request
    */
   val endPoint = EndPoint(httpRequest.getMethod.toString, HttpHeaders.getHost(httpRequest), httpRequest.getUri)
 

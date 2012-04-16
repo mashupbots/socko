@@ -33,7 +33,8 @@ import akka.actor.Actor
 import akka.event.Logging
 
 /**
- * A processor that send a response containing all the info about the request.
+ * A processor that send a response containing information about the request.
+ * 
  * We use this for our testing.
  */
 class SnoopProcessor extends Actor {

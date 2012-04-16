@@ -27,27 +27,27 @@ import org.jboss.netty.util.CharsetUtil
 /**
  * Context for processing HTTP chunks.
  *
- * The `HttpChunkProcessingContext` will only sent to processors:
+ * The [[org.mashupbots.socko.context.HttpChunkProcessingContext]] will only be sent to processors:
  *  - if the web server is configured NOT to aggregate chunks
- *  - after an initial `HttpRequestProcessingContext` has been received where the `isChunked` flag is set to `True`
+ *  - after an initial [[org.mashupbots.socko.context.HttpRequestProcessingContext]] has been received where the 
+ *    `isChunked` property is set to `True`.
  *
  * @param channel Channel by which the request entered and response will be written
- * @param endPoint End point though which the request entered
- * @param isKeepAlive Flag to indicate if this connection is to be kept alive or closed after a response is returned
+ * @param initialHttpRequest The initial HTTP request associated with this chunk
  * @param httpChunk Incoming chunk of data for processing
  */
 case class HttpChunkProcessingContext(
   channel: Channel,
-  originalHttpRequest: OriginalHttpRequest,
+  initialHttpRequest: InitialHttpRequest,
   httpChunk: HttpChunk) extends HttpProcessingContext {
 
   /**
-   * HTTP End point
+   * HTTP end point used by this chunk 
    */
-  val endPoint = originalHttpRequest.endPoint
+  val endPoint = initialHttpRequest.endPoint
 
   /**
-   * `True` if and only if is connection is to be kept alive and the channel should NOT be closed
+   * `True` if and only if this connection is to be kept alive and the channel should NOT be closed
    * after a response is returned.
    *
    * This flag is controlled by the existence of the keep alive HTTP header.
@@ -55,7 +55,7 @@ case class HttpChunkProcessingContext(
    * Connection: keep-alive
    * }}}
    */
-  val isKeepAlive = originalHttpRequest.isKeepAlive
+  val isKeepAlive = initialHttpRequest.isKeepAlive
 
   /**
    * Array of accepted encoding for content compression from the HTTP header
@@ -63,7 +63,7 @@ case class HttpChunkProcessingContext(
    * For example, give then header `Accept-Encoding: gzip, deflate`, then an array containing
    * `gzip` and `defalte` will be returned.
    */
-  val acceptedEncodings = originalHttpRequest.acceptedEncodings
+  val acceptedEncodings = initialHttpRequest.acceptedEncodings
 
   /**
    * Flag to indicate if this is the last chunk

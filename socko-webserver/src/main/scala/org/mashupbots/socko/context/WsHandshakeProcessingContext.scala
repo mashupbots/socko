@@ -26,10 +26,10 @@ import org.jboss.netty.util.CharsetUtil
  * Context for processing web socket handshakes.
  *
  * Socko requires that this context be processed in your route and NOT passed to processor actors.
- * The only action that needs to be taken is to set the if an upgrade
- * to web socket is permitted on your route.
+ * The only action that needs to be taken is to set `isAllowed` to `True`.
  *
  * {{{
+ * val routes = Routes({
  *   case ctx @ Path("/snoop/websocket/") => ctx match {
  *     case ctx: WsHandshakeProcessingContext => {
  *       val hctx = ctx.asInstanceOf[WsHandshakeProcessingContext]
@@ -39,11 +39,14 @@ import org.jboss.netty.util.CharsetUtil
  *       myActorSystem.actorOf(Props[MyWebSocketFrameProcessor], name) ! ctx
  *     }
  *   }
+ * })
  * }}}
  *
  * If `isAllowed` is set to `True`, Socko will perform all the necessary handshaking. If false,
  * the default value, Socko will reject the handshake and web sockets processing will be aborted.
  *
+ * `isAllowed` has been added as a security measure to make sure that upgrade to web sockets is only performed at
+ * explicit routes.
  *
  * @param channel Channel by which the request entered and response will be written
  * @param httpRequest HTTP request associated with the upgrade to web sockets connection

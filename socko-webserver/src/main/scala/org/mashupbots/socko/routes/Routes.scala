@@ -15,11 +15,13 @@
 //
 package org.mashupbots.socko.routes
 
-import org.mashupbots.socko.context.ProcessingContext
 import scala.util.matching.Regex
 
+import org.mashupbots.socko.context.ProcessingContext
+
 /**
- * A list of PartialFunctions used for routing HTTP requests.
+ * Routes define the rules for dispatching requests to its intended Akka actor processors. It is implemented as a
+ * list of PartialFunctions.
  *
  * To assist with routing, use the following extractors:
  *  - HTTP Method: GET, POST, PUT, DELETE, HEAD, CONNECT, OPTIONS, TRACE
@@ -31,12 +33,10 @@ import scala.util.matching.Regex
  * {{{
  *   val r = Routes({
  *     case ctx @ GET(Path(PathSegments("record" :: id :: Nil))) => {
- *       result = "1"
+ *       ...
  *     }
  *     case ctx @ Path(PathSegments("record" :: id :: Nil)) => {
- *       // Get storing data in our cache
- *       ctx.cache.put("id", id)
- *       result = "2"
+ *       ...
  *     }
  *   })
  * }}}
@@ -46,17 +46,19 @@ import scala.util.matching.Regex
  *   val r = Routes(
  *     {
  *       case ctx @ GET(Path(PathSegments("record" :: id :: Nil))) => {
- *         result = "1"
+ *         ...
  *       }
  *       case ctx @ Path(PathSegments("record" :: id :: Nil)) => {
- *         // Get storing data in our cache
- *         ctx.cache.put("id", id)
- *         result = "2"
+ *         ...
  *       }
  *     },
  *     {
- *       case ctx @ PUT(Host("aaa.abc.com")) & Path("/test1") => result = "1"
- *       case ctx @ Host("aaa.abc.com") & Path("/test2") => result = "2"
+ *       case ctx @ PUT(Host("aaa.abc.com")) & Path("/test1") => {
+ *         ...
+ *       }
+ *       case ctx @ Host("aaa.abc.com") & Path("/test2") => {
+ *         ...
+ *       }
  *     })
  * }}}
  *
@@ -79,7 +81,10 @@ object Routes {
 }
 
 /**
- * HTTP method routing
+ * Used to help match the HTTP method.
+ *
+ * You should not need to use this class. Rather use the objects that extends from this class. For example:
+ * [[org.mashupbots.socko.routes.GET]].
  *
  * @param method HTTP Method
  */
@@ -89,22 +94,131 @@ class Method(method: String) {
     else None
 }
 
-object GET extends Method("GET")
-object POST extends Method("POST")
-object PUT extends Method("PUT")
-object DELETE extends Method("DELETE")
-object HEAD extends Method("HEAD")
-object CONNECT extends Method("CONNECT")
-object OPTIONS extends Method("OPTIONS")
-object TRACE extends Method("TRACE")
-
 /**
- * HTTP path routing. Must be exact match.
+ * Matches HTTP requests with a method set to `GET`.
  *
  * For example:
  * {{{
- *   case Path("/test1")
+ *   val r = Routes({
+ *     case ctx @ GET(_) => {
+ *       ...
+ *     }
+ *   })
  * }}}
+ */
+object GET extends Method("GET")
+
+/**
+ * Matches HTTP requests with a method set to `POST`.
+ *
+ * For example:
+ * {{{
+ *   val r = Routes({
+ *     case ctx @ POST(_) => {
+ *       ...
+ *     }
+ *   })
+ * }}}
+ */
+object POST extends Method("POST")
+
+/**
+ * Matches HTTP requests with a method set to `PUT`.
+ *
+ * For example:
+ * {{{
+ *   val r = Routes({
+ *     case ctx @ PUT(_) => {
+ *       ...
+ *     }
+ *   })
+ * }}}
+ */
+object PUT extends Method("PUT")
+
+/**
+ * Matches HTTP requests with a method set to `DELETE`.
+ *
+ * For example:
+ * {{{
+ *   val r = Routes({
+ *     case ctx @ DELETE(_) => {
+ *       ...
+ *     }
+ *   })
+ * }}}
+ */
+object DELETE extends Method("DELETE")
+
+/**
+ * Matches HTTP requests with a method set to `HEAD`.
+ *
+ * For example:
+ * {{{
+ *   val r = Routes({
+ *     case ctx @ HEAD(_) => {
+ *       ...
+ *     }
+ *   })
+ * }}}
+ */
+object HEAD extends Method("HEAD")
+
+/**
+ * Matches HTTP requests with a method set to `CONNECT`.
+ *
+ * For example:
+ * {{{
+ *   val r = Routes({
+ *     case ctx @ CONNECT(_) => {
+ *       ...
+ *     }
+ *   })
+ * }}}
+ */
+object CONNECT extends Method("CONNECT")
+
+/**
+ * Matches HTTP requests with a method set to `OPTIONS`.
+ *
+ * For example:
+ * {{{
+ *   val r = Routes({
+ *     case ctx @ OPTIONS(_) => {
+ *       ...
+ *     }
+ *   })
+ * }}}
+ */
+object OPTIONS extends Method("OPTIONS")
+
+/**
+ * Matches HTTP requests with a method set to `TRACE`.
+ *
+ * For example:
+ * {{{
+ *   val r = Routes({
+ *     case ctx @ TRACE(_) => {
+ *       ...
+ *     }
+ *   })
+ * }}}
+ */
+object TRACE extends Method("TRACE")
+
+/**
+ * Matches HTTP requests with the same case-sensitive path.
+ *
+ * For example, to match `/folderX` use:
+ * {{{
+ *   val r = Routes({
+ *     case ctx @ Path("/folderX") => {
+ *       ...
+ *     }
+ *   })
+ * }}}
+ *
+ * This will match `/folderX` but not: `/folderx`, `/folderX/` or `/TheFolderX`
  */
 object Path {
   def unapply(ctx: ProcessingContext) = Some(ctx.endPoint.path)
@@ -112,14 +226,16 @@ object Path {
 }
 
 /**
- * HTTP path segments routing.
+ * Matches HTTP requests with the same path segment pattern.
  *
  * For example, to match `/record/1`, use:
  * {{{
- *   case ctx @ Path(PathSegments("record" :: id :: Nil)) => {
- *     // id will be set to 1
- *     ctx.cache.put("id", id)
- *   }
+ *   val r = Routes({
+ *     case ctx @ Path(PathSegments("record" :: id :: Nil)) => {
+ *       // id will be set to 1
+ *       ...
+ *     }
+ *   })
  * }}}
  */
 object PathSegments {
@@ -130,7 +246,7 @@ object PathSegments {
 }
 
 /**
- * Regular expression matching of HTTP path routing
+ * Matches HTTP requests that have paths matching the specified regular expression.
  *
  * For example, to match `/path/to/file`, first define your regular expression as an object:
  * {{{
@@ -139,10 +255,13 @@ object PathSegments {
  *
  * Then, when defining your Route:
  * {{{
- *   case ctx @ case MyPathRegex(m) => {
- *     assert(m.group(1) == "to")
- *     assert(m.group(2) == "file")
- *   }
+ *   val r = Routes({
+ *     case ctx @ case MyPathRegex(m) => {
+ *       assert(m.group(1) == "to")
+ *       assert(m.group(2) == "file")
+ *       ...
+ *     }
+ *   })
  * }}}
  */
 class PathRegex(regex: Regex) {
@@ -150,12 +269,18 @@ class PathRegex(regex: Regex) {
 }
 
 /**
- * HTTP host routing. Must be exact match.
+ * Matches HTTP requests with the same case-sensitive host.
  *
- * For example, to match `www.abc.com`, use:
+ * For example, to match `www.sockoweb.com`, use:
  * {{{
- *   case Host("www.abc.com")
+ *   val r = Routes({
+ *     case ctx @ Host("www.sockoweb.com") => {
+ *       ...
+ *     }
+ *   })
  * }}}
+ *
+ * This will match `www.sockoweb.com` but not: `www1.sockoweb.com`, `sockoweb.com` or `sockoweb.org`
  */
 object Host {
   def unapply(ctx: ProcessingContext) = Some(ctx.endPoint.host)
@@ -163,14 +288,16 @@ object Host {
 }
 
 /**
- * HTTP host segments for routing
+ * Matches HTTP requests with the same host segment pattern.
  *
- * For example, to match `server1.abc.com`, use:
+ * For example, to match `server1.sockoweb.com`, use:
  * {{{
- *   case ctx @ Host(HostSegments(server :: "abc" :: "com" :: Nil)) => {
- *     // server will be set to server1
- *     ctx.cache.put("server", server)
- *   }
+ *   val r = Routes({
+ *     case ctx @ Host(HostSegments(server :: "sockoweb" :: "com" :: Nil)) => {
+ *       // server will be set to server1
+ *       ...
+ *     }
+ *   })
  * }}}
  */
 object HostSegments {
@@ -178,18 +305,21 @@ object HostSegments {
 }
 
 /**
- * Regular expression matching of HTTP host routing
+ * Matches HTTP requests that have hosts matching the specified regular expression.
  *
- * For example, to match `www.abc.com`, first define your regex as an object:
+ * For example, to match `www.sockoweb.com`, first define your regex as an object:
  * {{{
  *    object MyHostRegex extends HostRegex("""www\.([a-z]+)\.com""".r)
  * }}}
  *
  * Then, when defining your Route:
  * {{{
- *   case ctx @ case MyHostRegex(m) => {
- *     assert(m.group(1) == "abc")
- *   }
+ *   val r = Routes({
+ *     case ctx @ MyHostRegex(m) => {
+ *       assert(m.group(1) == "sockoweb")
+ *       ...
+ *     }
+ *   })
  * }}}
  */
 class HostRegex(regex: Regex) {
@@ -199,11 +329,15 @@ class HostRegex(regex: Regex) {
 }
 
 /**
- * HTTP query string routing. Must be exact match.
+ * Matches HTTP requests that have identical query string
  *
- * For example:
+ * For example, to match `http://www.sockoweb.org/do?action=save`:
  * {{{
- *   case QueryString("action=save")
+ *   val r = Routes({
+ *     case ctx @ QueryString("action=save") => {
+ *       ...
+ *     }
+ *   })
  * }}}
  */
 object QueryString {
@@ -212,18 +346,21 @@ object QueryString {
 }
 
 /**
- * Regular expression matching of HTTP query string
+ * Matches HTTP requests that have a query string matching the specified regular expression.
  *
- * For example, to match `?name1=value1`, first define your regex as an object:
+ * For example, to match `?name1=value1`, first define your regular expression as an object:
  * {{{
  *    object MyQueryStringRegex extends QueryStringRegex("""name1=([a-z0-9]+)""".r)
  * }}}
  *
  * Then, when defining your Route:
  * {{{
- *   case ctx @ MyQueryStringRegex(m) => {
- *     assert(m.group(1) == "value1")
- *   }
+ *   val r = Routes({
+ *     case ctx @ MyQueryStringRegex(m) => {
+ *       assert(m.group(1) == "value1")
+ *       ...
+ *     }
+ *   })
  * }}}
  */
 class QueryStringRegex(regex: Regex) {
@@ -233,7 +370,9 @@ class QueryStringRegex(regex: Regex) {
 }
 
 /**
- * Match of a query string name and returns the first matched value.
+ * Matches HTTP requests that have a query string item with the specified name.
+ *
+ * If a match is found, the value is returned.  If there are more than one value, on the first value is returned.
  *
  * For example, to match `?name1=value1`, first define your match as an object:
  * {{{
@@ -242,9 +381,12 @@ class QueryStringRegex(regex: Regex) {
  *
  * Then, when defining your Route:
  * {{{
- *   case ctx @ MyQueryStringName(value) => {
- *     assert(value == "value1")
- *   }
+ *   val r = Routes({
+ *     case ctx @ MyQueryStringName(value) => {
+ *       assert(value == "value1")
+ *       ...
+ *     }
+ *   })
  * }}}
  */
 class QueryStringMatcher(name: String) {
@@ -253,10 +395,17 @@ class QueryStringMatcher(name: String) {
   }
 }
 
-
-
 /**
  * Concatenates 2 extractors in a case statement
+ *
+ * For example:
+ * {{{
+ *   val r = Routes({
+ *     ctx @ GET(Path("/mypath")) & QueryString("name1=value1") => {
+ *       ...
+ *     }
+ *   })
+ * }}}
  */
 object & { def unapply[A](a: A) = Some(a, a) }
 

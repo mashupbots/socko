@@ -23,7 +23,7 @@ import javax.net.ssl.SSLEngine
 import javax.net.ssl.TrustManagerFactory
 
 /**
- * Manages TLS/SSL configuration
+ * Manages reading key stores and trust stores for TLS/SSL connections 
  *
  * @param server The web server instancing this SSLManager
  */

@@ -16,18 +16,18 @@
 package org.mashupbots.socko.context
 
 import java.nio.charset.Charset
-
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
 import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import org.jboss.netty.handler.codec.http.websocketx.WebSocketFrame
+import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
 
 /**
  * Context for processing web socket frames. 
  * 
- * A `WsProcessingContext` will only be sent to processors only after an initial `WsHandshakeProcessingContext` has
- * been successfully processed.
+ * A [[org.mashupbots.socko.context.WsProcessingContext]] will only be dispatched to processors only after an initial 
+ * [[org.mashupbots.socko.context.WsHandshakeProcessingContext]] has been successfully processed.
  *
  * @param channel Channel by which the request entered and response will be written
  * @param endPoint End point though which the original handshake request entered
@@ -86,5 +86,11 @@ case class WsProcessingContext(
     channel.write(new BinaryWebSocketFrame(buf))
   }
 
+  /**
+   * Close the web socket connection
+   */
+  def close() {
+    channel.write(new CloseWebSocketFrame())
+  }
 }
 
