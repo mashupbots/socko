@@ -183,13 +183,47 @@ abstract class HttpProcessingContext() extends ProcessingContext {
       response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent().readableBytes())
     }
 
-    // Close the connection as soon as the error message is sent.
     val future = channel.write(response)
     if (closeChannel) {
       future.addListener(ChannelFutureListener.CLOSE)
     }
   }
 
+  /**
+   * Redirects the browser to the specified URL using the 302 HTTP status code.
+   * 
+   * Request
+   * {{{
+   * GET /index.html HTTP/1.1
+   * Host: www.example.com
+   * }}}
+   * 
+   * Response
+   * {{{
+   * HTTP/1.1 302 Found
+   * Location: http://www.newurl.org/
+   * }}}
+   *
+   * @param url URL to which the browser will be redirected
+   */
+  def redirect(url: String) {
+    val closeChannel = (!this.isKeepAlive)
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FOUND)
+
+    setDateHeader(response)    
+    response.setHeader(HttpHeaders.Names.LOCATION, url)
+    
+    if (!closeChannel) {
+      setKeepAliveHeader(response)
+      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent().readableBytes())
+    }
+
+    val future = channel.write(response)
+    if (closeChannel) {
+      future.addListener(ChannelFutureListener.CLOSE)
+    }
+  }
+  
   /**
    * Sets the Date header in the HTTP response.
    *
