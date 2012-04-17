@@ -86,7 +86,7 @@ import akka.event.Logging
  * }}}
  */
 class StaticFileProcessor extends Actor {
-  val log = Logging(context.system, this)
+  private val log = Logging(context.system, this)
 
   /**
    * Only takes [[org.mashupbots.socko.processors.StaticFileRequest]] messages. 

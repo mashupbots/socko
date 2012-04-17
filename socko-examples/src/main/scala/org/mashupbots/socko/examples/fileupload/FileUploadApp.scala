@@ -53,7 +53,9 @@ object FileUploadApp extends Logger {
   // STEP #1 - Define Actors and Start Akka
   //
   // We are going to start StaticFileProcessor actor as a router.
-  // There will be 5 instances, each instance having its own thread since there is a lot of blocking IO
+  // There will be 5 instances, each instance having its own thread since there is a lot of blocking IO.
+  //
+  // FileUploadProcessor will also be started as a router with a PinnedDispatcher since it involves IO.
   //
   val actorConfig = "my-pinned-dispatcher {\n" +
     "  type=PinnedDispatcher\n" +
@@ -64,7 +66,11 @@ object FileUploadApp extends Logger {
     "  loglevel=DEBUG\n" +
     "  actor {\n" +
     "    deployment {\n" +
-    "      /my-router {\n" +
+    "      /static-file-router {\n" +
+    "        router = round-robin\n" +
+    "        nr-of-instances = 5\n" +
+    "      }\n" +
+    "      /file-upload-router {\n" +
     "        router = round-robin\n" +
     "        nr-of-instances = 5\n" +
     "      }\n" +
@@ -75,7 +81,10 @@ object FileUploadApp extends Logger {
   val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
 
   val staticFileProcessorRouter = actorSystem.actorOf(Props[StaticFileProcessor]
-    .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "my-router")
+    .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
+
+  val fileUploadProcessorRouter = actorSystem.actorOf(Props[FileUploadProcessor]
+    .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "file-upload-router")
 
   //
   // STEP #2 - Define Routes
@@ -97,9 +106,10 @@ object FileUploadApp extends Logger {
         tempDir)
       staticFileProcessorRouter ! request
     }
-    case ctx @ POST(_) => {
+    case ctx @ POST(Path("/upload")) => {
       // save file to the content directory so it can be downloaded
-      
+      val request = FileUploadRequest(ctx.asInstanceOf[HttpRequestProcessingContext], contentDir)
+      fileUploadProcessorRouter ! request
     }
   })
 
@@ -171,12 +181,12 @@ object FileUploadApp extends Logger {
     buf.append("<form action=\"/upload\" enctype=\"multipart/form-data\" method=\"post\">\n")
 
     buf.append("  <div class=\"field\">\n")
-    buf.append("    <label>Select a file to upload</label><br/>\n")
+    buf.append("    <label>1. Select a file to upload</label><br/>\n")
     buf.append("    <input type=\"file\" name=\"fileUpload\" />\n")
     buf.append("  </div>\n")
 
     buf.append("  <div class=\"field\">\n")
-    buf.append("    <label>Description</label><br/>\n")
+    buf.append("    <label>2. Description</label><br/>\n")
     buf.append("    <input type=\"text\" name=\"fileDescription\" size=\"50\" />\n")
     buf.append("  </div>\n")
 

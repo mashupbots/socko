@@ -18,8 +18,8 @@ package org.mashupbots.socko.processors
 
 import scala.collection.JavaConversions.asScalaBuffer
 
-import org.apache.http.HttpHeaders
 import org.jboss.netty.channel.ChannelLocal
+import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.mashupbots.socko.context.HttpChunkProcessingContext
 import org.mashupbots.socko.context.HttpRequestProcessingContext
 import org.mashupbots.socko.context.WsProcessingContext
@@ -38,7 +38,7 @@ import akka.event.Logging
  * We use this for our testing.
  */
 class SnoopProcessor extends Actor {
-  val log = Logging(context.system, this)
+  private val log = Logging(context.system, this)
 
   /**
    * Process incoming messages
@@ -94,14 +94,14 @@ class SnoopProcessor extends Actor {
     }
 
     // If post, then try to parse the data
-    val contentType = ctx.getHeader(HttpHeaders.CONTENT_TYPE)
+    val contentType = ctx.getHeader(HttpHeaders.Names.CONTENT_TYPE)
     if (contentType.isDefined &&
       (contentType.get.startsWith("multipart/form-data") ||
         contentType.get.startsWith("application/x-www-form-urlencoded"))) {
       buf.append("FORM DATA\r\n")
       val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, ctx.httpRequest)
-      val datas = decoder.getBodyHttpDatas().toList
-      datas.foreach(data => {
+      val dataList = decoder.getBodyHttpDatas().toList
+      dataList.foreach(data => {
         if (data.getHttpDataType() == HttpDataType.Attribute) {
           // Normal post data
           val attribute = data.asInstanceOf[Attribute]
