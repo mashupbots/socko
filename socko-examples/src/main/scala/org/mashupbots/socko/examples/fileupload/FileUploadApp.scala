@@ -98,7 +98,8 @@ object FileUploadApp extends Logger {
       staticFileProcessorRouter ! request
     }
     case ctx @ POST(_) => {
-      // save file to upload directory 
+      // save file to the content directory so it can be downloaded
+      
     }
   })
 
@@ -107,7 +108,7 @@ object FileUploadApp extends Logger {
   //
   def main(args: Array[String]) {
     // Create content
-    createIndexHtml(contentDir)
+    createContent(contentDir)
 
     // Start web server
     val webServer = new WebServer(WebServerConfig(), routes)
@@ -156,27 +157,30 @@ object FileUploadApp extends Logger {
   }
 
   /**
-   * Creates index.html in the specified directory
+   * Creates html and css files in the specified directory
    */
-  private def createIndexHtml(dir: File) {
+  private def createContent(dir: File) {
     val buf = new StringBuilder()
     buf.append("<html>\n")
-    buf.append("<head><title>Socko File Upload Example</title></head>\n")
+    buf.append("<head>\n")
+    buf.append("  <title>Socko File Upload Example</title>\n")
+    buf.append("  <link rel=\"stylesheet\" type=\"text/css\" href=\"mystyle.css\" />\n")
+    buf.append("</head>\n")
     buf.append("<body>\n")
     buf.append("<h1>Socko File Upload Example</h1>\n")
     buf.append("<form action=\"/upload\" enctype=\"multipart/form-data\" method=\"post\">\n")
 
-    buf.append("  <div>\n")
+    buf.append("  <div class=\"field\">\n")
     buf.append("    <label>Select a file to upload</label><br/>\n")
     buf.append("    <input type=\"file\" name=\"fileUpload\" />\n")
     buf.append("  </div>\n")
 
-    buf.append("  <div style=\"margin-top: 20px;\">\n")
+    buf.append("  <div class=\"field\">\n")
     buf.append("    <label>Description</label><br/>\n")
-    buf.append("    <input type=\"text\" name=\"fileDescription\" size=\"100\" />\n")
+    buf.append("    <input type=\"text\" name=\"fileDescription\" size=\"50\" />\n")
     buf.append("  </div>\n")
 
-    buf.append("  <div style=\"margin-top: 20px;\">\n")
+    buf.append("  <div class=\"field\">\n")
     buf.append("    <input type=\"submit\" value=\"Upload\" />\n")
     buf.append("  </div>\n")
 
@@ -188,6 +192,15 @@ object FileUploadApp extends Logger {
     val out = new FileOutputStream(indexFile)
     out.write(buf.toString.getBytes(CharsetUtil.UTF_8))
     out.close()
+    
+    buf.setLength(0)
+    buf.append("body { font-family: Arial,Helv,Courier,Serif}\n")
+    buf.append("div.field {margin-top:20px;}\n")
+    
+    val cssFile = new File(dir, "mystyle.css")
+    val out2 = new FileOutputStream(cssFile)
+    out2.write(buf.toString.getBytes(CharsetUtil.UTF_8))
+    out2.close()
 
   }
 }

@@ -280,6 +280,9 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    * Content-Type: image/gif
    * }}}
    *
+   * This implementation uses <a href="http://docs.oracle.com/javase/6/docs/api/javax/activation/MimetypesFileTypeMap.html">
+   * `MimetypesFileTypeMap`</a> and relies on the presence of the file extening in a `mime.types` file. 
+   *
    * @param response  HTTP response
    * @param file file to extract content type
    */
