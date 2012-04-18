@@ -4,16 +4,13 @@ A [Scala](http://www.scala-lang.org/) web server powered by
 [Netty](http://netty.io/) networking and [Akka](http://akka.io/) processing.
 
 ## Background
-We designed MashupBots to be an HTML5 style app. 
+We are currently working on a HTML5 style app called MashupBots.
 
-Our fat html5/css/javascript client is going to be served as static files from the web server. 
-Server side HTML templating will be not required because it will all happen in the browser using javascript.
+We wanted a lightweight Scala web server that can serve static files and support a RESTful API to our business logic implemented in Akka.
 
-Our fat client will communicate with our Akka based business logic and database via a HTTP REST API served 
-off the same web server.
+We do not need a web application framework: server side templating, caching, session management, etc.
 
-We could not find a lightweight, asynchronous web server that exactly meets our requirements so we decided 
-to write one.
+We couldn't find a web server that exactly meets our requirements, so we decided to write one.
 
 We hope you find it as useful as we do.
 
@@ -146,7 +143,7 @@ Get the source code from github
 * To run the scalatest unit test cases, just right click on a test class file and select `Run As JUnit Test`.
 
 
-## Other Info
+## Links
 
 * [Issues] (https://github.com/mashupbots/socko/issues?milestone=&sort=created&direction=desc&state=open)
 * [Road Map](https://github.com/mashupbots/socko/issues/milestones)
