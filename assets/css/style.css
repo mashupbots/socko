@@ -73,14 +73,13 @@ header {
 	height: 67px;
 }
 header h1 { 
-	background: url(../img/logo.png) no-repeat;
-	width: 166px;
-	height: 38px;
-	position: relative;
-	top: 16px;
-	font-size: 0;
-	text-indent: -9999px;
 	float: left;
+	color: #FFF;
+	font-size: 22px;
+	font-weight: normal;
+	font-family: 'nevisBold', Arial, sans-serif;
+	top: 20px;
+	position: relative;
 }
 header ul {
 	float: right;
@@ -111,9 +110,9 @@ header ul li a:hover, header ul li a.active {
 
 /* Masthead */
 #masthead { 
-	background: #ff7361;
+	background: #72CB47;
 	height: 368px; 
-	border-top: 1px solid #ff9f93;
+	border-top: 1px solid #9CFF6B;
 }
 #slider {
 	position:relative;
@@ -213,9 +212,13 @@ header ul li a:hover, header ul li a.active {
 .slide_tagline p { 
 	font-size: 14px;
 	line-height: 20px;
-	color: #ffd2cc;
+	color: #373B43;
 	margin-top: 15px;
 	font-weight: 500;
+}
+.slide_tagline a { 
+	color: #373B43;
+	text-decoration: underline;
 }
 .slide_img { 
 	float: right;
@@ -467,7 +470,7 @@ header ul li a:hover, header ul li a.active {
 }
 #test_bg h3 {
 	font-size: 18px;
-	color: #ff7361;
+	color: #61B733;
 	font-weight: lighter;
 	text-align: center;
 	position: relative;
