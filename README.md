@@ -6,7 +6,7 @@ A [Scala](http://www.scala-lang.org/) web server powered by
 ## Background
 We are currently working on a HTML5 style app called MashupBots.
 
-We wanted a lightweight Scala web server that can serve static files and support a RESTful API to our business logic implemented in Akka.
+We wanted an open source, lightweight and embeddable Scala web server that can serve static files and support a RESTful API to our business logic implemented in Akka.
 
 We do not need a web application framework: server side templating, caching, session management, etc.
 
@@ -23,20 +23,20 @@ Socko is:
   * who wish to serve static files and/or HTML 5 applications from the same web server hosting 
     their REST endpoints
 
-* Fast-ish and efficient???
-  * TO DO - benchmarking
+* Fast-ish
   * Socko handles and processes incoming HTTP requests in an asynchronous and event driven manner thanks to
     Netty and Akka.
-  * Socko also supports blocking IO, for example reading files or database interaction, you can configure Akka
-    to use a thread pool instead.
+  * TO DO - benchmarking
 
 * Lightweight (assuming you are already using Akka)
-  * > 1,300 lines of Scala code (and ~2,600 lines of Java code which will be removed once Akka 
+  * ~1,300 lines of Scala code (and ~2,600 lines of Java code which will be removed once Akka 
     moves to the upcoming Netty 4.0).
-  * Socko runs in a standard Scala application. No servlet containers required.
-  * Socko has no external dependencies outside Akka 2.0 and Netty (which is a dependency of Akka 2.0 Remote).
-  
-* Supportive of HTTP Standards
+  * Socko has no external dependencies outside Akka 2.0 Remote (which includes Netty).
+
+* Embedded
+  * Socko runs within your Scala application. 
+
+* Supportive of HTTP and HTML5 Standards
   * HTTP/S and WebSockets
   * HTTP compression
   * HTTP headers
@@ -49,15 +49,18 @@ Socko is:
   * Configurable from inside your code and/or via settings in Akka's configuration file.
   * Plenty of [examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
 
+* Open Source
+  * [Apache 2 license](http://www.apache.org/licenses/LICENSE-2.0)
+
 
 ## What Socko is NOT
 
-* Socko is not a servlet. We use Netty instead.
+* Socko is not a standalone web server.  It must be embedded within your application.
+
+* Socko is not a servlet container. It will not run your servlet or JSP pages.
   
 * Socko is not a web application or MVC framework like Lift or Play. It does not perform server side
   HTML templating. We use client side javascript libraries like EmberJS and BackboneJS instead.
-    
-* Socko does not store session data or cache application data. We use HTML5 local storage instead.
 
 
 ## Quick Start
