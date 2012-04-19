@@ -93,7 +93,7 @@ class StaticFileProcessor extends Actor {
    */
   def receive = {
     case request: StaticFileRequest => {
-      getFile(request)
+      sendFile(request)
     }
     case _ => {
       log.info("received unknown message of type: ")
@@ -147,7 +147,7 @@ class StaticFileProcessor extends Actor {
    * Content-Encoding: gzip
    * }}}
    */
-  private def getFile(request: StaticFileRequest): Unit = {
+  private def sendFile(request: StaticFileRequest): Unit = {
     val file = request.file
 
     // Checks
