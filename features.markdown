@@ -65,7 +65,7 @@ Netty and Akka.
 
 We are aiming to be at least on-par with Apache Tomcat 7.
 
-We still have some more benchmarking to do, but early indicates we are going to meet this objective.
+We still have some more benchmarking to do, but early testing indicates that we are going to meet this objective.
 
 
 ## Open Source
