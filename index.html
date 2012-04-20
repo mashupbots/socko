@@ -10,15 +10,15 @@ layout: default
             <div id="slide_container">
               <div class="slide">
                 <div class="slide_tagline">
-                  <h2>A lightweight Scala web server powered by Netty networking and Akka processing.</h2>
+                  <h2>An embedded Scala web server powered by Netty networking and Akka processing.</h2>
                   <p>We are currently working on a HTML5 style app called <a href="https://github.com/mashupbots/mashupbots">MashupBots</a>.</p>
-                  <p>We wanted a lightweight Scala web server that can serve static files and support a RESTful API to our business logic implemented in Akka.</p>
+                  <p>We wanted an open source, lightweight and embeddable Scala web server that can serve static files and support RESTful APIs to our business logic implemented in Akka.</p>
                   <p>We do not need a web application framework: server side templating, caching, session management, etc.</p>
                   <p>We couldn't find a web server that exactly meets our requirements, so we decided to write one.</p>
                   <p>We hope you find it as useful as we do.</p>
                 </div><!--/slide tagline-->
                 <div class="slide_img">
-                  <img alt="Big Image" src="/assets/img/macbook.png" />
+                  <img alt="Big Image" src="/assets/img/code.png" />
                 </div><!--/slide img-->
               </div><!--/slide-->
             
@@ -36,48 +36,30 @@ layout: default
     <div id="featured">
       <div class="page_wrap">
         <div class="featured_boxes boxes_fix">
-          <span class="stats_icon"></span>
-          <div class="featured_meta">
-            <h2>What is Socko?</h2>
-            <p>Socko is a lightweight web server that is written in Scala, runs on
-              top of the asynchronous event driven Netty framework, and
-              processes requests using AKKA actors.</li>
-            </p>
-          </div><!--/featured meta-->
-        </div><!--/featured boxes-->
-        <div class="featured_boxes">
-          <div class="featured_meta">
-            <h2>Getting the Source</h2>
-            <p>Get the source code from github</p>
-            <pre>$ git clone git@github.com:mashupbots/socko.git</pre>
-            <p>Contributions welcomed.</p>
-          </div><!--/featured meta-->
-        </div><!--/featured boxes-->
-        <div class="featured_boxes boxes_fix">
-          <span class="support_icon"></span>
-          <div class="featured_meta">
-            <h2>Out of the box, Socko supports</h2>
+          <span class="tick"></span>
+          <div class="featured_meta" style="height: 420px">
+            <h2>Socko is ...</h2>
             <ul>
-              <li>HTTP and WebSockets</li>
-              <li>TLS/SSL</li>
-              <li>Decoding HTTP POST and file uploads</li>
-              <li>HTTP compression</li>
-              <li>Routing like Unfilted HTTP ToolKit and Play Mini</li>
-              <li>Serving of static files</li>
+              <li>Intended for Scala and Akka developers<p/>Put a RESTful API in front of your Akka actors. Serve static files. Use our Unfiltered like routing DSL.</li>
+              <li>Embedded into your App</li>
+              <li>Lightweight<p/>~1300 lines of Scala code. Only depedancy is Akka 2.0 Remote</li>
+              <li>Supportive of HTTP and HTML5 Standards<p/>HTTP/S, WebSockets, Compression, Headers, Post Body Decoding</li>
+              <li>Fast-ish</li>
+              <li>Open Source</li>
             </ul>
-            </div><!--/featured meta-->
+            <p><a href="features.html">Read More ...</a></p>
+          </div><!--/featured meta-->
         </div><!--/featured boxes-->
         <div class="featured_boxes">
-          <span class="dashboard_icon"></span>
-          <div class="featured_meta">
+          <span class="cross"></span>
+          <div class="featured_meta" style="height: 420px">
             <h2>What Socko is NOT</h2>
             <ul>
-              <li>Socko isn't a servlet container. We use Netty instead.</li>
-              <li>Socko isn't a web application framework like Lift or Play and doesn't do server side HTML templating.
-                Socko uses client side javascript libraries like EmberJS and BackboneJS instead.</li>
-              <li>Socko does not store sessions or cache application data. We use HTML5 local storage instead.</li>
+              <li>Socko is <b>not</b> a standalone web server.<p/>It must be embedded within your application.</li>
+              <li>Socko is <b>not</b> a servlet container.<p/>It will not run your servlet or JSP pages.</li>
+              <li>Socko is <b>not</b> a web application or MVC framework like Lift or Play.<p/>It does not perform server side  HTML templating. We use client side javascript libraries like EmberJS and BackboneJS instead.</li>
             </ul>
-            </div><!--/featured meta-->
+          </div><!--/featured meta-->
         </div><!--/featured boxes-->
         <div class="clear"></div>
       </div><!--/page wrap-->
