@@ -40,7 +40,7 @@ hr {
 .center { 
 	text-align:center; 
 }
-p, ul { 
+p, ul, ol { 
 	margin-bottom: 15px;
 	font-size: 14px;
 	line-height: 18px;
@@ -378,7 +378,31 @@ header ul li a {
   list-style-position: outside;
 }
 .article li {
-  margin-left: 16px;
+  margin-left: 20px;
+}
+.article pre {
+  padding: 13px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  -o-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -khtml-border-radius: 4px;
+  border-radius: 4px;
+  background-color: #f2f2f2;
+  font-size: 12px;
+  font-family: Menlo, monospace;
+  line-height: 16px;
+  margin-bottom: 22px; 
+}
+.article pre code {
+  font-family: "Menlo", "Courier", monospace;
+  background-color: transparent;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  -o-border-radius: 0px;
+  -ms-border-radius: 0px;
+  -khtml-border-radius: 0px;
+  border-radius: 0px;  
 }
 .article code {
   font-family: "Menlo", "Courier", monospace;
@@ -390,6 +414,26 @@ header ul li a {
   -ms-border-radius: 4px;
   -khtml-border-radius: 4px;
   border-radius: 4px; 
+  font-size: 13px;
+}
+
+.article ol {
+  list-style-type: decimal;
+}
+
+.article table.code {
+}
+.article table.code th {
+  padding: 4px;
+  border: 1px solid #CCC;
+  font-family: "Menlo", "Courier", monospace;
+  background-color: #dddddd;
+  font-size: 13px;
+}
+.article table.code td {
+  padding: 4px;
+  border: 1px solid #CCC;
+  font-family: "Menlo", "Courier", monospace;
   font-size: 13px;
 }
 
