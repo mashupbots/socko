@@ -64,9 +64,10 @@ Socko has no external dependencies outside Akka 2.0 Remote (which includes Netty
 Socko handles and processes incoming HTTP requests in an asynchronous and event driven manner thanks to
 Netty and Akka.
 
-We are aiming to be at least on-par with Apache Tomcat 7.
+Our initial [benchmarking](/2012/04/22/benchmark.html) shows Socko is a little faster than Apache Tomcat 7 for static and dynamic content.
 
-We still have some more benchmarking to do, but early testing indicates that we are going to meet this objective.
+However, Socko is a little slower than Apache Web Server 2.2.20 for static content.
+
 
 
 ## Open Source

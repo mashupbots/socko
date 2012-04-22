@@ -372,6 +372,8 @@ header ul li a {
 .article h3 {
   color: #373b43;
   font-size: 16px;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
 }
 .article ul {
   list-style: disc;
@@ -397,6 +399,7 @@ header ul li a {
 .article pre code {
   font-family: "Menlo", "Courier", monospace;
   background-color: transparent;
+  padding: 0px;
   -moz-border-radius: 0px;
   -webkit-border-radius: 0px;
   -o-border-radius: 0px;

@@ -23,6 +23,8 @@ author: Vibul
    
  - ApacheBench, Version 2.3 <$Revision: 655654 $> was used to perform the test
  
+ - Java 1.6.0_26 64 bit
+ 
  
 ## Test 1. 1MB static file, 100 concurrent users, 10,000 requests
 

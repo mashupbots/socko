@@ -1,0 +1,733 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>org.mashupbots.socko.context.WsHandshakeProcessingContext</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <img src="../../../../lib/class_big.png" />
+        <p id="owner"><a name="org" class="extype" href="../../../package.html">org</a>.<a name="org.mashupbots" class="extype" href="../../package.html">mashupbots</a>.<a name="org.mashupbots.socko" class="extype" href="../package.html">socko</a>.<a name="org.mashupbots.socko.context" class="extype" href="package.html">context</a></p>
+        <h1>WsHandshakeProcessingContext</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <span class="name">WsHandshakeProcessingContext</span>
+        
+        <span class="params">(<span name="channel">channel: <span name="org.jboss.netty.channel.Channel" class="extype">Channel</span></span>, <span name="httpRequest">httpRequest: <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>)</span><span class="result"> extends <a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+      </span>
+      </h4>
+      
+          <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Context for processing web socket handshakes.</p><p>Socko requires that this context be processed in your route and NOT passed to processor actors.
+The only action that needs to be taken is to set <code>isAllowed</code> to <code>True</code>.</p><pre>
+val routes = Routes({
+  case ctx @ Path(&quot;/snoop/websocket/&quot;) =&gt; ctx match {
+    case ctx: WsHandshakeProcessingContext =&gt; {
+      val hctx = ctx.asInstanceOf[WsHandshakeProcessingContext]
+      hctx.isAllowed = true
+    }
+    case ctx: WsProcessingContext =&gt; {
+      myActorSystem.actorOf(Props[MyWebSocketFrameProcessor], name) ! ctx
+    }
+  }
+})
+</pre><p>If <code>isAllowed</code> is set to <code>True</code>, Socko will perform all the necessary handshaking. If false,
+the default value, Socko will reject the handshake and web sockets processing will be aborted.</p><p><code>isAllowed</code> has been added as a security measure to make sure that upgrade to web sockets is only performed at
+explicit routes.
+</p></div><dl class="paramcmts block"><dt class="param">channel</dt><dd class="cmt"><p>Channel by which the request entered and response will be written</p></dd><dt class="param">httpRequest</dt><dd class="cmt"><p>HTTP request associated with the upgrade to web sockets connection
+</p></dd></dl><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a>, <a name="org.mashupbots.socko.context.ProcessingContext" class="extype" href="ProcessingContext.html">ProcessingContext</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+        </div></div>
+        
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          <div id="order">
+                <span class="filtertype">Ordering</span>
+                <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
+              </div>
+          <div id="ancestors">
+                <span class="filtertype">Inherited</span>
+                <ol><li class="hideall out"><span>Hide All</span></li>
+                <li class="showall in"><span>Show all</span></li></ol>
+                <ol id="linearization"><li name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="in"><span>WsHandshakeProcessingContext</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="org.mashupbots.socko.context.HttpProcessingContext" class="in"><span>HttpProcessingContext</span></li><li name="org.mashupbots.socko.context.ProcessingContext" class="in"><span>ProcessingContext</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              </div>
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+
+        <div class="members" id="constructors">
+              <h3>Instance Constructors</h3>
+              <ol><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#this" data-isabs="false">
+      <a id="this:WsHandshakeProcessingContext"></a>
+      <h4 class="signature">
+      <span class="kind">new</span>
+      <span class="symbol"> 
+        <span class="name">WsHandshakeProcessingContext</span>
+        
+        <span class="params">(<span name="channel">channel: <span name="org.jboss.netty.channel.Channel" class="extype">Channel</span></span>, <span name="httpRequest">httpRequest: <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>)</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">channel</dt><dd class="cmt"><p>Channel by which the request entered and response will be written</p></dd><dt class="param">httpRequest</dt><dd class="cmt"><p>HTTP request associated with the upgrade to web sockets connection
+</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+        
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
+      <a id="!=(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">!=</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">!=</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">##</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
+      <a id="==(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">==</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">==</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#acceptedEncodings" data-isabs="false">
+      <a id="acceptedEncodings:Array[String]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">acceptedEncodings</span>
+        
+        <span class="result">: <span name="scala.Array" class="extype">Array</span>[String]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Array of accepted encoding for content compression from the HTTP header</p><div class="fullcomment"><div class="comment cmt"><p>Array of accepted encoding for content compression from the HTTP header</p><p>For example, give then header <code>Accept-Encoding: gzip, deflate</code>, then an array containing
+<code>gzip</code> and <code>defalte</code> will be returned.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → <a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">asInstanceOf</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        <span class="result">: T0</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.ProcessingContext#cache" data-isabs="false">
+      <a id="cache:Map[String, String]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">cache</span>
+        
+        <span class="result">: <span name="scala.collection.mutable.Map" class="extype">Map</span>[String, String]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Cache that can be use to pass data from handler to processor and between processors
+</p><div class="fullcomment"><div class="comment cmt"><p>Cache that can be use to pass data from handler to processor and between processors
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.ProcessingContext" class="extype" href="ProcessingContext.html">ProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#canEqual" data-isabs="false">
+      <a id="canEqual(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">canEqual</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → Equals</dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#channel" data-isabs="false">
+      <a id="channel:Channel"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">channel</span>
+        
+        <span class="result">: <span name="org.jboss.netty.channel.Channel" class="extype">Channel</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Channel by which the request entered and response will be written</p><div class="fullcomment"><div class="comment cmt"><p>Channel by which the request entered and response will be written</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → <a name="org.mashupbots.socko.context.ProcessingContext" class="extype" href="ProcessingContext.html">ProcessingContext</a></dd></dl></div>
+    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">clone</span>
+        
+        <span class="params">()</span><span class="result">: AnyRef</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#endPoint" data-isabs="false">
+      <a id="endPoint:EndPoint"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">endPoint</span>
+        
+        <span class="result">: <a name="org.mashupbots.socko.context.EndPoint" class="extype" href="EndPoint.html">EndPoint</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">HTTP end point
+</p><div class="fullcomment"><div class="comment cmt"><p>HTTP end point
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → <a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a> → <a name="org.mashupbots.socko.context.ProcessingContext" class="extype" href="ProcessingContext.html">ProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">eq</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#equals" data-isabs="false">
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">equals</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → Equals → AnyRef → Any</dd></dl></div>
+    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">finalize</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
+      <a id="getClass():java.lang.Class[_]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">getClass</span>
+        
+        <span class="params">()</span><span class="result">: java.lang.Class[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#getHeader" data-isabs="false">
+      <a id="getHeader(String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">getHeader</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[String]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns the header value with the specified header name.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the header value with the specified header name.  If there are
+more than one header value for the specified header name, the first
+value is returned.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>Some(String)</code> or <code>None</code> if there is no such header or the header content is
+an empty string
+</p></dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#hashCode" data-isabs="false">
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">hashCode</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#headers" data-isabs="false">
+      <a id="headers:List[Entry[String, String]]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">headers</span>
+        
+        <span class="result">: <span name="java.util.List" class="extype">List</span>[<span name="java.util.Map.Entry" class="extype">Entry</span>[<span name="java.lang.String" class="extype">String</span>, <span name="java.lang.String" class="extype">String</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">HTTP headers
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#httpRequest" data-isabs="false">
+      <a id="httpRequest:HttpRequest"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">httpRequest</span>
+        
+        <span class="result">: <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">HTTP request associated with the upgrade to web sockets connection
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#isAllowed" data-isabs="false">
+      <a id="isAllowed:Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">var</span>
+      <span class="symbol"> 
+        <span class="name">isAllowed</span>
+        
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Flag to be set to <code>True</code> by the route to indicate if the upgrade to a web socket connection is permitted or not
+</p>
+    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">isInstanceOf</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#isKeepAlive" data-isabs="false">
+      <a id="isKeepAlive:Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">isKeepAlive</span>
+        
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt"><code>True</code> if and only if is connection is to be kept alive and the channel should NOT be closed
+after a response is returned.</p><div class="fullcomment"><div class="comment cmt"><p><code>True</code> if and only if is connection is to be kept alive and the channel should NOT be closed
+after a response is returned.</p><p>This flag is controlled by the existence of the keep alive HTTP header.</p><pre>
+Connection: keep-alive
+</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → <a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">ne</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">notify</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">notifyAll</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#productArity" data-isabs="false">
+      <a id="productArity:Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">productArity</span>
+        
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#productElement" data-isabs="false">
+      <a id="productElement(Int):Any"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">productElement</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Any" class="extype">Any</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="scala.Product#productIterator" data-isabs="false">
+      <a id="productIterator:Iterator[Any]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">productIterator</span>
+        
+        <span class="result">: Iterator[<span name="scala.Any" class="extype">Any</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Product</dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#productPrefix" data-isabs="false">
+      <a id="productPrefix:String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">productPrefix</span>
+        
+        <span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#readBinaryContent" data-isabs="false">
+      <a id="readBinaryContent():Array[Byte]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">readBinaryContent</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns the content as byte array.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the content as byte array. An empty array is returned if there is no content
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → <a name="org.mashupbots.socko.context.ProcessingContext" class="extype" href="ProcessingContext.html">ProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#readStringContent" data-isabs="false">
+      <a id="readStringContent(Charset):String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">readStringContent</span>
+        
+        <span class="params">(<span name="charset">charset: <span name="java.nio.charset.Charset" class="extype">Charset</span></span>)</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns the content as a string.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the content as a string. And empty string is returned if there is no content.
+</p></div><dl class="paramcmts block"><dt class="param">charset</dt><dd class="cmt"><p>Character set to use to convert data to string
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → <a name="org.mashupbots.socko.context.ProcessingContext" class="extype" href="ProcessingContext.html">ProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#readStringContent" data-isabs="false">
+      <a id="readStringContent():String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">readStringContent</span>
+        
+        <span class="params">()</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns the content of this request as a string.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the content of this request as a string. It is assumed that content is encoded in UTF-8.
+An empty string is returned if there is no content.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → <a name="org.mashupbots.socko.context.ProcessingContext" class="extype" href="ProcessingContext.html">ProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.HttpProcessingContext#redirect" data-isabs="false">
+      <a id="redirect(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">redirect</span>
+        
+        <span class="params">(<span name="url">url: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Redirects the browser to the specified URL using the 302 HTTP status code.</p><div class="fullcomment"><div class="comment cmt"><p>Redirects the browser to the specified URL using the 302 HTTP status code.</p><p>Request</p><pre>
+GET /index.html HTTP/1.1
+Host: www.example.com
+</pre><p>Response</p><pre>
+HTTP/1.1 302 Found
+Location: http://www.newurl.org/
+</pre></div><dl class="paramcmts block"><dt class="param">url</dt><dd class="cmt"><p>URL to which the browser will be redirected
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.HttpProcessingContext#setContentTypeHeader" data-isabs="false">
+      <a id="setContentTypeHeader(HttpResponse,String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">setContentTypeHeader</span>
+        
+        <span class="params">(<span name="response">response: <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span></span>, <span name="mimeType">mimeType: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets the content type header for the HTTP Response</p><div class="fullcomment"><div class="comment cmt"><p>Sets the content type header for the HTTP Response</p><p>For example:</p><pre>
+Content-Type: image/gif
+</pre></div><dl class="paramcmts block"><dt class="param">response</dt><dd class="cmt"><p>HTTP response</p></dd><dt class="param">mimeType</dt><dd class="cmt"><p>MIME type
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.HttpProcessingContext#setContentTypeHeader" data-isabs="false">
+      <a id="setContentTypeHeader(HttpResponse,File):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">setContentTypeHeader</span>
+        
+        <span class="params">(<span name="response">response: <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span></span>, <span name="file">file: <span name="java.io.File" class="extype">File</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets the content type header for the HTTP Response based on the file name extension</p><div class="fullcomment"><div class="comment cmt"><p>Sets the content type header for the HTTP Response based on the file name extension</p><p>For example:</p><pre>
+Content-Type: image/gif
+</pre><p>This implementation uses <a href="http://docs.oracle.com/javase/6/docs/api/javax/activation/MimetypesFileTypeMap.html">
+<code>MimetypesFileTypeMap</code></a> and relies on the presence of the file extening in a <code>mime.types</code> file.
+</p></div><dl class="paramcmts block"><dt class="param">response</dt><dd class="cmt"><p>HTTP response</p></dd><dt class="param">file</dt><dd class="cmt"><p>file to extract content type
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.HttpProcessingContext#setDateAndCacheHeaders" data-isabs="false">
+      <a id="setDateAndCacheHeaders(HttpResponse,Date,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">setDateAndCacheHeaders</span>
+        
+        <span class="params">(<span name="response">response: <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span></span>, <span name="lastModified">lastModified: <span name="java.util.Date" class="extype">Date</span></span>, <span name="browserCacheSeconds">browserCacheSeconds: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets the Date, Last-Modified, Expires and Cache-Control headers in the HTTP Response</p><div class="fullcomment"><div class="comment cmt"><p>Sets the Date, Last-Modified, Expires and Cache-Control headers in the HTTP Response</p><p>For example:</p><pre>
+Date:          Tue, 01 Mar 2011 22:44:26 GMT
+Last-Modified: Wed, 30 Jun 2010 21:36:48 GMT
+Expires:       Tue, 01 Mar 2012 22:44:26 GMT
+Cache-Control: private, max-age=31536000
+</pre></div><dl class="paramcmts block"><dt class="param">response</dt><dd class="cmt"><p>HTTP response</p></dd><dt class="param">lastModified</dt><dd class="cmt"><p>When the file was last modified</p></dd><dt class="param">browserCacheSeconds</dt><dd class="cmt"><p>Number of seconds for which the file should be cached by the browser
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.HttpProcessingContext#setDateHeader" data-isabs="false">
+      <a id="setDateHeader(HttpResponse):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">setDateHeader</span>
+        
+        <span class="params">(<span name="response">response: <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets the Date header in the HTTP response.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the Date header in the HTTP response.</p><p>For example:</p><pre>
+Date: Tue, 01 Mar 2011 22:44:26 GMT
+</pre></div><dl class="paramcmts block"><dt class="param">response</dt><dd class="cmt"><p>HTTP response
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.HttpProcessingContext#setKeepAliveHeader" data-isabs="false">
+      <a id="setKeepAliveHeader(HttpResponse):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">setKeepAliveHeader</span>
+        
+        <span class="params">(<span name="response">response: <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets the connection header for the HTTP Response</p><div class="fullcomment"><div class="comment cmt"><p>Sets the connection header for the HTTP Response</p><p>According to <a href="http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Persistent%20Connections">HTTP 1.1</a>
+specifications: <i>The Connection header field with a keep-alive keyword must be sent on all requests and
+responses that wish to continue the persistence</i>.</p><p>For example:</p><pre>
+Connection: keep-alive
+</pre></div><dl class="paramcmts block"><dt class="param">response</dt><dd class="cmt"><p>HTTP response
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
+      <a id="synchronized[T0](⇒ T0):T0"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">synchronized</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        <span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.WsHandshakeProcessingContext#toString" data-isabs="false">
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">toString</span>
+        
+        <span class="params">()</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.WsHandshakeProcessingContext" class="extype" href="">WsHandshakeProcessingContext</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">wait</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">wait</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">wait</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.HttpProcessingContext#writeErrorResponse" data-isabs="false">
+      <a id="writeErrorResponse(HttpResponseStatus,Boolean,String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">writeErrorResponse</span>
+        
+        <span class="params">(<span name="status">status: <span name="org.jboss.netty.handler.codec.http.HttpResponseStatus" class="extype">HttpResponseStatus</span></span>, <span name="forceCloseChannel">forceCloseChannel: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">false</span></span>, <span name="msg">msg: String = <span class="symbol">null</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sends a HTTP error response to the client.</p><div class="fullcomment"><div class="comment cmt"><p>Sends a HTTP error response to the client.
+</p></div><dl class="paramcmts block"><dt class="param">status</dt><dd class="cmt"><p>HTTP error status indicating the nature of the error</p></dd><dt class="param">forceCloseChannel</dt><dd class="cmt"><p>Option flag to force closing channel. Default is false and channel will only be
+	closed if <code>keep-alive</code> header is not set.</p></dd><dt class="param">msg</dt><dd class="cmt"><p>Optional error message. If not supplied, status description will be used.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.HttpProcessingContext#writeResponse" data-isabs="false">
+      <a id="writeResponse(Array[Byte],String,Map[String, String]):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">writeResponse</span>
+        
+        <span class="params">(<span name="content">content: <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]</span>, <span name="contentType">contentType: String</span>, <span name="headers">headers: Map[String, String]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sends a binary HTTP response to the client with a status of &quot;200 OK&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Sends a binary HTTP response to the client with a status of &quot;200 OK&quot;.
+</p></div><dl class="paramcmts block"><dt class="param">content</dt><dd class="cmt"><p>String to send</p></dd><dt class="param">contentType</dt><dd class="cmt"><p>MIME content type to set in the response header. For example, &quot;image/gif&quot;</p></dd><dt class="param">headers</dt><dd class="cmt"><p>Additional headers to add to the HTTP response. Defaults to empty map; i.e. no additional headers.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a></dd></dl></div>
+    </li><li visbl="pub" name="org.mashupbots.socko.context.HttpProcessingContext#writeResponse" data-isabs="false">
+      <a id="writeResponse(String,String,Charset,Map[String, String]):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">writeResponse</span>
+        
+        <span class="params">(<span name="content">content: String</span>, <span name="contentType">contentType: String = <span class="symbol">&quot;text/plain; charset=UTF-8&quot;</span></span>, <span name="charset">charset: <span name="java.nio.charset.Charset" class="extype">Charset</span> = <span class="symbol"><span class="name"><a href="../../../package.html">CharsetUtil.UTF_8</a></span></span></span>, <span name="headers">headers: Map[String, String] = <span class="symbol">Map.empty</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sends a string HTTP response to the client with a status of &quot;200 OK&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Sends a string HTTP response to the client with a status of &quot;200 OK&quot;.
+</p></div><dl class="paramcmts block"><dt class="param">content</dt><dd class="cmt"><p>String to send</p></dd><dt class="param">contentType</dt><dd class="cmt"><p>MIME content type to set in the response header. Defaults to &quot;text/plain; charset=UTF-8&quot;.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>Character set encoding. Defaults to &quot;UTF-8&quot;</p></dd><dt class="param">headers</dt><dd class="cmt"><p>Additional headers to add to the HTTP response. Defaults to empty map; i.e. no additional headers.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Deprecated Value Members</h3>
+              <ol><li visbl="pub" name="scala.Product#productElements" data-isabs="false">
+      <a id="productElements:Iterator[Any]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name deprecated">productElements</span>
+        
+        <span class="result">: Iterator[<span name="scala.Any" class="extype">Any</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Product</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p>use productIterator instead</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div name="scala.Serializable" class="parent">
+              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="java.io.Serializable" class="parent">
+              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="scala.Product" class="parent">
+              <h3>Inherited from <span name="scala.Product" class="extype">Product</span></h3>
+            </div><div name="scala.Equals" class="parent">
+              <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
+            </div><div name="org.mashupbots.socko.context.HttpProcessingContext" class="parent">
+              <h3>Inherited from <a name="org.mashupbots.socko.context.HttpProcessingContext" class="extype" href="HttpProcessingContext.html">HttpProcessingContext</a></h3>
+            </div><div name="org.mashupbots.socko.context.ProcessingContext" class="parent">
+              <h3>Inherited from <a name="org.mashupbots.socko.context.ProcessingContext" class="extype" href="ProcessingContext.html">ProcessingContext</a></h3>
+            </div><div name="scala.AnyRef" class="parent">
+              <h3>Inherited from AnyRef</h3>
+            </div><div name="scala.Any" class="parent">
+              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
+            </div>
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

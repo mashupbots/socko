@@ -1,0 +1,334 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>org.mashupbots.socko.routes</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a name="org" class="extype" href="../../../package.html">org</a>.<a name="org.mashupbots" class="extype" href="../../package.html">mashupbots</a>.<a name="org.mashupbots.socko" class="extype" href="../package.html">socko</a></p>
+        <h1>routes</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol"> 
+        <span class="name">routes</span>
+        
+        
+      </span>
+      </h4>
+      
+          <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Routes define the rules for dispatching requests to its intended Akka actor processors.
+</p></div></div>
+        
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="org.mashupbots.socko.routes.HostRegex" data-isabs="false">
+      <a id="HostRegex:HostRegex"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="HostRegex.html"><span class="name">HostRegex</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests that have hosts matching the specified regular expression.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.Method" data-isabs="false">
+      <a id="Method:Method"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="Method.html"><span class="name">Method</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Used to help match the HTTP method.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.PathRegex" data-isabs="false">
+      <a id="PathRegex:PathRegex"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="PathRegex.html"><span class="name">PathRegex</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests that have paths matching the specified regular expression.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.QueryStringMatcher" data-isabs="false">
+      <a id="QueryStringMatcher:QueryStringMatcher"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="QueryStringMatcher.html"><span class="name">QueryStringMatcher</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests that have a query string item with the specified name.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.QueryStringRegex" data-isabs="false">
+      <a id="QueryStringRegex:QueryStringRegex"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="QueryStringRegex.html"><span class="name">QueryStringRegex</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests that have a query string matching the specified regular expression.</p>
+    </li></ol>
+            </div>
+        
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="org.mashupbots.socko.routes.&amp;" data-isabs="false">
+      <a id="&amp;:&amp;"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="$amp$.html"><span class="name">&amp;</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Concatenates 2 extractors in a case statement</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.CONNECT" data-isabs="false">
+      <a id="CONNECT:CONNECT"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="CONNECT$.html"><span class="name">CONNECT</span></a>
+        
+        <span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests with a method set to <code>CONNECT</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.DELETE" data-isabs="false">
+      <a id="DELETE:DELETE"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="DELETE$.html"><span class="name">DELETE</span></a>
+        
+        <span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests with a method set to <code>DELETE</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.GET" data-isabs="false">
+      <a id="GET:GET"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="GET$.html"><span class="name">GET</span></a>
+        
+        <span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests with a method set to <code>GET</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.HEAD" data-isabs="false">
+      <a id="HEAD:HEAD"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="HEAD$.html"><span class="name">HEAD</span></a>
+        
+        <span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests with a method set to <code>HEAD</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.Host" data-isabs="false">
+      <a id="Host:Host"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Host$.html"><span class="name">Host</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests with the same case-sensitive host.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.HostSegments" data-isabs="false">
+      <a id="HostSegments:HostSegments"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="HostSegments$.html"><span class="name">HostSegments</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests with the same host segment pattern.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.HttpChunk" data-isabs="false">
+      <a id="HttpChunk:HttpChunk"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="HttpChunk$.html"><span class="name">HttpChunk</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Used to help match an HTTP Chunk context.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.HttpRequest" data-isabs="false">
+      <a id="HttpRequest:HttpRequest"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="HttpRequest$.html"><span class="name">HttpRequest</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Used to help match an HTTP Request context.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.OPTIONS" data-isabs="false">
+      <a id="OPTIONS:OPTIONS"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="OPTIONS$.html"><span class="name">OPTIONS</span></a>
+        
+        <span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests with a method set to <code>OPTIONS</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.POST" data-isabs="false">
+      <a id="POST:POST"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="POST$.html"><span class="name">POST</span></a>
+        
+        <span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests with a method set to <code>POST</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.PUT" data-isabs="false">
+      <a id="PUT:PUT"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="PUT$.html"><span class="name">PUT</span></a>
+        
+        <span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests with a method set to <code>PUT</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.Path" data-isabs="false">
+      <a id="Path:Path"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Path$.html"><span class="name">Path</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests with the same case-sensitive path.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.PathSegments" data-isabs="false">
+      <a id="PathSegments:PathSegments"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="PathSegments$.html"><span class="name">PathSegments</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests with the same path segment pattern.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.QueryString" data-isabs="false">
+      <a id="QueryString:QueryString"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="QueryString$.html"><span class="name">QueryString</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests that have identical query string</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.Routes" data-isabs="false">
+      <a id="Routes:Routes"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Routes$.html"><span class="name">Routes</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Routes define the rules for dispatching requests to its intended Akka actor processors.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.TRACE" data-isabs="false">
+      <a id="TRACE:TRACE"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="TRACE$.html"><span class="name">TRACE</span></a>
+        
+        <span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches HTTP requests with a method set to <code>TRACE</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.WebSocketFrame" data-isabs="false">
+      <a id="WebSocketFrame:WebSocketFrame"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="WebSocketFrame$.html"><span class="name">WebSocketFrame</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Used to help match an WebSocket Frame context.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.WebSocketHandshake" data-isabs="false">
+      <a id="WebSocketHandshake:WebSocketHandshake"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="WebSocketHandshake$.html"><span class="name">WebSocketHandshake</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Used to help match an WebSocket Handshake context.</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>
