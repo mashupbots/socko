@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+  <title></title>
+	<!--[if IE]>
+	<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<!--[if lt IE 9]>
+	<link rel="stylesheet" href="/assets/css/ie7.css" type="text/css" media="screen" />
+	<![endif]-->
+	<link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon"/>
+	<meta name="viewport" content="width=device-width; initial-scale=1.0">
+	<link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-30679101-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+</head>
+<body>
+
+<!--Top Support-->
+	<div id="top_support">
+		<div class="page_wrap">
+      <h5><a href="https://github.com/mashupbots/socko">Check Socko out on GitHub</a></h5>
+		</div><!--/page wrap-->
+	</div><!--/top support-->
+<!--/Top Support-->
+	
+  <header>
+    <div class="page_wrap">
+      <h1><a href="/">SOCKO WEB SERVER</a></h1>
+      <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="download.html">Download</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+        <li><a href="https://github.com/mashupbots/socko">GitHub</a></li>
+      </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="article page_wrap">
+  <h1 id='socko_features'>Socko Features</h1>
+
+<h2 id='intended_for_scala_and_akka_developers'>Intended for Scala and Akka developers</h2>
+
+<p>Socko enables you to expose your Akka actors as HTTP or WebSocket endpoints.</p>
+
+<p>It uses a routing DSL like <a href='http://unfiltered.databinder.net/Unfiltered.html'>Unfilted</a> and <a href='https://github.com/typesafehub/play2-mini'>Play2 Mini</a>. Route by HTTP method, host, path and querystring. Here&#8217;s an <a href='https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/routes/RouteApp.scala'>example</a>.</p>
+
+<p>Socko includes a StaticFileProcessor Akka actor that serves static files. We use this to serve our HTML5 application files.</p>
+
+<p>We did consider using an existing Scala web servers. Here&#8217;s why they did not suit our needs:</p>
+
+<ul>
+<li><a href='http://www.playframework.org/'>Play2</a>, <a href='http://liftweb.net/'>Lift</a>, <a href='https://github.com/ngocdaothanh/xitrum'>Xitrum</a>, <a href='http://code.google.com/p/sweetscala/'>Sweet</a> - we do not need server based web application framework.</li>
+
+<li><a href='https://github.com/typesafehub/play2-mini'>Play2-mini</a> - a bit too heavyweight as of version 1 because it pulls in all of Play.</li>
+
+<li><a href='https://github.com/spray/spray/wiki'>Spray</a>, <a href='http://unfiltered.databinder.net/Unfiltered.html'>Unfiltered</a> - we want WebSocket support; would like future support for SPDY and perhaps STOMP.</li>
+
+<li><a href='http://www.scalatra.org/'>Scalatra</a> - we do not want to have to use a servlet container.</li>
+</ul>
+
+<p><strong>NOTE</strong></p>
+
+<p>We are not saying that any of the above great frameworks are in anyway bad.</p>
+
+<p>What we are saying is they did not exactly fit the requirements of our mashupbots project. With our existing knowledge of <a href='http://netty.io'>Netty</a>, we thought it was quicker for us to build Socko than to modify/enhance an existing project to suite our needs.</p>
+
+<h2 id='embedded'>Embedded</h2>
+
+<p>Socko runs within your Scala application. It is not a standalone web server.</p>
+
+<p>You can configure Socko from inside your code and/or via settings in Akka&#8217;s configuration file.</p>
+
+<p>You can also start more than web server instance in your application; bound to different ports. This is useful if you have APIs that you wish to publish on different network interfaces; for example a public API and a private administraion/monitoring API.</p>
+
+<h2 id='lightweight_assuming_you_are_already_using_akka'>Lightweight (assuming you are already using Akka)</h2>
+
+<p>V0.1 has approximately 1,300 lines of Scala code (and ~2,600 lines of Java code which will be removed once Akka moves to the upcoming Netty 4.0).</p>
+
+<p>Socko has no external dependencies outside Akka 2.0 Remote (which includes Netty).</p>
+
+<h2 id='supportive_of_http_and_html5_standards'>Supportive of HTTP and HTML5 Standards</h2>
+
+<ul>
+<li>
+<p>HTTP/S and WebSockets</p>
+</li>
+
+<li>
+<p>HTTP compression</p>
+</li>
+
+<li>
+<p>HTTP streaming (i.e. &#8220;chunked&#8221; transfer encoding)</p>
+</li>
+
+<li>
+<p>HTTP/1.1 persistant connections (keep-alive)</p>
+</li>
+
+<li>
+<p>HTTP headers, including browser static file cache headers</p>
+</li>
+
+<li>
+<p>Decoding HTTP POST request body, file uploads and query strings</p>
+</li>
+</ul>
+
+<h2 id='fastish'>Fast-ish</h2>
+
+<p>Socko handles and processes incoming HTTP requests in an asynchronous and event driven manner thanks to Netty and Akka.</p>
+
+<p>We are aiming to be at least on-par with Apache Tomcat 7.</p>
+
+<p>We still have some more benchmarking to do, but early testing indicates that we are going to meet this objective.</p>
+
+<h2 id='open_source'>Open Source</h2>
+
+<p>Socko is published under the <a href='http://www.apache.org/licenses/LICENSE-2.0'>Apache 2 license</a>.</p>
+
+<p>The source code is hosted at <a href='https://github.com/mashupbots/socko'>github</a>.</p>
+
+<p>If you have a bug fix or enhancements, please send us a github pull request. Your contribution is welcome and appreciated.</p>
+</div><!--/page wrap-->
+
+
+
+  <footer>
+    <div class="page_wrap">
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="download.html">Download</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+        <li><a href="https://github.com/mashupbots/socko">GitHub</a></li>
+      </ul>
+      <p>Copyright 2012 Vibul Imtarnasan and David Bolton</p>
+      <div class="clear"></div>
+    </div><!--/page wrap-->
+  </footer>
+</body>
+</html>

@@ -26,7 +26,7 @@ body {
 	clear:both; 
 }
 a { 
-	color: #61B733;
+	color: #ff7361;
 	text-decoration: none;
 }
 a:hover { 
@@ -66,9 +66,6 @@ p, ul {
 	position: relative;
 	top: 3px;
 }
-#top_support h5 a {
-	color: #72CB47;
-}	
 #top_support h5 span {
 	color: #FFF;
 }
@@ -112,6 +109,9 @@ header ul li a {
 	-o-transition: background-color .2s linear, color .2s linear;
 	-ms-transition: background-color .2s linear, color .2s linear;
 	transition: background-color .2s linear, color .2s linear;
+}
+header ul li a:hover, header ul li a.active { 
+	color: #ff7361;
 }
 
 /* Masthead */
@@ -428,11 +428,17 @@ footer ul li a {
 	-ms-transition: background-color .2s linear, color .2s linear;
 	transition: background-color .2s linear, color .2s linear;
 }
+footer ul li a:hover { 
+	color: #ff7361;
+}
 footer p { 
 	color: #a0a5b0;
 	float: right;
 }
-
+footer a { 
+	color: #ff7361;
+	text-decoration: none;
+}
 
 /* Media for anything with a max width of 960px. Mostly large tablets such as the iPad */
 @media (min-width: 768px) and (max-width: 960px) {

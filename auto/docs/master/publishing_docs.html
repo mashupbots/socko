@@ -1,0 +1,25 @@
+<h1 id='the_socko_project_site'>The Socko project site</h1>
+
+<p>The Socko project is at <a href='http://sockoweb.org'>http://sockoweb.org</a>. This site includes the <a href='http://sockoweb.org/docs.html'>documentation for multiple versions of the software</a>. This page explains where to edit documentation, how to synchronise that documentation to the project site branch of the repo, and how to publish the project site.</p>
+
+<h2 id='editing_the_project_documentation'>Editing the project documentation</h2>
+
+<p>Each instance of documentation is generated from the markdown files in the socko-docs/docs directory. Aside from being markdown files, these files also include information to drive the Jekyll generation of the project site. This mostly means that they contain <a href='https://github.com/mojombo/jekyll/wiki/YAML-Front-Matter'>YAML front matter</a>.</p>
+
+<h2 id='the_synchronise_script'>The synchronise script</h2>
+
+<p>The socko-docs/synch_docs.sh script is used to synchronise documents to the <a href='http://mashupbots.github.com/socko'>project site</a> stored in the gh-pages branch, from either the current branch or a tag. It works in the following way:</p>
+
+<ul>
+<li>Finds the current branch or tag if available</li>
+
+<li>Checks out the gh-pages branch</li>
+
+<li>Use git archive to export the socko-docs/docs directory from the identified branch or tag to a docs directory namespaced by the branch/tag name</li>
+
+<li>Commits the changes to the gh-pages branch</li>
+</ul>
+
+<h1 id='publishing_the_updated_project_site'>Publishing the updated project site</h1>
+
+<p>To publish the project site, push the gh-pages branch to GitHub. Socko uses a custom domain name for the project site, so the updated site will be available at <a href='http://sockoweb.org'>http://sockoweb.org</a>.</p>

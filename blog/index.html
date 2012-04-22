@@ -1,0 +1,17 @@
+---
+layout: article
+title: Blog
+---
+ 
+<h1>Socko Blog</h1>
+ 
+<ul class="blog_posts">
+  {% for post in site.posts %}
+ 
+  <li>
+    <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+    <p>{{ post.summary }}. Published <i>{{ post.date | date: "%d %B %Y" }}</i> by <i>{{ post.author }}</i>.</p>
+  </li>
+  
+  {% endfor %}
+</ul>
