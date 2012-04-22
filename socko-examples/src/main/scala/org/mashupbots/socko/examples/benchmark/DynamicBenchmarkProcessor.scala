@@ -31,7 +31,7 @@ class DynamicBenchmarkProcessor extends Actor {
       buf.append("Hello\n")
       buf.append("</body>\n")
       buf.append("</html>\n")
-      request.writeResponse(buf.toString)
+      request.writeResponse(buf.toString, "text/html; charset=UTF-8")
       context.stop(self)
   }
 }
