@@ -47,8 +47,8 @@ import org.mashupbots.socko.context.HttpChunkProcessingContext
 import org.mashupbots.socko.context.HttpRequestProcessingContext
 import org.mashupbots.socko.context.InitialHttpRequest
 import org.mashupbots.socko.context.ProcessingContext
+import org.mashupbots.socko.context.WsFrameProcessingContext
 import org.mashupbots.socko.context.WsHandshakeProcessingContext
-import org.mashupbots.socko.context.WsProcessingContext
 import org.mashupbots.socko.utils.Logger
 
 /**
@@ -110,7 +110,7 @@ class RequestHandler(
         }
 
       case wsFrame: WebSocketFrame =>
-        var ctx = WsProcessingContext(e.getChannel, originalHttpRequest.get.endPoint, wsFrame)
+        var ctx = WsFrameProcessingContext(e.getChannel, originalHttpRequest.get.endPoint, wsFrame)
         log.debug("WS {} CHANNEL={}",
           Array[Object](ctx.endPoint, e.getChannel.getId))
 

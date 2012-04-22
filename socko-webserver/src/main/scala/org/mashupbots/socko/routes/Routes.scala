@@ -16,8 +16,11 @@
 package org.mashupbots.socko.routes
 
 import scala.util.matching.Regex
-
 import org.mashupbots.socko.context.ProcessingContext
+import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.HttpChunkProcessingContext
+import org.mashupbots.socko.context.WsHandshakeProcessingContext
+import org.mashupbots.socko.context.WsFrameProcessingContext
 
 /**
  * Routes define the rules for dispatching requests to its intended Akka actor processors. It is implemented as a
@@ -78,6 +81,78 @@ object Routes {
   def apply(funcList: PartialFunction[ProcessingContext, Unit]*) = {
     funcList.toList.reduceLeft { (functions, f) => functions orElse f }
   }
+}
+
+/**
+ * Used to help match an HTTP Request context.
+ *
+ * For example:
+ * {{{
+ *   val r = Routes({
+ *     case ctx @ HttpRequest(_) => {
+ *       ...
+ *     }
+ *   })
+ * }}}
+ */
+object HttpRequest {
+  def unapply(ctx: ProcessingContext) =
+    if (ctx.isInstanceOf[HttpRequestProcessingContext]) Some(ctx.asInstanceOf[HttpRequestProcessingContext])
+    else None
+}
+
+/**
+ * Used to help match an WebSocket Handshake context.
+ *
+ * For example:
+ * {{{
+ *   val r = Routes({
+ *     case ctx @ WebSocketHandshake(_) => {
+ *       ...
+ *     }
+ *   })
+ * }}}
+ */
+object WebSocketHandshake {
+  def unapply(ctx: ProcessingContext) =
+    if (ctx.isInstanceOf[WsHandshakeProcessingContext]) Some(ctx.asInstanceOf[WsHandshakeProcessingContext])
+    else None
+}
+
+/**
+ * Used to help match an WebSocket Frame context.
+ *
+ * For example:
+ * {{{
+ *   val r = Routes({
+ *     case ctx @ WebSocketFrame(_) => {
+ *       ...
+ *     }
+ *   })
+ * }}}
+ */
+object WebSocketFrame {
+  def unapply(ctx: ProcessingContext) =
+    if (ctx.isInstanceOf[WsFrameProcessingContext]) Some(ctx.asInstanceOf[WsFrameProcessingContext])
+    else None
+}
+
+/**
+ * Used to help match an HTTP Chunk context.
+ *
+ * For example:
+ * {{{
+ *   val r = Routes({
+ *     case ctx @ HttpChunk(_) => {
+ *       ...
+ *     }
+ *   })
+ * }}}
+ */
+object HttpChunk {
+  def unapply(ctx: ProcessingContext) =
+    if (ctx.isInstanceOf[HttpChunkProcessingContext]) Some(ctx.asInstanceOf[HttpChunkProcessingContext])
+    else None
 }
 
 /**

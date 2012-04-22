@@ -21,10 +21,9 @@ import java.util.Hashtable
 
 import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
+import org.mashupbots.socko.context.WsFrameProcessingContext
 import org.mashupbots.socko.context.WsHandshakeProcessingContext
-import org.mashupbots.socko.context.WsProcessingContext
-import org.mashupbots.socko.routes.Path
-import org.mashupbots.socko.routes.Routes
+import org.mashupbots.socko.routes._
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 import org.scalatest.junit.JUnitRunner
@@ -49,21 +48,22 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
   val path = "http://localhost:" + port + "/"
 
   val routes = Routes({
-    case ctx @ Path("/snoop/") => {
-      val name = "SnoopProcessor_%s_%s".format(ctx.channel.getId, System.currentTimeMillis)
-      actorSystem.actorOf(Props[SnoopProcessor], name) ! ctx
+    case HttpRequest(httpRequest) => httpRequest match {
+      case Path("/snoop/") => {
+        val name = "SnoopProcessor_%s_%s".format(httpRequest.channel.getId, System.currentTimeMillis)
+        actorSystem.actorOf(Props[SnoopProcessor], name) ! httpRequest
+      }
     }
-    case ctx @ Path("/snoop/websocket/") => ctx match {
-      // For WebSocket processing, we have to first indicate that it is allowed 
-      // in the handshake then processes the frames
-      case ctx: WsHandshakeProcessingContext => {
-        val hctx = ctx.asInstanceOf[WsHandshakeProcessingContext]
-        hctx.isAllowed = true
+    case WebSocketHandshake(wsHandshake) => wsHandshake match {
+      case Path("/snoop/websocket/") => {
+        // For WebSocket processing, we first have to authorize the handshake by setting the "isAllowed" property.
+        // This is a security measure to make sure that web sockets can only be established at your specified end points.
+        wsHandshake.isAllowed = true
       }
-      case ctx: WsProcessingContext => {
-        val name = "SnoopProcessor_%s_%s".format(ctx.channel.getId, System.currentTimeMillis)
-        actorSystem.actorOf(Props[SnoopProcessor], name) ! ctx
-      }
+    }
+    case WebSocketFrame(wsFrame) => {
+      val name = "SnoopProcessor_%s_%s".format(wsFrame.channel.getId, System.currentTimeMillis)
+      actorSystem.actorOf(Props[SnoopProcessor], name) ! wsFrame
     }
   })
 
@@ -92,8 +92,8 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
       resp.content should include("REQUEST_URI: /snoop/")
 
       resp.headers("Date").length should be > 0
-      resp.headers("Content-Length").length should be > 0      
-      resp.headers("Content-Type") should equal("text/plain; charset=UTF-8")      
+      resp.headers("Content-Length").length should be > 0
+      resp.headers("Content-Type") should equal("text/plain; charset=UTF-8")
     }
 
     "support HTTP POST" in {
@@ -110,8 +110,8 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
       resp.content should include("  password=guessme")
 
       resp.headers("Date").length should be > 0
-      resp.headers("Content-Length").length should be > 0      
-      resp.headers("Content-Type") should equal("text/plain; charset=UTF-8")      
+      resp.headers("Content-Length").length should be > 0
+      resp.headers("Content-Type") should equal("text/plain; charset=UTF-8")
     }
 
     "support HTTP PUT" in {
@@ -127,8 +127,8 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
       resp.content should include("<abc></abc>")
 
       resp.headers("Date").length should be > 0
-      resp.headers("Content-Length").length should be > 0      
-      resp.headers("Content-Type") should equal("text/plain; charset=UTF-8")      
+      resp.headers("Content-Length").length should be > 0
+      resp.headers("Content-Type") should equal("text/plain; charset=UTF-8")
     }
 
     "support HTTP DELETE" in {
@@ -143,8 +143,8 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
       resp.content should include("REQUEST_URI: /snoop/")
 
       resp.headers("Date").length should be > 0
-      resp.headers("Content-Length").length should be > 0      
-      resp.headers("Content-Type") should equal("text/plain; charset=UTF-8")      
+      resp.headers("Content-Length").length should be > 0
+      resp.headers("Content-Type") should equal("text/plain; charset=UTF-8")
     }
 
     "support HTTP HEAD" in {
@@ -264,7 +264,7 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
       resp.headers("Date").length should be > 0
       resp.headers("Content-Encoding") should equal("gzip")
     }
-    
+
     "support Deflate compression" in {
       val url = new URL(path + "snoop/")
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
@@ -278,6 +278,6 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
       resp.headers("Date").length should be > 0
       resp.headers("Content-Encoding") should equal("deflate")
     }
-    
+
   }
 }

@@ -43,8 +43,8 @@ object CodedConfigApp extends Logger {
   // STEP #2 - Define Routes
   //
   val routes = Routes({
-    case ctx @ GET(_) => {
-      actorSystem.actorOf(Props[HelloProcessor]) ! ctx
+    case GET(context) => {
+      actorSystem.actorOf(Props[HelloProcessor]) ! context
     }
   })
 

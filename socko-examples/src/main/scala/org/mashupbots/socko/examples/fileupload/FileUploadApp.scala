@@ -22,11 +22,7 @@ import org.jboss.netty.util.CharsetUtil
 import org.mashupbots.socko.context.HttpRequestProcessingContext
 import org.mashupbots.socko.processors.StaticFileProcessor
 import org.mashupbots.socko.processors.StaticFileRequest
-import org.mashupbots.socko.routes.GET
-import org.mashupbots.socko.routes.POST
-import org.mashupbots.socko.routes.Path
-import org.mashupbots.socko.routes.PathSegments
-import org.mashupbots.socko.routes.Routes
+import org.mashupbots.socko.routes._
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
@@ -90,26 +86,25 @@ object FileUploadApp extends Logger {
   // STEP #2 - Define Routes
   //
   val routes = Routes({
-    case ctx @ GET(Path("/")) => {
-      // Redirect to index.html
-      // This is a quick non-blocking operation so executing it in the netty thread pool is OK. 
-      val httpContext = ctx.asInstanceOf[HttpRequestProcessingContext]
-      val endPoint = httpContext.endPoint
-      httpContext.redirect("http://localhost:8888/index.html")
-    }
-    case ctx @ GET(Path(PathSegments(fileName :: Nil))) => {
-      // download requested file
-      val request = new StaticFileRequest(
-        ctx.asInstanceOf[HttpRequestProcessingContext],
-        contentDir,
-        new File(contentDir, fileName),
-        tempDir)
-      staticFileProcessorRouter ! request
-    }
-    case ctx @ POST(Path("/upload")) => {
-      // save file to the content directory so it can be downloaded
-      val request = FileUploadRequest(ctx.asInstanceOf[HttpRequestProcessingContext], contentDir)
-      fileUploadProcessorRouter ! request
+    case HttpRequest(httpRequest) => httpRequest match {
+      case GET(Path("/")) => {
+        // Redirect to index.html
+        // This is a quick non-blocking operation so executing it in the netty thread pool is OK. 
+        httpRequest.redirect("http://localhost:8888/index.html")
+      }
+      case GET(Path(PathSegments(fileName :: Nil))) => {
+        // Download requested file
+        val staticFileRequest = new StaticFileRequest(
+          httpRequest,
+          contentDir,
+          new File(contentDir, fileName),
+          tempDir)
+        staticFileProcessorRouter ! staticFileRequest
+      }
+      case POST(Path("/upload")) => {
+        // Save file to the content directory so it can be downloaded
+        fileUploadProcessorRouter ! FileUploadRequest(httpRequest, contentDir)
+      }
     }
   })
 
@@ -202,11 +197,11 @@ object FileUploadApp extends Logger {
     val out = new FileOutputStream(indexFile)
     out.write(buf.toString.getBytes(CharsetUtil.UTF_8))
     out.close()
-    
+
     buf.setLength(0)
     buf.append("body { font-family: Arial,Helv,Courier,Serif}\n")
     buf.append("div.field {margin-top:20px;}\n")
-    
+
     val cssFile = new File(dir, "mystyle.css")
     val out2 = new FileOutputStream(cssFile)
     out2.write(buf.toString.getBytes(CharsetUtil.UTF_8))

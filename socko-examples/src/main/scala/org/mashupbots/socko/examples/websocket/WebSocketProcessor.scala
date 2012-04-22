@@ -15,21 +15,14 @@
 //
 package org.mashupbots.socko.examples.websocket
 
-import scala.collection.JavaConversions.asScalaBuffer
-import org.apache.http.HttpHeaders
-import org.jboss.netty.channel.ChannelLocal
-import org.mashupbots.socko.context.HttpChunkProcessingContext
-import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.mashupbots.socko.context.WsProcessingContext
-import org.mashupbots.socko.postdecoder.InterfaceHttpData.HttpDataType
-import org.mashupbots.socko.postdecoder.Attribute
-import org.mashupbots.socko.postdecoder.DefaultHttpDataFactory
-import org.mashupbots.socko.postdecoder.FileUpload
-import org.mashupbots.socko.postdecoder.HttpPostRequestDecoder
-import akka.actor.Actor
-import akka.event.Logging
 import java.text.SimpleDateFormat
 import java.util.GregorianCalendar
+
+import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.WsFrameProcessingContext
+
+import akka.actor.Actor
+import akka.event.Logging
 
 /**
  * Web Socket processor that echos incoming text frames in upper case.
@@ -45,7 +38,7 @@ class WebSocketProcessor extends Actor {
       // Return the HTML page to setup web sockets in the browser
       writeHTML(httpRequestContext)
       context.stop(self)
-    case webSocketContext: WsProcessingContext =>
+    case webSocketContext: WsFrameProcessingContext =>
       // Echo web socket text frames
       writeWebSocketResponse(webSocketContext)
       context.stop(self)
@@ -110,7 +103,7 @@ class WebSocketProcessor extends Actor {
   /**
    * Echo the details of the web socket frame that we just received; but in upper case.
    */
-  private def writeWebSocketResponse(ctx: WsProcessingContext) {
+  private def writeWebSocketResponse(ctx: WsFrameProcessingContext) {
     log.info("TextWebSocketFrame: " + ctx.readStringContent)
 
     val dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")

@@ -20,7 +20,6 @@ import org.apache.http.HttpHeaders
 import org.jboss.netty.channel.ChannelLocal
 import org.mashupbots.socko.context.HttpChunkProcessingContext
 import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.mashupbots.socko.context.WsProcessingContext
 import org.mashupbots.socko.postdecoder.InterfaceHttpData.HttpDataType
 import org.mashupbots.socko.postdecoder.Attribute
 import org.mashupbots.socko.postdecoder.DefaultHttpDataFactory

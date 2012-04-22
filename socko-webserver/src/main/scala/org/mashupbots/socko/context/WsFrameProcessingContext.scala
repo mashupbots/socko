@@ -33,7 +33,7 @@ import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
  * @param endPoint End point though which the original handshake request entered
  * @param wsFrame Incoming data for processing
  */
-case class WsProcessingContext(
+case class WsFrameProcessingContext(
   channel: Channel,
   endPoint: EndPoint,
   wsFrame: WebSocketFrame) extends ProcessingContext {

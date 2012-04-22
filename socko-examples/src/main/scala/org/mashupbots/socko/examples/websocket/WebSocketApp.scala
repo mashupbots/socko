@@ -17,11 +17,9 @@ package org.mashupbots.socko.examples.websocket
 
 import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.WsFrameProcessingContext
 import org.mashupbots.socko.context.WsHandshakeProcessingContext
-import org.mashupbots.socko.context.WsProcessingContext
-import org.mashupbots.socko.routes.GET
-import org.mashupbots.socko.routes.Path
-import org.mashupbots.socko.routes.Routes
+import org.mashupbots.socko.routes._
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
@@ -51,27 +49,31 @@ object WebSocketApp extends Logger {
   // `WebSocketProcessor` will `stop()` itself after processing the request. 
   //
   val routes = Routes({
-    case ctx @ GET(Path("/html")) => {
-      // Return HTML page to establish web socket
-      actorSystem.actorOf(Props[WebSocketProcessor]) ! ctx
+
+    case HttpRequest(httpRequest) => httpRequest match {
+      case GET(Path("/html")) => {
+        // Return HTML page to establish web socket
+        actorSystem.actorOf(Props[WebSocketProcessor]) ! httpRequest
+      }
+      case Path("/favicon.ico") => {
+        // If favicon.ico, just return a 404 because we don't have that file
+        httpRequest.writeErrorResponse(HttpResponseStatus.NOT_FOUND, false, "")
+      }
     }
-    case ctx @ Path("/websocket/") => ctx match {
-      case ctx: WsHandshakeProcessingContext => {
+
+    case WebSocketHandshake(wsHandshake) => wsHandshake match {
+      case Path("/websocket/") => {
         // For WebSocket processing, we first have to authorize the handshake by setting the "isAllowed" property.
         // This is a security measure to make sure that web sockets can only be established at your specified end points.
-        val hctx = ctx.asInstanceOf[WsHandshakeProcessingContext]
-        hctx.isAllowed = true
-      }
-      case ctx: WsProcessingContext => {
-        // Once handshaking has taken place, the client can then send text to us for processing
-        actorSystem.actorOf(Props[WebSocketProcessor]) ! ctx
+        wsHandshake.isAllowed = true
       }
     }
-    case ctx @ Path("/favicon.ico") => {
-      // If favicon.ico, just return a 404 because we don't have that file
-      val httpContext = ctx.asInstanceOf[HttpRequestProcessingContext]
-      httpContext.writeErrorResponse(HttpResponseStatus.NOT_FOUND, false, "")
+
+    case WebSocketFrame(wsFrame) => {
+      // Once handshaking has taken place, we can now process frames sent from the client
+      actorSystem.actorOf(Props[WebSocketProcessor]) ! wsFrame
     }
+
   })
 
   //

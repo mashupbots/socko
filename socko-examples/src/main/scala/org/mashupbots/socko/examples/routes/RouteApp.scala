@@ -49,35 +49,34 @@ object RouteApp extends Logger {
   // `TimeProcessor` will `stop()` itself after processing each request.
   //
   val routes = Routes({
+    
+    case HttpRequest(httpRequest) => httpRequest match {
+      // *** HOW TO EXTRACT QUERYSTRING VARIABLES AND USE CONCATENATION ***
+      // If the timezone is specified on the query string, (like "/time?tz=sydney"), pass the
+      // timezone to the TimeProcessor    
+      case (GET(Path("/time")) & TimezoneQueryString(timezone)) => {
+        actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(httpRequest, Some(timezone))
+      }
 
-    // *** HOW TO EXTRACT QUERYSTRING VARIABLES AND USE CONCATENATION ***
-    // If the timezone is specified on the query string, (like "/time?tz=sydney"), pass the
-    // timezone to the TimeProcessor    
-    case ctx @ GET(Path("/time")) & TimezoneQueryString(timezone) => {
-      val request = TimeRequest(ctx.asInstanceOf[HttpRequestProcessingContext], Some(timezone))
-      actorSystem.actorOf(Props[TimeProcessor]) ! request
-    }
+      // *** HOW TO MATCH AND EXTRACT A PATH SEGMENT ***
+      // If the timezone is specified on the path (like "/time/sydney"), pass the
+      // timezone to the TimeProcessor
+      case GET(Path(PathSegments("time" :: timezone :: Nil))) => {
+        actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(httpRequest, Some(timezone))
+      }
 
-    // *** HOW TO MATCH AND EXTRACT A PATH SEGMENT ***
-    // If the timezone is specified on the path (like "/time/sydney"), pass the
-    // timezone to the TimeProcessor
-    case ctx @ GET(Path(PathSegments("time" :: timezone :: Nil))) => {
-      val request = TimeRequest(ctx.asInstanceOf[HttpRequestProcessingContext], Some(timezone))
-      actorSystem.actorOf(Props[TimeProcessor]) ! request
-    }
+      // *** HOW TO MATCH AN EXACT PATH ***
+      // No timezone specified, make TimeProcessor return the time in the default timezone
+      case GET(Path("/time")) => {
+        actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(httpRequest, None)
+      }
 
-    // *** HOW TO MATCH AN EXACT PATH ***
-    // No timezone specified, make TimeProcessor return the time in the default timezone
-    case ctx @ GET(Path("/time")) => {
-      val request = TimeRequest(ctx.asInstanceOf[HttpRequestProcessingContext], None)
-      actorSystem.actorOf(Props[TimeProcessor]) ! request
+      // If favicon.ico, just return a 404 because we don't have that file
+      case Path("/favicon.ico") => {
+        httpRequest.writeErrorResponse(HttpResponseStatus.NOT_FOUND, false, "")
+      }
     }
-
-    // If favicon.ico, just return a 404 because we don't have that file
-    case ctx @ Path("/favicon.ico") => {
-      val httpContext = ctx.asInstanceOf[HttpRequestProcessingContext]
-      httpContext.writeErrorResponse(HttpResponseStatus.NOT_FOUND, false, "")
-    }
+    
   })
 
   object TimezoneQueryString extends QueryStringMatcher("tz")

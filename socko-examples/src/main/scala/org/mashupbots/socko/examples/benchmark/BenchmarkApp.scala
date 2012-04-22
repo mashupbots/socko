@@ -23,9 +23,7 @@ import org.jboss.netty.util.CharsetUtil
 import org.mashupbots.socko.context.HttpRequestProcessingContext
 import org.mashupbots.socko.processors.StaticFileProcessor
 import org.mashupbots.socko.processors.StaticFileRequest
-import org.mashupbots.socko.routes.GET
-import org.mashupbots.socko.routes.Path
-import org.mashupbots.socko.routes.Routes
+import org.mashupbots.socko.routes._
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
@@ -82,27 +80,29 @@ object BenchmarkApp extends Logger {
   // STEP #2 - Define Routes
   //
   val routes = Routes({
-    case ctx @ GET(Path("/test.html")) => {
-      val request = new StaticFileRequest(
-        ctx.asInstanceOf[HttpRequestProcessingContext],
-        contentDir,
-        new File(contentDir, "test.html"),
-        tempDir)
-      staticFileProcessorRouter ! request
-    }
-    case ctx @ GET(Path("/data.dat")) => {
-      val request = new StaticFileRequest(
-        ctx.asInstanceOf[HttpRequestProcessingContext],
-        contentDir,
-        new File(contentDir, "data.dat"),
-        tempDir)
-      staticFileProcessorRouter ! request
-    }
-    case ctx @ GET(Path("/dynamic")) => {
-      actorSystem.actorOf(Props[DynamicBenchmarkProcessor]) ! ctx
-    }
-    case ctx @ GET(Path("/favicon.ico")) => {
-      ctx.asInstanceOf[HttpRequestProcessingContext].writeErrorResponse(HttpResponseStatus.NOT_FOUND)
+    case HttpRequest(httpRequest) => httpRequest match {
+      case GET(Path("/test.html")) => {
+        val staticFileRequest = new StaticFileRequest(
+          httpRequest,
+          contentDir,
+          new File(contentDir, "test.html"),
+          tempDir)
+        staticFileProcessorRouter ! staticFileRequest
+      }
+      case GET(Path("/data.dat")) => {
+        val staticFileRequest = new StaticFileRequest(
+          httpRequest,
+          contentDir,
+          new File(contentDir, "data.dat"),
+          tempDir)
+        staticFileProcessorRouter ! staticFileRequest
+      }
+      case GET(Path("/dynamic")) => {
+        actorSystem.actorOf(Props[DynamicBenchmarkProcessor]) ! httpRequest
+      }
+      case GET(Path("/favicon.ico")) => {
+        httpRequest.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
+      }
     }
   })
 
@@ -182,12 +182,12 @@ object BenchmarkApp extends Logger {
     // data.dat - 1MB file
     buf.setLength(0)
     for (i <- 0 until (1024 * 1024)) {
-    	buf.append('a')
+      buf.append('a')
     }
-    
+
     val bigFile = new File(dir, "data.dat")
     val out2 = new FileOutputStream(bigFile)
     out2.write(buf.toString.getBytes(CharsetUtil.UTF_8))
-    out2.close()    
+    out2.close()
   }
 }

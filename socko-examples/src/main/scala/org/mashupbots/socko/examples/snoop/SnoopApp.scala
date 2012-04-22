@@ -43,8 +43,8 @@ object SnoopApp extends Logger {
   // `SnoopProcessor` will `stop()` itself after processing each request.
   //
   val routes = Routes({
-    case ctx @ _ => {
-      actorSystem.actorOf(Props[SnoopProcessor]) ! ctx
+    case context => {
+      actorSystem.actorOf(Props[SnoopProcessor]) ! context
     }
   })
 

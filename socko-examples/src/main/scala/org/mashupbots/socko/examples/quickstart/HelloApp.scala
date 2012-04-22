@@ -46,8 +46,8 @@ object HelloApp extends Logger {
   // STEP #2 - Define Routes
   //
   val routes = Routes({
-    case ctx @ GET(_) => {
-      actorSystem.actorOf(Props[HelloProcessor]) ! ctx
+    case GET(request) => {
+      actorSystem.actorOf(Props[HelloProcessor]) ! request
     }
   })
 

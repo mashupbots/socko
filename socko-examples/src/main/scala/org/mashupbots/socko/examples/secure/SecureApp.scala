@@ -58,8 +58,8 @@ object SecureApp extends Logger {
   // STEP #2 - Define Routes
   //
   val routes = Routes({
-    case ctx @ GET(_) => {
-      actorSystem.actorOf(Props[SecureHelloProcessor]) ! ctx
+    case GET(request) => {
+      actorSystem.actorOf(Props[SecureHelloProcessor]) ! request
     }
   })
 

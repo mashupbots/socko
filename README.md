@@ -1,12 +1,12 @@
 # SOCKO
 
-A [Scala](http://www.scala-lang.org/) web server powered by
+An embedded [Scala](http://www.scala-lang.org/) web server powered by
 [Netty](http://netty.io/) networking and [Akka](http://akka.io/) processing.
 
 ## Background
 We are currently working on a HTML5 style app called MashupBots.
 
-We wanted an open source, lightweight and embeddable Scala web server that can serve static files and support a RESTful API to our business logic implemented in Akka.
+We wanted an open source, lightweight and embeddable Scala web server that can serve static files and support RESTful APIs to our business logic implemented in Akka.
 
 We do not need a web application framework: server side templating, caching, session management, etc.
 
@@ -35,20 +35,18 @@ Socko is:
 
 * Embedded
   * Socko runs within your Scala application. 
+  * Routing DSL like [Unfilted](http://unfiltered.databinder.net/Unfiltered.html) and 
+    [Play2 Mini](https://github.com/typesafehub/play2-mini). Route by HTTP method, host, path and querystring.
+    See [example](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/routes/RouteApp.scala).
+  * Configurable from inside your code and/or via settings in Akka's configuration file.
+  * Plenty of [examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
 
 * Supportive of HTTP and HTML5 Standards
   * HTTP/S and WebSockets
   * HTTP compression
   * HTTP headers
   * Decoding HTTP POST, file uploads and query strings
-
-* Trying to be as Simple and as Easy as possible
-  * Routing DSL like [Unfilted HTTP ToolKit](http://unfiltered.databinder.net/Unfiltered.html) and 
-    [Play Mini](https://github.com/typesafehub/play2-mini). Route by HTTP method, host, path and querystring.
-    See [example](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/routes/RouteApp.scala).
-  * Configurable from inside your code and/or via settings in Akka's configuration file.
-  * Plenty of [examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
-
+  
 * Open Source
   * [Apache 2 license](http://www.apache.org/licenses/LICENSE-2.0)
 

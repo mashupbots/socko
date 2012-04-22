@@ -22,7 +22,7 @@ import org.jboss.netty.channel.ChannelLocal
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.mashupbots.socko.context.HttpChunkProcessingContext
 import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.mashupbots.socko.context.WsProcessingContext
+import org.mashupbots.socko.context.WsFrameProcessingContext
 import org.mashupbots.socko.postdecoder.InterfaceHttpData.HttpDataType
 import org.mashupbots.socko.postdecoder.Attribute
 import org.mashupbots.socko.postdecoder.DefaultHttpDataFactory
@@ -50,7 +50,7 @@ class SnoopProcessor extends Actor {
     case httpChunkContext: HttpChunkProcessingContext =>
       snoopHttpChunk(httpChunkContext)
       context.stop(self)
-    case webSocketContext: WsProcessingContext =>
+    case webSocketContext: WsFrameProcessingContext =>
       snoopWebSocket(webSocketContext)
       context.stop(self)
     case _ => {
@@ -155,7 +155,7 @@ class SnoopProcessor extends Actor {
   /**
    * Echo out details of the web socket frame that we just received
    */
-  private def snoopWebSocket(ctx: WsProcessingContext) {
+  private def snoopWebSocket(ctx: WsFrameProcessingContext) {
     if (ctx.isText) {
       log.info("TextWebSocketFrame: " + ctx.readStringContent)
       ctx.writeText(ctx.readStringContent)
