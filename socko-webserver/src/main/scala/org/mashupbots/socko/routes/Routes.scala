@@ -35,10 +35,10 @@ import org.mashupbots.socko.context.WsFrameProcessingContext
  * Example of a single list of partial functions:
  * {{{
  *   val r = Routes({
- *     case ctx @ GET(PathSegments("record" :: id :: Nil)) => {
+ *     case GET(PathSegments("record" :: id :: Nil)) => {
  *       ...
  *     }
- *     case ctx @ PathSegments("record" :: id :: Nil) => {
+ *     case PathSegments("record" :: id :: Nil) => {
  *       ...
  *     }
  *   })
@@ -48,18 +48,18 @@ import org.mashupbots.socko.context.WsFrameProcessingContext
  * {{{
  *   val r = Routes(
  *     {
- *       case ctx @ GET(PathSegments("record" :: id :: Nil)) => {
+ *       case GET(PathSegments("record" :: id :: Nil)) => {
  *         ...
  *       }
- *       case ctx @ PathSegments("record" :: id :: Nil) => {
+ *       case PathSegments("record" :: id :: Nil) => {
  *         ...
  *       }
  *     },
  *     {
- *       case ctx @ PUT(Host("aaa.abc.com")) & Path("/test1") => {
+ *       case PUT(Host("aaa.abc.com")) & Path("/test1") => {
  *         ...
  *       }
- *       case ctx @ Host("aaa.abc.com") & Path("/test2") => {
+ *       case Host("aaa.abc.com") & Path("/test2") => {
  *         ...
  *       }
  *     })
@@ -175,7 +175,7 @@ class Method(method: String) {
  * For example:
  * {{{
  *   val r = Routes({
- *     case ctx @ GET(_) => {
+ *     case GET(ctx) => {
  *       ...
  *     }
  *   })
@@ -189,7 +189,7 @@ object GET extends Method("GET")
  * For example:
  * {{{
  *   val r = Routes({
- *     case ctx @ POST(_) => {
+ *     case POST(ctx) => {
  *       ...
  *     }
  *   })
@@ -203,7 +203,7 @@ object POST extends Method("POST")
  * For example:
  * {{{
  *   val r = Routes({
- *     case ctx @ PUT(_) => {
+ *     case PUT(ctx) => {
  *       ...
  *     }
  *   })
@@ -217,7 +217,7 @@ object PUT extends Method("PUT")
  * For example:
  * {{{
  *   val r = Routes({
- *     case ctx @ DELETE(_) => {
+ *     case DELETE(ctx) => {
  *       ...
  *     }
  *   })
@@ -231,7 +231,7 @@ object DELETE extends Method("DELETE")
  * For example:
  * {{{
  *   val r = Routes({
- *     case ctx @ HEAD(_) => {
+ *     case HEAD(ctx) => {
  *       ...
  *     }
  *   })
@@ -245,7 +245,7 @@ object HEAD extends Method("HEAD")
  * For example:
  * {{{
  *   val r = Routes({
- *     case ctx @ CONNECT(_) => {
+ *     case CONNECT(ctx) => {
  *       ...
  *     }
  *   })
@@ -259,7 +259,7 @@ object CONNECT extends Method("CONNECT")
  * For example:
  * {{{
  *   val r = Routes({
- *     case ctx @ OPTIONS(_) => {
+ *     case OPTIONS(ctx) => {
  *       ...
  *     }
  *   })
@@ -273,7 +273,7 @@ object OPTIONS extends Method("OPTIONS")
  * For example:
  * {{{
  *   val r = Routes({
- *     case ctx @ TRACE(_) => {
+ *     case TRACE(ctx) => {
  *       ...
  *     }
  *   })

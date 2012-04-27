@@ -55,7 +55,7 @@ import com.typesafe.config.ConfigException
  * @param hostname Hostname or IP address to bind. `0.0.0.0` will bind to all addresses.
  * 	You can also specify comma separated hostnames/ip address like `localhost,192.168.1.1`.
  *  Defaults to `localhost`.
- * @param port Port to bind to. Defaults to `8888`.
+ * @param port IP port number to bind to. Defaults to `8888`.
  * @param sslConfig SSL protocol configuration. If `None`, then SSL will not be turned on.
  *  Defaults to `None`.
  * @param httpConfig HTTP protocol configuration. Default to a and instance of 
