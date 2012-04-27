@@ -35,10 +35,10 @@ import org.mashupbots.socko.context.WsFrameProcessingContext
  * Example of a single list of partial functions:
  * {{{
  *   val r = Routes({
- *     case ctx @ GET(Path(PathSegments("record" :: id :: Nil))) => {
+ *     case ctx @ GET(PathSegments("record" :: id :: Nil)) => {
  *       ...
  *     }
- *     case ctx @ Path(PathSegments("record" :: id :: Nil)) => {
+ *     case ctx @ PathSegments("record" :: id :: Nil) => {
  *       ...
  *     }
  *   })
@@ -48,10 +48,10 @@ import org.mashupbots.socko.context.WsFrameProcessingContext
  * {{{
  *   val r = Routes(
  *     {
- *       case ctx @ GET(Path(PathSegments("record" :: id :: Nil))) => {
+ *       case ctx @ GET(PathSegments("record" :: id :: Nil)) => {
  *         ...
  *       }
- *       case ctx @ Path(PathSegments("record" :: id :: Nil)) => {
+ *       case ctx @ PathSegments("record" :: id :: Nil) => {
  *         ...
  *       }
  *     },
@@ -331,7 +331,7 @@ object PathSegments {
  * Then, when defining your Route:
  * {{{
  *   val r = Routes({
- *     case case MyPathRegex(m) => {
+ *     case MyPathRegex(m) => {
  *       assert(m.group(1) == "to")
  *       assert(m.group(2) == "file")
  *       ...
@@ -445,26 +445,26 @@ class QueryStringRegex(regex: Regex) {
 }
 
 /**
- * Matches HTTP requests that have a query string item with the specified name.
+ * Matches HTTP requests that have a query string field with the specified name.
  *
- * If a match is found, the value is returned.  If there are more than one value, on the first value is returned.
+ * If a match is found, the value is returned. If there are more than one value, on the first value is returned.
  *
  * For example, to match `?name1=value1`, first define your match as an object:
  * {{{
- *    object MyQueryStringName extends QueryStringName("name1")
+ *    object MyQueryStringField extends QueryStringName("name1")
  * }}}
  *
  * Then, when defining your Route:
  * {{{
  *   val r = Routes({
- *     case MyQueryStringName(value) => {
+ *     case MyQueryStringField(value) => {
  *       assert(value == "value1")
  *       ...
  *     }
  *   })
  * }}}
  */
-class QueryStringMatcher(name: String) {
+class QueryStringField(name: String) {
   def unapply(ctx: ProcessingContext) = {
     ctx.endPoint.getQueryString(name)
   }

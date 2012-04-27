@@ -56,11 +56,11 @@ class QueryStringRouteSpec extends WordSpec with ShouldMatchers with GivenWhenTh
     }
 
     "route on querystring match" in {
-      object QueryStringMatcher extends QueryStringMatcher("name1")
+      object QueryStringField extends QueryStringField("name1")
 
       var result = ""
       val r = Routes({
-        case QueryStringMatcher(value) => {
+        case QueryStringField(value) => {
           value should equal("value1")
           result = "1"
         }

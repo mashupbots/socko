@@ -79,7 +79,7 @@ object RouteApp extends Logger {
     
   })
 
-  object TimezoneQueryString extends QueryStringMatcher("tz")
+  object TimezoneQueryString extends QueryStringField("tz")
 
   //
   // STEP #3 - Start and Stop Socko Web Server
