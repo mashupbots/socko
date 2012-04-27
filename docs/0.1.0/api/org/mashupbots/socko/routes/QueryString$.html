@@ -30,7 +30,7 @@
       
           <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Matches HTTP requests that have identical query string</p><p>For example, to match <code>http://www.sockoweb.org/do?action=save</code>:</p><pre>
   val r = Routes({
-    case ctx @ QueryString(&quot;action=save&quot;) =&gt; {
+    case QueryString(&quot;action=save&quot;) =&gt; {
       ...
     }
   })

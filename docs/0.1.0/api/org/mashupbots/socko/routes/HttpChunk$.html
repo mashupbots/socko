@@ -30,7 +30,7 @@
       
           <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Used to help match an HTTP Chunk context.</p><p>For example:</p><pre>
   val r = Routes({
-    case ctx @ HttpChunk(_) =&gt; {
+    case HttpChunk(httpChunk) =&gt; {
       ...
     }
   })

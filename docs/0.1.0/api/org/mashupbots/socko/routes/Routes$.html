@@ -31,28 +31,28 @@
           <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Routes define the rules for dispatching requests to its intended Akka actor processors. It is implemented as a
 list of PartialFunctions.</p><p>To assist with routing, use the following extractors:</p><ul><li>HTTP Method: GET, POST, PUT, DELETE, HEAD, CONNECT, OPTIONS, TRACE</li><li>HTTP Path: Path, PathSegments, PathRegex</li><li>HTTP Host: Host, HostSegments, HostRegex</li><li>HTTP Query String: QueryString, QueryStringRegex</li></ul><p>Example of a single list of partial functions:</p><pre>
   val r = Routes({
-    case ctx @ GET(Path(PathSegments(&quot;record&quot; :: id :: Nil))) =&gt; {
+    case GET(PathSegments(&quot;record&quot; :: id :: Nil)) =&gt; {
       ...
     }
-    case ctx @ Path(PathSegments(&quot;record&quot; :: id :: Nil)) =&gt; {
+    case PathSegments(&quot;record&quot; :: id :: Nil) =&gt; {
       ...
     }
   })
 </pre><p>Example of 2 lists of partial functions:</p><pre>
   val r = Routes(
     {
-      case ctx @ GET(Path(PathSegments(&quot;record&quot; :: id :: Nil))) =&gt; {
+      case GET(PathSegments(&quot;record&quot; :: id :: Nil)) =&gt; {
         ...
       }
-      case ctx @ Path(PathSegments(&quot;record&quot; :: id :: Nil)) =&gt; {
+      case PathSegments(&quot;record&quot; :: id :: Nil) =&gt; {
         ...
       }
     },
     {
-      case ctx @ PUT(Host(&quot;aaa.abc.com&quot;)) &amp; Path(&quot;/test1&quot;) =&gt; {
+      case PUT(Host(&quot;aaa.abc.com&quot;)) &amp; Path(&quot;/test1&quot;) =&gt; {
         ...
       }
-      case ctx @ Host(&quot;aaa.abc.com&quot;) &amp; Path(&quot;/test2&quot;) =&gt; {
+      case Host(&quot;aaa.abc.com&quot;) &amp; Path(&quot;/test2&quot;) =&gt; {
         ...
       }
     })

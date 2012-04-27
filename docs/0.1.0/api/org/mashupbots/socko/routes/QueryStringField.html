@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>org.mashupbots.socko.routes.TRACE</title>
+          <title>org.mashupbots.socko.routes.QueryStringField</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
@@ -12,31 +12,34 @@
       <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
     
         </head>
-        <body class="value">
+        <body class="type">
       <div id="definition">
-        <img src="../../../../lib/object_big.png" />
+        <img src="../../../../lib/class_big.png" />
         <p id="owner"><a name="org" class="extype" href="../../../package.html">org</a>.<a name="org.mashupbots" class="extype" href="../../package.html">mashupbots</a>.<a name="org.mashupbots.socko" class="extype" href="../package.html">socko</a>.<a name="org.mashupbots.socko.routes" class="extype" href="package.html">routes</a></p>
-        <h1>TRACE</h1>
+        <h1>QueryStringField</h1>
       </div>
 
       <h4 class="signature" id="signature">
-      <span class="kind">object</span>
+      <span class="kind">class</span>
       <span class="symbol"> 
-        <span class="name">TRACE</span>
+        <span class="name">QueryStringField</span>
         
-        <span class="result"> extends <a name="org.mashupbots.socko.routes.Method" class="extype" href="Method.html">Method</a></span>
+        <span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
-          <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Matches HTTP requests with a method set to <code>TRACE</code>.</p><p>For example:</p><pre>
+          <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Matches HTTP requests that have a query string field with the specified name.</p><p>If a match is found, the value is returned. If there are more than one value, on the first value is returned.</p><p>For example, to match <code>?name1=value1</code>, first define your match as an object:</p><pre>
+   object MyQueryStringField extends QueryStringName(&quot;name1&quot;)
+</pre><p>Then, when defining your Route:</p><pre>
   val r = Routes({
-    case TRACE(ctx) =&gt; {
+    case MyQueryStringField(value) =&gt; {
+      assert(value == &quot;value1&quot;)
       ...
     }
   })
 </pre></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="org.mashupbots.socko.routes.Method" class="extype" href="Method.html">Method</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
         
 
@@ -52,7 +55,7 @@
                 <span class="filtertype">Inherited</span>
                 <ol><li class="hideall out"><span>Hide All</span></li>
                 <li class="showall in"><span>Show all</span></li></ol>
-                <ol id="linearization"><li name="org.mashupbots.socko.routes.TRACE" class="in"><span>TRACE</span></li><li name="org.mashupbots.socko.routes.Method" class="in"><span>Method</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+                <ol id="linearization"><li name="org.mashupbots.socko.routes.QueryStringField" class="in"><span>QueryStringField</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
               </div>
           <div id="visbl">
               <span class="filtertype">Visibility</span>
@@ -60,7 +63,21 @@
             </div>
         </div>
 
+        <div class="members" id="constructors">
+              <h3>Instance Constructors</h3>
+              <ol><li visbl="pub" name="org.mashupbots.socko.routes.QueryStringField#this" data-isabs="false">
+      <a id="this:QueryStringField"></a>
+      <h4 class="signature">
+      <span class="kind">new</span>
+      <span class="symbol"> 
+        <span class="name">QueryStringField</span>
         
+        <span class="params">(<span name="name">name: String</span>)</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
 
         
         
@@ -272,17 +289,17 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="org.mashupbots.socko.routes.Method#unapply" data-isabs="false">
-      <a id="unapply(ProcessingContext):Option[ProcessingContext]"></a>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.QueryStringField#unapply" data-isabs="false">
+      <a id="unapply(ProcessingContext):Option[String]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol"> 
         <span class="name">unapply</span>
         
-        <span class="params">(<span name="ctx">ctx: <a name="org.mashupbots.socko.context.ProcessingContext" class="extype" href="../context/ProcessingContext.html">ProcessingContext</a></span>)</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<a name="org.mashupbots.socko.context.ProcessingContext" class="extype" href="../context/ProcessingContext.html">ProcessingContext</a>]</span>
+        <span class="params">(<span name="ctx">ctx: <a name="org.mashupbots.socko.context.ProcessingContext" class="extype" href="../context/ProcessingContext.html">ProcessingContext</a></span>)</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[String]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="org.mashupbots.socko.routes.Method" class="extype" href="Method.html">Method</a></dd></dl></div>
+      
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -330,9 +347,7 @@
 
         
 
-        <div name="org.mashupbots.socko.routes.Method" class="parent">
-              <h3>Inherited from <a name="org.mashupbots.socko.routes.Method" class="extype" href="Method.html">Method</a></h3>
-            </div><div name="scala.AnyRef" class="parent">
+        <div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>

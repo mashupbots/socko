@@ -32,7 +32,7 @@
    object MyPathRegex extends PathRegex(&quot;&quot;&quot;/path/([a-z0-9]+)/([a-z0-9]+)&quot;&quot;&quot;.r)
 </pre><p>Then, when defining your Route:</p><pre>
   val r = Routes({
-    case ctx @ case MyPathRegex(m) =&gt; {
+    case MyPathRegex(m) =&gt; {
       assert(m.group(1) == &quot;to&quot;)
       assert(m.group(2) == &quot;file&quot;)
       ...

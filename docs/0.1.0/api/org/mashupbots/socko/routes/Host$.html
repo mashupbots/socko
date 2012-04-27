@@ -30,7 +30,7 @@
       
           <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Matches HTTP requests with the same case-sensitive host.</p><p>For example, to match <code>www.sockoweb.com</code>, use:</p><pre>
   val r = Routes({
-    case ctx @ Host(&quot;www.sockoweb.com&quot;) =&gt; {
+    case Host(&quot;www.sockoweb.com&quot;) =&gt; {
       ...
     }
   })

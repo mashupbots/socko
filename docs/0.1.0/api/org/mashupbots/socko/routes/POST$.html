@@ -30,7 +30,7 @@
       
           <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Matches HTTP requests with a method set to <code>POST</code>.</p><p>For example:</p><pre>
   val r = Routes({
-    case ctx @ POST(_) =&gt; {
+    case POST(ctx) =&gt; {
       ...
     }
   })

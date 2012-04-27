@@ -32,7 +32,7 @@
    object MyQueryStringRegex extends QueryStringRegex(&quot;&quot;&quot;name1=([a-z0-9]+)&quot;&quot;&quot;.r)
 </pre><p>Then, when defining your Route:</p><pre>
   val r = Routes({
-    case ctx @ MyQueryStringRegex(m) =&gt; {
+    case MyQueryStringRegex(m) =&gt; {
       assert(m.group(1) == &quot;value1&quot;)
       ...
     }

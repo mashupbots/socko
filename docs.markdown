@@ -5,7 +5,7 @@ layout: article
 
 ## Socko v0.1.0
 
- - [User Guides](/docs/0.1.0/guides/)
+ - [User Guides](/docs/0.1.0/guides/user_guide.html)
  - [API](/docs/0.1.0/api/)
  
 

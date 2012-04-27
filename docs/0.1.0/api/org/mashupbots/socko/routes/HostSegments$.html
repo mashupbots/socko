@@ -30,7 +30,7 @@
       
           <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Matches HTTP requests with the same host segment pattern.</p><p>For example, to match <code>server1.sockoweb.com</code>, use:</p><pre>
   val r = Routes({
-    case ctx @ Host(HostSegments(server :: &quot;sockoweb&quot; :: &quot;com&quot; :: Nil)) =&gt; {
+    case HostSegments(server :: &quot;sockoweb&quot; :: &quot;com&quot; :: Nil) =&gt; {
       // server will be set to server1
       ...
     }
@@ -274,13 +274,13 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="org.mashupbots.socko.routes.HostSegments#unapply" data-isabs="false">
-      <a id="unapply(String):Option[List[String]]"></a>
+      <a id="unapply(ProcessingContext):Option[List[String]]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol"> 
         <span class="name">unapply</span>
         
-        <span class="params">(<span name="host">host: String</span>)</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[List[String]]</span>
+        <span class="params">(<span name="ctx">ctx: <a name="org.mashupbots.socko.context.ProcessingContext" class="extype" href="../context/ProcessingContext.html">ProcessingContext</a></span>)</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[List[String]]</span>
       </span>
       </h4>
       

@@ -30,7 +30,7 @@
       
           <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Matches HTTP requests with the same case-sensitive path.</p><p>For example, to match <code>/folderX</code> use:</p><pre>
   val r = Routes({
-    case ctx @ Path(&quot;/folderX&quot;) =&gt; {
+    case Path(&quot;/folderX&quot;) =&gt; {
       ...
     }
   })

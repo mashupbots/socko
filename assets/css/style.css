@@ -32,6 +32,9 @@ a {
 a:hover { 
 	text-decoration: underline;
 }
+a.blank:hover { 
+	text-decoration: none;
+}
 hr { 
 	border:none; 
 	border-bottom:3px solid #f3f3f3; 
@@ -406,18 +409,18 @@ header ul li a {
   -ms-border-radius: 0px;
   -khtml-border-radius: 0px;
   border-radius: 0px;  
+  font-size: 13px;
 }
 .article code {
   font-family: "Menlo", "Courier", monospace;
-  background-color: #dddddd;
-  padding: 2px 3px;
+  padding: 1px 2px;
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   -o-border-radius: 4px;
   -ms-border-radius: 4px;
   -khtml-border-radius: 4px;
   border-radius: 4px; 
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .article ol {

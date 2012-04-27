@@ -30,7 +30,7 @@
       
           <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Matches HTTP requests with a method set to <code>OPTIONS</code>.</p><p>For example:</p><pre>
   val r = Routes({
-    case ctx @ OPTIONS(_) =&gt; {
+    case OPTIONS(ctx) =&gt; {
       ...
     }
   })

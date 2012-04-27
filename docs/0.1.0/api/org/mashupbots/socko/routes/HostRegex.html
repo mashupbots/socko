@@ -32,7 +32,7 @@
    object MyHostRegex extends HostRegex(&quot;&quot;&quot;www\.([a-z]+)\.com&quot;&quot;&quot;.r)
 </pre><p>Then, when defining your Route:</p><pre>
   val r = Routes({
-    case ctx @ MyHostRegex(m) =&gt; {
+    case MyHostRegex(m) =&gt; {
       assert(m.group(1) == &quot;sockoweb&quot;)
       ...
     }
