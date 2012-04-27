@@ -61,7 +61,7 @@ object RouteApp extends Logger {
       // *** HOW TO MATCH AND EXTRACT A PATH SEGMENT ***
       // If the timezone is specified on the path (like "/time/sydney"), pass the
       // timezone to the TimeProcessor
-      case GET(Path(PathSegments("time" :: timezone :: Nil))) => {
+      case GET(PathSegments("time" :: timezone :: Nil)) => {
         actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(httpRequest, Some(timezone))
       }
 

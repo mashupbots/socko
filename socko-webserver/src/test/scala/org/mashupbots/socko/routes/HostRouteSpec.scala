@@ -46,15 +46,15 @@ class HostRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
       var result = ""
       var hostSuffix = ""
       val r = Routes({
-        case GET(Host(HostSegments(site :: "abc" :: "com" :: Nil))) => {
+        case GET(HostSegments(site :: "abc" :: "com" :: Nil)) => {
           result = "1"
         }
-        case ctx @ Host(HostSegments(site :: "abc" :: "com" :: Nil)) => {
+        case ctx @ HostSegments(site :: "abc" :: "com" :: Nil) => {
           // Get storing data in our cache
           ctx.cache.put("site", site)
           result = "2"
         }
-        case ctx @ Host(HostSegments("server100" :: x)) => {
+        case ctx @ HostSegments("server100" :: x) => {
           result = "3"
           hostSuffix = x.mkString(".")
         }
@@ -96,7 +96,7 @@ class HostRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
       val r = Routes({
         case ctx @ PUT(Host("www.abc.com")) => result = "1"
         case Host("www.abc.com") => result = "2"
-        case ctx @ Host(HostSegments(site :: "abc" :: "com" :: Nil)) => result = "3"
+        case ctx @ HostSegments(site :: "abc" :: "com" :: Nil) => result = "3"
       })
 
       when("no exact match")

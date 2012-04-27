@@ -89,7 +89,7 @@ object Routes {
  * For example:
  * {{{
  *   val r = Routes({
- *     case ctx @ HttpRequest(_) => {
+ *     case HttpRequest(httpRequest) => {
  *       ...
  *     }
  *   })
@@ -107,7 +107,7 @@ object HttpRequest {
  * For example:
  * {{{
  *   val r = Routes({
- *     case ctx @ WebSocketHandshake(_) => {
+ *     case WebSocketHandshake(wsHandshake) => {
  *       ...
  *     }
  *   })
@@ -125,7 +125,7 @@ object WebSocketHandshake {
  * For example:
  * {{{
  *   val r = Routes({
- *     case ctx @ WebSocketFrame(_) => {
+ *     case WebSocketFrame(wsFrame) => {
  *       ...
  *     }
  *   })
@@ -143,7 +143,7 @@ object WebSocketFrame {
  * For example:
  * {{{
  *   val r = Routes({
- *     case ctx @ HttpChunk(_) => {
+ *     case HttpChunk(httpChunk) => {
  *       ...
  *     }
  *   })
@@ -287,7 +287,7 @@ object TRACE extends Method("TRACE")
  * For example, to match `/folderX` use:
  * {{{
  *   val r = Routes({
- *     case ctx @ Path("/folderX") => {
+ *     case Path("/folderX") => {
  *       ...
  *     }
  *   })
@@ -306,7 +306,7 @@ object Path {
  * For example, to match `/record/1`, use:
  * {{{
  *   val r = Routes({
- *     case ctx @ Path(PathSegments("record" :: id :: Nil)) => {
+ *     case PathSegments("record" :: id :: Nil) => {
  *       // id will be set to 1
  *       ...
  *     }
@@ -314,7 +314,7 @@ object Path {
  * }}}
  */
 object PathSegments {
-  def unapply(path: String): Option[List[String]] = path.split("/").toList match {
+  def unapply(ctx: ProcessingContext): Option[List[String]] = ctx.endPoint.path.split("/").toList match {
     case "" :: rest => Some(rest) // skip a leading slash
     case all => Some(all)
   }
@@ -331,7 +331,7 @@ object PathSegments {
  * Then, when defining your Route:
  * {{{
  *   val r = Routes({
- *     case ctx @ case MyPathRegex(m) => {
+ *     case case MyPathRegex(m) => {
  *       assert(m.group(1) == "to")
  *       assert(m.group(2) == "file")
  *       ...
@@ -349,7 +349,7 @@ class PathRegex(regex: Regex) {
  * For example, to match `www.sockoweb.com`, use:
  * {{{
  *   val r = Routes({
- *     case ctx @ Host("www.sockoweb.com") => {
+ *     case Host("www.sockoweb.com") => {
  *       ...
  *     }
  *   })
@@ -368,7 +368,7 @@ object Host {
  * For example, to match `server1.sockoweb.com`, use:
  * {{{
  *   val r = Routes({
- *     case ctx @ Host(HostSegments(server :: "sockoweb" :: "com" :: Nil)) => {
+ *     case HostSegments(server :: "sockoweb" :: "com" :: Nil) => {
  *       // server will be set to server1
  *       ...
  *     }
@@ -376,7 +376,7 @@ object Host {
  * }}}
  */
 object HostSegments {
-  def unapply(host: String): Option[List[String]] = Some(host.split("""\.""").toList)
+  def unapply(ctx: ProcessingContext): Option[List[String]] = Some(ctx.endPoint.host.split("""\.""").toList)
 }
 
 /**
@@ -390,7 +390,7 @@ object HostSegments {
  * Then, when defining your Route:
  * {{{
  *   val r = Routes({
- *     case ctx @ MyHostRegex(m) => {
+ *     case MyHostRegex(m) => {
  *       assert(m.group(1) == "sockoweb")
  *       ...
  *     }
@@ -409,7 +409,7 @@ class HostRegex(regex: Regex) {
  * For example, to match `http://www.sockoweb.org/do?action=save`:
  * {{{
  *   val r = Routes({
- *     case ctx @ QueryString("action=save") => {
+ *     case QueryString("action=save") => {
  *       ...
  *     }
  *   })
@@ -431,7 +431,7 @@ object QueryString {
  * Then, when defining your Route:
  * {{{
  *   val r = Routes({
- *     case ctx @ MyQueryStringRegex(m) => {
+ *     case MyQueryStringRegex(m) => {
  *       assert(m.group(1) == "value1")
  *       ...
  *     }
@@ -457,7 +457,7 @@ class QueryStringRegex(regex: Regex) {
  * Then, when defining your Route:
  * {{{
  *   val r = Routes({
- *     case ctx @ MyQueryStringName(value) => {
+ *     case MyQueryStringName(value) => {
  *       assert(value == "value1")
  *       ...
  *     }

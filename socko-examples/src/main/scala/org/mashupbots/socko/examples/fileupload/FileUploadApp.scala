@@ -92,7 +92,7 @@ object FileUploadApp extends Logger {
         // This is a quick non-blocking operation so executing it in the netty thread pool is OK. 
         httpRequest.redirect("http://localhost:8888/index.html")
       }
-      case GET(Path(PathSegments(fileName :: Nil))) => {
+      case GET(PathSegments(fileName :: Nil)) => {
         // Download requested file
         val staticFileRequest = new StaticFileRequest(
           httpRequest,

@@ -45,14 +45,14 @@ class PathRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
       var result = ""
       var relativePath = ""
       val r = Routes({
-        case ctx @ GET(Path(PathSegments("record" :: id :: Nil))) => {
+        case ctx @ GET(PathSegments("record" :: id :: Nil)) => {
           result = "1"
         }
-        case ctx @ Path(PathSegments("record" :: id :: Nil)) => {
+        case ctx @ PathSegments("record" :: id :: Nil) => {
           ctx.cache.put("id", id) // test cache storage
           result = "2"
         }
-        case ctx @ Path(PathSegments("html" :: x)) => {
+        case ctx @ PathSegments("html" :: x) => {
           relativePath = x.mkString("/", "/", "")
           result = "3"
         }
@@ -96,7 +96,7 @@ class PathRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
         case PUT(Path("/testpath")) => result = "1"
         case Path("/testpath/folder1") => result = "2"
         case Path("/testpath") => result = "3"
-        case Path(PathSegments("html" :: x)) => result = "4"
+        case PathSegments("html" :: x) => result = "4"
       })
 
       when("no exact match")

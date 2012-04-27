@@ -78,7 +78,7 @@ class StaticFileProcessorSpec
   val fileLastModifiedCacheTimeoutSeconds = 2
 
   val routes = Routes({
-    case ctx @ GET(Path(PathSegments("files" :: relativePath))) => {
+    case ctx @ GET(PathSegments("files" :: relativePath)) => {
       val request = new StaticFileRequest(
         ctx.asInstanceOf[HttpRequestProcessingContext],
         rootDir,
