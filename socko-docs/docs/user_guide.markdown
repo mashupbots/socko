@@ -106,26 +106,27 @@ and `FileUploadProcessor` reads and writes lots of files, we have set them up to
 Note that we have only allocated 5 threads to each processor. To scale, you will need to allocate
 more threads.
 
-    val actorConfig = "my-pinned-dispatcher {\n" +
-      "  type=PinnedDispatcher\n" +
-      "  executor=thread-pool-executor\n" +
-      "}\n" +
-      "akka {\n" +
-      "  event-handlers = [\"akka.event.slf4j.Slf4jEventHandler\"]\n" +
-      "  loglevel=DEBUG\n" +
-      "  actor {\n" +
-      "    deployment {\n" +
-      "      /static-file-router {\n" +
-      "        router = round-robin\n" +
-      "        nr-of-instances = 5\n" +
-      "      }\n" +
-      "      /file-upload-router {\n" +
-      "        router = round-robin\n" +
-      "        nr-of-instances = 5\n" +
-      "      }\n" +
-      "    }\n" +
-      "  }\n" +
-      "}"
+    val actorConfig = """
+my-pinned-dispatcher {
+  type=PinnedDispatcher
+  executor=thread-pool-executor
+}
+akka {
+  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+  loglevel=DEBUG
+  actor {
+    deployment {
+      /static-file-router {
+        router = round-robin
+        nr-of-instances = 5
+      }
+      /file-upload-router {
+        router = round-robin
+        nr-of-instances = 5
+      }
+    }
+  }
+}"""
 
     val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
 

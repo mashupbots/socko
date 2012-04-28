@@ -54,22 +54,24 @@ object BenchmarkApp extends Logger {
   //
   // FileUploadProcessor will also be started as a router with a PinnedDispatcher since it involves IO.
   //
-  val actorConfig = "my-pinned-dispatcher {\n" +
-    "  type=PinnedDispatcher\n" +
-    "  executor=thread-pool-executor\n" +
-    "}\n" +
-    "akka {\n" +
-    "  event-handlers = [\"akka.event.slf4j.Slf4jEventHandler\"]\n" +
-    "  loglevel=DEBUG\n" +
-    "  actor {\n" +
-    "    deployment {\n" +
-    "      /static-file-router {\n" +
-    "        router = round-robin\n" +
-    "        nr-of-instances = 100\n" +
-    "      }\n" +
-    "    }\n" +
-    "  }\n" +
-    "}"
+  val actorConfig = """
+my-pinned-dispatcher {
+  type=PinnedDispatcher
+  executor=thread-pool-executor
+}
+akka {
+  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+  loglevel=DEBUG
+  actor {
+    deployment {
+      /static-file-router {
+        router = round-robin
+        nr-of-instances = 100
+      }
+    }
+  }
+}
+"""
 
   val actorSystem = ActorSystem("BenchmarkActorSystem", ConfigFactory.parseString(actorConfig))
 

@@ -50,22 +50,23 @@ import akka.routing.FromConfig
 class StaticFileProcessorSpec
   extends WordSpec with ShouldMatchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient with Logger {
 
-  val actorConfig = "my-pinned-dispatcher {\n" +
-    "  type=PinnedDispatcher\n" +
-    "  executor=thread-pool-executor\n" +
-    "}\n" +
-    "akka {\n" +
-    "  event-handlers = [\"akka.event.slf4j.Slf4jEventHandler\"]\n" +
-    "  loglevel=DEBUG\n" +
-    "  actor {\n" +
-    "    deployment {\n" +
-    "      /my-router {\n" +
-    "        router = round-robin\n" +
-    "        nr-of-instances = 5\n" +
-    "      }\n" +
-    "    }\n" +
-    "  }\n" +
-    "}"
+  val actorConfig = """
+my-pinned-dispatcher {
+  type=PinnedDispatcher
+  executor=thread-pool-executor
+}
+akka {
+  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+  loglevel=DEBUG
+  actor {
+    deployment {
+      /my-router {
+        router = round-robin
+        nr-of-instances = 5
+      }
+    }
+  }
+}"""
 
   var actorSystem: ActorSystem = null
   var webServer: WebServer = null

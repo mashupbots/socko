@@ -152,29 +152,30 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     }
 
     "load from Akka Config" in {
-      val actorConfig = "barebones-webserver {\n" +
-        "  server-name=BareBonesTest\n" +
-        "  hostname=\"192.168.0.1\"\n" +
-        "  port=9999\n" +
-        "}\n" +
-        "all-config-webserver {\n" +
-        "  server-name = allTest\n" +
-        "  hostname = localhost\n" +
-        "  port=10000\n" +
-        "  ssl-config {\n" +
-        "    key-store-file=/tmp/ks.dat\n" +
-        "    key-store-password=kspwd\n" +
-        "    trust-store-file=/tmp/ts.dat\n" +
-        "    trust-store-password=tspwd\n" +
-        "  }\n" +
-        "  http-config {\n" +
-        "    max-length-in-mb=10\n" +
-        "    max-initial-line-length=20\n" +
-        "    max-header-size-in-bytes=30\n" +
-        "    max-chunk-size-in-bytes=40\n" +
-        "    aggregate-chunks=false\n" +
-        "  }\n" +
-        "}"
+      val actorConfig = """
+barebones-webserver {
+  server-name=BareBonesTest
+  hostname="192.168.0.1"
+  port=9999
+}
+all-config-webserver {
+  server-name = allTest
+  hostname = localhost
+  port=10000
+  ssl-config {
+    key-store-file=/tmp/ks.dat
+    key-store-password=kspwd
+    trust-store-file=/tmp/ts.dat
+    trust-store-password=tspwd
+  }
+  http-config {
+    max-length-in-mb=10
+    max-initial-line-length=20
+    max-header-size-in-bytes=30
+    max-chunk-size-in-bytes=40
+    aggregate-chunks=false
+  }
+}"""
 
       val actorSystem = ActorSystem("WebServerConfigSpec", ConfigFactory.parseString(actorConfig))
 
