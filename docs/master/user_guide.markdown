@@ -107,26 +107,26 @@ Note that we have only allocated 5 threads to each processor. To scale, you will
 more threads.
 
     val actorConfig = """
-my-pinned-dispatcher {
-  type=PinnedDispatcher
-  executor=thread-pool-executor
-}
-akka {
-  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
-  loglevel=DEBUG
-  actor {
-    deployment {
-      /static-file-router {
-        router = round-robin
-        nr-of-instances = 5
+      my-pinned-dispatcher {
+        type=PinnedDispatcher
+        executor=thread-pool-executor
       }
-      /file-upload-router {
-        router = round-robin
-        nr-of-instances = 5
-      }
-    }
-  }
-}"""
+      akka {
+        event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+        loglevel=DEBUG
+        actor {
+          deployment {
+            /static-file-router {
+              router = round-robin
+              nr-of-instances = 5
+            }
+            /file-upload-router {
+              router = round-robin
+              nr-of-instances = 5
+            }
+          }
+        }
+      }"""
 
     val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
 
