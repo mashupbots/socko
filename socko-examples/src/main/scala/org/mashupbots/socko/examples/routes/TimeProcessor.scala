@@ -16,7 +16,6 @@
 package org.mashupbots.socko.examples.routes
 
 import scala.collection.JavaConversions.asScalaBuffer
-import org.apache.http.HttpHeaders
 import org.jboss.netty.channel.ChannelLocal
 import org.mashupbots.socko.context.HttpChunkProcessingContext
 import org.mashupbots.socko.context.HttpRequestProcessingContext
