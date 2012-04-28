@@ -5,6 +5,7 @@
 import sbt._
 import Keys._
 import com.typesafe.sbteclipse.plugin.EclipsePlugin._
+import sbt.Project.Initialize
 
 //
 // Build setup
@@ -18,7 +19,6 @@ object SockoBuild extends Build {
     // Info
     organization := "org.mashupbots.socko",
     version      := "0.1.0-SNAPSHOT",
-    scalaVersion := "2.9.1"
 
     // Repositories
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
@@ -69,11 +69,11 @@ object SockoBuild extends Build {
 
   def sockoPublishTo: Initialize[Option[Resolver]] = {
     (version) { version: String =>
-      val nexus = "http://nexus.scala-tools.org/content/repositories/"
+      val nexus = " https://oss.sonatype.org/"
       if (version.trim.endsWith("SNAPSHOT")) {
-        Some("snapshots" at nexus + "snapshots/")
+        Some("snapshots" at nexus + "content/repositories/snapshots/")
       } else {
-        Some("releases" at nexus + "releases/")
+        Some("releases" at nexus + "service/local/staging/deploy/maven2/")
       }
     }
   }
