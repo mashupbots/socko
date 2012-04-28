@@ -1,7 +1,8 @@
 ---
 layout: docs
-title: Socko documentation
+title: Socko Documenation
 ---
-# Socko documentation
+# Socko Documenation
 
-* [Publishing the documentation](publishing_docs.html)
+* [User Guide](user_guide.html)
+* [Developer Guide](deverloper_guide.html)
