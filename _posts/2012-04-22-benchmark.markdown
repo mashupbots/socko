@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Initial Benchmarks for Socko v0.1
+title: Initial Benchmarks for Socko v0.1.0
 summary: Socko vs Apache vs Tomcat
 author: Vibul
 ---

@@ -3,9 +3,26 @@ layout: article
 ---
 #Download Socko
 
-## Released Version
+## Latest Release
 
-Coming soon ...
+The latest verison of Socko is **`0.1.0`** released on 30th April 2012.
+
+Download [socko-webserver_2.9.1-0.1.0.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.9.1/0.1.0/socko-webserver_2.9.1-0.1.0.jar).
+
+[Change logs](https://github.com/mashupbots/socko/issues/milestones?state=closed) and 
+[road maps](https://github.com/mashupbots/socko/issues/milestones?state=open) are available on our issue tracker.
+
+
+## Simple Build Tool 
+
+If you are using Scala 2.9.1, add the following to your `build.sbt`.  Replace `X.Y.Z` with the
+version number.
+
+    libraryDependencies += "org.mashupbots.socko" %% "socko-webserver" % "X.Y.Z"
+
+If you are not using the above scala version(s), use the following instead
+   
+    libraryDependencies += "org.mashupbots.socko" % "socko-webserver_2.9.1" % "X.Y.Z"
 
 
 ## Build from Source
