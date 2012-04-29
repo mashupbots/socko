@@ -23,23 +23,22 @@ Socko is:
   * who wish to serve static files and/or HTML 5 applications from the same web server hosting 
     their REST endpoints
 
-* Fast-ish
-  * Socko handles and processes incoming HTTP requests in an asynchronous and event driven manner thanks to
-    Netty and Akka.
-  * TO DO - benchmarking
-
-* Lightweight (assuming you are already using Akka)
-  * ~1,300 lines of Scala code (and ~2,600 lines of Java code which will be removed once Akka 
-    moves to the upcoming Netty 4.0).
-  * Socko has no external dependencies outside Akka 2.0 Remote (which includes Netty).
-
 * Embedded
   * Socko runs within your Scala application. 
   * Routing DSL like [Unfilted](http://unfiltered.databinder.net/Unfiltered.html) and 
     [Play2 Mini](https://github.com/typesafehub/play2-mini). Route by HTTP method, host, path and querystring.
     See [example](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/routes/RouteApp.scala).
   * Configurable from inside your code and/or via settings in Akka's configuration file.
-  * Plenty of [examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
+
+* Lightweight (assuming you are already using Akka)
+  * ~1,300 lines of Scala code (and ~2,600 lines of Java code which will be removed once Akka 
+    moves to the upcoming Netty 4.0).
+  * Socko has no external dependencies outside Akka 2.0 Remote (which includes Netty).
+
+* Fast-ish
+  * Socko handles and processes incoming HTTP requests in an asynchronous and event driven manner thanks to
+    Netty and Akka.
+  * Initial benchmarking [results](http://sockoweb.org/2012/04/22/benchmark.html)
 
 * Supportive of HTTP and HTML5 Standards
   * HTTP/S and WebSockets
@@ -76,8 +75,8 @@ object HelloApp extends Logger {
   // STEP #2 - Define routes. 
   //
   val routes = Routes({
-    case ctx @ GET(_) => {
-      actorSystem.actorOf(Props[HelloProcessor]) ! ctx
+    case GET(httpRequest) => {
+      actorSystem.actorOf(Props[HelloProcessor]) ! httpRequest
     }
   })
 
@@ -146,8 +145,10 @@ Get the source code from github
 
 ## Links
 
+* [Web Site](http://sockoweb.org/)
 * [Issues] (https://github.com/mashupbots/socko/issues?milestone=&sort=created&direction=desc&state=open)
 * [Road Map](https://github.com/mashupbots/socko/issues/milestones)
+* [Examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
 
 
 
