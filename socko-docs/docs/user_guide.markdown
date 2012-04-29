@@ -144,7 +144,7 @@ more threads.
 
 Routes allows you to control how Socko dispatches incoming requests to your actors.
 
-Routes are implemented in Socko using partial functions that takes a {{ page.ProcessingContextClass }}
+Routes are implemented in Socko using partial functions that take a {{ page.ProcessingContextClass }}
 as input and returns `Unit` (or void).
 
 Within your implementation of the partial function, your code will need to dispatch the 
@@ -181,7 +181,7 @@ These extractors allows you to match different types of {{ page.ProcessingContex
  - [`WebSocketFrame`](../api/#org.mashupbots.socko.routes.WebSocketFrame$) matches {{ page.WsFrameProcessingContextClass }}
  - [`WebSocketHandshake`](../api/#org.mashupbots.socko.routes.WebSocketHandshake$) matches {{ page.WsHandshakeProcessingContextClass }}
 
-The following code taken form our [web socket example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket) 
+The following code taken from our [web socket example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket) 
 illustrates usage:
 
     val routes = Routes({
