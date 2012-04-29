@@ -133,7 +133,7 @@ Get the source code from github
 
 * Start `Eclipse`
 
-* From the top memu, select `File` | `Import`
+* From the top menu, select `File` | `Import`
   * Select `General` | `Existing Projects into Workspace`. 
   * Click `Next`.
   * Select the `socko` source code directory as the root
