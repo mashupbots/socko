@@ -95,7 +95,7 @@ actors processes messages.
 The default dispatcher is optimized for non blocking code.
 
 However, if your actors have blocking operations like database read/write or file system read/write, 
-we recommend that you use a dispatcher driven by the `tread-pool-executor`.  For example, the 
+we recommend that you use a dispatcher driven by the `thread-pool-executor`.  For example, the 
 `PinnedDispatcher` is used in Socko's file upload [example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload).
 
 Isolating blocking operations to a thread pool means that other actors can continue processing without
