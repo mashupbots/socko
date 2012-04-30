@@ -372,7 +372,7 @@ class StaticFileProcessor extends Actor {
  * @param context HTTP Request context
  * @param rootFileDir Root directory from which files will be served. `file` must be present under this directory; if
  *  not a 404 Not Found is returned. This is used to enforce security to make sure that only intended files can be 
- *  downloaded.
+ *  downloaded and prevent paths like `http://foo/../../etc/passwd`.
  * @param file File to download
  * @param tempDir Temporary directory where compressed version of files can be stored
  * @param browserCacheTimeoutSeconds Number of seconds to cache the file in the browser. Defaults to 1 hour.
