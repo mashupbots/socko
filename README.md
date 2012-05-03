@@ -142,11 +142,17 @@ Get the source code from github
 
 * To run the scalatest unit test cases, just right click on a test class file and select `Run As JUnit Test`.
 
+### Getting Help
+
+If you have a question or need help, please open a ticket in our [Issues Register] (https://github.com/mashupbots/socko/issues).
+
+
 
 ## Links
 
 * [Web Site](http://sockoweb.org/)
-* [Issues] (https://github.com/mashupbots/socko/issues?milestone=&sort=created&direction=desc&state=open)
+* [Blog](http://sockoweb.org/blog)
+* [Issues] (https://github.com/mashupbots/socko/issues/)
 * [Road Map](https://github.com/mashupbots/socko/issues/milestones)
 * [Examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
 
