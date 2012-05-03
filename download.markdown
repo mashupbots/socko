@@ -12,6 +12,7 @@ Download [socko-webserver_2.9.1-0.1.0.jar](https://oss.sonatype.org/content/grou
 [Change logs](https://github.com/mashupbots/socko/issues/milestones?state=closed) and 
 [road maps](https://github.com/mashupbots/socko/issues/milestones?state=open) are available on our issue tracker.
 
+If you have a question or need help, just create a ticket in our [issue register](https://github.com/mashupbots/socko/issues).
 
 ## Simple Build Tool 
 

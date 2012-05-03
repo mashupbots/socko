@@ -368,9 +368,13 @@ header ul li a {
 }
 .article h2 {
   color: #373b43;
-  font-size: 20px;
+  font-size: 22px;
   margin-top: 2em;
   margin-bottom: 0.5em;
+  border-bottom: 1px solid #AAA;
+}
+.article.post h2 {
+  border-bottom: none;
 }
 .article h3 {
   color: #373b43;
@@ -444,8 +448,8 @@ header ul li a {
 }
 
 /* Blog */
-.blog_posts {
-  
+.blog_posts h2 {
+  border-bottom: none;
 }
 
 
