@@ -162,7 +162,7 @@ class StaticFileProcessor extends Actor {
       return
     }
     if (file.getName.startsWith(".")) {
-      log.debug("File name '{}' start with .", file.getCanonicalPath)
+      log.debug("File name '{}' starts with .", file.getCanonicalPath)
       request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
       return
     }
