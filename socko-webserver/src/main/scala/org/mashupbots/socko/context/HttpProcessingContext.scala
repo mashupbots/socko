@@ -42,6 +42,11 @@ import java.io.ByteArrayOutputStream
 abstract class HttpProcessingContext() extends ProcessingContext {
 
   /**
+   * Processing configuration
+   */
+  def config: HttpProcessingConfig
+
+  /**
    * HTTP End point
    */
   def endPoint: EndPoint
@@ -72,6 +77,8 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    * @param contentType MIME content type to set in the response header. Defaults to "text/plain; charset=UTF-8".
    * @param charset Character set encoding. Defaults to "UTF-8"
    * @param headers Additional headers to add to the HTTP response. Defaults to empty map; i.e. no additional headers.
+   * @param allowCompression Flag to indicate if content is to be compressed if the `acceptedEncodings` header is set.
+   *   Defaults to `true`.
    */
   def writeResponse(
     content: String,
@@ -79,9 +86,9 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     charset: Charset = CharsetUtil.UTF_8,
     headers: Map[String, String] = Map.empty): Unit = {
 
-    writeResponse(content.getBytes(charset), contentType, headers)
+    writeResponse(content.getBytes(charset), contentType, headers, true)
   }
-  
+
   /**
    * Sends a binary HTTP response to the client with a status of "200 OK".
    *
@@ -93,6 +100,22 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     content: Array[Byte],
     contentType: String,
     headers: Map[String, String]): Unit = {
+    writeResponse(content, contentType, headers, true)
+  }
+  
+  /**
+   * Sends a binary HTTP response to the client with a status of "200 OK".
+   *
+   * @param content String to send
+   * @param contentType MIME content type to set in the response header. For example, "image/gif"
+   * @param headers Additional headers to add to the HTTP response. Defaults to empty map; i.e. no additional headers.
+   * @param allowCompression Flag to indicate if content is to be compressed if the `acceptedEncodings` header is set.
+   */
+  def writeResponse(
+    content: Array[Byte],
+    contentType: String,
+    headers: Map[String, String],
+    allowCompression: Boolean): Unit = {
 
     // Build the response object.
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
@@ -127,20 +150,24 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    *
    * @param response HTTP response
    * @param content Binary content to return in the response
+   * @param allowCompression Flag to indicate if content is to be compressed if the `acceptedEncodings` header is set.
+   *   Defaults to `true`.
    */
-  private def setContent(response: HttpResponse, content: Array[Byte]) {
+  private def setContent(response: HttpResponse, content: Array[Byte], allowCompression: Boolean = true) {
     val compressBytes = new ByteArrayOutputStream
     var compressedOut: DeflaterOutputStream = null
+    val compressible = (content != null && content.size > config.minCompressibleContentSizeInBytes &&
+      config.minCompressibleContentSizeInBytes >= 0 && allowCompression)
 
     try {
-      if (acceptedEncodings.contains("gzip")) {
+      if (compressible && acceptedEncodings.contains("gzip")) {
         compressedOut = new GZIPOutputStream(compressBytes)
         compressedOut.write(content, 0, content.length)
         compressedOut.close()
         compressedOut = null
         response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
         response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "gzip")
-      } else if (acceptedEncodings.contains("deflate")) {
+      } else if (compressible && acceptedEncodings.contains("deflate")) {
         compressedOut = new DeflaterOutputStream(compressBytes)
         compressedOut.write(content, 0, content.length)
         compressedOut.close()
@@ -191,13 +218,13 @@ abstract class HttpProcessingContext() extends ProcessingContext {
 
   /**
    * Redirects the browser to the specified URL using the 302 HTTP status code.
-   * 
+   *
    * Request
    * {{{
    * GET /index.html HTTP/1.1
    * Host: www.example.com
    * }}}
-   * 
+   *
    * Response
    * {{{
    * HTTP/1.1 302 Found
@@ -210,9 +237,9 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     val closeChannel = (!this.isKeepAlive)
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FOUND)
 
-    setDateHeader(response)    
+    setDateHeader(response)
     response.setHeader(HttpHeaders.Names.LOCATION, url)
-    
+
     if (!closeChannel) {
       setKeepAliveHeader(response)
       response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent().readableBytes())
@@ -223,7 +250,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
       future.addListener(ChannelFutureListener.CLOSE)
     }
   }
-  
+
   /**
    * Sets the Date header in the HTTP response.
    *
@@ -281,7 +308,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    * }}}
    *
    * This implementation uses <a href="http://docs.oracle.com/javase/6/docs/api/javax/activation/MimetypesFileTypeMap.html">
-   * `MimetypesFileTypeMap`</a> and relies on the presence of the file extening in a `mime.types` file. 
+   * `MimetypesFileTypeMap`</a> and relies on the presence of the file extening in a `mime.types` file.
    *
    * @param response  HTTP response
    * @param file file to extract content type

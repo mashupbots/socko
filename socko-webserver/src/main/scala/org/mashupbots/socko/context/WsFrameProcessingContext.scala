@@ -32,11 +32,13 @@ import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
  * @param channel Channel by which the request entered and response will be written
  * @param endPoint End point though which the original handshake request entered
  * @param wsFrame Incoming data for processing
+ * @param config Web Socket configuration
  */
 case class WsFrameProcessingContext(
   channel: Channel,
   endPoint: EndPoint,
-  wsFrame: WebSocketFrame) extends ProcessingContext {
+  wsFrame: WebSocketFrame,
+  config: WsProcessingConfig) extends ProcessingContext {
 
   val isText = wsFrame.isInstanceOf[TextWebSocketFrame]
   val isBinary = wsFrame.isInstanceOf[BinaryWebSocketFrame]

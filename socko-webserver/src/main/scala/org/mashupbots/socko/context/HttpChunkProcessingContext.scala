@@ -35,11 +35,13 @@ import org.jboss.netty.util.CharsetUtil
  * @param channel Channel by which the request entered and response will be written
  * @param initialHttpRequest The initial HTTP request associated with this chunk
  * @param httpChunk Incoming chunk of data for processing
+ * @param config Processing configuration
  */
 case class HttpChunkProcessingContext(
   channel: Channel,
   initialHttpRequest: InitialHttpRequest,
-  httpChunk: HttpChunk) extends HttpProcessingContext {
+  httpChunk: HttpChunk,
+  config: HttpProcessingConfig) extends HttpProcessingContext {
 
   /**
    * HTTP end point used by this chunk 

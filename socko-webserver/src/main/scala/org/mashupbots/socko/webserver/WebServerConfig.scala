@@ -181,13 +181,16 @@ case class SslConfig(
  * @param maxChunkSizeInBytes Maximum size of HTTP chunks. Defaults to 8192 bytes.
  * @param aggreateChunks Flag to indicate if we want to aggregate chunks. If `false`, your processor actors must be
  *  able to handle `HttpChunkProcessingContext`
+ * @param minCompressibleContentSizeInBytes Minimum number of bytes before HTTP content will be compressed if requested
+ *   by the client. Set to `-1` to turn off compression; `0` to make all content compressible.
  */
 case class HttpConfig(
   maxLengthInMB: Int = 4,
   maxInitialLineLength: Int = 4096,
   maxHeaderSizeInBytes: Int = 8192,
   maxChunkSizeInBytes: Int = 8192,
-  aggreateChunks: Boolean = true) {
+  aggreateChunks: Boolean = true,
+  minCompressibleContentSizeInBytes: Int = 1024) {
 
   val maxLengthInBytes = maxLengthInMB * 1024 * 1024
 
@@ -199,7 +202,8 @@ case class HttpConfig(
     WebServerConfig.getInt(config, prefix + ".max-initial-line-length", 4096),
     WebServerConfig.getInt(config, prefix + ".max-header-size-in-bytes", 8192),
     WebServerConfig.getInt(config, prefix + ".max-chunk-size-in-bytes", 8192),
-    WebServerConfig.getBoolean(config, prefix + ".aggregate-chunks", true))
+    WebServerConfig.getBoolean(config, prefix + ".aggregate-chunks", true),
+    WebServerConfig.getInt(config, prefix + ".min-compressible-content-size-in-bytes", 1024))
 }
 
 /**

@@ -18,7 +18,6 @@ package org.mashupbots.socko.processors
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.Hashtable
-
 import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
 import org.mashupbots.socko.context.WsFrameProcessingContext
@@ -31,10 +30,10 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-
 import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
+import org.mashupbots.socko.webserver.HttpConfig
 
 /**
  * Test
@@ -68,7 +67,9 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
   })
 
   override def beforeAll(configMap: Map[String, Any]) {
-    webServer = new WebServer(WebServerConfig(port = port), routes)
+    // Make all content compressible to pass our tests
+    val httpConfig = HttpConfig(minCompressibleContentSizeInBytes = 0)
+    webServer = new WebServer(WebServerConfig(port = port, httpConfig = httpConfig), routes)
     webServer.start()
 
     // Wait for start

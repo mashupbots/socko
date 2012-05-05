@@ -44,11 +44,13 @@ import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.util.CharsetUtil
 import org.mashupbots.socko.context.HttpChunkProcessingContext
+import org.mashupbots.socko.context.HttpProcessingConfig
 import org.mashupbots.socko.context.HttpRequestProcessingContext
 import org.mashupbots.socko.context.InitialHttpRequest
 import org.mashupbots.socko.context.ProcessingContext
 import org.mashupbots.socko.context.WsFrameProcessingContext
 import org.mashupbots.socko.context.WsHandshakeProcessingContext
+import org.mashupbots.socko.context.WsProcessingConfig
 import org.mashupbots.socko.utils.Logger
 
 /**
@@ -57,10 +59,12 @@ import org.mashupbots.socko.utils.Logger
  * @param routes PartialFunction used for routing incoming HTTP messages to actors for processing. See
  *   [[org.mashupbots.socko.riytes.Routes]]
  * @param allChannels Channel group used for storing all open channels
+ * @param config Web Server Configuration
  */
 class RequestHandler(
   routes: PartialFunction[ProcessingContext, Unit],
-  allChannels: ChannelGroup) extends SimpleChannelUpstreamHandler with Logger {
+  allChannels: ChannelGroup,
+  config: WebServerConfig) extends SimpleChannelUpstreamHandler with Logger {
 
   /**
    * WebSocket handshaker used when closing web sockets
@@ -73,6 +77,15 @@ class RequestHandler(
   private var originalHttpRequest: Option[InitialHttpRequest] = None
 
   /**
+   * HTTP processing configuration
+   */
+  private val httpConfig = HttpProcessingConfig(
+      config.httpConfig.minCompressibleContentSizeInBytes)
+  
+      
+  private lazy val wsConfig = WsProcessingConfig()
+  
+  /**
    * Dispatch message to actor system for processing
    *
    * @param ctx Channel context
@@ -81,7 +94,7 @@ class RequestHandler(
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     e.getMessage match {
       case httpRequest: HttpRequest =>
-        var ctx = HttpRequestProcessingContext(e.getChannel, httpRequest)
+        var ctx = HttpRequestProcessingContext(e.getChannel, httpRequest, httpConfig)
         log.debug("HTTP {} CHANNEL={}",
           Array[Object](ctx.endPoint, e.getChannel.getId))
 
@@ -90,7 +103,7 @@ class RequestHandler(
           routes(ctx)
           originalHttpRequest = Some(new InitialHttpRequest(ctx))
         } else if (ctx.isWebSocketUpgrade) {
-          var wsctx = WsHandshakeProcessingContext(e.getChannel, httpRequest)
+          var wsctx = WsHandshakeProcessingContext(e.getChannel, httpRequest, httpConfig)
           routes(wsctx)
           doWebSocketHandshake(wsctx)
           originalHttpRequest = Some(new InitialHttpRequest(ctx))
@@ -99,7 +112,7 @@ class RequestHandler(
         }
 
       case httpChunk: HttpChunk =>
-        var ctx = HttpChunkProcessingContext(e.getChannel, originalHttpRequest.get, httpChunk)
+        var ctx = HttpChunkProcessingContext(e.getChannel, originalHttpRequest.get, httpChunk, httpConfig)
         log.debug("CHUNK {} CHANNEL={}",
           Array[Object](ctx.endPoint, e.getChannel.getId))
 
@@ -110,7 +123,7 @@ class RequestHandler(
         }
 
       case wsFrame: WebSocketFrame =>
-        var ctx = WsFrameProcessingContext(e.getChannel, originalHttpRequest.get.endPoint, wsFrame)
+        var ctx = WsFrameProcessingContext(e.getChannel, originalHttpRequest.get.endPoint, wsFrame, wsConfig)
         log.debug("WS {} CHANNEL={}",
           Array[Object](ctx.endPoint, e.getChannel.getId))
 

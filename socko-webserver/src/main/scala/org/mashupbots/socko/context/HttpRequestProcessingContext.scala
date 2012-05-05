@@ -33,10 +33,12 @@ import org.jboss.netty.util.CharsetUtil
  *
  * @param channel Channel by which the request entered and response will be written
  * @param httpRequest Incoming request for processing
+ * @param config Processing configuration
  */
 case class HttpRequestProcessingContext(
   channel: Channel,
-  httpRequest: HttpRequest) extends HttpProcessingContext {
+  httpRequest: HttpRequest,
+  config: HttpProcessingConfig) extends HttpProcessingContext {
 
   /**
    * HTTP End point for this request

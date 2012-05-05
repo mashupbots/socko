@@ -50,10 +50,12 @@ import org.jboss.netty.util.CharsetUtil
  *
  * @param channel Channel by which the request entered and response will be written
  * @param httpRequest HTTP request associated with the upgrade to web sockets connection
+ * @param config Processing configuration
  */
 case class WsHandshakeProcessingContext(
   channel: Channel,
-  httpRequest: HttpRequest) extends HttpProcessingContext {
+  httpRequest: HttpRequest,
+  config: HttpProcessingConfig) extends HttpProcessingContext {
 
   /**
    * HTTP end point
