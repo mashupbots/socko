@@ -58,15 +58,18 @@ import com.typesafe.config.ConfigException
  * @param port IP port number to bind to. Defaults to `8888`.
  * @param sslConfig SSL protocol configuration. If `None`, then SSL will not be turned on.
  *  Defaults to `None`.
- * @param httpConfig HTTP protocol configuration. Default to a and instance of 
+ * @param httpConfig HTTP protocol configuration. Defaults to an instance of
  *  [[org.mashupbots.socko.webserver.HttpConfig]] with default settings.
+ * @param activityLogConfig HTTP protocol configuration. Defaults to an instance of
+ *  [[org.mashupbots.socko.webserver.ActivityLogConfig]] with default settings; i.e. no logging.
  */
 case class WebServerConfig(
   serverName: String = "WebServer",
   hostname: String = "localhost",
   port: Int = 8888,
   sslConfig: Option[SslConfig] = None,
-  httpConfig: HttpConfig = HttpConfig()) extends Extension {
+  httpConfig: HttpConfig = HttpConfig(),
+  activityLogConfig: ActivityLogConfig = ActivityLogConfig()) extends Extension {
 
   /**
    * Read configuration from AKKA's `application.conf`
@@ -76,7 +79,8 @@ case class WebServerConfig(
     config.getString(prefix + ".hostname"),
     config.getInt(prefix + ".port"),
     WebServerConfig.getOptionalSslConfig(config, prefix + ".ssl-config"),
-    WebServerConfig.getHttpConfig(config, prefix + ".http-config"))
+    WebServerConfig.getHttpConfig(config, prefix + ".http-config"),
+    WebServerConfig.getActivityLogConfig(config, prefix + ".activity-log-config"))
 
   /**
    * Validate current configuration settings. Throws an exception if configuration has errors.
@@ -142,6 +146,10 @@ case class WebServerConfig(
       throw new IllegalArgumentException("HTTP configuration, maximum chunk size, must be > 0")
     }
 
+    if (activityLogConfig == null) {
+      throw new IllegalArgumentException("Activity Log configuration must be specified")
+    }
+    
   }
 }
 
@@ -205,6 +213,72 @@ case class HttpConfig(
     WebServerConfig.getBoolean(config, prefix + ".aggregate-chunks", true),
     WebServerConfig.getInt(config, prefix + ".min-compressible-content-size-in-bytes", 1024))
 }
+
+/**
+ * Activity log configuration.
+ * 
+ * Activity log (aka web server log) details who accesses what information at time.
+ * 
+ * Socko asynchronously writes activity log events to file and/or the configured logging framework.
+ * 
+ * @param fileOutputFolder Optional Path to the folder where activity information will be written. Files in this
+ *   folder will be named after the day on which the entry was made. e.g. `YYYYMMDD.log`. Defaults to `None` 
+ *   which means that activity logs will not be written to a file.
+ * @param fileOutputFormat Format for the output file. Valid values are `Common` (Default) and `Extended`.
+ * @param loggerOutput Flag to indicate if activity information is to be written to the configured logger; typically
+ *   `logback`. Defaults to `false`.
+ * @param loggerOutputFormat Format for logger entries. Valid values are `Common` (Default) and `Extended`.
+ */
+case class ActivityLogConfig (
+  fileOutputFolder: Option[File] = None,
+  fileOutputFormat: ActivityLogFormat.Type = ActivityLogFormat.Common,
+  loggerOutput: Boolean = false,
+  loggerOutputFormat: ActivityLogFormat.Type = ActivityLogFormat.Common
+) {
+  
+  /**
+   * Read configuration from AKKA's `application.conf`. Supply default values to use if setting not present
+   */
+  def this(config: Config, prefix: String) = this(
+    WebServerConfig.getOptionalFile(config, prefix + ".file-output-folder"),
+    ActivityLogFormat.withName(config.getString(prefix + ".file-output-format")),
+    WebServerConfig.getBoolean(config, prefix + ".logger-output", false),
+    ActivityLogFormat.withName(config.getString(prefix + ".logger-output-format")))
+  
+}
+
+/**
+ * Server Activity Log format
+ */
+object ActivityLogFormat extends Enumeration {
+  
+  type Type = Value
+  
+  /**
+   * See http://en.wikipedia.org/wiki/Common_Log_Format
+   * 
+   * For example:
+   * [[[
+   * 216.67.1.91 - leon [01/Jul/2002:12:11:52 +0000] "GET /index.html HTTP/1.1" 200 431 "http://www.loganalyzer.net/" "Mozilla/4.05 [en] (WinNT; I)" "USERID=CustomerA;IMPID=01234"
+   * ]]] 
+   */
+  val Common = Value
+  
+  /**
+   * See http://www.w3.org/TR/WD-logfile.html
+   * 
+   * For example:
+   * [[[
+   * #Software: Socko
+   * #Version: 1.0
+   * #Date: 2002-05-02 17:42:15
+   * #Fields: date time c-ip cs-username s-ip s-port cs-method cs-uri-stem cs-uri-query sc-status sc-bytes cs-bytes time-taken cs(User-Agent) cs(Referrer) 
+   * 2002-05-24 20:18:01 172.224.24.114 - 206.73.118.24 80 GET /Default.htm - 200 7930 248 31 Mozilla/4.0+(compatible;+MSIE+5.01;+Windows+2000+Server) http://64.224.24.114/
+   * ]]]
+   */
+  val Extended = Value  
+}
+
 
 /**
  * Methods for reading configuration from Akka.
@@ -277,7 +351,7 @@ object WebServerConfig extends Logger {
   }
 
   /**
-   * Returns the defined `ProcessingConfig`. If not defined, then the default `ProcessingConfig` is returned.
+   * Returns the defined `HttpConfig`. If not defined, then the default `HttpConfig` is returned.
    */
   def getHttpConfig(config: Config, name: String): HttpConfig = {
     try {
@@ -292,12 +366,34 @@ object WebServerConfig extends Logger {
         new HttpConfig()
       }
       case ex => {
-        log.error("Error parsing processing config. Defaults will be used.", ex)
+        log.error("Error parsing HTTPConfig. Defaults will be used.", ex)
         new HttpConfig()
       }
     }
   }
 
+  /**
+   * Returns the defined `ActivityLogConfig`. If not defined, then the default `ActivityLogConfig` is returned.
+   */
+  def getActivityLogConfig(config: Config, name: String): ActivityLogConfig = {
+    try {
+      val v = config.getConfig(name)
+      if (v == null) {
+        new ActivityLogConfig()
+      } else {
+        new ActivityLogConfig(config, name)
+      }
+    } catch {
+      case ex: ConfigException.Missing => {
+        new ActivityLogConfig()
+      }
+      case ex => {
+        log.error("Error parsing ActivityLogConfig. Defaults will be used.", ex)
+        new ActivityLogConfig()
+      }
+    }
+  }
+  
   /**
    * Returns the defined `SslConfig`. If not defined, `None` is returned.
    */

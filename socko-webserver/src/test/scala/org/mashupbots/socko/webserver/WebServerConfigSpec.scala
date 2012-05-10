@@ -151,31 +151,42 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
         WebServerConfig(httpConfig = HttpConfig(1, 1, 0, -1, false)), "HTTP configuration, maximum chunk size")
     }
 
+    "throw Exception if ActivityLogConfig is not supplied" in {
+      checkForIllegalArgumentException(
+        WebServerConfig(activityLogConfig = null), "Activity Log configuration")
+    }
+
     "load from Akka Config" in {
       val actorConfig = """
-barebones-webserver {
-  server-name=BareBonesTest
-  hostname="192.168.0.1"
-  port=9999
-}
-all-config-webserver {
-  server-name = allTest
-  hostname = localhost
-  port=10000
-  ssl-config {
-    key-store-file=/tmp/ks.dat
-    key-store-password=kspwd
-    trust-store-file=/tmp/ts.dat
-    trust-store-password=tspwd
-  }
-  http-config {
-    max-length-in-mb=10
-    max-initial-line-length=20
-    max-header-size-in-bytes=30
-    max-chunk-size-in-bytes=40
-    aggregate-chunks=false
-  }
-}"""
+		barebones-webserver {
+		  server-name=BareBonesTest
+		  hostname="192.168.0.1"
+		  port=9999
+		}
+		all-config-webserver {
+		  server-name = allTest
+		  hostname = localhost
+		  port=10000
+		  ssl-config {
+		    key-store-file=/tmp/ks.dat
+		    key-store-password=kspwd
+		    trust-store-file=/tmp/ts.dat
+		    trust-store-password=tspwd
+		  }
+		  http-config {
+		    max-length-in-mb=10
+		    max-initial-line-length=20
+		    max-header-size-in-bytes=30
+		    max-chunk-size-in-bytes=40
+		    aggregate-chunks=false
+		  }
+          activity-log-config {
+            file-output-folder=/tmp
+            file-output-format=Common
+            logger-output=true
+            logger-output-format=Extended
+    	  }
+		}"""
 
       val actorSystem = ActorSystem("WebServerConfigSpec", ConfigFactory.parseString(actorConfig))
 
@@ -202,6 +213,10 @@ all-config-webserver {
       all.httpConfig.maxChunkSizeInBytes should be(40)
       all.httpConfig.aggreateChunks should be(false)
 
+      all.activityLogConfig.fileOutputFolder.get.getCanonicalPath should equal("/tmp")
+      all.activityLogConfig.fileOutputFormat should equal(ActivityLogFormat.Common)
+      all.activityLogConfig.loggerOutput should be(true)
+      all.activityLogConfig.loggerOutputFormat should equal(ActivityLogFormat.Extended)
       actorSystem.shutdown()
     }
   }
