@@ -36,9 +36,12 @@ abstract class ProcessingContext() {
   def endPoint: EndPoint
 
   /**
-   * Cache that can be use to pass data from handler to processor and between processors
+   * Cache that can be use to pass data from route to processor and between processors.
+   * 
+   * This map is not synchronized and not thread-safe. If you need to use a thread safe map, create a 
+   * `ConcurrentHashMap` as an item in this map in your route.
    */
-  val cache: collection.mutable.Map[String, String] = collection.mutable.Map.empty[String, String]
+  lazy val cache: collection.mutable.Map[String, Any] = collection.mutable.Map.empty[String, Any]
 
   /**
    * Returns the request content as a string
