@@ -60,16 +60,15 @@ import com.typesafe.config.ConfigException
  *  Defaults to `None`.
  * @param httpConfig HTTP protocol configuration. Defaults to an instance of
  *  [[org.mashupbots.socko.webserver.HttpConfig]] with default settings.
- * @param activityLogConfig HTTP protocol configuration. Defaults to an instance of
- *  [[org.mashupbots.socko.webserver.ActivityLogConfig]] with default settings; i.e. no logging.
+ * @param activityLogMode Log activity to the configured logger
  */
 case class WebServerConfig(
   serverName: String = "WebServer",
   hostname: String = "localhost",
   port: Int = 8888,
+  activityLog: ActivityLog.Type = ActivityLog.Off,
   sslConfig: Option[SslConfig] = None,
-  httpConfig: HttpConfig = HttpConfig(),
-  activityLogConfig: ActivityLogConfig = ActivityLogConfig()) extends Extension {
+  httpConfig: HttpConfig = HttpConfig()) extends Extension {
 
   /**
    * Read configuration from AKKA's `application.conf`
@@ -78,9 +77,9 @@ case class WebServerConfig(
     config.getString(prefix + ".server-name"),
     config.getString(prefix + ".hostname"),
     config.getInt(prefix + ".port"),
+    WebServerConfig.getActivityLog(config, prefix + ".activity-log"),
     WebServerConfig.getOptionalSslConfig(config, prefix + ".ssl-config"),
-    WebServerConfig.getHttpConfig(config, prefix + ".http-config"),
-    WebServerConfig.getActivityLogConfig(config, prefix + ".activity-log-config"))
+    WebServerConfig.getHttpConfig(config, prefix + ".http-config"))
 
   /**
    * Validate current configuration settings. Throws an exception if configuration has errors.
@@ -146,10 +145,6 @@ case class WebServerConfig(
       throw new IllegalArgumentException("HTTP configuration, maximum chunk size, must be > 0")
     }
 
-    if (activityLogConfig == null) {
-      throw new IllegalArgumentException("Activity Log configuration must be specified")
-    }
-    
   }
 }
 
@@ -215,47 +210,19 @@ case class HttpConfig(
 }
 
 /**
- * Activity log configuration.
- * 
- * Activity log (aka web server log) details who accesses what information at time.
- * 
- * Socko asynchronously writes activity log events to file and/or the configured logging framework.
- * 
- * @param fileOutputFolder Optional Path to the folder where activity information will be written. Files in this
- *   folder will be named after the day on which the entry was made. e.g. `YYYYMMDD.log`. Defaults to `None` 
- *   which means that activity logs will not be written to a file.
- * @param fileOutputFormat Format for the output file. Valid values are `Common` (Default) and `Extended`.
- * @param loggerOutput Flag to indicate if activity information is to be written to the configured logger; typically
- *   `logback`. Defaults to `false`.
- * @param loggerOutputFormat Format for logger entries. Valid values are `Common` (Default) and `Extended`.
+ * Server Activity Log setting
  */
-case class ActivityLogConfig (
-  fileOutputFolder: Option[File] = None,
-  fileOutputFormat: ActivityLogFormat.Type = ActivityLogFormat.Common,
-  loggerOutput: Boolean = false,
-  loggerOutputFormat: ActivityLogFormat.Type = ActivityLogFormat.Common
-) {
-  
-  /**
-   * Read configuration from AKKA's `application.conf`. Supply default values to use if setting not present
-   */
-  def this(config: Config, prefix: String) = this(
-    WebServerConfig.getOptionalFile(config, prefix + ".file-output-folder"),
-    ActivityLogFormat.withName(config.getString(prefix + ".file-output-format")),
-    WebServerConfig.getBoolean(config, prefix + ".logger-output", false),
-    ActivityLogFormat.withName(config.getString(prefix + ".logger-output-format")))
-  
-}
-
-/**
- * Server Activity Log format
- */
-object ActivityLogFormat extends Enumeration {
+object ActivityLog extends Enumeration {
   
   type Type = Value
   
   /**
-   * See http://en.wikipedia.org/wiki/Common_Log_Format
+   * Do not log activity
+   */
+  val Off = Value
+  
+  /**
+   * Log in common format. See http://en.wikipedia.org/wiki/Common_Log_Format
    * 
    * For example:
    * [[[
@@ -265,7 +232,7 @@ object ActivityLogFormat extends Enumeration {
   val Common = Value
   
   /**
-   * See http://www.w3.org/TR/WD-logfile.html
+   * Log in extended format. See http://www.w3.org/TR/WD-logfile.html
    * 
    * For example:
    * [[[
@@ -371,29 +338,7 @@ object WebServerConfig extends Logger {
       }
     }
   }
-
-  /**
-   * Returns the defined `ActivityLogConfig`. If not defined, then the default `ActivityLogConfig` is returned.
-   */
-  def getActivityLogConfig(config: Config, name: String): ActivityLogConfig = {
-    try {
-      val v = config.getConfig(name)
-      if (v == null) {
-        new ActivityLogConfig()
-      } else {
-        new ActivityLogConfig(config, name)
-      }
-    } catch {
-      case ex: ConfigException.Missing => {
-        new ActivityLogConfig()
-      }
-      case ex => {
-        log.error("Error parsing ActivityLogConfig. Defaults will be used.", ex)
-        new ActivityLogConfig()
-      }
-    }
-  }
-  
+ 
   /**
    * Returns the defined `SslConfig`. If not defined, `None` is returned.
    */
@@ -416,5 +361,20 @@ object WebServerConfig extends Logger {
     }
   }
 
+  /**
+   * Returns the activity log setting
+   */
+  def getActivityLog(config: Config, name: String): ActivityLog.Type = {
+    try {
+      val v = config.getString(name)
+      if (v == null || v == "") {
+        ActivityLog.Off
+      } else {
+        ActivityLog.withName(v)
+      }
+    } catch {
+      case _ => ActivityLog.Off
+    }
+  }
 }
 

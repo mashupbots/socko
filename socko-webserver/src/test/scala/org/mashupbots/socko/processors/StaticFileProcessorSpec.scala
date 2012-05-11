@@ -51,22 +51,22 @@ class StaticFileProcessorSpec
   extends WordSpec with ShouldMatchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient with Logger {
 
   val actorConfig = """
-my-pinned-dispatcher {
-  type=PinnedDispatcher
-  executor=thread-pool-executor
-}
-akka {
-  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
-  loglevel=DEBUG
-  actor {
-    deployment {
-      /my-router {
-        router = round-robin
-        nr-of-instances = 5
-      }
-    }
-  }
-}"""
+	my-pinned-dispatcher {
+	  type=PinnedDispatcher
+	  executor=thread-pool-executor
+	}
+	akka {
+	  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+	  loglevel=DEBUG
+	  actor {
+	    deployment {
+	      /my-router {
+	        router = round-robin
+	        nr-of-instances = 5
+	      }
+	    }
+	  }
+	}"""
 
   var actorSystem: ActorSystem = null
   var webServer: WebServer = null

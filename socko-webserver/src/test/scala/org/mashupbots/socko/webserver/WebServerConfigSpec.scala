@@ -15,30 +15,30 @@
 //
 package org.mashupbots.socko.webserver
 
+import java.io.File
+
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.WordSpec
-import org.mashupbots.socko.context.EndPoint
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.GivenWhenThen
-import java.io.File
-import akka.actor.ExtensionId
-import akka.actor.ExtensionIdProvider
-import akka.actor.ExtendedActorSystem
-import akka.actor.ActorSystem
+import org.scalatest.WordSpec
+
 import com.typesafe.config.ConfigFactory
 
+import akka.actor.ActorSystem
+import akka.actor.ExtendedActorSystem
+import akka.actor.ExtensionId
+import akka.actor.ExtensionIdProvider
+
 @RunWith(classOf[JUnitRunner])
-class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
+class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll  {
 
-  val aDirectory = new File("/tmp")
+  var aDirectory: File = null
 
-  val aFileNotFound = new File("/tmp/notexist")
+  var aFileNotFound: File = null
 
-  val aFile = new File("/tmp/WebServerConfigSpec.txt");
-  private val out = new java.io.FileWriter(aFile)
-  out.write("test")
-  out.close
+  var aFile: File = null
 
   def checkForIllegalArgumentException(cfg: WebServerConfig, paramName: String): Unit = {
     val ex = intercept[IllegalArgumentException] {
@@ -48,6 +48,40 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       "'" + paramName + "' does not appear in the error message: " + ex.getMessage)
   }
 
+  override def beforeAll(configMap: Map[String, Any]) {
+    aDirectory = File.createTempFile("ADir_", "")
+    aDirectory.delete()
+    aDirectory.mkdir()
+
+    aFileNotFound = new File(aDirectory, "notexist.txt")
+
+    aFile = new File("/tmp/WebServerConfigSpec.txt");
+    val out = new java.io.FileWriter(aFile)
+    out.write("test")
+    out.close
+  }
+
+  override def afterAll(configMap: Map[String, Any]) {
+    if (aDirectory != null) {
+      deleteDirectory(aDirectory)
+      aDirectory = null
+    }
+  }
+
+  def deleteDirectory(path: File): Boolean = {
+    if (path.exists()) {
+      val files = path.listFiles()
+      files.foreach(f => {
+        if (f.isFile) {
+          f.delete()
+        } else {
+          deleteDirectory(f)
+        }
+      })
+    }
+    path.delete()
+  }
+
   "WebServerConfig" should {
 
     "load with defaults" in {
@@ -55,17 +89,17 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     }
 
     "validate with no SSL configuration" in {
-      WebServerConfig("test", "0.0.0.0", 80, None, HttpConfig()).validate()
+      WebServerConfig("test", "0.0.0.0", 80, ActivityLog.Off, None, HttpConfig()).validate()
     }
 
     "validate with server side (keystore) SSL configuration" in {
       WebServerConfig(
-        "test", "0.0.0.0", 80, Some(SslConfig(aFile, "test", None, None)), HttpConfig()).validate()
+        "test", "0.0.0.0", 80, ActivityLog.Off, Some(SslConfig(aFile, "test", None, None)), HttpConfig()).validate()
     }
 
     "validate with client (truststore) and server side (keystore) SSL configuration" in {
       WebServerConfig(
-        "test", "0.0.0.0", 80, Some(SslConfig(aFile, "test", Some(aFile), Some("test"))), HttpConfig()).validate()
+        "test", "0.0.0.0", 80, ActivityLog.Off, Some(SslConfig(aFile, "test", Some(aFile), Some("test"))), HttpConfig()).validate()
     }
 
     "throw Exception when server name is not supplied" in {
@@ -151,11 +185,6 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
         WebServerConfig(httpConfig = HttpConfig(1, 1, 0, -1, false)), "HTTP configuration, maximum chunk size")
     }
 
-    "throw Exception if ActivityLogConfig is not supplied" in {
-      checkForIllegalArgumentException(
-        WebServerConfig(activityLogConfig = null), "Activity Log configuration")
-    }
-
     "load from Akka Config" in {
       val actorConfig = """
 		barebones-webserver {
@@ -180,12 +209,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
 		    max-chunk-size-in-bytes=40
 		    aggregate-chunks=false
 		  }
-          activity-log-config {
-            file-output-folder=/tmp
-            file-output-format=Common
-            logger-output=true
-            logger-output-format=Extended
-    	  }
+          activity-log = Common
 		}"""
 
       val actorSystem = ActorSystem("WebServerConfigSpec", ConfigFactory.parseString(actorConfig))
@@ -197,11 +221,13 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       barebones.sslConfig should equal(None)
       barebones.httpConfig.maxLengthInMB should be(4)
       barebones.httpConfig.aggreateChunks should be(true)
+      barebones.activityLog should be(ActivityLog.Off)
 
       val all = AllWebServerConfig(actorSystem)
       all.serverName should equal("allTest")
       all.hostname should equal("localhost")
       all.port should equal(10000)
+      all.activityLog should be(ActivityLog.Common)
       all.sslConfig.get.keyStoreFile.getCanonicalPath should equal("/tmp/ks.dat")
       all.sslConfig.get.keyStorePassword should equal("kspwd")
       all.sslConfig.get.trustStoreFile.get.getCanonicalPath should equal("/tmp/ts.dat")
@@ -213,10 +239,6 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       all.httpConfig.maxChunkSizeInBytes should be(40)
       all.httpConfig.aggreateChunks should be(false)
 
-      all.activityLogConfig.fileOutputFolder.get.getCanonicalPath should equal("/tmp")
-      all.activityLogConfig.fileOutputFormat should equal(ActivityLogFormat.Common)
-      all.activityLogConfig.loggerOutput should be(true)
-      all.activityLogConfig.loggerOutputFormat should equal(ActivityLogFormat.Extended)
       actorSystem.shutdown()
     }
   }
