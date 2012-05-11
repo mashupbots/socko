@@ -89,17 +89,17 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     }
 
     "validate with no SSL configuration" in {
-      WebServerConfig("test", "0.0.0.0", 80, ActivityLog.Off, None, HttpConfig()).validate()
+      WebServerConfig("test", "0.0.0.0", 80, None, None, HttpConfig()).validate()
     }
 
     "validate with server side (keystore) SSL configuration" in {
       WebServerConfig(
-        "test", "0.0.0.0", 80, ActivityLog.Off, Some(SslConfig(aFile, "test", None, None)), HttpConfig()).validate()
+        "test", "0.0.0.0", 80, None, Some(SslConfig(aFile, "test", None, None)), HttpConfig()).validate()
     }
 
     "validate with client (truststore) and server side (keystore) SSL configuration" in {
       WebServerConfig(
-        "test", "0.0.0.0", 80, ActivityLog.Off, Some(SslConfig(aFile, "test", Some(aFile), Some("test"))), HttpConfig()).validate()
+        "test", "0.0.0.0", 80, None, Some(SslConfig(aFile, "test", Some(aFile), Some("test"))), HttpConfig()).validate()
     }
 
     "throw Exception when server name is not supplied" in {
@@ -196,6 +196,11 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
 		  server-name = allTest
 		  hostname = localhost
 		  port=10000
+          web-log {
+            format = Extended
+            buffer-size = 1024
+            start-writer = true
+          }
 		  ssl-config {
 		    key-store-file=/tmp/ks.dat
 		    key-store-password=kspwd
@@ -209,7 +214,6 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
 		    max-chunk-size-in-bytes=40
 		    aggregate-chunks=false
 		  }
-          activity-log = Common
 		}"""
 
       val actorSystem = ActorSystem("WebServerConfigSpec", ConfigFactory.parseString(actorConfig))
@@ -221,17 +225,22 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       barebones.sslConfig should equal(None)
       barebones.httpConfig.maxLengthInMB should be(4)
       barebones.httpConfig.aggreateChunks should be(true)
-      barebones.activityLog should be(ActivityLog.Off)
+      barebones.webLog should be(None)
 
       val all = AllWebServerConfig(actorSystem)
       all.serverName should equal("allTest")
       all.hostname should equal("localhost")
       all.port should equal(10000)
-      all.activityLog should be(ActivityLog.Common)
+
+      all.webLog.get.format should be(WebLogFormat.Extended)
+      all.webLog.get.bufferSize should be(1024)
+      all.webLog.get.startWriter should be(true)
+
       all.sslConfig.get.keyStoreFile.getCanonicalPath should equal("/tmp/ks.dat")
       all.sslConfig.get.keyStorePassword should equal("kspwd")
       all.sslConfig.get.trustStoreFile.get.getCanonicalPath should equal("/tmp/ts.dat")
       all.sslConfig.get.trustStorePassword.get should equal("tspwd")
+
       all.httpConfig.maxLengthInMB should be(10)
       all.httpConfig.maxLengthInBytes should be(10 * 1024 * 1024)
       all.httpConfig.maxInitialLineLength should be(20)

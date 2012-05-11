@@ -56,17 +56,18 @@ import com.typesafe.config.ConfigException
  * 	You can also specify comma separated hostnames/ip address like `localhost,192.168.1.1`.
  *  Defaults to `localhost`.
  * @param port IP port number to bind to. Defaults to `8888`.
+ * @param webLogConfig Web server activity log configuration. If `None`, activity will not be
+ *  logged. If supplied, activities will be asynchronously written to the logger.
  * @param sslConfig SSL protocol configuration. If `None`, then SSL will not be turned on.
  *  Defaults to `None`.
  * @param httpConfig HTTP protocol configuration. Defaults to an instance of
  *  [[org.mashupbots.socko.webserver.HttpConfig]] with default settings.
- * @param activityLogMode Log activity to the configured logger
  */
 case class WebServerConfig(
   serverName: String = "WebServer",
   hostname: String = "localhost",
   port: Int = 8888,
-  activityLog: ActivityLog.Type = ActivityLog.Off,
+  webLog: Option[WebLogConfig] = None,
   sslConfig: Option[SslConfig] = None,
   httpConfig: HttpConfig = HttpConfig()) extends Extension {
 
@@ -77,7 +78,7 @@ case class WebServerConfig(
     config.getString(prefix + ".server-name"),
     config.getString(prefix + ".hostname"),
     config.getInt(prefix + ".port"),
-    WebServerConfig.getActivityLog(config, prefix + ".activity-log"),
+    WebServerConfig.getOptionalWebLogConfig(config, prefix + ".web-log"),
     WebServerConfig.getOptionalSslConfig(config, prefix + ".ssl-config"),
     WebServerConfig.getHttpConfig(config, prefix + ".http-config"))
 
@@ -210,42 +211,61 @@ case class HttpConfig(
 }
 
 /**
- * Server Activity Log setting
+ * Configuration for web server activity logs.
+ *
+ * The events are queued before being asynchronously written to the logger.
+ *
+ * @param format Format of the web log
+ * @param bufferSize Number of events to queue before new events are discarded. This prevents a slow writer
+ *   causing the queue the grow until web server to run out of memory.
+ * @param startWriter Automatically start writer to dequeue log entries. If `false`, the caller must provide
+ *   their own writer to dequeue the entries.
  */
-object ActivityLog extends Enumeration {
-  
-  type Type = Value
-  
+case class WebLogConfig(
+  format: WebLogFormat.Type = WebLogFormat.Common,
+  bufferSize: Int = 512,
+  startWriter: Boolean = true) {
+
   /**
-   * Do not log activity
+   * Read configuration from AKKA's `application.conf`
    */
-  val Off = Value
-  
+  def this(config: Config, prefix: String) = this(
+    WebLogFormat.withName(config.getString(prefix + ".format")),
+    WebServerConfig.getInt(config, prefix + ".buffer-size", 512),
+    WebServerConfig.getBoolean(config, prefix + ".start-writer", true))
+}
+
+/**
+ * Web Server Activity Log setting
+ */
+object WebLogFormat extends Enumeration {
+
+  type Type = Value
+
   /**
    * Log in common format. See http://en.wikipedia.org/wiki/Common_Log_Format
-   * 
+   *
    * For example:
    * [[[
    * 216.67.1.91 - leon [01/Jul/2002:12:11:52 +0000] "GET /index.html HTTP/1.1" 200 431 "http://www.loganalyzer.net/" "Mozilla/4.05 [en] (WinNT; I)" "USERID=CustomerA;IMPID=01234"
-   * ]]] 
+   * ]]]
    */
   val Common = Value
-  
+
   /**
    * Log in extended format. See http://www.w3.org/TR/WD-logfile.html
-   * 
+   *
    * For example:
    * [[[
    * #Software: Socko
    * #Version: 1.0
    * #Date: 2002-05-02 17:42:15
-   * #Fields: date time c-ip cs-username s-ip s-port cs-method cs-uri-stem cs-uri-query sc-status sc-bytes cs-bytes time-taken cs(User-Agent) cs(Referrer) 
+   * #Fields: date time c-ip cs-username s-ip s-port cs-method cs-uri-stem cs-uri-query sc-status sc-bytes cs-bytes time-taken cs(User-Agent) cs(Referrer)
    * 2002-05-24 20:18:01 172.224.24.114 - 206.73.118.24 80 GET /Default.htm - 200 7930 248 31 Mozilla/4.0+(compatible;+MSIE+5.01;+Windows+2000+Server) http://64.224.24.114/
    * ]]]
    */
-  val Extended = Value  
+  val Extended = Value
 }
-
 
 /**
  * Methods for reading configuration from Akka.
@@ -338,7 +358,7 @@ object WebServerConfig extends Logger {
       }
     }
   }
- 
+
   /**
    * Returns the defined `SslConfig`. If not defined, `None` is returned.
    */
@@ -364,16 +384,22 @@ object WebServerConfig extends Logger {
   /**
    * Returns the activity log setting
    */
-  def getActivityLog(config: Config, name: String): ActivityLog.Type = {
+  def getOptionalWebLogConfig(config: Config, name: String): Option[WebLogConfig] = {
     try {
-      val v = config.getString(name)
-      if (v == null || v == "") {
-        ActivityLog.Off
+      val v = config.getConfig(name)
+      if (v == null) {
+        None
       } else {
-        ActivityLog.withName(v)
+        Some(new WebLogConfig(config, name))
       }
     } catch {
-      case _ => ActivityLog.Off
+      case ex: ConfigException.Missing => {
+        None
+      }
+      case ex => {
+        log.error("Error parsing WebLogConfig config. Web server activity logging is turned off.", ex)
+        None
+      }
     }
   }
 }
