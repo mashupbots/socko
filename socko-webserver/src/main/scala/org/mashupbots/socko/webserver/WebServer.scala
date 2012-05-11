@@ -59,7 +59,7 @@ class WebServer(
   /**
    * SSL Engine
    */
-  val sslManager: Option[SslManager] = if (config.sslConfig.isDefined) Some(new SslManager(this)) else None
+  val sslManager: Option[SslManager] = if (config.ssl.isDefined) Some(new SslManager(this)) else None
 
   /**
    * Starts the server

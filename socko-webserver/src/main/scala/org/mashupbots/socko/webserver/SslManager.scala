@@ -36,7 +36,7 @@ class SslManager(server: WebServer) {
    * Create context for SSLEngine
    */
   val context: SSLContext = {
-    var sslConfig = server.config.sslConfig.get
+    var sslConfig = server.config.ssl.get
 
     // Set up key manager factory to use our key store (server certificates)
     val ks = KeyStore.getInstance("JKS")
@@ -74,7 +74,7 @@ class SslManager(server: WebServer) {
    */
   def createSSLEngine(): SSLEngine = {
       val engine = context.createSSLEngine()
-      engine.setNeedClientAuth(server.config.sslConfig.get.trustStoreFile.isDefined)
+      engine.setNeedClientAuth(server.config.ssl.get.trustStoreFile.isDefined)
       engine.setUseClientMode(false)
       engine
   }

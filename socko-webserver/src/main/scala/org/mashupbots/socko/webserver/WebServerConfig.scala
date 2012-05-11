@@ -29,12 +29,67 @@ import com.typesafe.config.ConfigException
  *
  * The configuration can be optionally loaded from Akka's application.conf` file.
  *
- * The following configuration file:
+ * The following example configuration file:
  * {{{
  *   akka-config-example {
  *     server-name=AkkaConfigExample
  *     hostname=localhost
  *     port=9000
+ *     
+ *     # Optional web log. If not supplied, web server activity logging is turned off.
+ *     web-log {
+ *     
+ *       # Optional Web log format: Common (Default) or Extended 
+ *       format = Common
+ *       
+ *       # Optional asynchronous log queue size. Defaults to 512 events in the queue 
+ *       # before new events are discarded.
+ *       buffer-size = 512
+ *       
+ *       # Optional flag to start the writer. Defaults to `true`. If `false`, we assume
+ *       # you will use your own writer to dequeue events form the queue.
+ *       start-writer = true
+ *     }
+ *     
+ *     # Optional SSL. If not supplied, ssl is turned off.
+ *     ssl {
+ *     
+ *       # Path to key store (server cert.)
+ *       key-store-file=/tmp/ks.dat
+ *       
+ *       # Password to key store
+ *       key-store-password=kspwd
+ *       
+ *       # Optional path to trust store (client cert.)
+ *       trust-store-file=/tmp/ts.dat
+ *       
+ *       # Optional password to trust store
+ *       trust-store-password=tspwd
+ *     }
+ *     
+ *     # Optional HTTP protocol configuration. If not supplied, defaults are used.
+ *     http {
+ *     
+ *       # Maximum size of HTTP request. Defaults to 4MB.
+ *       max-length-in-mb=4
+ *       
+ *       # Maximum length of the HTTP initial line. Defaults to 4096 bytes (4K).
+ *       max-initial-line-length=4096
+ *       
+ *       # Maximum size of HTTP headers. Defaults to 8192 bytes (8K).
+ *       max-header-size-in-bytes=8192
+ *       
+ *       # Maximum size of HTTP chunks. Defaults to 8192 bytes (8K).
+ *       max-chunk-size-in-bytes=8192
+ *       
+ *       # Flag to indicate if HTTP chunk requests should be aggregated and presented
+ *       # as a single HTTP request. Defaults to true.
+ *       aggregate-chunks=true
+ *       
+ *       # Content under this size is not compressed. Defaults to 1024 bytes (1K). 
+ *       # Set to -1 to turn off compression; or 0 to compress all content.
+ *       min-compressible-content-size-in-bytes=1024
+ *     }     
  *   }
  * }}}
  *
@@ -58,9 +113,9 @@ import com.typesafe.config.ConfigException
  * @param port IP port number to bind to. Defaults to `8888`.
  * @param webLogConfig Web server activity log configuration. If `None`, activity will not be
  *  logged. If supplied, activities will be asynchronously written to the logger.
- * @param sslConfig SSL protocol configuration. If `None`, then SSL will not be turned on.
+ * @param ssl SSL protocol configuration. If `None`, then SSL will not be turned on.
  *  Defaults to `None`.
- * @param httpConfig HTTP protocol configuration. Defaults to an instance of
+ * @param http HTTP protocol configuration. Defaults to an instance of
  *  [[org.mashupbots.socko.webserver.HttpConfig]] with default settings.
  */
 case class WebServerConfig(
@@ -68,8 +123,8 @@ case class WebServerConfig(
   hostname: String = "localhost",
   port: Int = 8888,
   webLog: Option[WebLogConfig] = None,
-  sslConfig: Option[SslConfig] = None,
-  httpConfig: HttpConfig = HttpConfig()) extends Extension {
+  ssl: Option[SslConfig] = None,
+  http: HttpConfig = HttpConfig()) extends Extension {
 
   /**
    * Read configuration from AKKA's `application.conf`
@@ -79,8 +134,8 @@ case class WebServerConfig(
     config.getString(prefix + ".hostname"),
     config.getInt(prefix + ".port"),
     WebServerConfig.getOptionalWebLogConfig(config, prefix + ".web-log"),
-    WebServerConfig.getOptionalSslConfig(config, prefix + ".ssl-config"),
-    WebServerConfig.getHttpConfig(config, prefix + ".http-config"))
+    WebServerConfig.getOptionalSslConfig(config, prefix + ".ssl"),
+    WebServerConfig.getHttpConfig(config, prefix + ".http"))
 
   /**
    * Validate current configuration settings. Throws an exception if configuration has errors.
@@ -97,52 +152,52 @@ case class WebServerConfig(
       throw new IllegalArgumentException("port must be specified and > 0")
     }
 
-    if (sslConfig.isDefined) {
-      if (sslConfig.get.keyStoreFile == null) {
+    if (ssl.isDefined) {
+      if (ssl.get.keyStoreFile == null) {
         throw new IllegalArgumentException("key store file must be specified")
       }
-      if (!sslConfig.get.keyStoreFile.exists) {
+      if (!ssl.get.keyStoreFile.exists) {
         throw new IllegalArgumentException("key store file does not exist")
       }
-      if (!sslConfig.get.keyStoreFile.isFile) {
+      if (!ssl.get.keyStoreFile.isFile) {
         throw new IllegalArgumentException("key store file is not a file")
       }
-      if (sslConfig.get.keyStorePassword == null || sslConfig.get.keyStorePassword == "") {
+      if (ssl.get.keyStorePassword == null || ssl.get.keyStorePassword == "") {
         throw new IllegalArgumentException("key store password must be specified")
       }
 
-      if (sslConfig.get.trustStoreFile.isDefined) {
-        if (sslConfig.get.trustStoreFile == null || sslConfig.get.trustStoreFile.get == null) {
+      if (ssl.get.trustStoreFile.isDefined) {
+        if (ssl.get.trustStoreFile == null || ssl.get.trustStoreFile.get == null) {
           throw new IllegalArgumentException("trust store file must be specified")
         }
-        if (!sslConfig.get.trustStoreFile.get.exists) {
+        if (!ssl.get.trustStoreFile.get.exists) {
           throw new IllegalArgumentException("trust store file does not exist")
         }
-        if (!sslConfig.get.trustStoreFile.get.isFile) {
+        if (!ssl.get.trustStoreFile.get.isFile) {
           throw new IllegalArgumentException("trust store file is not a file")
         }
-        if (sslConfig.get.trustStorePassword == null ||
-          sslConfig.get.trustStorePassword.isEmpty ||
-          sslConfig.get.trustStorePassword.get == null ||
-          sslConfig.get.trustStorePassword.get == "") {
+        if (ssl.get.trustStorePassword == null ||
+          ssl.get.trustStorePassword.isEmpty ||
+          ssl.get.trustStorePassword.get == null ||
+          ssl.get.trustStorePassword.get == "") {
           throw new IllegalArgumentException("trust store password must be specified")
         }
       }
     }
 
-    if (httpConfig == null) {
+    if (http == null) {
       throw new IllegalArgumentException("HTTP configuration must be specified")
     }
-    if (httpConfig.maxLengthInMB <= 0) {
+    if (http.maxLengthInMB <= 0) {
       throw new IllegalArgumentException("HTTP configuration, maximum length in MB, must be specified and > 0")
     }
-    if (httpConfig.maxInitialLineLength <= 0) {
+    if (http.maxInitialLineLength <= 0) {
       throw new IllegalArgumentException("HTTP configuration, maximum initial line length, must be > 0")
     }
-    if (httpConfig.maxHeaderSizeInBytes < 0) {
+    if (http.maxHeaderSizeInBytes < 0) {
       throw new IllegalArgumentException("HTTP configuration, maximum header size, must be > 0")
     }
-    if (httpConfig.maxChunkSizeInBytes < 0) {
+    if (http.maxChunkSizeInBytes < 0) {
       throw new IllegalArgumentException("HTTP configuration, maximum chunk size, must be > 0")
     }
 

@@ -80,7 +80,7 @@ class RequestHandler(
    * HTTP processing configuration
    */
   private val httpConfig = HttpProcessingConfig(
-      config.httpConfig.minCompressibleContentSizeInBytes)
+      config.http.minCompressibleContentSizeInBytes)
   
       
   private lazy val wsConfig = WsProcessingConfig()

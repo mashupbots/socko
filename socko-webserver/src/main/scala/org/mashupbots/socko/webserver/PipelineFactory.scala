@@ -43,12 +43,12 @@ class PipelineFactory(server: WebServer) extends ChannelPipelineFactory {
     }
 
     newPipeline.addLast("decoder", new HttpRequestDecoder(
-      server.config.httpConfig.maxInitialLineLength,
-      server.config.httpConfig.maxHeaderSizeInBytes,
-      server.config.httpConfig.maxChunkSizeInBytes))
+      server.config.http.maxInitialLineLength,
+      server.config.http.maxHeaderSizeInBytes,
+      server.config.http.maxChunkSizeInBytes))
 
-    if (server.config.httpConfig.aggreateChunks) {
-      newPipeline.addLast("chunkAggregator", new HttpChunkAggregator(server.config.httpConfig.maxLengthInBytes))
+    if (server.config.http.aggreateChunks) {
+      newPipeline.addLast("chunkAggregator", new HttpChunkAggregator(server.config.http.maxLengthInBytes))
     }
 
     newPipeline.addLast("encoder", new HttpResponseEncoder())

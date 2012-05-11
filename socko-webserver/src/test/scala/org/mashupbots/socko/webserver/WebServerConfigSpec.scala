@@ -125,64 +125,64 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     "throw Exception if keystore file is invalid" in {
       when("keystore file not specified")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(null, null, null, null))), "key store file")
+        WebServerConfig(ssl = Some(SslConfig(null, null, null, null))), "key store file")
 
       when("keystore file a directory and not a file")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aDirectory, null, null, null))), "key store file")
+        WebServerConfig(ssl = Some(SslConfig(aDirectory, null, null, null))), "key store file")
 
       when("keystore file does not exist")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFileNotFound, null, null, null))), "key store file")
+        WebServerConfig(ssl = Some(SslConfig(aFileNotFound, null, null, null))), "key store file")
     }
 
     "throw Exception if keystore password is not supplied" in {
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, null, null, null))), "key store password")
+        WebServerConfig(ssl = Some(SslConfig(aFile, null, null, null))), "key store password")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "", null, null))), "key store password")
+        WebServerConfig(ssl = Some(SslConfig(aFile, "", null, null))), "key store password")
     }
 
     "throw Exception if truststore file is invalid" in {
       when("truststore file not specified")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(null), null))), "trust store file")
+        WebServerConfig(ssl = Some(SslConfig(aFile, "pw", Some(null), null))), "trust store file")
 
       when("truststore file a directory and not a file")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aDirectory), null))), "trust store file")
+        WebServerConfig(ssl = Some(SslConfig(aFile, "pw", Some(aDirectory), null))), "trust store file")
 
       when("truststore file does not exist")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFileNotFound), null))), "trust store file")
+        WebServerConfig(ssl = Some(SslConfig(aFile, "pw", Some(aFileNotFound), null))), "trust store file")
     }
 
     "throw Exception if truststore password is not supplied" in {
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFile), null))), "trust store password")
+        WebServerConfig(ssl = Some(SslConfig(aFile, "pw", Some(aFile), null))), "trust store password")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFile), Some(null)))), "trust store password")
+        WebServerConfig(ssl = Some(SslConfig(aFile, "pw", Some(aFile), Some(null)))), "trust store password")
       checkForIllegalArgumentException(
-        WebServerConfig(sslConfig = Some(SslConfig(aFile, "pw", Some(aFile), Some("")))), "trust store password")
+        WebServerConfig(ssl = Some(SslConfig(aFile, "pw", Some(aFile), Some("")))), "trust store password")
     }
 
     "throw Exception if HttpConfig is not supplied" in {
       checkForIllegalArgumentException(
-        WebServerConfig(httpConfig = null), "HTTP configuration")
+        WebServerConfig(http = null), "HTTP configuration")
     }
 
     "throw Exception if HttpConfig settings are invalid" in {
       checkForIllegalArgumentException(
-        WebServerConfig(httpConfig = HttpConfig(0, 0, 0, 0, false)), "HTTP configuration, maximum length in MB")
+        WebServerConfig(http = HttpConfig(0, 0, 0, 0, false)), "HTTP configuration, maximum length in MB")
 
       checkForIllegalArgumentException(
-        WebServerConfig(httpConfig = HttpConfig(1, -1, 0, 0, false)), "HTTP configuration, maximum initial line length")
+        WebServerConfig(http = HttpConfig(1, -1, 0, 0, false)), "HTTP configuration, maximum initial line length")
 
       checkForIllegalArgumentException(
-        WebServerConfig(httpConfig = HttpConfig(1, 1, -1, 0, false)), "HTTP configuration, maximum header size")
+        WebServerConfig(http = HttpConfig(1, 1, -1, 0, false)), "HTTP configuration, maximum header size")
 
       checkForIllegalArgumentException(
-        WebServerConfig(httpConfig = HttpConfig(1, 1, 0, -1, false)), "HTTP configuration, maximum chunk size")
+        WebServerConfig(http = HttpConfig(1, 1, 0, -1, false)), "HTTP configuration, maximum chunk size")
     }
 
     "load from Akka Config" in {
@@ -201,18 +201,19 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
             buffer-size = 1024
             start-writer = true
           }
-		  ssl-config {
+		  ssl {
 		    key-store-file=/tmp/ks.dat
 		    key-store-password=kspwd
 		    trust-store-file=/tmp/ts.dat
 		    trust-store-password=tspwd
 		  }
-		  http-config {
+		  http {
 		    max-length-in-mb=10
 		    max-initial-line-length=20
 		    max-header-size-in-bytes=30
 		    max-chunk-size-in-bytes=40
 		    aggregate-chunks=false
+            min-compressible-content-size-in-bytes=50
 		  }
 		}"""
 
@@ -222,10 +223,10 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       barebones.serverName should equal("BareBonesTest")
       barebones.hostname should equal("192.168.0.1")
       barebones.port should equal(9999)
-      barebones.sslConfig should equal(None)
-      barebones.httpConfig.maxLengthInMB should be(4)
-      barebones.httpConfig.aggreateChunks should be(true)
       barebones.webLog should be(None)
+      barebones.ssl should equal(None)
+      barebones.http.maxLengthInMB should be(4)
+      barebones.http.aggreateChunks should be(true)
 
       val all = AllWebServerConfig(actorSystem)
       all.serverName should equal("allTest")
@@ -236,18 +237,19 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       all.webLog.get.bufferSize should be(1024)
       all.webLog.get.startWriter should be(true)
 
-      all.sslConfig.get.keyStoreFile.getCanonicalPath should equal("/tmp/ks.dat")
-      all.sslConfig.get.keyStorePassword should equal("kspwd")
-      all.sslConfig.get.trustStoreFile.get.getCanonicalPath should equal("/tmp/ts.dat")
-      all.sslConfig.get.trustStorePassword.get should equal("tspwd")
+      all.ssl.get.keyStoreFile.getCanonicalPath should equal("/tmp/ks.dat")
+      all.ssl.get.keyStorePassword should equal("kspwd")
+      all.ssl.get.trustStoreFile.get.getCanonicalPath should equal("/tmp/ts.dat")
+      all.ssl.get.trustStorePassword.get should equal("tspwd")
 
-      all.httpConfig.maxLengthInMB should be(10)
-      all.httpConfig.maxLengthInBytes should be(10 * 1024 * 1024)
-      all.httpConfig.maxInitialLineLength should be(20)
-      all.httpConfig.maxHeaderSizeInBytes should be(30)
-      all.httpConfig.maxChunkSizeInBytes should be(40)
-      all.httpConfig.aggreateChunks should be(false)
-
+      all.http.maxLengthInMB should be(10)
+      all.http.maxLengthInBytes should be(10 * 1024 * 1024)
+      all.http.maxInitialLineLength should be(20)
+      all.http.maxHeaderSizeInBytes should be(30)
+      all.http.maxChunkSizeInBytes should be(40)
+      all.http.aggreateChunks should be(false)
+      all.http.minCompressibleContentSizeInBytes should be(50)
+      
       actorSystem.shutdown()
     }
   }

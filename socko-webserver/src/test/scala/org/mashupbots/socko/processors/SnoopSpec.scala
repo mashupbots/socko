@@ -69,7 +69,7 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
   override def beforeAll(configMap: Map[String, Any]) {
     // Make all content compressible to pass our tests
     val httpConfig = HttpConfig(minCompressibleContentSizeInBytes = 0)
-    webServer = new WebServer(WebServerConfig(port = port, httpConfig = httpConfig), routes)
+    webServer = new WebServer(WebServerConfig(port = port, http = httpConfig), routes)
     webServer.start()
 
     // Wait for start
