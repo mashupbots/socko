@@ -560,7 +560,7 @@ from `application.conf`. Note the setting will be named `akka-config-example`.
 
 Then, start the actor system and load the configuration from that system.
 
-     val actorSystem = ActorSystem("AkkaConfigActorSystem")
+    val actorSystem = ActorSystem("AkkaConfigActorSystem")
     val myWebServerConfig = MyWebServerConfig(actorSystem)
     
 Lastly, add the following our `application.conf`
@@ -569,4 +569,5 @@ Lastly, add the following our `application.conf`
         port=9999
     }
 
+A complete example `application.conf` can be found in {{ page.WebServerConfigClass }}.
 
