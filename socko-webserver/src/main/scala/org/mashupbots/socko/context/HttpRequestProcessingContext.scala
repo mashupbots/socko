@@ -27,6 +27,7 @@ import org.jboss.netty.handler.codec.http.HttpRequest
 import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.util.CharsetUtil
+import org.mashupbots.socko.utils.WebLogEvent
 
 /**
  * Context for processing HTTP requests.
@@ -89,6 +90,11 @@ case class HttpRequestProcessingContext(
     if (v == null || v == "") None else Some(v)
   }
 
+  /**
+   * HTTP Version 
+   */
+  val httpVersion = httpRequest.getProtocolVersion
+  
   /**
    * `True` if and only if the contents of this HTTP request will be arriving in subsequent HTTPChunks
    *
@@ -161,5 +167,6 @@ case class HttpRequestProcessingContext(
       case _ => None
     }
   }
+
 
 }

@@ -15,8 +15,13 @@
 //
 package org.mashupbots.socko.context
 
+import org.mashupbots.socko.utils.WebLogQueue
+
 /**
  * Web Socket processing configuration used by the context
+ *
+ * @param webLog web log for recording events
  */
-case class WsProcessingConfig() {
+case class WsProcessingConfig(
+  webLog: Option[WebLogQueue]) {
 }

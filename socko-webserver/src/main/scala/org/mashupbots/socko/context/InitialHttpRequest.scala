@@ -15,21 +15,46 @@
 //
 package org.mashupbots.socko.context
 
+import scala.collection.JavaConversions._
+import java.util.Map
+import org.jboss.netty.handler.codec.http.HttpVersion
+
 /**
- * Details of the initial HTTP request that triggered HTTP chunk or WebSocket processing
- * 
+ * Details of the initial HTTP request that triggered HTTP chunk or WebSocket processing.
+ *
+ * This is used for logging and preparing the response
+ *
  * @param endPoint HTTP end point used by the request
  * @param isKeepAlive `True` if and only if this connection is to be kept alive
  * @param acceptedEncodings Array of accepted encoding for content compression from the HTTP header
+ * @param httpVersion HTTP version being used
+ * @param headers HTTP headers sent in the initial request
  */
 case class InitialHttpRequest(
   endPoint: EndPoint,
   isKeepAlive: Boolean,
-  acceptedEncodings: Array[String]) {
+  acceptedEncodings: Array[String],
+  httpVersion: HttpVersion,
+  headers: List[Map.Entry[String, String]]) {
 
   def this(request: HttpRequestProcessingContext) = this(
     request.endPoint,
     request.isKeepAlive,
-    request.acceptedEncodings)
+    request.acceptedEncodings,
+    request.httpVersion,
+    request.headers.toList)
+
+  /**
+   * Returns the header value with the specified header name.  If there are
+   * more than one header value for the specified header name, the first
+   * value is returned.
+   *
+   * @return `Some(String)` or `None` if there is no such header or the header content is
+   * an empty string
+   */
+  def getHeader(name: String): Option[String] = {
+    val v = headers.find(h => h.getKey == name)
+    if (v.isDefined) Some(v.get.getValue) else None
+  }
 
 }

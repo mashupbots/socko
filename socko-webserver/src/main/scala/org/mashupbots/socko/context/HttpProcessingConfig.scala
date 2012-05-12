@@ -15,13 +15,17 @@
 //
 package org.mashupbots.socko.context
 
+import org.mashupbots.socko.utils.WebLogQueue
+
 /**
  * HTTP processing configuration used by the context
  * 
  * @param minCompressibleContentSizeInBytes Minimum number of bytes before content will be compressed if requested by 
- *   the client. Set to `-1` to turn off compression. 
+ *   the client. Set to `-1` to turn off compression.
+ * @param webLog web log for recording events
  */
 case class HttpProcessingConfig(
-    minCompressibleContentSizeInBytes: Int) {
+    minCompressibleContentSizeInBytes: Int,
+    webLog: Option[WebLogQueue]) {
 
 }

@@ -16,8 +16,8 @@
 package org.mashupbots.socko.context
 
 import java.nio.charset.Charset
-
 import org.jboss.netty.channel.Channel
+import org.mashupbots.socko.utils.WebLogQueue
 
 /**
  * When processing a web request, the context provides a uniform way to read request data
@@ -37,10 +37,10 @@ abstract class ProcessingContext() {
 
   /**
    * Cache that can be use to pass data from route to processor and between processors.
-   * 
+   *
    * This map is not synchronized and not thread-safe. In most cases, we expect this cache to be used by a single
-   * thread - hence a standard map is faster. 
-   * 
+   * thread - hence a standard map is faster.
+   *
    * If you do need to use a thread safe map, from your route, instance and store a `ConcurrentHashMap` as an item
    * in this cache.
    */

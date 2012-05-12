@@ -518,20 +518,24 @@ Common settings are:
 
    Human friendly name of this server. Defaults to `WebServer`.
     
- - hostname
+ - `hostname`
  
    Hostname or IP address to bind. `0.0.0.0` will bind to all addresses. You can also specify comma 
    separated hostnames/ip address like `localhost,192.168.1.1`. Defaults to `localhost`.
    
- - port
+ - `port`
  
    IP port number to bind to. Defaults to `8888`.
    
- - sslConfig
+ - `webLog`
+   
+   Web server activity log.
+   
+ - `ssl`
  
    Optional SSL configuration. Default is `None`.
    
- - httpConfig
+ - `http`
  
    Optional HTTP request settings.
 

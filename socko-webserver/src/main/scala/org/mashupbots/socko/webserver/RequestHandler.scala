@@ -56,15 +56,9 @@ import org.mashupbots.socko.utils.Logger
 /**
  * Handles incoming HTTP messages from Netty
  *
- * @param routes PartialFunction used for routing incoming HTTP messages to actors for processing. See
- *   [[org.mashupbots.socko.riytes.Routes]]
- * @param allChannels Channel group used for storing all open channels
- * @param config Web Server Configuration
+ * @param server WebServer using this handler
  */
-class RequestHandler(
-  routes: PartialFunction[ProcessingContext, Unit],
-  allChannels: ChannelGroup,
-  config: WebServerConfig) extends SimpleChannelUpstreamHandler with Logger {
+class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler with Logger {
 
   /**
    * WebSocket handshaker used when closing web sockets
@@ -72,19 +66,19 @@ class RequestHandler(
   private var wsHandshaker: WebSocketServerHandshaker = null
 
   /**
-   * Details of the original HTTP that kicked off HTTP Chunk or WebSocket processing
+   * Details of the initial HTTP that kicked off HTTP Chunk or WebSocket processing
    */
-  private var originalHttpRequest: Option[InitialHttpRequest] = None
+  private var initialHttpRequest: Option[InitialHttpRequest] = None
 
   /**
    * HTTP processing configuration
    */
   private val httpConfig = HttpProcessingConfig(
-      config.http.minCompressibleContentSizeInBytes)
-  
-      
-  private lazy val wsConfig = WsProcessingConfig()
-  
+    server.config.http.minCompressibleContentSizeInBytes,
+    server.webLog)
+
+  private lazy val wsConfig = WsProcessingConfig(server.webLog)
+
   /**
    * Dispatch message to actor system for processing
    *
@@ -95,37 +89,37 @@ class RequestHandler(
     e.getMessage match {
       case httpRequest: HttpRequest =>
         var ctx = HttpRequestProcessingContext(e.getChannel, httpRequest, httpConfig)
-        log.debug("HTTP {} CHANNEL={}",
-          Array[Object](ctx.endPoint, e.getChannel.getId))
+
+        log.debug("HTTP {} CHANNEL={}", ctx.endPoint, e.getChannel.getId)
 
         if (ctx.isChunked) {
           validateFirstChunk(ctx)
-          routes(ctx)
-          originalHttpRequest = Some(new InitialHttpRequest(ctx))
+          server.routes(ctx)
+          initialHttpRequest = Some(new InitialHttpRequest(ctx))
         } else if (ctx.isWebSocketUpgrade) {
           var wsctx = WsHandshakeProcessingContext(e.getChannel, httpRequest, httpConfig)
-          routes(wsctx)
+          server.routes(wsctx)
           doWebSocketHandshake(wsctx)
-          originalHttpRequest = Some(new InitialHttpRequest(ctx))
+          initialHttpRequest = Some(new InitialHttpRequest(ctx))
         } else {
-          routes(ctx)
+          server.routes(ctx)
         }
 
       case httpChunk: HttpChunk =>
-        var ctx = HttpChunkProcessingContext(e.getChannel, originalHttpRequest.get, httpChunk, httpConfig)
-        log.debug("CHUNK {} CHANNEL={}",
-          Array[Object](ctx.endPoint, e.getChannel.getId))
+        var ctx = HttpChunkProcessingContext(e.getChannel, initialHttpRequest.get, httpChunk, httpConfig)
 
-        routes(ctx)
+        log.debug("CHUNK {} CHANNEL={}", ctx.endPoint, e.getChannel.getId)
+
+        server.routes(ctx)
 
         if (ctx.isLastChunk) {
           validateLastChunk(ctx)
         }
 
       case wsFrame: WebSocketFrame =>
-        var ctx = WsFrameProcessingContext(e.getChannel, originalHttpRequest.get.endPoint, wsFrame, wsConfig)
-        log.debug("WS {} CHANNEL={}",
-          Array[Object](ctx.endPoint, e.getChannel.getId))
+        var ctx = WsFrameProcessingContext(e.getChannel, initialHttpRequest.get.endPoint, wsFrame, wsConfig)
+
+        log.debug("WS {} CHANNEL={}", ctx.endPoint, e.getChannel.getId)
 
         if (wsFrame.isInstanceOf[CloseWebSocketFrame]) {
           // This will also close the channel
@@ -133,7 +127,7 @@ class RequestHandler(
         } else if (wsFrame.isInstanceOf[PingWebSocketFrame]) {
           e.getChannel.write(new PongWebSocketFrame(wsFrame.getBinaryData()))
         } else {
-          routes(ctx)
+          server.routes(ctx)
         }
 
       case _ =>
@@ -151,11 +145,11 @@ class RequestHandler(
   private def validateFirstChunk(ctx: HttpRequestProcessingContext) {
     if (isAggreatingChunks(ctx.channel)) {
       if (ctx.httpRequest.isChunked) {
-        if (originalHttpRequest.isDefined) {
+        if (initialHttpRequest.isDefined) {
           throw new IllegalStateException("New chunk started before the previous chunk ended")
         }
       }
-      if (!ctx.httpRequest.isChunked && originalHttpRequest.isDefined) {
+      if (!ctx.httpRequest.isChunked && initialHttpRequest.isDefined) {
         throw new IllegalStateException("New request received before the previous chunk ended")
       }
     } else if (ctx.httpRequest.isChunked) {
@@ -169,7 +163,7 @@ class RequestHandler(
   private def validateLastChunk(ctx: HttpChunkProcessingContext) {
     if (isAggreatingChunks(ctx.channel)) {
       if (ctx.isLastChunk) {
-        originalHttpRequest = None
+        initialHttpRequest = None
       }
     } else {
       throw new IllegalStateException("Received a chunk when chunks should have been aggreated")
@@ -237,7 +231,7 @@ class RequestHandler(
    * Note that when a channel closes, `allChannels` automatically removes it.
    */
   override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    allChannels.add(e.getChannel)
+    server.allChannels.add(e.getChannel)
   }
 
   /**

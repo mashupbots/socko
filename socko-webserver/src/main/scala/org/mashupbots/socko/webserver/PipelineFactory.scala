@@ -54,7 +54,7 @@ class PipelineFactory(server: WebServer) extends ChannelPipelineFactory {
     newPipeline.addLast("encoder", new HttpResponseEncoder())
     newPipeline.addLast("chunkWriter", new ChunkedWriteHandler())
 
-    newPipeline.addLast("handler", new RequestHandler(server.routes, server.allChannels, server.config))
+    newPipeline.addLast("handler", new RequestHandler(server))
 
     return newPipeline
   }

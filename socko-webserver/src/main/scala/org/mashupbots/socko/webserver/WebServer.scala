@@ -16,13 +16,12 @@
 package org.mashupbots.socko.webserver
 
 import java.util.concurrent.Executors
-
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.mashupbots.socko.context.ProcessingContext
 import org.mashupbots.socko.utils.Logger
-
+import org.mashupbots.socko.utils.WebLogQueue
 import javax.net.ssl.SSLEngine
 
 /**
@@ -32,10 +31,10 @@ import javax.net.ssl.SSLEngine
  *   val webServer = new WebServer(myWebServerConfig, routes)
  *   webServer.start()
  *   ...
- *   
+ *
  *   webServer.stop()
  * }}}
- * 
+ *
  * @param config Web server configuration
  * @param routes Routes for processing requests
  */
@@ -59,7 +58,14 @@ class WebServer(
   /**
    * SSL Engine
    */
-  val sslManager: Option[SslManager] = if (config.ssl.isDefined) Some(new SslManager(this)) else None
+  val sslManager: Option[SslManager] = if (config.ssl.isEmpty) None else
+    Some(new SslManager(this))
+
+  /**
+   * Queue for storing web logs so they can be written asynchronously
+   */
+  val webLog: Option[WebLogQueue] = if (config.webLog.isEmpty) None else
+    Some(new WebLogQueue(config.webLog.get.bufferSize))
 
   /**
    * Starts the server

@@ -111,7 +111,7 @@ import com.typesafe.config.ConfigException
  * 	You can also specify comma separated hostnames/ip address like `localhost,192.168.1.1`.
  *  Defaults to `localhost`.
  * @param port IP port number to bind to. Defaults to `8888`.
- * @param webLogConfig Web server activity log configuration. If `None`, activity will not be
+ * @param webLog Web server activity log configuration. If `None`, activity will not be
  *  logged. If supplied, activities will be asynchronously written to the logger.
  * @param ssl SSL protocol configuration. If `None`, then SSL will not be turned on.
  *  Defaults to `None`.

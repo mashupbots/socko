@@ -71,6 +71,11 @@ abstract class HttpProcessingContext() extends ProcessingContext {
   def acceptedEncodings: Array[String]
 
   /**
+   * Write a web log entry
+   */
+  //def writeWebLog()
+  
+  /**
    * Sends a string HTTP response to the client with a status of "200 OK".
    *
    * @param content String to send
@@ -134,6 +139,11 @@ abstract class HttpProcessingContext() extends ProcessingContext {
       response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent().readableBytes())
       // Add keep alive header as per HTTP 1.1 specifications
       setKeepAliveHeader(response)
+    }
+    
+    // Write web log
+    if (config.webLog.isDefined) {
+      //writeWebLog()
     }
 
     // Write the response.
