@@ -107,6 +107,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
 
       case httpChunk: HttpChunk =>
         var ctx = HttpChunkProcessingContext(e.getChannel, initialHttpRequest.get, httpChunk, httpConfig)
+        initialHttpRequest.get.totalChunkContentLength += httpChunk.getContent.readableBytes
 
         log.debug("CHUNK {} CHANNEL={}", ctx.endPoint, e.getChannel.getId)
 
@@ -117,7 +118,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
         }
 
       case wsFrame: WebSocketFrame =>
-        var ctx = WsFrameProcessingContext(e.getChannel, initialHttpRequest.get.endPoint, wsFrame, wsConfig)
+        var ctx = WsFrameProcessingContext(e.getChannel, initialHttpRequest.get, wsFrame, wsConfig)
 
         log.debug("WS {} CHANNEL={}", ctx.endPoint, e.getChannel.getId)
 
@@ -258,12 +259,17 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
       throw new UnsupportedOperationException("Websocket not supported at this end point")
     }
 
-    val wsFactory = new WebSocketServerHandshakerFactory(createWebSocketLocation(ctx), null, false)
+    val wsFactory = new WebSocketServerHandshakerFactory(
+        createWebSocketLocation(ctx), 
+        if (ctx.subprotocols.isDefined) ctx.subprotocols.get else null, 
+        false)
     wsHandshaker = wsFactory.newHandshaker(ctx.httpRequest)
     if (wsHandshaker == null) {
       wsFactory.sendUnsupportedWebSocketVersionResponse(ctx.channel)
+      ctx.writeWebLog(HttpResponseStatus.UPGRADE_REQUIRED.getCode, 0)
     } else {
       wsHandshaker.handshake(ctx.channel, ctx.httpRequest)
+      ctx.writeWebLog(HttpResponseStatus.SWITCHING_PROTOCOLS.getCode, 0)
     }
   }
 

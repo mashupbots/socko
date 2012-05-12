@@ -71,12 +71,12 @@ case class HttpRequestProcessingContext(
       Array()
     }
   }
-  
+
   /**
    * List of HTTP request headers
    */
   val headers = httpRequest.getHeaders
-  
+
   /**
    * Returns the header value with the specified header name.  If there are
    * more than one header value for the specified header name, the first
@@ -91,10 +91,10 @@ case class HttpRequestProcessingContext(
   }
 
   /**
-   * HTTP Version 
+   * HTTP Version
    */
   val httpVersion = httpRequest.getProtocolVersion
-  
+
   /**
    * `True` if and only if the contents of this HTTP request will be arriving in subsequent HTTPChunks
    *
@@ -168,5 +168,32 @@ case class HttpRequestProcessingContext(
     }
   }
 
+  /**
+   * Adds an entry to the web log
+   * 
+   * If you have an authenticated user, be sure to set `this.username` before writing a web log.
+   * 
+   * @param responseStatusCode HTTP status code
+   * @param responseSize length of response content in bytes
+   */
+  def writeWebLog(responseStatusCode: Int, responseSize: Long) {
+    if (config.webLog.isEmpty) {
+      return
+    }
 
+    config.webLog.get.enqueue(WebLogEvent(
+      new Date(),
+      channel.getRemoteAddress,
+      channel.getLocalAddress,
+      username,
+      httpRequest.getMethod.toString,
+      httpRequest.getUri,
+      responseStatusCode,
+      responseSize,
+      HttpHeaders.getContentLength(httpRequest),
+      duration,
+      httpRequest.getProtocolVersion.getText,
+      getHeader(HttpHeaders.Names.USER_AGENT),
+      getHeader(HttpHeaders.Names.REFERER)))
+  }
 }

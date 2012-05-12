@@ -22,25 +22,40 @@ import org.jboss.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
 import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import org.jboss.netty.handler.codec.http.websocketx.WebSocketFrame
 import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
+import org.mashupbots.socko.utils.WebLogEvent
+import java.util.Date
+import org.jboss.netty.handler.codec.http.HttpHeaders
 
 /**
- * Context for processing web socket frames. 
- * 
- * A [[org.mashupbots.socko.context.WsProcessingContext]] will only be dispatched to processors only after an initial 
+ * Context for processing web socket frames.
+ *
+ * A [[org.mashupbots.socko.context.WsProcessingContext]] will only be dispatched to processors only after an initial
  * [[org.mashupbots.socko.context.WsHandshakeProcessingContext]] has been successfully processed.
  *
  * @param channel Channel by which the request entered and response will be written
- * @param endPoint End point though which the original handshake request entered
+ * @param initialHttpRequest The initial HTTP request
  * @param wsFrame Incoming data for processing
  * @param config Web Socket configuration
  */
 case class WsFrameProcessingContext(
   channel: Channel,
-  endPoint: EndPoint,
+  initialHttpRequest: InitialHttpRequest,
   wsFrame: WebSocketFrame,
   config: WsProcessingConfig) extends ProcessingContext {
 
+  /**
+   * HTTP end point used by this chunk
+   */
+  val endPoint = initialHttpRequest.endPoint
+
+  /**
+   * Indicates a text frame
+   */
   val isText = wsFrame.isInstanceOf[TextWebSocketFrame]
+
+  /**
+   * Indicates a binary frame
+   */
   val isBinary = wsFrame.isInstanceOf[BinaryWebSocketFrame]
 
   /**
@@ -94,5 +109,44 @@ case class WsFrameProcessingContext(
   def close() {
     channel.write(new CloseWebSocketFrame())
   }
+
+  /**
+   * Adds an entry to the web log.
+   *
+   * Web logs were designed for request/response style interaction and not the duplex communication channel of
+   * websockets.
+   *
+   * By default, Socko does not write web logs for websocket frames. This is because Socko does not know the context
+   * of your frames. However, you can write web logs by calling this method from your route or actor processor.
+   *
+   * If you have authenticated the user, you can set it in `this.username`.
+   *
+   * @param method Can be used to describe the operation or the message type. No spaces allowed.
+   * @param uri Can be used to provide context. Querystring is also permissible.
+   * @param requestSize Length of request frame. Set to 0 if none.
+   * @param responseStatusCode Status code
+   * @param responseSize Length of response frame in bytes. Set to 0 if none.
+   */
+  def writeWebLog(method: String, uri: String, requestSize: Long, responseStatusCode: Int, responseSize: Long) {
+    if (config.webLog.isEmpty) {
+      return
+    }
+
+    config.webLog.get.enqueue(WebLogEvent(
+      new Date(),
+      channel.getRemoteAddress,
+      channel.getLocalAddress,
+      username,
+      method,
+      uri,
+      responseStatusCode,
+      responseSize,
+      requestSize,
+      duration,
+      initialHttpRequest.protocolVersion,
+      None,
+      None))
+  }
+
 }
 

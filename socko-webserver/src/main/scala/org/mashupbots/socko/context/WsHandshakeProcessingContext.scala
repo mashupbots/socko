@@ -16,11 +16,13 @@
 package org.mashupbots.socko.context
 
 import java.nio.charset.Charset
+import java.util.Date
 
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.handler.codec.http.HttpRequest
 import org.jboss.netty.util.CharsetUtil
+import org.mashupbots.socko.utils.WebLogEvent
 
 /**
  * Context for processing web socket handshakes.
@@ -112,6 +114,11 @@ case class WsHandshakeProcessingContext(
   var isAllowed: Boolean = false
 
   /**
+   * Optional comma separated list of supported protocols. e.g. `chat, stomp`
+   */
+  var subprotocols: Option[String] = None 
+  
+  /**
    * Returns the content of this request as a string. It is assumed that content is encoded in UTF-8.
    * An empty string is returned if there is no content.
    */
@@ -137,4 +144,30 @@ case class WsHandshakeProcessingContext(
     if (content.readable) content.array else Array.empty[Byte]
   }
 
+  /**
+   * Adds an entry to the web log
+   * 
+   * @param responseStatusCode HTTP status code
+   * @param responseSize length of response content in bytes
+   */
+  def writeWebLog(responseStatusCode: Int, responseSize: Long) {
+    if (config.webLog.isEmpty) {
+      return
+    }
+
+    config.webLog.get.enqueue(WebLogEvent(
+      new Date(),
+      channel.getRemoteAddress,
+      channel.getLocalAddress,
+      username,
+      httpRequest.getMethod.toString,
+      httpRequest.getUri,
+      responseStatusCode,
+      responseSize,
+      HttpHeaders.getContentLength(httpRequest),
+      duration,
+      httpRequest.getProtocolVersion.getText,
+      getHeader(HttpHeaders.Names.USER_AGENT),
+      getHeader(HttpHeaders.Names.REFERER)))
+  }  
 }

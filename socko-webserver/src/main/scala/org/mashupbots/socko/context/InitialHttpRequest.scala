@@ -18,6 +18,8 @@ package org.mashupbots.socko.context
 import scala.collection.JavaConversions._
 import java.util.Map
 import org.jboss.netty.handler.codec.http.HttpVersion
+import java.util.Date
+import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshaker
 
 /**
  * Details of the initial HTTP request that triggered HTTP chunk or WebSocket processing.
@@ -29,21 +31,32 @@ import org.jboss.netty.handler.codec.http.HttpVersion
  * @param acceptedEncodings Array of accepted encoding for content compression from the HTTP header
  * @param httpVersion HTTP version being used
  * @param headers HTTP headers sent in the initial request
+ * @param createdOn Timestamp when the initial request was created
  */
 case class InitialHttpRequest(
   endPoint: EndPoint,
   isKeepAlive: Boolean,
   acceptedEncodings: Array[String],
-  httpVersion: HttpVersion,
-  headers: List[Map.Entry[String, String]]) {
+  protocolVersion: String,
+  headers: List[Map.Entry[String, String]],
+  createdOn: Date) {
 
   def this(request: HttpRequestProcessingContext) = this(
     request.endPoint,
     request.isKeepAlive,
     request.acceptedEncodings,
-    request.httpVersion,
-    request.headers.toList)
+    request.httpVersion.getText,
+    request.headers.toList,
+    request.createdOn)
 
+  def this(request: WsHandshakeProcessingContext, wsHandshaker: WebSocketServerHandshaker) = this(
+    request.endPoint,
+    request.isKeepAlive,
+    request.acceptedEncodings,
+    "WS/" + wsHandshaker.getVersion.toHttpHeaderValue,
+    request.headers.toList,
+    request.createdOn)
+    
   /**
    * Returns the header value with the specified header name.  If there are
    * more than one header value for the specified header name, the first
@@ -57,4 +70,16 @@ case class InitialHttpRequest(
     if (v.isDefined) Some(v.get.getValue) else None
   }
 
+  /**
+   * Number of milliseconds from the time when the initial request was made
+   */
+  def duration(): Long = {
+    new Date().getTime - createdOn.getTime
+  }
+  
+  /**
+   * Total length of chunks received to date
+   */
+  var totalChunkContentLength: Long = 0
 }
+

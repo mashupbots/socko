@@ -51,14 +51,13 @@ case class WebLogEvent(
   username: Option[String],
   method: String,
   uri: String,
-  responseStatusCode: String,
+  responseStatusCode: Int,
   responseSize: Long,
   requestSize: Long,
   timeTaken: Long,
   protocolVersion: String,
   userAgent: Option[String],
   referrer: Option[String]) {
-  
 }
 
 object WebLogEvent {

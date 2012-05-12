@@ -18,6 +18,7 @@ package org.mashupbots.socko.context
 import java.nio.charset.Charset
 import org.jboss.netty.channel.Channel
 import org.mashupbots.socko.utils.WebLogQueue
+import java.util.Date
 
 /**
  * When processing a web request, the context provides a uniform way to read request data
@@ -45,6 +46,26 @@ abstract class ProcessingContext() {
    * in this cache.
    */
   lazy val cache: collection.mutable.Map[String, Any] = collection.mutable.Map.empty[String, Any]
+
+  /**
+   * Timestamp when this context was created
+   */
+  val createdOn: Date = new Date()
+
+  /**
+   * Number of milliseconds from the time when this context was created
+   */
+  def duration(): Long = {
+    new Date().getTime - createdOn.getTime
+  }
+  
+  /**
+   * Username of the authenticated user.  You need to set this for it to appear in the web logs.
+   * 
+   * Socko does not make assumptions on your authentication method.  You do it and set this `username` to let 
+   * us know. 
+   */
+  var username: Option[String] = None
 
   /**
    * Returns the request content as a string

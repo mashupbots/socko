@@ -248,7 +248,7 @@ class StaticFileProcessor extends Actor {
     }
     val fileLength = raf.length()
 
-    // Write the initial HTTP response line and headers
+    // Prepare response
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
     HttpHeaders.setContentLength(response, fileLength)
     request.context.setContentTypeHeader(response, file)
@@ -257,7 +257,11 @@ class StaticFileProcessor extends Actor {
     if (contentEncoding != "") {
       response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
     }
+    
+    // We have to write our own web log entry since we are not using request.context.writeResponse
+    request.context.writeWebLog(HttpResponseStatus.OK.getCode, fileLength)
 
+    // Write the initial HTTP response line and headers
     val ch = request.context.channel
     ch.write(response)
 

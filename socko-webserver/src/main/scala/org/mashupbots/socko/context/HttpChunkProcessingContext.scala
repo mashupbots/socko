@@ -16,13 +16,14 @@
 package org.mashupbots.socko.context
 
 import java.nio.charset.Charset
-
 import scala.collection.JavaConversions.asScalaBuffer
-
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.HttpChunk
 import org.jboss.netty.handler.codec.http.HttpChunkTrailer
 import org.jboss.netty.util.CharsetUtil
+import org.mashupbots.socko.utils.WebLogEvent
+import java.util.Date
+import org.jboss.netty.handler.codec.http.HttpHeaders
 
 /**
  * Context for processing HTTP chunks.
@@ -102,4 +103,33 @@ case class HttpChunkProcessingContext(
     if (content.readable) content.array else Array.empty[Byte]
   }
 
+  /**
+   * Adds an entry to the web log
+   * 
+   * If you have an authenticated user, be sure to set `this.username` before writing a web log.
+   * 
+   * @param responseStatusCode HTTP status code
+   * @param responseSize length of response content in bytes
+   */
+  def writeWebLog(responseStatusCode: Int, responseSize: Long) {
+    if (config.webLog.isEmpty) {
+      return
+    }
+
+    config.webLog.get.enqueue(WebLogEvent(
+      new Date(),
+      channel.getRemoteAddress,
+      channel.getLocalAddress,
+      username,
+      initialHttpRequest.endPoint.method,
+      initialHttpRequest.endPoint.uri,
+      responseStatusCode,
+      responseSize,
+      initialHttpRequest.totalChunkContentLength,
+      initialHttpRequest.duration,
+      initialHttpRequest.protocolVersion,
+      initialHttpRequest.getHeader(HttpHeaders.Names.USER_AGENT),
+      initialHttpRequest.getHeader(HttpHeaders.Names.REFERER)))
+  }
+  
 }

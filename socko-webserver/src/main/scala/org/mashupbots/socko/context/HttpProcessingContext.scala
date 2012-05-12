@@ -72,8 +72,11 @@ abstract class HttpProcessingContext() extends ProcessingContext {
 
   /**
    * Write a web log entry
+   * 
+   * @param responseStatusCode HTTP status code
+   * @param responseSize length of response content in bytes
    */
-  //def writeWebLog()
+  def writeWebLog(responseStatusCode:Int, responseSize: Long)
   
   /**
    * Sends a string HTTP response to the client with a status of "200 OK".
@@ -136,15 +139,13 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     }
     if (this.isKeepAlive) {
       // Add 'Content-Length' header only for a keep-alive connection.
-      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent().readableBytes())
+      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent.readableBytes)
       // Add keep alive header as per HTTP 1.1 specifications
       setKeepAliveHeader(response)
     }
     
     // Write web log
-    if (config.webLog.isDefined) {
-      //writeWebLog()
-    }
+    writeWebLog(response.getStatus.getCode, response.getContent.readableBytes)
 
     // Write the response.
     val future = channel.write(response)
@@ -220,6 +221,8 @@ abstract class HttpProcessingContext() extends ProcessingContext {
       response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent().readableBytes())
     }
 
+    writeWebLog(response.getStatus.getCode, response.getContent.readableBytes)
+    
     val future = channel.write(response)
     if (closeChannel) {
       future.addListener(ChannelFutureListener.CLOSE)
@@ -255,6 +258,8 @@ abstract class HttpProcessingContext() extends ProcessingContext {
       response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent().readableBytes())
     }
 
+    writeWebLog(response.getStatus.getCode, response.getContent.readableBytes)
+    
     val future = channel.write(response)
     if (closeChannel) {
       future.addListener(ChannelFutureListener.CLOSE)
