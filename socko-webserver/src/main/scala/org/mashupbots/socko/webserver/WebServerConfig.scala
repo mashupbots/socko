@@ -23,6 +23,7 @@ import akka.actor.Extension
 import com.typesafe.config.Config
 import org.mashupbots.socko.utils.Logger
 import com.typesafe.config.ConfigException
+import org.mashupbots.socko.utils.WebLogFormat
 
 /**
  * Web server configuration
@@ -288,38 +289,6 @@ case class WebLogConfig(
     WebLogFormat.withName(config.getString(prefix + ".format")),
     WebServerConfig.getInt(config, prefix + ".buffer-size", 512),
     WebServerConfig.getBoolean(config, prefix + ".start-writer", true))
-}
-
-/**
- * Web Server Activity Log setting
- */
-object WebLogFormat extends Enumeration {
-
-  type Type = Value
-
-  /**
-   * Log in common format. See http://en.wikipedia.org/wiki/Common_Log_Format
-   *
-   * For example:
-   * [[[
-   * 216.67.1.91 - leon [01/Jul/2002:12:11:52 +0000] "GET /index.html HTTP/1.1" 200 431 "http://www.loganalyzer.net/" "Mozilla/4.05 [en] (WinNT; I)" "USERID=CustomerA;IMPID=01234"
-   * ]]]
-   */
-  val Common = Value
-
-  /**
-   * Log in extended format. See http://www.w3.org/TR/WD-logfile.html
-   *
-   * For example:
-   * [[[
-   * #Software: Socko
-   * #Version: 1.0
-   * #Date: 2002-05-02 17:42:15
-   * #Fields: date time c-ip cs-username s-ip s-port cs-method cs-uri-stem cs-uri-query sc-status sc-bytes cs-bytes time-taken cs(User-Agent) cs(Referrer)
-   * 2002-05-24 20:18:01 172.224.24.114 - 206.73.118.24 80 GET /Default.htm - 200 7930 248 31 Mozilla/4.0+(compatible;+MSIE+5.01;+Windows+2000+Server) http://64.224.24.114/
-   * ]]]
-   */
-  val Extended = Value
 }
 
 /**
