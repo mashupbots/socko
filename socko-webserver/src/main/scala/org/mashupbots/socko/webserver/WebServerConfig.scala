@@ -46,10 +46,6 @@ import org.mashupbots.socko.utils.WebLogFormat
  *       # Optional asynchronous log queue size. Defaults to 512 events in the queue 
  *       # before new events are discarded.
  *       buffer-size = 512
- *       
- *       # Optional flag to start the writer. Defaults to `true`. If `false`, we assume
- *       # you will use your own writer to dequeue events form the queue.
- *       start-writer = true
  *     }
  *     
  *     # Optional SSL. If not supplied, ssl is turned off.
@@ -274,21 +270,17 @@ case class HttpConfig(
  * @param format Format of the web log
  * @param bufferSize Number of events to queue before new events are discarded. This prevents a slow writer
  *   causing the queue the grow until web server to run out of memory.
- * @param startWriter Automatically start writer to dequeue log entries. If `false`, you must provide
- *   your own writer to dequeue the entries from your instance of `WebServer.webLog`.
  */
 case class WebLogConfig(
   format: WebLogFormat.Type = WebLogFormat.Common,
-  bufferSize: Int = 512,
-  startWriter: Boolean = true) {
+  bufferSize: Int = 512) {
 
   /**
    * Read configuration from AKKA's `application.conf`
    */
   def this(config: Config, prefix: String) = this(
     WebLogFormat.withName(config.getString(prefix + ".format")),
-    WebServerConfig.getInt(config, prefix + ".buffer-size", 512),
-    WebServerConfig.getBoolean(config, prefix + ".start-writer", true))
+    WebServerConfig.getInt(config, prefix + ".buffer-size", 512))
 }
 
 /**

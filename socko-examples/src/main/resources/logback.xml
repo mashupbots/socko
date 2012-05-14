@@ -11,7 +11,7 @@
     </encoder>
   </appender>
 
-  <logger name="org.mashupbots.socko.utils.WebLogWriter" level="info">
+  <logger name="org.mashupbots.socko.utils.DefaultWebLogWriter" level="info">
     <appender-ref ref="WEBLOG" />
   </logger>
 

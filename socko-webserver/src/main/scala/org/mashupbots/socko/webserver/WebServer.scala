@@ -23,7 +23,8 @@ import org.mashupbots.socko.context.ProcessingContext
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.utils.WebLogQueue
 import javax.net.ssl.SSLEngine
-import org.mashupbots.socko.utils.WebLogWriter
+import org.mashupbots.socko.utils.DefaultWebLogWriter
+import org.mashupbots.socko.utils.DefaultWebLogQueue
 
 /**
  * Socko Web Server
@@ -41,7 +42,8 @@ import org.mashupbots.socko.utils.WebLogWriter
  */
 class WebServer(
   val config: WebServerConfig,
-  val routes: PartialFunction[ProcessingContext, Unit]) extends Logger {
+  val routes: PartialFunction[ProcessingContext, Unit],
+  customWebLogQueue: Option[WebLogQueue] = None) extends Logger {
 
   require(config != null)
   config.validate()
@@ -65,12 +67,16 @@ class WebServer(
   /**
    * Queue for storing web logs so they can be written asynchronously
    */
-  val webLog: Option[WebLogQueue] = if (config.webLog.isEmpty) None else
-    Some(new WebLogQueue(config.webLog.get.bufferSize))
+  val webLog: Option[WebLogQueue] = if (customWebLogQueue.isDefined) customWebLogQueue else 
+    if (config.webLog.isEmpty) None else
+    Some(new DefaultWebLogQueue(config.webLog.get.bufferSize))
 
-  val webLogWriterThread: Option[Thread] = if (config.webLog.isEmpty || !config.webLog.get.startWriter) None else
-    Some((new Thread(new WebLogWriter(this.webLog.get, config.webLog.get.format))))
-  
+  /**
+   * Thread for writing queued web events to the logger
+   */
+  val webLogWriterThread: Option[Thread] = if (config.webLog.isEmpty) None else
+    Some((new Thread(new DefaultWebLogWriter(this.webLog.get, config.webLog.get.format))))
+
   /**
    * Starts the server
    */
@@ -101,7 +107,7 @@ class WebServer(
     if (webLogWriterThread.isDefined && !webLogWriterThread.get.isAlive) {
       webLogWriterThread.get.start()
     }
-    
+
     log.info("Socko server '{}' started on {}:{}",
       Array[AnyRef](config.serverName, config.hostname, config.port.toString).toArray)
   }

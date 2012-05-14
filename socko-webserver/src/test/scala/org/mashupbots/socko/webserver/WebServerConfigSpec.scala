@@ -197,7 +197,6 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
           web-log {
             format = Extended
             buffer-size = 1024
-            start-writer = true
           }
 		  ssl {
 		    key-store-file=/tmp/ks.dat
@@ -233,7 +232,6 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
 
       all.webLog.get.format should be(WebLogFormat.Extended)
       all.webLog.get.bufferSize should be(1024)
-      all.webLog.get.startWriter should be(true)
 
       all.ssl.get.keyStoreFile.getCanonicalPath should equal("/tmp/ks.dat")
       all.ssl.get.keyStorePassword should equal("kspwd")

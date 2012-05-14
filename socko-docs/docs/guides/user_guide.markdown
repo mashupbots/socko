@@ -11,7 +11,8 @@ WebServerClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServer"
 WebServerConfigClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServerConfig">WebServerConfig</a></code>
 WebLogEventClass: <code><a href="../api/#org.mashupbots.socko.utils.WebLogEvent">WebLogEvent</a></code>
 WebLogQueueClass: <code><a href="../api/#org.mashupbots.socko.utils.WebLogQueue">WebLogQueue</a></code>
-WebLogWriterClass: <code><a href="../api/#org.mashupbots.socko.utils.WebLogWriter">WebLogWriter</a></code>
+DefaultWebLogQueueClass: <code><a href="../api/#org.mashupbots.socko.utils.DefaultWebLogQueue">DefaultWebLogQueue</a></code>
+DefaultWebLogWriterClass: <code><a href="../api/#org.mashupbots.socko.utils.DefaultWebLogWriter">DefaultWebLogWriter</a></code>
 ---
 # Socko User Guide
 
@@ -603,7 +604,7 @@ Examples:
 
 ### Turning On Web Logs
 
-By default, web logs are turned off.
+By default, web logs are turned **OFF**.
 
 To turn web logs on, add the following `web-log` section to your `application.conf`
  
@@ -621,10 +622,6 @@ To turn web logs on, add the following `web-log` section to your `application.co
         # Optional asynchronous log queue size. Defaults to 512 events in the queue 
         # before new events are discarded.
         buffer-size = 512
-        
-        # Optional flag to start the writer. Defaults to `true`. If `false`, we assume
-        # you will use your own writer to dequeue events form the queue.
-        start-writer = true
       }
     }
     
@@ -635,9 +632,9 @@ You can also turn it on programmatically as illustrated in the [route example ap
     val config = WebServerConfig(webLog = Some(WebLogConfig()))
     val webServer = new WebServer(config, routes)
     
-When turned on, the default behaviour is to write web logs to the logger. You can control where these logs are written
-by configuring your logger. For example, if you are using [Logback](http://logback.qos.ch/), you can write to a daily 
-rolling file by changing `logback.xml` to include:
+When turned on, the default behaviour is to write web logs to your installed logger using {{ page.DefaultWebLogWriterClass }}. 
+You can control where these logs are written by configuring your logger. For example, if you are using 
+[Logback](http://logback.qos.ch/), you can write to a daily rolling file by changing `logback.xml` to include:
 
     <configuration>
       <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -661,7 +658,7 @@ rolling file by changing `logback.xml` to include:
         </encoder>
       </appender> 
   
-      <logger name="org.mashupbots.socko.utils.WebLogWriter" level="info">
+      <logger name="org.mashupbots.socko.utils.DefaultWebLogWriter" level="info">
         <appender-ref ref="WEBLOG" />
       </logger>
 
@@ -676,7 +673,7 @@ Web log events can be recorded using the processing context.
 
  - {{ page.HttpRequestProcessingContextClass }}
  
-   Web logs events are automatically recorded for you when you use the `writeResponse()`, `writeErrorResponse()` and
+   Web logs events are automatically recorded for you when you call `writeResponse()`, `writeErrorResponse()` or
    `redirect()` methods.
 
    These methods assume a non-chunked response.
@@ -690,12 +687,12 @@ Web log events can be recorded using the processing context.
    
  - {{ page.WsFrameProcessingContextClass }}
  
-   Web log events are **NOT** automatically recorded for you. This is becasue web sockets do not have to strictly follow 
+   Web log events are **NOT** automatically recorded for you. This is becasue web sockets do not strictly follow 
    the request/response structure of HTTP. For example, in a chat server, a broadcast message will not have a request
    frame.
    
    If you wish to record a web log event, you can use the `writeWebLog()` method. The method, uri and other details
-   of the event to be recorded is determiend by you.
+   of the event to be recorded is arbitrarily set by you.
    
  - {{ page.WsHandshakeProcessingContextClass }}
    
@@ -704,26 +701,24 @@ Web log events can be recorded using the processing context.
 
 ### Custom Web Log Output
 
-If you prefer to implement your own method and/or format of writing web logs, you must turn **on** web logs but
-turn **off** the default writer ({{ page.WebLogWriterClass }}).
+If you prefer to use your own method and/or format of writing web logs, you can specify a custom {{ page.WebLogQueueClass }}
+implementation as follows:
 
-    // Turn off the default writer
-    val config = WebServerConfig(webLog = Some(WebLogConfig(startWriter = false)))
-    val webServer = new WebServer(config, routes)
+    val config = WebServerConfig()
+    val routes = ...
+    val myWebLogQueue = Some(new MyCustomWebLogQueue())
+    val webServer = new WebServer(config, routes, myWebLogQueue)
 
-    // You can also turn it off in application.conf
-    // web-log {
-    //   start-writer = false
-    // }
+You can then use the {{ page.DefaultWebLogWriterClass }} or your own customer writer to dequeue and write out the web log events.
+For optimal performance, we strongly recommend you dequeue and write web logs in a separate thread.
+
+    // Using the default web log writer
+    val defaultWriterThread = new Thread(new DefaultWebLogWriter(myWebLogQueue, WebLogFormat.Extended))
+    defaultWriterThread.start()
     
-Once turned on, {{ page.WebLogEventClass }} objects will be added to a {{ page.WebLogQueueClass }}. The queue is 
-accessible from the `webLog` property of your {{ page.WebServerClass }}. For example:
+    // Using your own writer
+    val myWriterThread = new Thread(new MyCustomWebLogWriter(myWebLogQueue))
+    myWriterThread.start()
 
-    val config = WebServerConfig(webLog = Some(WebLogConfig(startWriter = false)))
-    val webServer = new WebServer(config, routes)
-    val evt = webServer.webLog.get.dequeue()
-
-We strongly recommend that you dequeue and write the web log in a separate thread. See {{ page.WebLogWriterClass }}
-for an example implementation.
 
 

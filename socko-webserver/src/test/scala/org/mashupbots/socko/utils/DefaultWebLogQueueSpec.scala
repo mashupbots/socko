@@ -25,7 +25,7 @@ import java.net.InetSocketAddress
 import org.scalatest.GivenWhenThen
 
 @RunWith(classOf[JUnitRunner])
-class WebLogQueueSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
+class DefaultWebLogQueueSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
 
   val evt = new WebLogEvent(
     new Date(),
@@ -42,10 +42,10 @@ class WebLogQueueSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
     userAgent = None,
     referrer = None)
 
-  "WebLogQueue" should {
+  "DefaultWebLogQueue" should {
 
     "enqueue" in {
-      val queue = new WebLogQueue(3)
+      val queue = new DefaultWebLogQueue(3)
       queue.enqueue(evt) should be(true)
       queue.size should be(1)
 
@@ -58,7 +58,7 @@ class WebLogQueueSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
     }
 
     "dequeue" in {
-      val queue = new WebLogQueue(3)
+      val queue = new DefaultWebLogQueue(3)
 
       queue.enqueue(evt) should be(true)
       queue.size should be(1)
@@ -69,12 +69,12 @@ class WebLogQueueSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
     }
 
     "work in a multi-thread envioronment" in {
-      val queue = new WebLogQueue(100)
+      val queue = new DefaultWebLogQueue(100)
 
       val p1 = new Thread(new Producer(queue))
       val p2 = new Thread(new Producer(queue))
       val p3 = new Thread(new Producer(queue))
-      val c1 = new Thread(new WebLogWriter(queue, WebLogFormat.Common))
+      val c1 = new Thread(new DefaultWebLogWriter(queue, WebLogFormat.Common))
 
       c1.start()
       p1.start()
@@ -97,7 +97,7 @@ class WebLogQueueSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
     }
   }
 
-  class Producer(queue: WebLogQueue) extends Runnable {
+  class Producer(queue: DefaultWebLogQueue) extends Runnable {
     def run() {
       for (i <- 0 until 50) {
         val evt = new WebLogEvent(

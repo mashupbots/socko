@@ -21,7 +21,7 @@ package org.mashupbots.socko.utils
  * @param queue Web Log Queue to monitor and dequeue
  * @param format Format of log to write
  */
-class WebLogWriter(queue: WebLogQueue, format: WebLogFormat.Type) extends Runnable with Logger {
+class DefaultWebLogWriter(queue: WebLogQueue, format: WebLogFormat.Type) extends Runnable with Logger {
 
   def run() {
     try {
