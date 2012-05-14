@@ -16,19 +16,18 @@
 package org.mashupbots.socko.utils
 
 /**
- * Reads activity log queues and writes them to the logger.
+ * Reads the specified web log queue and writes the queued events to the logger.
  *
  * @param queue Web Log Queue to monitor and dequeue
  * @param format Format of log to write
  */
 class WebLogWriter(queue: WebLogQueue, format: WebLogFormat.Type) extends Runnable with Logger {
 
-  var isRunning = false
-
   def run() {
     try {
-      isRunning = true
-      while (isRunning) {
+      while (true) {
+        
+        // Call will block until there is an event to write
         val evt = queue.dequeue
 
         try {
@@ -46,10 +45,6 @@ class WebLogWriter(queue: WebLogQueue, format: WebLogFormat.Type) extends Runnab
       case _ => //Don't re-throw any errors and quietly die
     }
 
-  }
-
-  def stop() {
-    isRunning = false
   }
 
 }

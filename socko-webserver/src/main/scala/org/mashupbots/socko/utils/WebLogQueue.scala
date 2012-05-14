@@ -22,8 +22,9 @@ import java.util.concurrent.TimeUnit
 /**
  * Queues web log events so that they can be asynchronously written to the logger for better performance.
  *
- * We have implemented using `LinkedBlockingQueue` because it seems to be the better
- * [[http://www.javacodegeeks.com/2010/09/java-best-practices-queue-battle-and.html performer]]
+ * We have implemented using `LinkedBlockingQueue` because it seems to be the better performer. See
+ * [[http://www.javacodegeeks.com/2010/09/java-best-practices-queue-battle-and.html here]] and 
+ * [[http://codeidol.com/java/javagenerics/Queues/Comparing-Queue-Implementations/ here]].
  *
  * Credits also goes to this Twitter [[http://twitter.github.com/scala_school/concurrency.html tutorial]].
  *

@@ -65,12 +65,13 @@ case class WebLogEvent(
    * Creates a log entry in the [[http://en.wikipedia.org/wiki/Common_Log_Format common log format]].
    *
    * [[[
-   * 216.67.1.91 - leon [01/Jul/2002:12:11:52 +0000] "GET /index.html HTTP/1.1" 200 431 "http://www.loganalyzer.net/" "Mozilla/4.05 [en] (WinNT; I)" "USERID=CustomerA;IMPID=01234"
+   * 216.67.1.91 - leon [01/Jul/2002:12:11:52 +0000] "GET /index.html HTTP/1.1" 200 431
    * ]]]
    */
   def toCommonFormat(): String = {
     val inetClientAddress = clientAddress.asInstanceOf[InetSocketAddress]
     val sf = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z")
+    sf.setTimeZone(WebLogEvent.UTC_TZ)
     val sb = new StringBuilder
     
     // Client address
@@ -78,7 +79,7 @@ case class WebLogEvent(
     sb.append(" - ")
 
     // Username
-    sb.append(if (username.isDefined) username.get else "-")
+    sb.append(if (username.isDefined) removeWhitespace(username.get) else "-")
     sb.append(" [")
     
     // Timestamp
@@ -86,11 +87,11 @@ case class WebLogEvent(
     sb.append("] \"")
 
     // Request Line
-    sb.append(method)
+    sb.append(removeWhitespace(method))
     sb.append(" ")
-    sb.append(uri)
+    sb.append(removeWhitespace(uri))
     sb.append(" ")
-    sb.append(protocolVersion)
+    sb.append(removeWhitespace(protocolVersion))
     sb.append("\" ")
 
     // Status
@@ -99,6 +100,58 @@ case class WebLogEvent(
     
     // Response size
     sb.append(responseSize)
+    
+    // Done
+    sb.toString
+  }
+  
+  /**
+   * Creates a log entry in the [[http://httpd.apache.org/docs/1.3/logs.html combined log format]].
+   *
+   * [[[
+   * 216.67.1.91 - leon [01/Jul/2002:12:11:52 +0000] "GET /index.html HTTP/1.1" 200 431 "http://www.loganalyzer.net/" "Mozilla/4.05 [en] (WinNT; I)"
+   * ]]]
+   */
+  def toCombinedFormat(): String = {
+    val inetClientAddress = clientAddress.asInstanceOf[InetSocketAddress]
+    val sf = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z")
+    sf.setTimeZone(WebLogEvent.UTC_TZ)
+    val sb = new StringBuilder
+    
+    // Client address
+    sb.append(inetClientAddress.getAddress.getHostAddress)
+    sb.append(" - ")
+
+    // Username
+    sb.append(if (username.isDefined) removeWhitespace(username.get) else "-")
+    sb.append(" [")
+    
+    // Timestamp
+    sb.append(sf.format(timestamp))
+    sb.append("] \"")
+
+    // Request Line
+    sb.append(removeWhitespace(method))
+    sb.append(" ")
+    sb.append(removeWhitespace(uri))
+    sb.append(" ")
+    sb.append(removeWhitespace(protocolVersion))
+    sb.append("\" ")
+
+    // Status
+    sb.append(responseStatusCode)
+    sb.append(" ")
+    
+    // Response size
+    sb.append(responseSize)
+    sb.append(" ")
+
+    //Referrer - because this is quoted, no need to remove whitespace
+    sb.append(if (referrer.isDefined) "\"" + referrer.get + "\"" else "-")
+    sb.append(" ")
+
+    //User-Agent - because this is quoted, no need to remove whitespace
+    sb.append(if (userAgent.isDefined) "\"" + userAgent.get + "\"" else "-")
     
     // Done
     sb.toString
@@ -119,7 +172,7 @@ case class WebLogEvent(
     val inetClientAddress = clientAddress.asInstanceOf[InetSocketAddress]
     val inetServerAddress = serverAddress.asInstanceOf[InetSocketAddress]
     val sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-    sf.setTimeZone(TimeZone.getTimeZone("UTC"))
+    sf.setTimeZone(WebLogEvent.UTC_TZ)
     val sb = new StringBuilder
     
     // date time
@@ -131,7 +184,7 @@ case class WebLogEvent(
     sb.append(" ")
 
     // c-username
-    sb.append(if (username.isDefined) username.get else "-")
+    sb.append(if (username.isDefined) removeWhitespace(username.get) else "-")
     sb.append(" ")
     
     // s-ip
@@ -143,14 +196,14 @@ case class WebLogEvent(
     sb.append(" ")
 
     //cs-method
-    sb.append(method)
+    sb.append(removeWhitespace(method))
     sb.append(" ")
     
     //cs-uri-stem cs-uri-query
     val idx = uri.indexOf("?")
     val uriStem = if (idx < 0) uri else uri.substring(0, uri.indexOf("?"))
-    val uriQuery = if (idx < 0) "-" else uri.substring(uri.indexOf("?") + 1)    
-    sb.append(uriStem)
+    val uriQuery = if (idx < 0) "-" else removeWhitespace(uri.substring(uri.indexOf("?") + 1))    
+    sb.append(removeWhitespace(uriStem))
     sb.append(" ")
     sb.append(uriQuery)
     sb.append(" ")
@@ -172,16 +225,23 @@ case class WebLogEvent(
     sb.append(" ")
 
     //cs(User-Agent)
-    sb.append(if (userAgent.isDefined) userAgent.get else "-")
+    sb.append(if (userAgent.isDefined) removeWhitespace(userAgent.get) else "-")
     sb.append(" ")
 
     //cs(Referrer)
-    sb.append(if (referrer.isDefined) userAgent.get else "-")
-    sb.append(" ")
+    sb.append(if (referrer.isDefined) removeWhitespace(referrer.get) else "-")
     
     // Done
     sb.toString
-  }  
+  }
   
+  private def removeWhitespace(s: String): String = {
+    s.replaceAll("\\s", "+")
+  }
+  
+}
+
+object WebLogEvent {
+  val UTC_TZ = TimeZone.getTimeZone("UTC")
 }
 

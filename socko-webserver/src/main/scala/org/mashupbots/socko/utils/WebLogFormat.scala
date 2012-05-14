@@ -27,11 +27,22 @@ object WebLogFormat extends Enumeration {
    *
    * For example:
    * [[[
-   * 216.67.1.91 - leon [01/Jul/2002:12:11:52 +0000] "GET /index.html HTTP/1.1" 200 431 "http://www.loganalyzer.net/" "Mozilla/4.05 [en] (WinNT; I)" "USERID=CustomerA;IMPID=01234"
+   * 216.67.1.91 - leon [01/Jul/2002:12:11:52 +0000] "GET /index.html HTTP/1.1" 200 431 "http://www.loganalyzer.net/"
    * ]]]
    */
   val Common = Value
 
+  /**
+   * Log in combined format. See http://httpd.apache.org/docs/1.3/logs.html. This is juse the same as the common
+   * format with the useragent and referrer
+   * 
+   * For example:
+   * [[[
+   * 216.67.1.91 - leon [01/Jul/2002:12:11:52 +0000] "GET /index.html HTTP/1.1" 200 431 "http://www.loganalyzer.net/" "Mozilla/4.05 [en] (WinNT; I)"
+   * ]]]
+   */
+  val Combined = Value
+  
   /**
    * Log in extended format. See http://www.w3.org/TR/WD-logfile.html
    *

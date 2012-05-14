@@ -274,8 +274,8 @@ case class HttpConfig(
  * @param format Format of the web log
  * @param bufferSize Number of events to queue before new events are discarded. This prevents a slow writer
  *   causing the queue the grow until web server to run out of memory.
- * @param startWriter Automatically start writer to dequeue log entries. If `false`, the caller must provide
- *   their own writer to dequeue the entries.
+ * @param startWriter Automatically start writer to dequeue log entries. If `false`, you must provide
+ *   your own writer to dequeue the entries from your instance of `WebServer.webLog`.
  */
 case class WebLogConfig(
   format: WebLogFormat.Type = WebLogFormat.Common,

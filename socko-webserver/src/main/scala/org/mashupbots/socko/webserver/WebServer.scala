@@ -23,6 +23,7 @@ import org.mashupbots.socko.context.ProcessingContext
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.utils.WebLogQueue
 import javax.net.ssl.SSLEngine
+import org.mashupbots.socko.utils.WebLogWriter
 
 /**
  * Socko Web Server
@@ -67,6 +68,9 @@ class WebServer(
   val webLog: Option[WebLogQueue] = if (config.webLog.isEmpty) None else
     Some(new WebLogQueue(config.webLog.get.bufferSize))
 
+  val webLogWriterThread: Option[Thread] = if (config.webLog.isEmpty || !config.webLog.get.startWriter) None else
+    Some((new Thread(new WebLogWriter(this.webLog.get, config.webLog.get.format))))
+  
   /**
    * Starts the server
    */
@@ -94,6 +98,10 @@ class WebServer(
       }
     })
 
+    if (webLogWriterThread.isDefined && !webLogWriterThread.get.isAlive) {
+      webLogWriterThread.get.start()
+    }
+    
     log.info("Socko server '{}' started on {}:{}",
       Array[AnyRef](config.serverName, config.hostname, config.port.toString).toArray)
   }
