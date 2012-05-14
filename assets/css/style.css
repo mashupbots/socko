@@ -402,6 +402,7 @@ header ul li a {
   font-family: Menlo, monospace;
   line-height: 16px;
   margin-bottom: 22px; 
+  overflow-x: auto;
 }
 .article pre code {
   font-family: "Menlo", "Courier", monospace;
