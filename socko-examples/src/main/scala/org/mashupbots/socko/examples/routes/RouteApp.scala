@@ -21,10 +21,10 @@ import org.mashupbots.socko.routes._
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
-
 import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
+import org.mashupbots.socko.webserver.WebLogConfig
 
 /**
  * This example shows how use route extractors.
@@ -85,7 +85,11 @@ object RouteApp extends Logger {
   // STEP #3 - Start and Stop Socko Web Server
   //
   def main(args: Array[String]) {
-    val webServer = new WebServer(WebServerConfig(), routes)
+    // Turn on web logs
+    // Web logs will be written to the logger. You can control output via logback.xml.
+    val config = WebServerConfig(webLog = Some(WebLogConfig()))
+    
+    val webServer = new WebServer(config, routes)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run { webServer.stop() }
     })
