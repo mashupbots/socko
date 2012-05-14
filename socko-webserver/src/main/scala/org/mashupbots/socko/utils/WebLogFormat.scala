@@ -33,8 +33,8 @@ object WebLogFormat extends Enumeration {
   val Common = Value
 
   /**
-   * Log in combined format. See http://httpd.apache.org/docs/1.3/logs.html. This is juse the same as the common
-   * format with the useragent and referrer
+   * Log in combined format. See http://httpd.apache.org/docs/current/logs.html. This is just the same as the common
+   * format with added user agent and referrer.
    * 
    * For example:
    * [[[
