@@ -30,7 +30,6 @@ import javax.net.ssl.TrustManagerFactory
 class SslManager(server: WebServer) {
 
   private[this] val PROTOCOL = "TLS"
-  private[this] val ALGORITHM = "SunX509"
 
   /**
    * Create context for SSLEngine
@@ -44,7 +43,7 @@ class SslManager(server: WebServer) {
     ks.load(is, sslConfig.keyStorePassword.toCharArray())
     is.close()
 
-    val kmf = KeyManagerFactory.getInstance(ALGORITHM)
+    val kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm)
     kmf.init(ks, sslConfig.keyStorePassword.toCharArray())
 
     // Setup trust store (client certificates)
@@ -54,9 +53,10 @@ class SslManager(server: WebServer) {
       } else {
         val ts = KeyStore.getInstance("JKS")
         val tis = new FileInputStream(sslConfig.trustStoreFile.get)
-        ts.load(is, sslConfig.trustStorePassword.get.toCharArray())
+        ts.load(tis, sslConfig.trustStorePassword.get.toCharArray())
+        tis.close
 
-        val trustManagerFactory = TrustManagerFactory.getInstance("SunX509", "SunJSSE")
+        val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
         trustManagerFactory.init(ts)
 
         trustManagerFactory.getTrustManagers
