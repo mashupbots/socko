@@ -161,7 +161,7 @@ class SnoopProcessor extends Actor {
       ctx.writeText(ctx.readStringContent)
     } else if (ctx.isBinary) {
       log.info("BinaryWebSocketFrame")
-      ctx.writeBinaryData(ctx.readBinaryContent)
+      ctx.writeBinary(ctx.readBinaryContent)
     }
   }
 

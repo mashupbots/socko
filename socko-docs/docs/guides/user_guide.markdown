@@ -77,20 +77,40 @@ Two ways to achieve this are:
 
 There are 4 types of {{ page.ProcessingContextClass }}:
 
-1. {{ page.HttpRequestProcessingContextClass }} 
-   will be sent to your actor when a HTTP Request is received.
+1. **{{ page.HttpRequestProcessingContextClass }}**
 
-2. {{ page.HttpChunkProcessingContextClass }} 
-   will be sent to your actor when a HTTP Chunk is received. This 
-   is only applicable if you turn off [chunk aggregation](#Configuration).
+   This context will be sent to your actor when a HTTP Request is received.
+   
+   To read the request, use `readStringContent()` or `readBinaryContent()`.  Refer to the [file upload example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload)
+   for instructions on how to decode HTTP post data.
+   
+   To write a response, use `writeResponse()`. If you wish to stream your response, you will need to use 
+   `writeChunkResponse()` instead. Refer to the [streaming example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/streaming).
 
-3. {{ page.WsFrameProcessingContextClass }} 
-   will be sent to your actor when a Web Socket Frame is received.
+2. **{{ page.HttpChunkProcessingContextClass }}**
 
-4. {{ page.WsHandshakeProcessingContextClass }} 
-   is used for Web Socket handshaking within your [Route](#Step2). It should **not** be sent to your actor.
+   This context will be sent to your actor when a HTTP Chunk is received and is only applicable if you turn off 
+   [chunk aggregation](#Configuration).
+   
+   Reading requests and writing responses is as per {{ page.HttpRequestProcessingContextClass }}.
 
-Note that the {{ page.ProcessingContextClass }} must only be used by local actors.
+3. **{{ page.WsFrameProcessingContextClass }}**
+
+   This context will be sent to your actor when a Web Socket Frame is received.
+   
+   To read a frame, first check if it `isText` or `isBinary`.  If text, use `readText()`. If binary, use 
+   `readBinary()`.
+   
+   To write a frame, use `writeText()` or `writeBinary()`.
+
+4. **{{ page.WsHandshakeProcessingContextClass }}**
+
+   This context is only used for Web Socket handshaking within your [Route](#Step2). 
+
+   It should **not** be sent to your actor.
+
+
+All {{ page.ProcessingContextClass }} must be used by **local actors** only.
 
 ### Akka Dispatchers and Thread Pools
 

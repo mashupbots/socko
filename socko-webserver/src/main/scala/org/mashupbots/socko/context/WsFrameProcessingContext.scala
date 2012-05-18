@@ -59,13 +59,11 @@ case class WsFrameProcessingContext(
   val isBinary = wsFrame.isInstanceOf[BinaryWebSocketFrame]
 
   /**
-   * Returns the request content as a string. UTF-8 character encoding is assumed
+   * Returns the request content as a string. UTF-8 character encoding is assumed.
+   * Same as `readText`.
    */
   def readStringContent(): String = {
-    if (!wsFrame.isInstanceOf[TextWebSocketFrame]) {
-      throw new UnsupportedOperationException("Cannot read a string from a BinaryWebSocketFrame")
-    }
-    wsFrame.asInstanceOf[TextWebSocketFrame].getText
+    readText
   }
 
   /**
@@ -85,20 +83,37 @@ case class WsFrameProcessingContext(
   }
 
   /**
-   * Sends a text web socket frame back to the caller
+   * Returns the request content as a string. UTF-8 character encoding is assumed
+   */
+  def readText(): String = {
+    if (!wsFrame.isInstanceOf[TextWebSocketFrame]) {
+      throw new UnsupportedOperationException("Cannot read a string from a BinaryWebSocketFrame")
+    }
+    wsFrame.asInstanceOf[TextWebSocketFrame].getText
+  }
+  
+  /**
+   * Sends a text web socket frame back to the client
    *
-   * @param text Text to send to the caller
+   * @param text Text to send to the client
    */
   def writeText(text: String) {
     channel.write(new TextWebSocketFrame(text))
   }
 
   /**
-   * Sends a binary web socket frame back to the caller
-   *
-   * @param binary Binary data to return to the caller
+   * Returns the request content as byte array
    */
-  def writeBinaryData(binary: Array[Byte]) {
+  def readBinary(): Array[Byte] = {
+    wsFrame.getBinaryData.array
+  }
+  
+  /**
+   * Sends a binary web socket frame back to the client
+   *
+   * @param binary Binary data to return to the client
+   */
+  def writeBinary(binary: Array[Byte]) {
     val buf = ChannelBuffers.copiedBuffer(binary)
     channel.write(new BinaryWebSocketFrame(buf))
   }
