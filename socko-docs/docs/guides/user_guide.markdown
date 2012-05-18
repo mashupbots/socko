@@ -82,10 +82,11 @@ There are 4 types of {{ page.ProcessingContextClass }}:
    This context will be sent to your actor when a HTTP Request is received.
    
    To read the request, use `readStringContent()` or `readBinaryContent()`.  Refer to the [file upload example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload)
-   for instructions on how to decode HTTP post data.
+   for the decoding of HTTP post data.
    
    To write a response, use `writeResponse()`. If you wish to stream your response, you will need to use 
-   `writeChunkResponse()` instead. Refer to the [streaming example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/streaming).
+   `writeChunkResponse()` and `writeChunk()` instead. Refer to the [streaming example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/streaming)
+   for usage.
 
 2. **{{ page.HttpChunkProcessingContextClass }}**
 

@@ -35,6 +35,7 @@ import javax.activation.MimetypesFileTypeMap
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.GZIPOutputStream
 import java.io.ByteArrayOutputStream
+import org.jboss.netty.handler.codec.http.DefaultHttpChunk
 
 /**
  * Abstract context for reading HTTP requests and writing HTTP responses
@@ -72,11 +73,16 @@ abstract class HttpProcessingContext() extends ProcessingContext {
 
   /**
    * Write a web log entry
-   * 
+   *
    * @param responseStatusCode HTTP status code
    * @param responseSize length of response content in bytes
    */
-  def writeWebLog(responseStatusCode:Int, responseSize: Long)
+  def writeWebLog(responseStatusCode: Int, responseSize: Long)
+
+  /**
+   * Sum of chunk responses sent to the client
+   */
+  private var totalChunkContentLength = 0
   
   /**
    * Sends a string HTTP response to the client with a status of "200 OK".
@@ -84,7 +90,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    * @param content String to send
    * @param contentType MIME content type to set in the response header. Defaults to "text/plain; charset=UTF-8".
    * @param charset Character set encoding. Defaults to "UTF-8"
-   * @param headers Additional headers to add to the HTTP response. Defaults to empty map; i.e. no additional headers.
+   * @param headers Additional headers to add to the HTTP response. Defaults to None; i.e. no additional headers.
    * @param allowCompression Flag to indicate if content is to be compressed if the `acceptedEncodings` header is set.
    *   Defaults to `true`.
    */
@@ -92,7 +98,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     content: String,
     contentType: String = "text/plain; charset=UTF-8",
     charset: Charset = CharsetUtil.UTF_8,
-    headers: Map[String, String] = Map.empty): Unit = {
+    headers: Option[Map[String, String]] = None): Unit = {
 
     writeResponse(content.getBytes(charset), contentType, headers, true)
   }
@@ -107,10 +113,10 @@ abstract class HttpProcessingContext() extends ProcessingContext {
   def writeResponse(
     content: Array[Byte],
     contentType: String,
-    headers: Map[String, String]): Unit = {
+    headers: Option[Map[String, String]]): Unit = {
     writeResponse(content, contentType, headers, true)
   }
-  
+
   /**
    * Sends a binary HTTP response to the client with a status of "200 OK".
    *
@@ -122,7 +128,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
   def writeResponse(
     content: Array[Byte],
     contentType: String,
-    headers: Map[String, String],
+    headers: Option[Map[String, String]],
     allowCompression: Boolean): Unit = {
 
     // Build the response object.
@@ -134,8 +140,8 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     // Headers
     setDateHeader(response)
     response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
-    if (headers != null && !headers.isEmpty) {
-      headers.foreach { kv => response.setHeader(kv._1, kv._2) }
+    if (headers.isDefined && !headers.get.isEmpty) {
+      headers.get.foreach { kv => response.setHeader(kv._1, kv._2) }
     }
     if (this.isKeepAlive) {
       // Add 'Content-Length' header only for a keep-alive connection.
@@ -143,7 +149,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
       // Add keep alive header as per HTTP 1.1 specifications
       setKeepAliveHeader(response)
     }
-    
+
     // Write web log
     writeWebLog(response.getStatus.getCode, response.getContent.readableBytes)
 
@@ -222,10 +228,72 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     }
 
     writeWebLog(response.getStatus.getCode, response.getContent.readableBytes)
-    
+
     val future = channel.write(response)
     if (closeChannel) {
       future.addListener(ChannelFutureListener.CLOSE)
+    }
+  }
+
+  /**
+   * Initiates a HTTP chunk response to the client with a status of "200 OK".
+   *
+   * Use this method to initiate the response and `writeChunk()` to send the individual chunks.
+   *
+   * @param contentType MIME content type to set in the response header. For example, "image/gif"
+   * @param headers Additional headers to add to the HTTP response. Defaults to None; i.e. no additional headers.
+   */
+  def writeChunkResponse(
+    contentType: String,
+    headers: Option[Map[String, String]] = None): Unit = {
+
+    // Start totaling chunk length
+    totalChunkContentLength = 0
+    
+    // Build the response object.
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+
+    // See http://stackoverflow.com/questions/9027322/how-to-use-chunkedstream-properly
+    response.setChunked(true);
+    response.setHeader(HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);
+
+    // Headers
+    setDateHeader(response)
+    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
+    if (headers.isDefined && !headers.get.isEmpty) {
+      headers.get.foreach { kv => response.setHeader(kv._1, kv._2) }
+    }
+    if (this.isKeepAlive) {
+      // Add keep alive header as per HTTP 1.1 specifications
+      setKeepAliveHeader(response)
+    }
+
+    // Write the response
+    val future = channel.write(response)
+  }
+
+  /**
+   * Sends a chunk to the client.
+   *
+   * This method must be called AFTER `writeChunkResponse()`.
+   *
+   * @param chunkConent Binary content to send to the client.
+   * @param isLastChunk Flag to indicate if this is the last chunk or not. Defaults to `false`.
+   */
+  def writeChunk(chunkContent: Array[Byte], isLastChunk: Boolean = false): Unit = {
+    totalChunkContentLength += chunkContent.length
+    
+    val chunk = new DefaultHttpChunk(ChannelBuffers.wrappedBuffer(chunkContent))
+    channel.write(chunk)
+    
+    if (isLastChunk) {
+      val lastChunk = new DefaultHttpChunk(ChannelBuffers.EMPTY_BUFFER)
+      val future = channel.write(lastChunk)
+      if (!this.isKeepAlive) {
+        future.addListener(ChannelFutureListener.CLOSE)
+      }
+      
+      writeWebLog(HttpResponseStatus.OK.getCode, totalChunkContentLength)
     }
   }
 
@@ -259,7 +327,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     }
 
     writeWebLog(response.getStatus.getCode, response.getContent.readableBytes)
-    
+
     val future = channel.write(response)
     if (closeChannel) {
       future.addListener(ChannelFutureListener.CLOSE)
