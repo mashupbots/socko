@@ -233,9 +233,9 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       all.webLog.get.format should be(WebLogFormat.Extended)
       all.webLog.get.bufferSize should be(1024)
 
-      all.ssl.get.keyStoreFile.getCanonicalPath should equal("/tmp/ks.dat")
+      all.ssl.get.keyStoreFile.getAbsolutePath should equal("/tmp/ks.dat")
       all.ssl.get.keyStorePassword should equal("kspwd")
-      all.ssl.get.trustStoreFile.get.getCanonicalPath should equal("/tmp/ts.dat")
+      all.ssl.get.trustStoreFile.get.getAbsolutePath should equal("/tmp/ts.dat")
       all.ssl.get.trustStorePassword.get should equal("tspwd")
 
       all.http.maxLengthInMB should be(10)
