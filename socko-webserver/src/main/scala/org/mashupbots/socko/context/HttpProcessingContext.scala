@@ -15,6 +15,7 @@
 //
 package org.mashupbots.socko.context
 
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
@@ -23,19 +24,19 @@ import java.util.Date
 import java.util.GregorianCalendar
 import java.util.Locale
 import java.util.TimeZone
+import java.util.zip.DeflaterOutputStream
+import java.util.zip.GZIPOutputStream
+
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.ChannelFutureListener
+import org.jboss.netty.handler.codec.http.DefaultHttpChunk
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.handler.codec.http.HttpResponse
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.jboss.netty.handler.codec.http.HttpVersion
-import org.jboss.netty.util.CharsetUtil
+import org.mashupbots.socko.utils.CharsetUtil
+
 import javax.activation.MimetypesFileTypeMap
-import java.util.zip.DeflaterOutputStream
-import java.util.zip.GZIPOutputStream
-import java.io.ByteArrayOutputStream
-import org.jboss.netty.handler.codec.http.DefaultHttpChunk
 
 /**
  * Abstract context for reading HTTP requests and writing HTTP responses
@@ -132,7 +133,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     allowCompression: Boolean): Unit = {
 
     // Build the response object.
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
 
     // Content
     setContent(response, content)
@@ -215,7 +216,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    */
   def writeErrorResponse(status: HttpResponseStatus, forceCloseChannel: Boolean = false, msg: String = null) {
     val closeChannel = (!this.isKeepAlive || forceCloseChannel)
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status)
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status.toNetty)
 
     val msgToWrite = if (msg == null) status.toString() else msg
     response.setContent(ChannelBuffers.copiedBuffer("Error: " + msgToWrite + "\r\n", CharsetUtil.UTF_8))
@@ -251,7 +252,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     totalChunkContentLength = 0
     
     // Build the response object.
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
 
     // See http://stackoverflow.com/questions/9027322/how-to-use-chunkedstream-properly
     response.setChunked(true);
@@ -293,7 +294,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
         future.addListener(ChannelFutureListener.CLOSE)
       }
       
-      writeWebLog(HttpResponseStatus.OK.getCode, totalChunkContentLength)
+      writeWebLog(HttpResponseStatus.OK.code, totalChunkContentLength)
     }
   }
 
@@ -316,7 +317,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    */
   def redirect(url: String) {
     val closeChannel = (!this.isKeepAlive)
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FOUND)
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FOUND.toNetty)
 
     setDateHeader(response)
     response.setHeader(HttpHeaders.Names.LOCATION, url)

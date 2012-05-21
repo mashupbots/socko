@@ -15,10 +15,12 @@
 //
 package org.mashupbots.socko.examples.streaming
 
-import org.mashupbots.socko.context.HttpRequestProcessingContext
-import akka.actor.Actor
 import java.util.Date
-import org.jboss.netty.util.CharsetUtil
+
+import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.utils.CharsetUtil
+
+import akka.actor.Actor
 
 /**
  * Streaming processor streams a greeting and stops.

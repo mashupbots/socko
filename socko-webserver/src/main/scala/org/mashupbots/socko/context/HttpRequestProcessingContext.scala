@@ -24,7 +24,6 @@ import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.handler.codec.http.HttpRequest
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.util.CharsetUtil
 import org.mashupbots.socko.utils.WebLogEvent
@@ -146,7 +145,7 @@ case class HttpRequestProcessingContext(
    * Sends a 100 continue to the client
    */
   def write100Continue() {
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE)
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE.toNetty)
     channel.write(response)
   }
 

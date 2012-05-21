@@ -16,8 +16,7 @@
 package org.mashupbots.socko.examples.config
 
 import org.mashupbots.socko.examples.quickstart.HelloProcessor
-import org.mashupbots.socko.routes.GET
-import org.mashupbots.socko.routes.Routes
+import org.mashupbots.socko.routes._
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig

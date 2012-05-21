@@ -15,18 +15,17 @@
 //
 package org.mashupbots.socko.examples.fileupload
 
-import org.mashupbots.socko.context.HttpRequestProcessingContext
-import akka.actor.Actor
-import java.util.Date
 import java.io.File
+
 import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.mashupbots.socko.postdecoder.HttpPostRequestDecoder
-import org.mashupbots.socko.postdecoder.DefaultHttpDataFactory
-import scala.collection.JavaConversions._
-import org.mashupbots.socko.postdecoder.InterfaceHttpData.HttpDataType
+import org.mashupbots.socko.context.HttpResponseStatus
+import org.mashupbots.socko.context.HttpRequestProcessingContext
 import org.mashupbots.socko.postdecoder.Attribute
+import org.mashupbots.socko.postdecoder.DefaultHttpDataFactory
 import org.mashupbots.socko.postdecoder.FileUpload
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
+import org.mashupbots.socko.postdecoder.HttpPostRequestDecoder
+
+import akka.actor.Actor
 import akka.event.Logging
 
 /**

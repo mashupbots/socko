@@ -27,26 +27,23 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.GZIPOutputStream
 import java.util.Date
-
 import scala.Array.canBuildFrom
 import scala.collection.JavaConversions.asScalaConcurrentMap
 import scala.collection.mutable.ConcurrentMap
-
 import org.jboss.netty.channel.ChannelFuture
 import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.channel.ChannelFutureProgressListener
 import org.jboss.netty.channel.DefaultFileRegion
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse
 import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedFile
 import org.mashupbots.socko.context.HttpRequestProcessingContext
 import org.mashupbots.socko.utils.Logger
-
 import akka.actor.Actor
 import akka.event.Logging
+import org.mashupbots.socko.context.HttpResponseStatus
 
 /**
  * A processor that handles downloading of static files.
@@ -252,7 +249,7 @@ class StaticFileProcessor extends Actor {
     val fileLength = raf.length()
 
     // Prepare response
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
     HttpHeaders.setContentLength(response, fileLength)
     request.context.setContentTypeHeader(response, file)
     request.context.setKeepAliveHeader(response)
@@ -262,7 +259,7 @@ class StaticFileProcessor extends Actor {
     }
     
     // We have to write our own web log entry since we are not using request.context.writeResponse
-    request.context.writeWebLog(HttpResponseStatus.OK.getCode, fileLength)
+    request.context.writeWebLog(HttpResponseStatus.OK.code, fileLength)
 
     // Write the initial HTTP response line and headers
     val ch = request.context.channel

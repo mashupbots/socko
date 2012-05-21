@@ -18,21 +18,20 @@ package org.mashupbots.socko.examples.benchmark
 import java.io.File
 import java.io.FileOutputStream
 
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
-import org.jboss.netty.util.CharsetUtil
-import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.HttpResponseStatus
 import org.mashupbots.socko.processors.StaticFileProcessor
 import org.mashupbots.socko.processors.StaticFileRequest
 import org.mashupbots.socko.routes._
+import org.mashupbots.socko.utils.CharsetUtil
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
 import com.typesafe.config.ConfigFactory
 
-import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
+import akka.actor.actorRef2Scala
 import akka.routing.FromConfig
 
 /**
@@ -55,23 +54,22 @@ object BenchmarkApp extends Logger {
   // FileUploadProcessor will also be started as a router with a PinnedDispatcher since it involves IO.
   //
   val actorConfig = """
-my-pinned-dispatcher {
-  type=PinnedDispatcher
-  executor=thread-pool-executor
-}
-akka {
-  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
-  loglevel=DEBUG
-  actor {
-    deployment {
-      /static-file-router {
-        router = round-robin
-        nr-of-instances = 100
-      }
-    }
-  }
-}
-"""
+	my-pinned-dispatcher {
+	  type=PinnedDispatcher
+	  executor=thread-pool-executor
+	}
+	akka {
+	  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+	  loglevel=DEBUG
+	  actor {
+	    deployment {
+	      /static-file-router {
+	        router = round-robin
+	        nr-of-instances = 100
+	      }
+	    }
+	  }
+	}"""
 
   val actorSystem = ActorSystem("BenchmarkActorSystem", ConfigFactory.parseString(actorConfig))
 

@@ -15,20 +15,14 @@
 //
 package org.mashupbots.socko.examples.routes
 
-import scala.collection.JavaConversions.asScalaBuffer
-import org.jboss.netty.channel.ChannelLocal
-import org.mashupbots.socko.context.HttpChunkProcessingContext
-import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.mashupbots.socko.postdecoder.InterfaceHttpData.HttpDataType
-import org.mashupbots.socko.postdecoder.Attribute
-import org.mashupbots.socko.postdecoder.DefaultHttpDataFactory
-import org.mashupbots.socko.postdecoder.FileUpload
-import org.mashupbots.socko.postdecoder.HttpPostRequestDecoder
-import akka.actor.Actor
-import akka.event.Logging
 import java.text.SimpleDateFormat
 import java.util.GregorianCalendar
 import java.util.TimeZone
+
+import org.mashupbots.socko.context.HttpRequestProcessingContext
+
+import akka.actor.Actor
+import akka.event.Logging
 
 /**
  * Time processor that returns time in the response

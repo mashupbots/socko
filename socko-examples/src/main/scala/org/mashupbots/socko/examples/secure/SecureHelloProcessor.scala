@@ -15,9 +15,11 @@
 //
 package org.mashupbots.socko.examples.secure
 
-import org.mashupbots.socko.context.HttpRequestProcessingContext
-import akka.actor.Actor
 import java.util.Date
+
+import org.mashupbots.socko.context.HttpRequestProcessingContext
+
+import akka.actor.Actor
 
 /**
  * Hello processor writes a greeting and stops.
