@@ -152,6 +152,9 @@ class StaticFileProcessor extends Actor {
 
     // Checks
     if (!file.getCanonicalPath.startsWith(request.rootFileDir.getCanonicalPath)) {
+      // ".\file.txt" is a path but is not an absolute path nor canonical path.
+      // "C:\temp\file.txt" is a path, an absolute path, a canonical path
+      // "C:\temp\myapp\bin\..\..\file.txt" is a path, and an absolute path but not a canonical path
       log.debug("File '{}' not under root directory '{}'", file.getCanonicalPath, request.rootFileDir.getCanonicalPath)
       request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
       return
