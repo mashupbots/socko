@@ -71,9 +71,6 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
     val httpConfig = HttpConfig(minCompressibleContentSizeInBytes = 0)
     webServer = new WebServer(WebServerConfig(port = port, http = httpConfig), routes)
     webServer.start()
-
-    // Wait for start
-    Thread.sleep(1000)
   }
 
   override def afterAll(configMap: Map[String, Any]) {
@@ -212,14 +209,11 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
       val wsc = new TestWebSocketClient(path + "snoop/websocket/")
       wsc.connect()
 
-      Thread.sleep(500)
       wsc.isConnected should be(true)
 
-      wsc.send("test #1")
-      wsc.send("test #2")
-      wsc.send("test #3")
-
-      Thread.sleep(500)
+      wsc.send("test #1", true)
+      wsc.send("test #2", true)
+      wsc.send("test #3", true)
 
       wsc.disconnect()
 
@@ -230,7 +224,6 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
     "not connect if web socket path not found" in {
       val wsc = new TestWebSocketClient(path + "snoop/notexist/")
       wsc.connect()
-      Thread.sleep(500)
       wsc.isConnected should be(false)
       wsc.disconnect()
     }
@@ -238,7 +231,6 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
     "not connect if web socket path not allowed by route" in {
       val wsc = new TestWebSocketClient(path + "snoop/")
       wsc.connect()
-      Thread.sleep(500)
       wsc.isConnected should be(false)
       wsc.disconnect()
     }

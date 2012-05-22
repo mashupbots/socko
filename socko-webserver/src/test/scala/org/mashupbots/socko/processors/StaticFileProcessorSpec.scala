@@ -111,9 +111,6 @@ class StaticFileProcessorSpec
     // Start web server
     webServer = new WebServer(WebServerConfig(port = port), routes)
     webServer.start()
-
-    // Wait for start
-    Thread.sleep(1000)
   }
 
   override def afterAll(configMap: Map[String, Any]) {

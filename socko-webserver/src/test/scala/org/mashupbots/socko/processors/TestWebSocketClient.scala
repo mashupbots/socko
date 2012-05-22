@@ -47,41 +47,64 @@ import org.mashupbots.socko.utils.Logger
  */
 class TestWebSocketClient(url: String) extends Logger {
 
-  var bootstrap: ClientBootstrap = null
+  val bootstrap = new ClientBootstrap(
+    new NioClientSocketChannelFactory(
+      Executors.newCachedThreadPool(),
+      Executors.newCachedThreadPool()))
+
   val uri = new URI(url)
+
+  val handshaker = new WebSocketClientHandshakerFactory().newHandshaker(
+    new URI(url), WebSocketVersion.V13, null, false, null)
+
   var ch: Channel = null
   val channelData = new ChannelData()
+  val monitor = new AnyRef()
+
+  bootstrap.setPipelineFactory(new PipeLineFactory(handshaker, channelData, monitor))
 
   /**
-   * Connect to the server
+   * Connect to the server. This is a blocking call.
    */
   def connect() {
-    bootstrap = new ClientBootstrap(
-      new NioClientSocketChannelFactory(
-        Executors.newCachedThreadPool(),
-        Executors.newCachedThreadPool()))
+    if (this.isConnected) {
+      return
+    }
 
-    val handshaker =
-      new WebSocketClientHandshakerFactory().newHandshaker(
-        new URI(url), WebSocketVersion.V13, null, false, null)
+    // Initialize connection status
+    channelData.isConnected = None
 
-    bootstrap.setPipelineFactory(new PipeLineFactory(handshaker, channelData))
+    log.debug("WebSocket Client connecting")
+    val future = bootstrap.connect(new InetSocketAddress(uri.getHost, uri.getPort))
+    future.awaitUninterruptibly().rethrowIfFailed()
 
-    // Connect
-    log.debug("WebSocket Client connecting");
-    val future = bootstrap.connect(new InetSocketAddress(uri.getHost(), uri.getPort()));
-    future.awaitUninterruptibly().rethrowIfFailed();
+    ch = future.getChannel()
+    handshaker.handshake(ch)
 
-    ch = future.getChannel();
-    handshaker.handshake(ch).awaitUninterruptibly().rethrowIfFailed();
+    // Wait until connected
+    monitor.synchronized {
+      while (channelData.isConnected.isEmpty) {
+        monitor.wait()
+      }
+    }
   }
 
   /**
+   * Send text to the server and wait for response
    *
    * @param content Content to send
+   * @param waitForResponse Block until a response has been received
    */
-  def send(content: String) {
+  def send(content: String, waitForResponse: Boolean = false) {
+    channelData.hasReplied = false
     ch.write(new TextWebSocketFrame(content))
+    if (waitForResponse) {
+      monitor.synchronized {
+        while (!channelData.hasReplied) {
+          monitor.wait()
+        }
+      }
+    }
   }
 
   /**
@@ -105,7 +128,7 @@ class TestWebSocketClient(url: String) extends Logger {
    * Flag to indicate if the web service connection has been made
    */
   def isConnected(): Boolean = {
-    channelData.isConnected
+    if (channelData.isConnected.isEmpty) false else channelData.isConnected.get
   }
 
   /**
@@ -113,12 +136,13 @@ class TestWebSocketClient(url: String) extends Logger {
    */
   class PipeLineFactory(
     handshaker: WebSocketClientHandshaker,
-    channelData: ChannelData) extends ChannelPipelineFactory {
+    channelData: ChannelData,
+    connectionMonitor: AnyRef) extends ChannelPipelineFactory {
     def getPipeline: ChannelPipeline = {
       val newPipeline = Channels.pipeline()
       newPipeline.addLast("decoder", new HttpResponseDecoder())
       newPipeline.addLast("encoder", new HttpRequestEncoder())
-      newPipeline.addLast("ws-handler", new WebSocketClientHandler(handshaker, channelData))
+      newPipeline.addLast("ws-handler", new WebSocketClientHandler(handshaker, channelData, connectionMonitor))
       newPipeline
     }
   }
@@ -128,38 +152,46 @@ class TestWebSocketClient(url: String) extends Logger {
    */
   class WebSocketClientHandler(
     handshaker: WebSocketClientHandshaker,
-    channelData: ChannelData) extends SimpleChannelUpstreamHandler with Logger {
+    channelData: ChannelData,
+    connectionMonitor: AnyRef) extends SimpleChannelUpstreamHandler with Logger {
 
     override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
       log.debug("WebSocket Client disconnected!");
+      channelData.isConnected = Some(false)
     }
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
       val ch = ctx.getChannel()
       if (!handshaker.isHandshakeComplete()) {
-        handshaker.finishHandshake(ch, e.getMessage.asInstanceOf[HttpResponse])
-        log.debug("WebSocket Client connected!")
-        channelData.isConnected = true
-        return
+        try {
+          handshaker.finishHandshake(ch, e.getMessage.asInstanceOf[HttpResponse])
+          log.debug("WebSocket Client connected!")
+          channelData.isConnected = Some(true)
+        } catch {
+          case _ => {
+            log.debug("Error connecting to Web Socket Server")
+            channelData.isConnected = Some(false)
+          }
+        }
+      } else {
+        val frame = e.getMessage()
+        if (frame.isInstanceOf[TextWebSocketFrame]) {
+          val textFrame = frame.asInstanceOf[TextWebSocketFrame]
+          channelData.textBuffer.append(textFrame.getText)
+          channelData.textBuffer.append("\n")
+          log.debug("WebSocket Client received message: " + textFrame.getText)
+          channelData.hasReplied = true
+        } else if (frame.isInstanceOf[PongWebSocketFrame]) {
+          log.debug("WebSocket Client received pong")
+        } else if (frame.isInstanceOf[CloseWebSocketFrame]) {
+          log.debug("WebSocket Client received closing")
+          ch.close()
+        }
       }
 
-      if (e.getMessage().isInstanceOf[HttpResponse]) {
-        val response = e.getMessage().asInstanceOf[HttpResponse]
-        throw new Exception("Unexpected HttpResponse (status=" + response.getStatus() + ", content="
-          + response.getContent().toString(CharsetUtil.UTF_8) + ")");
-      }
-
-      val frame = e.getMessage()
-      if (frame.isInstanceOf[TextWebSocketFrame]) {
-        val textFrame = frame.asInstanceOf[TextWebSocketFrame];
-        channelData.textBuffer.append(textFrame.getText)
-        channelData.textBuffer.append("\n")
-        log.debug("WebSocket Client received message: " + textFrame.getText)
-      } else if (frame.isInstanceOf[PongWebSocketFrame]) {
-        log.debug("WebSocket Client received pong");
-      } else if (frame.isInstanceOf[CloseWebSocketFrame]) {
-        log.debug("WebSocket Client received closing");
-        ch.close();
+      // Notify monitor that we have connected
+      connectionMonitor.synchronized {
+        connectionMonitor.notifyAll()
       }
     }
 
@@ -174,7 +206,8 @@ class TestWebSocketClient(url: String) extends Logger {
    * Data associated with a specific channel
    */
   class ChannelData() {
-    var isConnected = false
+    var isConnected: Option[Boolean] = None
+    var hasReplied = false
     val textBuffer = new StringBuilder()
   }
 }
