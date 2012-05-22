@@ -39,7 +39,7 @@ class DefaultWebLogQueue(val capacity: Int) extends WebLogQueue {
    * exceeding the queue's capacity
    *
    * @param evt web log event to queue
-   * @returns `true` upon success and `false` if this queue is full.
+   * @return `true` upon success and `false` if this queue is full.
    */
   def enqueue(evt: WebLogEvent): Boolean = {
     queue.offer(evt)
@@ -48,7 +48,7 @@ class DefaultWebLogQueue(val capacity: Int) extends WebLogQueue {
   /**
    * Retrieves and removes the head of this queue, waiting if necessary until an element becomes available.
    *
-   * @returns A queued `WebLogEvent`
+   * @return A queued `WebLogEvent`
    */
   def dequeue(): WebLogEvent = {
     queue.take
@@ -58,7 +58,7 @@ class DefaultWebLogQueue(val capacity: Int) extends WebLogQueue {
    * Retrieves and removes the head of this queue, waiting for the specified time.
    *
    * @param timeoutMilliSeconds Number of milliseconds to wait before returnin
-   * @returns A queued `WebLogEvent`, `None` if timed out
+   * @return A queued `WebLogEvent`, `None` if timed out
    */
   def dequeue(timeoutMilliSeconds: Long): Option[WebLogEvent] = {
     val v = queue.poll(timeoutMilliSeconds, TimeUnit.MILLISECONDS)
