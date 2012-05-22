@@ -126,7 +126,7 @@ object Dependency {
   val netty         = "io.netty"            % "netty"              % "3.3.0.Final"
   val akkaTestKit   = "com.typesafe.akka"   % "akka-testkit"       % "2.0"
   val junit         = "junit"               % "junit"              % "4.9"           % "test"
-  val logback       = "ch.qos.logback"      % "logback-classic"    % "1.0.0"         % "runtime"
+  val logback       = "ch.qos.logback"      % "logback-classic"    % "1.0.3"         % "runtime"
   val scalatest     = "org.scalatest"       %% "scalatest"         % "1.7.1"         % "test"
 }
 
