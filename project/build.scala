@@ -111,8 +111,8 @@ object Dependencies {
   import Dependency._
 
   val webserver = Seq(
-    Dependency.akkaActor, Dependency.netty, Dependency.akkaSlf4j, Dependency.akkaTestKit,
-    Dependency.logback, Dependency.junit, Dependency.scalatest
+    Dependency.akkaActor, Dependency.akkaSlf4j, Dependency.akkaTestKit,
+    Dependency.netty, Dependency.logback, Dependency.junit, Dependency.scalatest
   )
   
   val examples = Seq(
@@ -123,10 +123,10 @@ object Dependencies {
 object Dependency {
   val akkaActor     = "com.typesafe.akka"   % "akka-actor"         % "2.0"
   val akkaSlf4j     = "com.typesafe.akka"   % "akka-slf4j"         % "2.0"
-  val netty         = "io.netty"            % "netty"              % "3.3.0.Final"
   val akkaTestKit   = "com.typesafe.akka"   % "akka-testkit"       % "2.0"
-  val junit         = "junit"               % "junit"              % "4.9"           % "test"
+  val netty         = "io.netty"            % "netty"              % "3.3.0.Final"
   val logback       = "ch.qos.logback"      % "logback-classic"    % "1.0.3"         % "runtime"
+  val junit         = "junit"               % "junit"              % "4.9"           % "test"
   val scalatest     = "org.scalatest"       %% "scalatest"         % "1.7.1"         % "test"
 }
 
