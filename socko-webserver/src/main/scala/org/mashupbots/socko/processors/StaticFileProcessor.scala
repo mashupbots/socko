@@ -148,26 +148,26 @@ class StaticFileProcessor extends Actor {
     val file = request.file
 
     // Checks
-    if (!file.getCanonicalPath.startsWith(request.rootFileDir.getCanonicalPath)) {
+    if (!file.getAbsolutePath.startsWith(request.rootFileDir.getAbsolutePath)) {
       // ".\file.txt" is a path but is not an absolute path nor canonical path.
       // "C:\temp\file.txt" is a path, an absolute path, a canonical path
       // "C:\temp\myapp\bin\..\..\file.txt" is a path, and an absolute path but not a canonical path
-      log.debug("File '{}' not under root directory '{}'", file.getCanonicalPath, request.rootFileDir.getCanonicalPath)
+      log.debug("File '{}' not under root directory '{}'", file.getAbsolutePath, request.rootFileDir.getAbsolutePath)
       request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
       return
     }
     if (!file.exists() || file.isHidden()) {
-      log.debug("File '{}' does not exist or is hidden", file.getCanonicalPath)
+      log.debug("File '{}' does not exist or is hidden", file.getAbsolutePath)
       request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
       return
     }
     if (file.getName.startsWith(".")) {
-      log.debug("File name '{}' starts with .", file.getCanonicalPath)
+      log.debug("File name '{}' starts with .", file.getAbsolutePath)
       request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
       return
     }
     if (!file.isFile()) {
-      log.debug("File '{}' is not a file", file.getCanonicalPath)
+      log.debug("File '{}' is not a file", file.getAbsolutePath)
       request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
       return
     }
@@ -303,11 +303,11 @@ class StaticFileProcessor extends Actor {
   private def compressFile(request: StaticFileRequest, format: String, file: File): Option[File] = {
     // We put the file timestamp in the hash to make sure that if a file changes,
     // the latest copy is downloaded 
-    val compressedFileName = md5(file.getCanonicalPath + "_" + file.lastModified) + "." + format
+    val compressedFileName = md5(file.getAbsolutePath + "_" + file.lastModified) + "." + format
     val compressedFile = new File(request.tempDir, compressedFileName)
     var isError = false
 
-    log.debug("Compressed file name: {}", compressedFile.getCanonicalPath)
+    log.debug("Compressed file name: {}", compressedFile.getAbsolutePath)
 
     if (!compressedFile.exists) {
       var fileIn: BufferedInputStream = null
@@ -409,14 +409,14 @@ object StaticFileLastModifiedCache extends Logger {
   def get(file: File, timeoutSeconds: Int): Long = {
     require(file != null, "file cannot be null")
 
-    val r = cache.get(file.getCanonicalPath)
+    val r = cache.get(file.getAbsolutePath)
     if (r.isDefined && new Date().getTime < r.get.timeout) {
       //log.debug("Getting from cache")
       r.get.lastModified
     } else {
       //log.debug("Read new value")
-      cache.put(file.getCanonicalPath,
-        FileLastModified(file.getCanonicalPath, file.lastModified, new Date().getTime + (timeoutSeconds * 1000)))
+      cache.put(file.getAbsolutePath,
+        FileLastModified(file.getAbsolutePath, file.lastModified, new Date().getTime + (timeoutSeconds * 1000)))
       file.lastModified
     }
   }
