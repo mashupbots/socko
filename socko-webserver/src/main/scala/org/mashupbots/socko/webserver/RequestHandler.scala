@@ -75,6 +75,8 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
    */
   private val httpConfig = HttpProcessingConfig(
     server.config.http.minCompressibleContentSizeInBytes,
+    server.config.http.maxCompressibleContentSizeInBytes,
+    server.config.http.compressibleContentTypes,
     server.webLog)
 
   private lazy val wsConfig = WsProcessingConfig(server.webLog)

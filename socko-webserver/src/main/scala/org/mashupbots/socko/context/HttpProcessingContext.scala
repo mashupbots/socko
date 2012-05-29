@@ -84,7 +84,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    * Sum of chunk responses sent to the client
    */
   private var totalChunkContentLength = 0
-  
+
   /**
    * Sends a string HTTP response to the client with a status of "200 OK".
    *
@@ -92,8 +92,6 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    * @param contentType MIME content type to set in the response header. Defaults to "text/plain; charset=UTF-8".
    * @param charset Character set encoding. Defaults to "UTF-8"
    * @param headers Additional headers to add to the HTTP response. Defaults to None; i.e. no additional headers.
-   * @param allowCompression Flag to indicate if content is to be compressed if the `acceptedEncodings` header is set.
-   *   Defaults to `true`.
    */
   def writeResponse(
     content: String,
@@ -101,7 +99,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     charset: Charset = CharsetUtil.UTF_8,
     headers: Option[Map[String, String]] = None): Unit = {
 
-    writeResponse(content.getBytes(charset), contentType, headers, true)
+    writeResponse(content.getBytes(charset), contentType, headers)
   }
 
   /**
@@ -115,28 +113,12 @@ abstract class HttpProcessingContext() extends ProcessingContext {
     content: Array[Byte],
     contentType: String,
     headers: Option[Map[String, String]]): Unit = {
-    writeResponse(content, contentType, headers, true)
-  }
-
-  /**
-   * Sends a binary HTTP response to the client with a status of "200 OK".
-   *
-   * @param content String to send
-   * @param contentType MIME content type to set in the response header. For example, "image/gif"
-   * @param headers Additional headers to add to the HTTP response. Defaults to empty map; i.e. no additional headers.
-   * @param allowCompression Flag to indicate if content is to be compressed if the `acceptedEncodings` header is set.
-   */
-  def writeResponse(
-    content: Array[Byte],
-    contentType: String,
-    headers: Option[Map[String, String]],
-    allowCompression: Boolean): Unit = {
 
     // Build the response object.
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
 
     // Content
-    setContent(response, content)
+    setContent(response, content, contentType)
 
     // Headers
     setDateHeader(response)
@@ -168,30 +150,35 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    *
    * @param response HTTP response
    * @param content Binary content to return in the response
-   * @param allowCompression Flag to indicate if content is to be compressed if the `acceptedEncodings` header is set.
-   *   Defaults to `true`.
+   * @param contentType MIME content type to set in the response header. For example, "image/gif"
    */
-  private def setContent(response: HttpResponse, content: Array[Byte], allowCompression: Boolean = true) {
-    val compressBytes = new ByteArrayOutputStream
-    var compressedOut: DeflaterOutputStream = null
-    val compressible = (content != null && content.size > config.minCompressibleContentSizeInBytes &&
-      config.minCompressibleContentSizeInBytes >= 0 && allowCompression)
+  private def setContent(response: HttpResponse, content: Array[Byte], contentType: String) {
+    // Check to see if we should compress the content
+    val compressible = (content != null &&
+      content.size >= config.minCompressibleContentSizeInBytes &&
+      content.size <= config.maxCompressibleContentSizeInBytes &&
+      config.compressibleContentTypes.exists(s => contentType.startsWith(s)))
 
+    var compressedOut: DeflaterOutputStream = null
     try {
       if (compressible && acceptedEncodings.contains("gzip")) {
+        val compressBytes = new ByteArrayOutputStream
         compressedOut = new GZIPOutputStream(compressBytes)
         compressedOut.write(content, 0, content.length)
         compressedOut.close()
         compressedOut = null
         response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
         response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "gzip")
+
       } else if (compressible && acceptedEncodings.contains("deflate")) {
+        val compressBytes = new ByteArrayOutputStream
         compressedOut = new DeflaterOutputStream(compressBytes)
         compressedOut.write(content, 0, content.length)
         compressedOut.close()
         compressedOut = null
         response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
         response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "deflate")
+
       } else {
         // No compression
         response.setContent(ChannelBuffers.copiedBuffer(content))
@@ -250,7 +237,7 @@ abstract class HttpProcessingContext() extends ProcessingContext {
 
     // Start totaling chunk length
     totalChunkContentLength = 0
-    
+
     // Build the response object.
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
 
@@ -283,17 +270,17 @@ abstract class HttpProcessingContext() extends ProcessingContext {
    */
   def writeChunk(chunkContent: Array[Byte], isLastChunk: Boolean = false): Unit = {
     totalChunkContentLength += chunkContent.length
-    
+
     val chunk = new DefaultHttpChunk(ChannelBuffers.wrappedBuffer(chunkContent))
     channel.write(chunk)
-    
+
     if (isLastChunk) {
       val lastChunk = new DefaultHttpChunk(ChannelBuffers.EMPTY_BUFFER)
       val future = channel.write(lastChunk)
       if (!this.isKeepAlive) {
         future.addListener(ChannelFutureListener.CLOSE)
       }
-      
+
       writeWebLog(HttpResponseStatus.OK.code, totalChunkContentLength)
     }
   }

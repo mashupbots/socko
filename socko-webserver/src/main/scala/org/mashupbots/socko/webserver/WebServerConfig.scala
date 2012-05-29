@@ -24,6 +24,7 @@ import com.typesafe.config.Config
 import org.mashupbots.socko.utils.Logger
 import com.typesafe.config.ConfigException
 import org.mashupbots.socko.utils.WebLogFormat
+import scala.collection.JavaConversions._
 
 /**
  * Web server configuration
@@ -36,57 +37,67 @@ import org.mashupbots.socko.utils.WebLogFormat
  *     server-name=AkkaConfigExample
  *     hostname=localhost
  *     port=9000
- *     
+ *
  *     # Optional web log. If not supplied, web server activity logging is turned off.
  *     web-log {
- *     
- *       # Optional Web log format: Common (Default) or Extended 
+ *
+ *       # Optional Web log format: Common (Default) or Extended
  *       format = Common
- *       
- *       # Optional asynchronous log queue size. Defaults to 512 events in the queue 
+ *
+ *       # Optional asynchronous log queue size. Defaults to 512 events in the queue
  *       # before new events are discarded.
  *       buffer-size = 512
  *     }
- *     
+ *
  *     # Optional SSL. If not supplied, ssl is turned off.
  *     ssl {
- *     
+ *
  *       # Path to key store (server cert.)
  *       key-store-file=/tmp/ks.dat
- *       
+ *
  *       # Password to key store
  *       key-store-password=kspwd
- *       
+ *
  *       # Optional path to trust store (client cert.)
  *       trust-store-file=/tmp/ts.dat
- *       
+ *
  *       # Optional password to trust store
  *       trust-store-password=tspwd
  *     }
- *     
+ *
  *     # Optional HTTP protocol configuration. If not supplied, defaults are used.
  *     http {
- *     
+ *
  *       # Maximum size of HTTP request. Defaults to 4MB.
  *       max-length-in-mb=4
- *       
+ *
  *       # Maximum length of the HTTP initial line. Defaults to 4096 bytes (4K).
  *       max-initial-line-length=4096
- *       
+ *
  *       # Maximum size of HTTP headers. Defaults to 8192 bytes (8K).
  *       max-header-size-in-bytes=8192
- *       
+ *
  *       # Maximum size of HTTP chunks. Defaults to 8192 bytes (8K).
  *       max-chunk-size-in-bytes=8192
- *       
+ *
  *       # Flag to indicate if HTTP chunk requests should be aggregated and presented
  *       # as a single HTTP request. Defaults to true.
  *       aggregate-chunks=true
- *       
- *       # Content under this size is not compressed. Defaults to 1024 bytes (1K). 
+ *
+ *       # Content under this size is not compressed. Defaults to 1024 bytes (1K).
  *       # Set to -1 to turn off compression; or 0 to compress all content.
  *       min-compressible-content-size-in-bytes=1024
- *     }     
+ *       
+ *       # Content over this size is not compressed. Defaults to 1MB
+ *       max-compressible-content-size-in-bytes=60
+ *       
+ *       # Only content with the specified MIME type will be compressed
+ *       compressible-content-types=[
+ *         "text/plain", "text/html", "text/xml", "text/css",
+ *         "application/xml", "application/xhtml+xml", "application/rss+xml",
+ *         "application/json", "application/jsonml+json",
+ *         "application/javascript", "application/x-javascript"]
+ *     }
  *   }
  * }}}
  *
@@ -230,6 +241,8 @@ case class SslConfig(
 
 /**
  * HTTP protocol handling configuration
+ * 
+ * HTTP compression parameters only applies to HTTP request and responses and not web sockets.
  *
  * @param maxLengthInMB Maximum size of HTTP request in megabytes. Defaults to 4MB.
  * @param maxInitialLineLength Maximum size the initial line. Defaults to 4096 characters.
@@ -238,7 +251,11 @@ case class SslConfig(
  * @param aggreateChunks Flag to indicate if we want to aggregate chunks. If `false`, your processor actors must be
  *  able to handle `HttpChunkProcessingContext`
  * @param minCompressibleContentSizeInBytes Minimum number of bytes before HTTP content will be compressed if requested
- *   by the client. Set to `-1` to turn off compression; `0` to make all content compressible.
+ *   by the client. Set to `-1` to turn off compression for all files; `0` to make all content compressible.
+ * @param maxCompressibleContentSizeInBytes Maximum number of bytes before HTTP content will be not be compressed if
+ *   requested by the client. Defaults to 1MB otherwise too much CPU maybe taken up for compression.
+ * @param compressibleContentTypes List of MIME types of that can be compressed. If not supplied, defaults to
+ *   HTML, CSS, JSON, XML and Javascript files.
  */
 case class HttpConfig(
   maxLengthInMB: Int = 4,
@@ -246,7 +263,9 @@ case class HttpConfig(
   maxHeaderSizeInBytes: Int = 8192,
   maxChunkSizeInBytes: Int = 8192,
   aggreateChunks: Boolean = true,
-  minCompressibleContentSizeInBytes: Int = 1024) {
+  minCompressibleContentSizeInBytes: Int = 1024,
+  maxCompressibleContentSizeInBytes: Int = (1 * 1024 * 1024),
+  compressibleContentTypes: List[String] = WebServerConfig.defaultCompressibleContentTypes) {
 
   val maxLengthInBytes = maxLengthInMB * 1024 * 1024
 
@@ -259,7 +278,9 @@ case class HttpConfig(
     WebServerConfig.getInt(config, prefix + ".max-header-size-in-bytes", 8192),
     WebServerConfig.getInt(config, prefix + ".max-chunk-size-in-bytes", 8192),
     WebServerConfig.getBoolean(config, prefix + ".aggregate-chunks", true),
-    WebServerConfig.getInt(config, prefix + ".min-compressible-content-size-in-bytes", 1024))
+    WebServerConfig.getInt(config, prefix + ".min-compressible-content-size-in-bytes", 1024),
+    WebServerConfig.getInt(config, prefix + ".max-compressible-content-size-in-bytes", 1 * 1024 * 1024),
+    WebServerConfig.getCompressibleContentTypes(config, prefix + ".compressible-content-types"))
 }
 
 /**
@@ -416,6 +437,30 @@ object WebServerConfig extends Logger {
         log.error("Error parsing WebLogConfig config. Web server activity logging is turned off.", ex)
         None
       }
+    }
+  }
+
+  val defaultCompressibleContentTypes: List[String] =
+    "text/plain" :: "text/html" :: "text/xml" :: "text/css" ::
+      "application/xml" :: "application/xhtml+xml" :: "application/rss+xml" ::
+      "application/json" :: "application/jsonml+json" ::
+      "application/javascript" :: "application/x-javascript" ::
+      Nil
+
+  /**
+   * Returns an optional file configuration value. It is assumed that the value of the configuration name is the full
+   * path to a file or directory.
+   */
+  def getCompressibleContentTypes(config: Config, name: String): List[String] = {
+    try {
+      val v = config.getStringList(name).toList
+      if (v == null || v.isEmpty) {
+        defaultCompressibleContentTypes
+      } else {
+        v
+      }
+    } catch {
+      case _ => defaultCompressibleContentTypes
     }
   }
 }

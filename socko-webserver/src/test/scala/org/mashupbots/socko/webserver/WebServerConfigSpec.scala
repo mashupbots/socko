@@ -184,6 +184,8 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     }
 
     "load from Akka Config" in {
+      
+      // *** If you are changing this, review scaladoc of WebServerConfig ***
       val actorConfig = """
 		barebones-webserver {
 		  server-name=BareBonesTest
@@ -211,8 +213,11 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
 		    max-chunk-size-in-bytes=40
 		    aggregate-chunks=false
             min-compressible-content-size-in-bytes=50
+            max-compressible-content-size-in-bytes=60
+            compressible-content-types=["text/plain", "text/html"]
 		  }
 		}"""
+      // *** If you are changing this, review scaladoc of WebServerConfig ***
 
       val actorSystem = ActorSystem("WebServerConfigSpec", ConfigFactory.parseString(actorConfig))
 
@@ -224,6 +229,9 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       barebones.ssl should equal(None)
       barebones.http.maxLengthInMB should be(4)
       barebones.http.aggreateChunks should be(true)
+      barebones.http.minCompressibleContentSizeInBytes should be(1024)
+      barebones.http.maxCompressibleContentSizeInBytes should be(1024 * 1024)
+      barebones.http.compressibleContentTypes.length should be(11)
 
       val all = AllWebServerConfig(actorSystem)
       all.serverName should equal("allTest")
@@ -245,6 +253,8 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       all.http.maxChunkSizeInBytes should be(40)
       all.http.aggreateChunks should be(false)
       all.http.minCompressibleContentSizeInBytes should be(50)
+      all.http.maxCompressibleContentSizeInBytes should be(60)
+      all.http.compressibleContentTypes.length should be(2)
       
       actorSystem.shutdown()
     }
