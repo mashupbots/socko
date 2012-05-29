@@ -41,4 +41,15 @@ This product uses the Netty project:
     * [http://netty.io/]
 
 
+Concurrent Linked Hash Map
+--------------------------
+This product uses the Concurrent Linked Hash Map project:
+
+  * LICENSE FILE:
+    * LICENSE.concurrentlinkedhashmap.txt (Apache 2)
+  * HOMEPAGE:
+    * [http://code.google.com/p/concurrentlinkedhashmap/]
+
+
+
     
