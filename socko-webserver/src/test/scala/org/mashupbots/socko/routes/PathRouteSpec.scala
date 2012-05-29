@@ -49,7 +49,7 @@ class PathRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
           result = "1"
         }
         case ctx @ PathSegments("record" :: id :: Nil) => {
-          ctx.cache.put("id", id) // test cache storage
+          ctx.items.put("id", id) // test cache storage
           result = "2"
         }
         case ctx @ PathSegments("html" :: x) => {
@@ -66,7 +66,7 @@ class PathRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
       var ctx = TestContext(EndPoint("PUT", "localhost", "/record/100"))
       r(ctx)
       result should equal("2")
-      ctx.cache.get("id") should equal(Some("100"))
+      ctx.items.get("id") should equal(Some("100"))
 
       when("the matching patern has a fixed root and variable subfolders")
       r(TestContext(EndPoint("PUT", "localhost", "/html/a/b/c/abc.html")))

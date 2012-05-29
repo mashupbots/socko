@@ -37,7 +37,7 @@ abstract class ProcessingContext() {
   def endPoint: EndPoint
 
   /**
-   * Cache that can be use to pass data from route to processor and between processors.
+   * Store of items that can be used to pass data from route to processor and between processors.
    *
    * This map is not synchronized and not thread-safe. In most cases, we expect this cache to be used by a single
    * thread - hence a standard map is faster.
@@ -45,7 +45,7 @@ abstract class ProcessingContext() {
    * If you do need to use a thread safe map, from your route, instance and store a `ConcurrentHashMap` as an item
    * in this cache.
    */
-  lazy val cache: collection.mutable.Map[String, Any] = collection.mutable.Map.empty[String, Any]
+  lazy val items: collection.mutable.Map[String, Any] = collection.mutable.Map.empty[String, Any]
 
   /**
    * Timestamp when this context was created

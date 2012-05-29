@@ -51,7 +51,7 @@ class HostRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
         }
         case ctx @ HostSegments(site :: "abc" :: "com" :: Nil) => {
           // Get storing data in our cache
-          ctx.cache.put("site", site)
+          ctx.items.put("site", site)
           result = "2"
         }
         case ctx @ HostSegments("server100" :: x) => {
@@ -68,7 +68,7 @@ class HostRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
       var ctx = TestContext(EndPoint("PUT", "site2.abc.com", "/record/100"))
       r(ctx)
       result should equal("2")
-      ctx.cache.get("site") should equal(Some("site2"))
+      ctx.items.get("site") should equal(Some("site2"))
 
       when("the matching patern has a fixed root and variable suffix")
       r(TestContext(EndPoint("PUT", "server100.def.com", "/html/a/b/c/abc.html")))
