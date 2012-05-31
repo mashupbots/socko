@@ -68,7 +68,7 @@ class DefaultWebLogQueueSpec extends WordSpec with ShouldMatchers with GivenWhen
       queue.size should be(0)
     }
 
-    "work in a multi-thread envioronment" in {
+    "work in a multi-thread environment" in {
       val queue = new DefaultWebLogQueue(100)
 
       val p1 = new Thread(new Producer(queue))

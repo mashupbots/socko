@@ -16,15 +16,17 @@
 package org.mashupbots.socko.webserver
 
 import java.util.concurrent.Executors
+
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.mashupbots.socko.context.ProcessingContext
+import org.mashupbots.socko.utils.Cache
+import org.mashupbots.socko.utils.DefaultWebLogQueue
+import org.mashupbots.socko.utils.DefaultWebLogWriter
+import org.mashupbots.socko.utils.LocalCache
 import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.utils.WebLogQueue
-import javax.net.ssl.SSLEngine
-import org.mashupbots.socko.utils.DefaultWebLogWriter
-import org.mashupbots.socko.utils.DefaultWebLogQueue
 
 /**
  * Socko Web Server
@@ -39,10 +41,14 @@ import org.mashupbots.socko.utils.DefaultWebLogQueue
  *
  * @param config Web server configuration
  * @param routes Routes for processing requests
+ * @param cache Cache to use for web server. Defaults to local in-memory cache.
+ * @param customWebLogQueue Your custom implementation of the [[org.mashupbots.socko.utils.WebLogQueue]] that is used
+ *   to queue web log entries.
  */
 class WebServer(
   val config: WebServerConfig,
   val routes: PartialFunction[ProcessingContext, Unit],
+  cache: Cache = new LocalCache(),
   customWebLogQueue: Option[WebLogQueue] = None) extends Logger {
 
   require(config != null)
@@ -67,8 +73,7 @@ class WebServer(
   /**
    * Queue for storing web logs so they can be written asynchronously
    */
-  val webLog: Option[WebLogQueue] = if (customWebLogQueue.isDefined) customWebLogQueue else 
-    if (config.webLog.isEmpty) None else
+  val webLog: Option[WebLogQueue] = if (customWebLogQueue.isDefined) customWebLogQueue else if (config.webLog.isEmpty) None else
     Some(new DefaultWebLogQueue(config.webLog.get.bufferSize))
 
   /**
