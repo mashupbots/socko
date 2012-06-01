@@ -21,20 +21,19 @@ import org.mashupbots.socko.utils.WebLogQueue
 import java.util.Date
 
 /**
- * When processing a web request, the context provides a uniform way to read request data
- * and write response data.
+ * The processing context provides a uniform way to read request data and write response data.
  */
 abstract class ProcessingContext() {
 
   /**
    * Netty channel associated with this request
    */
-  def channel: Channel
+  val channel: Channel
 
   /**
-   * The end point to which the request was addressed
+   * The end point to which the message was addressed
    */
-  def endPoint: EndPoint
+  val endPoint: EndPoint
 
   /**
    * Store of items that can be used to pass data from route to processor and between processors.
@@ -67,21 +66,5 @@ abstract class ProcessingContext() {
    */
   var username: Option[String] = None
 
-  /**
-   * Returns the request content as a string
-   */
-  def readStringContent(): String
-
-  /**
-   * Returns the request content as a string
-   *
-   * @param charset Character set to use to decode binary data into a string
-   */
-  def readStringContent(charset: Charset): String
-
-  /**
-   * Returns the request content as a byte array
-   */
-  def readBinaryContent(): Array[Byte]
 }
 

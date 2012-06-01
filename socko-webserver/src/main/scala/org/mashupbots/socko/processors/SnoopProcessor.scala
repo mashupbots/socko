@@ -17,20 +17,18 @@
 package org.mashupbots.socko.processors
 
 import scala.collection.JavaConversions.asScalaBuffer
-
 import org.jboss.netty.channel.ChannelLocal
 import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.mashupbots.socko.context.HttpChunkProcessingContext
-import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.mashupbots.socko.context.WsFrameProcessingContext
 import org.mashupbots.socko.postdecoder.InterfaceHttpData.HttpDataType
 import org.mashupbots.socko.postdecoder.Attribute
 import org.mashupbots.socko.postdecoder.DefaultHttpDataFactory
 import org.mashupbots.socko.postdecoder.FileUpload
 import org.mashupbots.socko.postdecoder.HttpPostRequestDecoder
-
 import akka.actor.Actor
 import akka.event.Logging
+import org.mashupbots.socko.context.HttpRequestContext
+import org.mashupbots.socko.context.HttpChunkContext
+import org.mashupbots.socko.context.WebSocketFrameContext
 
 /**
  * A processor that send a response containing information about the request.
@@ -44,13 +42,13 @@ class SnoopProcessor extends Actor {
    * Process incoming messages
    */
   def receive = {
-    case httpRequestContext: HttpRequestProcessingContext =>
+    case httpRequestContext: HttpRequestContext =>
       snoopHttpRequest(httpRequestContext)
       context.stop(self)
-    case httpChunkContext: HttpChunkProcessingContext =>
+    case httpChunkContext: HttpChunkContext =>
       snoopHttpChunk(httpChunkContext)
       context.stop(self)
-    case webSocketContext: WsFrameProcessingContext =>
+    case webSocketContext: WebSocketFrameContext =>
       snoopWebSocket(webSocketContext)
       context.stop(self)
     case _ => {
@@ -62,13 +60,13 @@ class SnoopProcessor extends Actor {
   /**
    * Echo out details of the HTTP request that we just received
    */
-  private def snoopHttpRequest(ctx: HttpRequestProcessingContext) {
+  private def snoopHttpRequest(ctx: HttpRequestContext) {
     val channel = ctx.channel
-    val request = ctx.httpRequest
+    val request = ctx.nettyHttpRequest
 
     // Send 100 continue if required
-    if (ctx.is100ContinueExpected) {
-      ctx.write100Continue()
+    if (ctx.request.is100ContinueExpected) {
+      ctx.response.write100Continue()
     }
 
     val buf = new StringBuilder()
@@ -94,12 +92,12 @@ class SnoopProcessor extends Actor {
     }
 
     // If post, then try to parse the data
-    val contentType = ctx.getHeader(HttpHeaders.Names.CONTENT_TYPE)
-    if (contentType.isDefined &&
-      (contentType.get.startsWith("multipart/form-data") ||
-        contentType.get.startsWith("application/x-www-form-urlencoded"))) {
+    val contentType = ctx.request.contentType
+    if (contentType != "" &&
+      (contentType.startsWith("multipart/form-data") ||
+        contentType.startsWith("application/x-www-form-urlencoded"))) {
       buf.append("FORM DATA\r\n")
-      val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, ctx.httpRequest)
+      val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, ctx.nettyHttpRequest)
       val dataList = decoder.getBodyHttpDatas().toList
       dataList.foreach(data => {
         if (data.getHttpDataType() == HttpDataType.Attribute) {
@@ -116,14 +114,17 @@ class SnoopProcessor extends Actor {
         }
       })
     } else {
-      val content = ctx.readStringContent
+      val content = ctx.request.content.toString()
       if (content.length > 0) {
         buf.append("CONTENT: " + content + "\r\n")
       }
     }
 
+    val x = ctx.response
+    val y = ctx.response
+    
     log.info("HttpRequest: " + buf.toString)
-    ctx.writeResponse(buf.toString)
+    ctx.response.write(buf.toString)
   }
 
   /**
@@ -131,7 +132,7 @@ class SnoopProcessor extends Actor {
    *
    * This will not be called unless chunk aggregation is turned off
    */
-  private def snoopHttpChunk(ctx: HttpChunkProcessingContext) {
+  private def snoopHttpChunk(ctx: HttpChunkContext) {
     // Accumulate chunk info in a string buffer stored in the channel
     val channel = ctx.channel
     var buf = ChunkDataStore.data.get(channel)
@@ -140,28 +141,28 @@ class SnoopProcessor extends Actor {
       ChunkDataStore.data.set(channel, buf)
     }
 
-    if (ctx.isLastChunk) {
+    if (ctx.chunk.isLastChunk) {
       buf.append("END OF CONTENT\r\n")
-      ctx.lastChunkHeaders.foreach(h => buf.append("HEADER: " + h.getKey + " = " + h.getValue + "\r\n"))
+      ctx.chunk.trailingHeaders.foreach(h => buf.append("HEADER: " + h._1 + " = " + h._2 + "\r\n"))
       buf.append("\r\n")
 
       log.info("HttpChunk: " + buf.toString)
-      ctx.writeResponse(buf.toString)
+      ctx.response.write(buf.toString)
     } else {
-      buf.append("CHUNK: " + ctx.readStringContent + "\r\n")
+      buf.append("CHUNK: " + ctx.chunk.toString + "\r\n")
     }
   }
 
   /**
    * Echo out details of the web socket frame that we just received
    */
-  private def snoopWebSocket(ctx: WsFrameProcessingContext) {
+  private def snoopWebSocket(ctx: WebSocketFrameContext) {
     if (ctx.isText) {
-      log.info("TextWebSocketFrame: " + ctx.readStringContent)
-      ctx.writeText(ctx.readStringContent)
+      log.info("TextWebSocketFrame: " + ctx.readText)
+      ctx.writeText(ctx.readText)
     } else if (ctx.isBinary) {
       log.info("BinaryWebSocketFrame")
-      ctx.writeBinary(ctx.readBinaryContent)
+      ctx.writeBinary(ctx.readBinary)
     }
   }
 

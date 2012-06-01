@@ -22,9 +22,7 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
-
 import org.junit.runner.RunWith
-import org.mashupbots.socko.context.HttpRequestProcessingContext
 import org.mashupbots.socko.routes.GET
 import org.mashupbots.socko.routes.Path
 import org.mashupbots.socko.routes.PathSegments
@@ -37,14 +35,13 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-
 import com.typesafe.config.ConfigFactory
-
 import akka.actor.actorRef2Scala
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.routing.FromConfig
+import org.mashupbots.socko.context.HttpRequestContext
 
 @RunWith(classOf[JUnitRunner])
 class StaticFileProcessorSpec
@@ -81,7 +78,7 @@ class StaticFileProcessorSpec
   val routes = Routes({
     case ctx @ GET(PathSegments("files" :: relativePath)) => {
       val request = new StaticFileRequest(
-        ctx.asInstanceOf[HttpRequestProcessingContext],
+        ctx.asInstanceOf[HttpRequestContext],
         rootDir,
         new File(rootDir, relativePath.mkString("/", "/", "")),
         tempDir,

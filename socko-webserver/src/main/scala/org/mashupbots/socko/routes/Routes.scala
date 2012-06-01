@@ -17,10 +17,10 @@ package org.mashupbots.socko.routes
 
 import scala.util.matching.Regex
 import org.mashupbots.socko.context.ProcessingContext
-import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.mashupbots.socko.context.HttpChunkProcessingContext
-import org.mashupbots.socko.context.WsHandshakeProcessingContext
-import org.mashupbots.socko.context.WsFrameProcessingContext
+import org.mashupbots.socko.context.HttpRequestContext
+import org.mashupbots.socko.context.HttpChunkContext
+import org.mashupbots.socko.context.WebSocketHandshakeContext
+import org.mashupbots.socko.context.WebSocketFrameContext
 
 /**
  * Routes define the rules for dispatching requests to its intended Akka actor processors. It is implemented as a
@@ -97,7 +97,7 @@ object Routes {
  */
 object HttpRequest {
   def unapply(ctx: ProcessingContext) =
-    if (ctx.isInstanceOf[HttpRequestProcessingContext]) Some(ctx.asInstanceOf[HttpRequestProcessingContext])
+    if (ctx.isInstanceOf[HttpRequestContext]) Some(ctx.asInstanceOf[HttpRequestContext])
     else None
 }
 
@@ -115,7 +115,7 @@ object HttpRequest {
  */
 object WebSocketHandshake {
   def unapply(ctx: ProcessingContext) =
-    if (ctx.isInstanceOf[WsHandshakeProcessingContext]) Some(ctx.asInstanceOf[WsHandshakeProcessingContext])
+    if (ctx.isInstanceOf[WebSocketHandshakeContext]) Some(ctx.asInstanceOf[WebSocketHandshakeContext])
     else None
 }
 
@@ -133,7 +133,7 @@ object WebSocketHandshake {
  */
 object WebSocketFrame {
   def unapply(ctx: ProcessingContext) =
-    if (ctx.isInstanceOf[WsFrameProcessingContext]) Some(ctx.asInstanceOf[WsFrameProcessingContext])
+    if (ctx.isInstanceOf[WebSocketFrameContext]) Some(ctx.asInstanceOf[WebSocketFrameContext])
     else None
 }
 
@@ -151,7 +151,7 @@ object WebSocketFrame {
  */
 object HttpChunk {
   def unapply(ctx: ProcessingContext) =
-    if (ctx.isInstanceOf[HttpChunkProcessingContext]) Some(ctx.asInstanceOf[HttpChunkProcessingContext])
+    if (ctx.isInstanceOf[HttpChunkContext]) Some(ctx.asInstanceOf[HttpChunkContext])
     else None
 }
 

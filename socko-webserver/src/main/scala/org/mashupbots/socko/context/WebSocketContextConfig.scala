@@ -18,19 +18,10 @@ package org.mashupbots.socko.context
 import org.mashupbots.socko.utils.WebLogQueue
 
 /**
- * HTTP processing configuration used by the context
- * 
- * @param minCompressibleContentSizeInBytes Minimum number of bytes before content will be compressed if requested by 
- *   the client. Set to `-1` to turn off compression.
- * @param maxCompressibleContentSizeInBytes Maximum number of bytes before HTTP content will be not be compressed if
- *   requested by the client. Defaults to 1MB otherwise too much CPU maybe taken up for compression.
- * @param compressibleContentTypes List of MIME types of that can be compressed.
+ * Web Socket configuration used by the context
+ *
  * @param webLog web log for recording events
  */
-case class HttpProcessingConfig(
-    minCompressibleContentSizeInBytes: Int,
-    maxCompressibleContentSizeInBytes: Int,
-    compressibleContentTypes: List[String],
-    webLog: Option[WebLogQueue]) {
-
+case class WebSocketContextConfig(
+  webLog: Option[WebLogQueue]) {
 }

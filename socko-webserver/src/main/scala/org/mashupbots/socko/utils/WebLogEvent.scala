@@ -37,9 +37,9 @@ import java.util.TimeZone
  * @param username Authenticated user naem
  * @param method The action the client was trying to perform (for example, a GET method).
  * @param uri The resource accessed; for example, Default.htm.
+ * @param requestSize The number of bytes received by the server.
  * @param responseStatusCode The status of the action, in HTTP or FTP terms.
  * @param responseSize The number of bytes sent by the server.
- * @param requestSize The number of bytes received by the server.
  * @param timeTaken The duration of time, in milliseconds, that this action consumed.
  * @param protocolVersion The protocol (HTTP, FTP) version used by the client. For HTTP this will be either
  *   HTTP/1.0 or HTTP/1.1.
@@ -53,9 +53,9 @@ case class WebLogEvent(
   username: Option[String],
   method: String,
   uri: String,
+  requestSize: Long,
   responseStatusCode: Int,
   responseSize: Long,
-  requestSize: Long,
   timeTaken: Long,
   protocolVersion: String,
   userAgent: Option[String],

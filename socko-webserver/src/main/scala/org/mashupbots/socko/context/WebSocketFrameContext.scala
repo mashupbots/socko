@@ -29,19 +29,19 @@ import org.jboss.netty.handler.codec.http.HttpHeaders
 /**
  * Context for processing web socket frames.
  *
- * A [[org.mashupbots.socko.context.WsProcessingContext]] will only be dispatched to processors only after an initial
- * [[org.mashupbots.socko.context.WsHandshakeProcessingContext]] has been successfully processed.
+ * A [[org.mashupbots.socko.context.WebSocketFrameContext]] will only be dispatched to processors only after an initial
+ * [[org.mashupbots.socko.context.WebSocketFrameHandshakeContext]] has been successfully processed.
  *
  * @param channel Channel by which the request entered and response will be written
  * @param initialHttpRequest The initial HTTP request
  * @param wsFrame Incoming data for processing
  * @param config Web Socket configuration
  */
-case class WsFrameProcessingContext(
+case class WebSocketFrameContext(
   channel: Channel,
-  initialHttpRequest: InitialHttpRequest,
+  initialHttpRequest: InitialHttpRequestMessage,
   wsFrame: WebSocketFrame,
-  config: WsProcessingConfig) extends ProcessingContext {
+  config: WebSocketContextConfig) extends ProcessingContext {
 
   /**
    * HTTP end point used by this chunk
@@ -59,28 +59,10 @@ case class WsFrameProcessingContext(
   val isBinary = wsFrame.isInstanceOf[BinaryWebSocketFrame]
 
   /**
-   * Returns the request content as a string. UTF-8 character encoding is assumed.
-   * Same as `readText`.
+   * Web socket version
    */
-  def readStringContent(): String = {
-    readText
-  }
-
-  /**
-   * Returns the request content as a string
-   *
-   * @param charset Character set to use to convert data to string
-   */
-  def readStringContent(charset: Charset): String = {
-    wsFrame.getBinaryData.toString(charset)
-  }
-
-  /**
-   * Returns the request content as byte array
-   */
-  def readBinaryContent(): Array[Byte] = {
-    wsFrame.getBinaryData.array
-  }
+  val protocolVersion = initialHttpRequest.httpVersion + ":" +
+    initialHttpRequest.headers.get(HttpHeaders.Names.SEC_WEBSOCKET_VERSION)
 
   /**
    * Returns the request content as a string. UTF-8 character encoding is assumed
@@ -91,7 +73,7 @@ case class WsFrameProcessingContext(
     }
     wsFrame.asInstanceOf[TextWebSocketFrame].getText
   }
-  
+
   /**
    * Sends a text web socket frame back to the client
    *
@@ -107,7 +89,7 @@ case class WsFrameProcessingContext(
   def readBinary(): Array[Byte] = {
     wsFrame.getBinaryData.array
   }
-  
+
   /**
    * Sends a binary web socket frame back to the client
    *
@@ -148,17 +130,17 @@ case class WsFrameProcessingContext(
     }
 
     config.webLog.get.enqueue(WebLogEvent(
-      new Date(),
+      this.createdOn,
       channel.getRemoteAddress,
       channel.getLocalAddress,
       username,
       method,
       uri,
+      requestSize,
       responseStatusCode,
       responseSize,
-      requestSize,
       duration,
-      initialHttpRequest.protocolVersion,
+      protocolVersion,
       None,
       None))
   }

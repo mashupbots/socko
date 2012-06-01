@@ -39,11 +39,12 @@ import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedFile
-import org.mashupbots.socko.context.HttpRequestProcessingContext
 import org.mashupbots.socko.utils.Logger
 import akka.actor.Actor
 import akka.event.Logging
 import org.mashupbots.socko.context.HttpResponseStatus
+import org.mashupbots.socko.context.HttpRequestContext
+import org.mashupbots.socko.context.HttpResponseMessage
 
 /**
  * A processor that handles downloading of static files.
@@ -146,6 +147,7 @@ class StaticFileProcessor extends Actor {
    */
   private def sendFile(request: StaticFileRequest): Unit = {
     val file = request.file
+    val context = request.context
 
     // Checks
     if (!file.getAbsolutePath.startsWith(request.rootFileDir.getAbsolutePath)) {
@@ -153,22 +155,22 @@ class StaticFileProcessor extends Actor {
       // "C:\temp\file.txt" is a path, an absolute path, a canonical path
       // "C:\temp\myapp\bin\..\..\file.txt" is a path, and an absolute path but not a canonical path
       log.debug("File '{}' not under root directory '{}'", file.getAbsolutePath, request.rootFileDir.getAbsolutePath)
-      request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
+      context.response.write(HttpResponseStatus.NOT_FOUND)
       return
     }
     if (!file.exists() || file.isHidden()) {
       log.debug("File '{}' does not exist or is hidden", file.getAbsolutePath)
-      request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
+      context.response.write(HttpResponseStatus.NOT_FOUND)
       return
     }
     if (file.getName.startsWith(".")) {
       log.debug("File name '{}' starts with .", file.getAbsolutePath)
-      request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
+      context.response.write(HttpResponseStatus.NOT_FOUND)
       return
     }
     if (!file.isFile()) {
       log.debug("File '{}' is not a file", file.getAbsolutePath)
-      request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
+      context.response.write(HttpResponseStatus.NOT_FOUND)
       return
     }
     log.debug("Getting {}", file)
@@ -178,7 +180,7 @@ class StaticFileProcessor extends Actor {
     if (hasFileBeenModified(request, lastModified)) {
       downloadFile(request, file, lastModified, request.browserCacheTimeoutSeconds)
     } else {
-      request.context.writeErrorResponse(HttpResponseStatus.NOT_MODIFIED)
+      context.response.write(HttpResponseStatus.NOT_MODIFIED)
     }
   }
 
@@ -190,7 +192,7 @@ class StaticFileProcessor extends Actor {
    * @returns `true` if and only if the file at the browser has been modified
    */
   private def hasFileBeenModified(request: StaticFileRequest, lastModified: Long): Boolean = {
-    val ifModifiedSinceDate = request.context.getIfModifiedSinceHeader()
+    val ifModifiedSinceDate = request.context.request.ifModifiedSince
     if (ifModifiedSinceDate.isDefined) {
       // When file timestamp is the same as what the browser is sending up
       // Only compare up to the second because the datetime format we send to the client does not have milliseconds 
@@ -215,13 +217,14 @@ class StaticFileProcessor extends Actor {
     var raf: RandomAccessFile = null
     var fileToDownload = file
     var contentEncoding = ""
+    val context = request.context
 
     // Check if compression is supported.
     // if format not supported or there is an error during compression, download uncompressed file
-    if (request.context.acceptedEncodings.length > 0) {
-      if (request.context.acceptedEncodings.contains("gzip")) {
+    if (context.request.acceptedEncodings.length > 0) {
+      if (context.request.acceptedEncodings.contains("gzip")) {
         contentEncoding = "gzip"
-      } else if (request.context.acceptedEncodings.contains("deflate")) {
+      } else if (context.request.acceptedEncodings.contains("deflate")) {
         contentEncoding = "deflate"
       }
 
@@ -240,7 +243,7 @@ class StaticFileProcessor extends Actor {
       raf = new RandomAccessFile(fileToDownload, "r")
     } catch {
       case e: FileNotFoundException => {
-        request.context.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
+        context.response.write(HttpResponseStatus.NOT_FOUND)
       }
     }
     if (raf == null) {
@@ -251,18 +254,18 @@ class StaticFileProcessor extends Actor {
     // Prepare response
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
     HttpHeaders.setContentLength(response, fileLength)
-    request.context.setContentTypeHeader(response, file)
-    request.context.setKeepAliveHeader(response)
-    request.context.setDateAndCacheHeaders(response, new Date(lastModified), cacheSeconds)
+    HttpResponseMessage.setContentTypeHeader(response, file)
+    HttpResponseMessage.setKeepAliveHeader(response, context.request.isKeepAlive)
+    HttpResponseMessage.setDateAndCacheHeaders(response, new Date(lastModified), cacheSeconds)
     if (contentEncoding != "") {
       response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
     }
     
-    // We have to write our own web log entry since we are not using request.context.writeResponse
-    request.context.writeWebLog(HttpResponseStatus.OK.code, fileLength)
+    // We have to write our own web log entry since we are not using context.writeResponse
+    context.writeWebLog(HttpResponseStatus.OK.code, fileLength)
 
     // Write the initial HTTP response line and headers
-    val ch = request.context.channel
+    val ch = context.channel
     ch.write(response)
 
     // Write the content
@@ -287,7 +290,7 @@ class StaticFileProcessor extends Actor {
     }
 
     // Decide whether to close the connection or not.
-    if (!request.context.isKeepAlive) {
+    if (!context.request.isKeepAlive) {
       writeFuture.addListener(ChannelFutureListener.CLOSE)
     }
   }
@@ -384,7 +387,7 @@ class StaticFileProcessor extends Actor {
  *  Defaults to 5 minutes.
  */
 case class StaticFileRequest(
-  context: HttpRequestProcessingContext,
+  context: HttpRequestContext,
   rootFileDir: File,
   file: File,
   tempDir: File,

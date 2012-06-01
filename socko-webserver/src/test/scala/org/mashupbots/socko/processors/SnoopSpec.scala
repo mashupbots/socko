@@ -20,8 +20,6 @@ import java.net.URL
 import java.util.Hashtable
 import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
-import org.mashupbots.socko.context.WsFrameProcessingContext
-import org.mashupbots.socko.context.WsHandshakeProcessingContext
 import org.mashupbots.socko.routes._
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
@@ -57,7 +55,7 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
       case Path("/snoop/websocket/") => {
         // For WebSocket processing, we first have to authorize the handshake by setting the "isAllowed" property.
         // This is a security measure to make sure that web sockets can only be established at your specified end points.
-        wsHandshake.isAllowed = true
+        wsHandshake.authorize()
       }
     }
     case WebSocketFrame(wsFrame) => {

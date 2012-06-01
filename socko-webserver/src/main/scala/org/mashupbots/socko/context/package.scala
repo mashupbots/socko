@@ -23,11 +23,11 @@ package org.mashupbots.socko
  * ([[org.mashupbots.socko.webserver.RequestHandler]]) and passed to your Akka actor processors via routes.
  * 
  * There are 4 types of [[org.mashupbots.socko.context.ProcessingContext]]
- *  - [[org.mashupbots.socko.context.HttpRequestProcessingContext]] - Context for processing a standard HTTP request.
- *  - [[org.mashupbots.socko.context.HttpChunkProcessingContext]] - Context for processing a HTTP chunk. Typically only
+ *  - [[org.mashupbots.socko.context.HttpRequestContext]] - Context for processing a standard HTTP request.
+ *  - [[org.mashupbots.socko.context.HttpChunkContext]] - Context for processing a HTTP chunk. Typically only
  *    used with large request data such as file upload.
- *  - [[org.mashupbots.socko.context.WsHandshakeProcessingContext]] - Context for performing WebSocket handshaking. 
- *  - [[org.mashupbots.socko.context.WsProcessingContext]] - Context for processing a WebSocket text or binary frame.
+ *  - [[org.mashupbots.socko.context.WebSocketHandshakeContext]] - Context for performing WebSocket handshaking. 
+ *  - [[org.mashupbots.socko.context.WebSocketFrameContext]] - Context for processing a WebSocket text or binary frame.
  */
 package object context {
 }
