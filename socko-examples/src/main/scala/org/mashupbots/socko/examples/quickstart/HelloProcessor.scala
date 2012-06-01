@@ -15,7 +15,7 @@
 //
 package org.mashupbots.socko.examples.quickstart
 
-import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.HttpRequestContext
 import akka.actor.Actor
 import java.util.Date
 
@@ -24,8 +24,8 @@ import java.util.Date
  */
 class HelloProcessor extends Actor {
   def receive = {
-    case request: HttpRequestProcessingContext =>
-      request.writeResponse("Hello from Socko (" + new Date().toString + ")")
+    case msg: HttpRequestContext =>
+      msg.response.write("Hello from Socko (" + new Date().toString + ")")
       context.stop(self)
   }
 }

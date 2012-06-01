@@ -80,10 +80,10 @@ object BenchmarkApp extends Logger {
   // STEP #2 - Define Routes
   //
   val routes = Routes({
-    case HttpRequest(httpRequest) => httpRequest match {
+    case HttpRequest(rq) => rq match {
       case GET(Path("/test.html")) => {
         val staticFileRequest = new StaticFileRequest(
-          httpRequest,
+          rq,
           contentDir,
           new File(contentDir, "test.html"),
           tempDir)
@@ -91,17 +91,17 @@ object BenchmarkApp extends Logger {
       }
       case GET(Path("/data.dat")) => {
         val staticFileRequest = new StaticFileRequest(
-          httpRequest,
+          rq,
           contentDir,
           new File(contentDir, "data.dat"),
           tempDir)
         staticFileProcessorRouter ! staticFileRequest
       }
       case GET(Path("/dynamic")) => {
-        actorSystem.actorOf(Props[DynamicBenchmarkProcessor]) ! httpRequest
+        actorSystem.actorOf(Props[DynamicBenchmarkProcessor]) ! rq
       }
       case GET(Path("/favicon.ico")) => {
-        httpRequest.writeErrorResponse(HttpResponseStatus.NOT_FOUND)
+        rq.response.write(HttpResponseStatus.NOT_FOUND)
       }
     }
   })

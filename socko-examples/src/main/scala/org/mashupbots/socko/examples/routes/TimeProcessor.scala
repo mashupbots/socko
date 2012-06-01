@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat
 import java.util.GregorianCalendar
 import java.util.TimeZone
 
-import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.HttpRequestContext
 
 import akka.actor.Actor
 import akka.event.Logging
@@ -39,11 +39,11 @@ class TimeProcessor extends Actor {
    * write the response.
    */
   def receive = {
-    case request: TimeRequest =>
+    case msg: TimeRequest =>
 
-      val tz = if (request.timezone.isDefined) {
-        val tzid = TimeZone.getAvailableIDs.find(s => 
-          s.toLowerCase().contains(request.timezone.get.replace("%20", "_").toLowerCase))
+      val tz = if (msg.timezone.isDefined) {
+        val tzid = TimeZone.getAvailableIDs.find(s =>
+          s.toLowerCase().contains(msg.timezone.get.replace("%20", "_").toLowerCase))
         if (tzid.isDefined) {
           TimeZone.getTimeZone(tzid.get)
         } else {
@@ -58,7 +58,7 @@ class TimeProcessor extends Actor {
       val time = new GregorianCalendar()
       val ts = dateFormatter.format(time.getTime())
 
-      request.context.writeResponse("The time is " + ts + ".\nThe timezone is " +
+      msg.context.response.write("The time is " + ts + ".\nThe timezone is " +
         dateFormatter.getTimeZone.getDisplayName)
       context.stop(self)
     case _ => {
@@ -75,6 +75,6 @@ class TimeProcessor extends Actor {
  * @param timzone The requested timezone
  */
 case class TimeRequest(
-  context: HttpRequestProcessingContext,
+  context: HttpRequestContext,
   timezone: Option[String])
 

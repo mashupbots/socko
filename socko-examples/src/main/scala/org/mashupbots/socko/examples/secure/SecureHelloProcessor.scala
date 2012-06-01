@@ -17,7 +17,7 @@ package org.mashupbots.socko.examples.secure
 
 import java.util.Date
 
-import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.HttpRequestContext
 
 import akka.actor.Actor
 
@@ -26,8 +26,8 @@ import akka.actor.Actor
  */
 class SecureHelloProcessor extends Actor {
   def receive = {
-    case request: HttpRequestProcessingContext =>
-      request.writeResponse("Hello from a Secure Socko (" + new Date().toString + ")")
+    case msg: HttpRequestContext =>
+      msg.response.write("Hello from a Secure Socko (" + new Date().toString + ")")
       context.stop(self)
   }
 }

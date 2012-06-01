@@ -19,7 +19,7 @@ import java.io.File
 
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.mashupbots.socko.context.HttpResponseStatus
-import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.HttpRequestContext
 import org.mashupbots.socko.postdecoder.Attribute
 import org.mashupbots.socko.postdecoder.DefaultHttpDataFactory
 import org.mashupbots.socko.postdecoder.FileUpload
@@ -36,30 +36,30 @@ class FileUploadProcessor extends Actor {
   private val log = Logging(context.system, this)
 
   def receive = {
-    case request: FileUploadRequest => {
-      val ctx = request.context
+    case msg: FileUploadRequest => {
+      val ctx = msg.context
       try {
-        val contentType = ctx.getHeader(HttpHeaders.Names.CONTENT_TYPE)
-        if (contentType.isDefined &&
-          (contentType.get.startsWith("multipart/form-data") ||
-            contentType.get.startsWith("application/x-www-form-urlencoded"))) {
+        val contentType = ctx.request.contentType
+        if (contentType != "" &&
+          (contentType.startsWith("multipart/form-data") ||
+            contentType.startsWith("application/x-www-form-urlencoded"))) {
 
-          val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, ctx.httpRequest)
+          val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, ctx.nettyHttpRequest)
 
           val descriptionField = decoder.getBodyHttpData("fileDescription").asInstanceOf[Attribute]
 
           val uploadField = decoder.getBodyHttpData("fileUpload").asInstanceOf[FileUpload]
-          val destFile = new File(request.saveDir, uploadField.getFilename)
+          val destFile = new File(msg.saveDir, uploadField.getFilename)
           uploadField.renameTo(destFile)
 
           val html = buildResponseHtml(descriptionField.getValue, destFile)
-          ctx.writeResponse(html, "text/html")
+          ctx.response.write(html, "text/html")
         } else {
-          ctx.writeErrorResponse(HttpResponseStatus.BAD_REQUEST)
+          ctx.response.write(HttpResponseStatus.BAD_REQUEST)
         }
       } catch {
         case ex => {
-          ctx.writeErrorResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, msg = ex.toString)          
+          ctx.response.write(HttpResponseStatus.INTERNAL_SERVER_ERROR, ex.toString)
         }
       }
     }
@@ -90,7 +90,7 @@ class FileUploadProcessor extends Actor {
 }
 
 case class FileUploadRequest(
-  context: HttpRequestProcessingContext,
+  context: HttpRequestContext,
   saveDir: File)
 
 /**

@@ -18,8 +18,8 @@ package org.mashupbots.socko.examples.websocket
 import java.text.SimpleDateFormat
 import java.util.GregorianCalendar
 
-import org.mashupbots.socko.context.HttpRequestProcessingContext
-import org.mashupbots.socko.context.WsFrameProcessingContext
+import org.mashupbots.socko.context.HttpRequestContext
+import org.mashupbots.socko.context.WebSocketFrameContext
 
 import akka.actor.Actor
 import akka.event.Logging
@@ -34,13 +34,13 @@ class WebSocketProcessor extends Actor {
    * Process incoming messages
    */
   def receive = {
-    case httpRequestContext: HttpRequestProcessingContext =>
+    case msg: HttpRequestContext =>
       // Return the HTML page to setup web sockets in the browser
-      writeHTML(httpRequestContext)
+      writeHTML(msg)
       context.stop(self)
-    case webSocketContext: WsFrameProcessingContext =>
+    case msg: WebSocketFrameContext =>
       // Echo web socket text frames
-      writeWebSocketResponse(webSocketContext)
+      writeWebSocketResponse(msg)
       context.stop(self)
     case _ => {
       log.info("received unknown message of type: ")
@@ -51,13 +51,10 @@ class WebSocketProcessor extends Actor {
   /**
    * Write HTML page to setup a web socket on the browser
    */
-  private def writeHTML(ctx: HttpRequestProcessingContext) {
-    val channel = ctx.channel
-    val request = ctx.httpRequest
-
+  private def writeHTML(ctx: HttpRequestContext) {
     // Send 100 continue if required
-    if (ctx.is100ContinueExpected) {
-      ctx.write100Continue()
+    if (ctx.request.is100ContinueExpected) {
+      ctx.response.write100Continue()
     }
 
     val buf = new StringBuilder()
@@ -97,20 +94,20 @@ class WebSocketProcessor extends Actor {
     buf.append("</body>\n")
     buf.append("</html>\n")
 
-    ctx.writeResponse(buf.toString, "text/html; charset=UTF-8")
+    ctx.response.write(buf.toString, "text/html; charset=UTF-8")
   }
 
   /**
    * Echo the details of the web socket frame that we just received; but in upper case.
    */
-  private def writeWebSocketResponse(ctx: WsFrameProcessingContext) {
-    log.info("TextWebSocketFrame: " + ctx.readStringContent)
+  private def writeWebSocketResponse(ctx: WebSocketFrameContext) {
+    log.info("TextWebSocketFrame: " + ctx.readText)
 
     val dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     val time = new GregorianCalendar()
     val ts = dateFormatter.format(time.getTime())
 
-    ctx.writeText(ts + " " + ctx.readStringContent.toUpperCase())
+    ctx.writeText(ts + " " + ctx.readText.toUpperCase())
   }
 
 }

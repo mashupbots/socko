@@ -17,7 +17,7 @@ package org.mashupbots.socko.examples.streaming
 
 import java.util.Date
 
-import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.HttpRequestContext
 import org.mashupbots.socko.utils.CharsetUtil
 
 import akka.actor.Actor
@@ -27,14 +27,15 @@ import akka.actor.Actor
  */
 class StreamingProcessor extends Actor {
   def receive = {
-    case request: HttpRequestProcessingContext =>
+    case msg: HttpRequestContext =>
       
-      request.writeChunkResponse("text/plain; charset=UTF-8")
+      msg.response.writeFirstChunk("text/plain; charset=UTF-8")
       
-      request.writeChunk(("Hello from Socko (" + new Date().toString + ")\n").getBytes(CharsetUtil.UTF_8))
-      request.writeChunk("This is the second line in the second chunk\n".getBytes(CharsetUtil.UTF_8))
-      request.writeChunk("This is the third line ... ".getBytes(CharsetUtil.UTF_8))
-      request.writeChunk("split into 2 chunks.".getBytes(CharsetUtil.UTF_8), true)
+      msg.response.writeChunk(("Hello from Socko (" + new Date().toString + ")\n").getBytes(CharsetUtil.UTF_8))
+      msg.response.writeChunk("This is the second line in the second chunk\n".getBytes(CharsetUtil.UTF_8))
+      msg.response.writeChunk("This is the third line ... ".getBytes(CharsetUtil.UTF_8))
+      msg.response.writeChunk("split into 2 chunks.".getBytes(CharsetUtil.UTF_8))
+      msg.response.writeLastChunk()
             
       context.stop(self)
   }

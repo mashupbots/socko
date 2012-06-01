@@ -19,7 +19,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 import org.jboss.netty.util.CharsetUtil
-import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.HttpRequestContext
 import org.mashupbots.socko.processors.StaticFileProcessor
 import org.mashupbots.socko.processors.StaticFileRequest
 import org.mashupbots.socko.routes._
@@ -54,26 +54,26 @@ object FileUploadApp extends Logger {
   // FileUploadProcessor will also be started as a router with a PinnedDispatcher since it involves IO.
   //
   val actorConfig = """
-my-pinned-dispatcher {
-  type=PinnedDispatcher
-  executor=thread-pool-executor
-}
-akka {
-  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
-  loglevel=DEBUG
-  actor {
-    deployment {
-      /static-file-router {
-        router = round-robin
-        nr-of-instances = 5
-      }
-      /file-upload-router {
-        router = round-robin
-        nr-of-instances = 5
-      }
-    }
-  }
-}"""
+	my-pinned-dispatcher {
+	  type=PinnedDispatcher
+	  executor=thread-pool-executor
+	}
+	akka {
+	  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+	  loglevel=DEBUG
+	  actor {
+	    deployment {
+	      /static-file-router {
+	        router = round-robin
+	        nr-of-instances = 5
+	      }
+	      /file-upload-router {
+	        router = round-robin
+	        nr-of-instances = 5
+	      }
+	    }
+	  }
+	}"""
 
   val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
 
@@ -87,16 +87,16 @@ akka {
   // STEP #2 - Define Routes
   //
   val routes = Routes({
-    case HttpRequest(httpRequest) => httpRequest match {
+    case HttpRequest(rq) => rq match {
       case GET(Path("/")) => {
         // Redirect to index.html
         // This is a quick non-blocking operation so executing it in the netty thread pool is OK. 
-        httpRequest.redirect("http://localhost:8888/index.html")
+        rq.response.redirect("http://localhost:8888/index.html")
       }
       case GET(PathSegments(fileName :: Nil)) => {
         // Download requested file
         val staticFileRequest = new StaticFileRequest(
-          httpRequest,
+          rq,
           contentDir,
           new File(contentDir, fileName),
           tempDir)
@@ -104,7 +104,7 @@ akka {
       }
       case POST(Path("/upload")) => {
         // Save file to the content directory so it can be downloaded
-        fileUploadProcessorRouter ! FileUploadRequest(httpRequest, contentDir)
+        fileUploadProcessorRouter ! FileUploadRequest(rq, contentDir)
       }
     }
   })

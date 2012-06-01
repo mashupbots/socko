@@ -3,10 +3,10 @@ layout: docs
 title: Socko User Guide
 
 ProcessingContextClass: <code><a href="../api/#org.mashupbots.socko.context.ProcessingContext">ProcessingContext</a></code>
-HttpRequestProcessingContextClass: <code><a href="../api/#org.mashupbots.socko.context.HttpRequestProcessingContext">HttpRequestProcessingContext</a></code>
-HttpChunkProcessingContextClass: <code><a href="../api/#org.mashupbots.socko.context.HttpChunkProcessingContext">HttpChunkProcessingContext</a></code>
-WsFrameProcessingContextClass: <code><a href="../api/#org.mashupbots.socko.context.WsFrameProcessingContext">WsFrameProcessingContext</a></code>
-WsHandshakeProcessingContextClass: <code><a href="../api/#org.mashupbots.socko.context.WsHandshakeProcessingContext">WsHandshakeProcessingContext</a></code>
+HttpRequestContextClass: <code><a href="../api/#org.mashupbots.socko.context.HttpRequestContext">HttpRequestContext</a></code>
+HttpChunkContextClass: <code><a href="../api/#org.mashupbots.socko.context.HttpChunkContext">HttpChunkContext</a></code>
+WebSocketFrameContextClass: <code><a href="../api/#org.mashupbots.socko.context.WebSocketFrameContext">WebSocketFrameContext</a></code>
+WebSocketHandshakeContextClass: <code><a href="../api/#org.mashupbots.socko.context.WebSocketHandshakeContext">WebSocketHandshakeContext</a></code>
 WebServerClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServer">WebServer</a></code>
 WebServerConfigClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServerConfig">WebServerConfig</a></code>
 WebLogEventClass: <code><a href="../api/#org.mashupbots.socko.utils.WebLogEvent">WebLogEvent</a></code>
@@ -35,7 +35,7 @@ Requests received by Socko will be passed to your actors within a Socko {{ page.
 Your actors use {{ page.ProcessingContextClass }} to read the request and write a response.
 
 In the following `HelloApp` example, we have defined an actor called `HelloProcessor` and started an Akka
-system called `HelloExampleActorSystem`.  The `HttpRequestProcessingContext` is used by `HelloProcessor`
+system called `HelloExampleActorSystem`.  The `HttpRequestContext` is used by `HelloProcessor`
 to write a response to the client.
 
     object HelloApp extends Logger {
@@ -51,7 +51,7 @@ to write a response to the client.
      */
     class HelloProcessor extends Actor {
       def receive = {
-        case request: HttpRequestProcessingContext =>
+        case request: HttpRequestContext =>
           request.writeResponse("Hello from Socko (" + new Date().toString + ")")
           context.stop(self)
       }
@@ -77,25 +77,25 @@ Two ways to achieve this are:
 
 There are 4 types of {{ page.ProcessingContextClass }}:
 
-1. **{{ page.HttpRequestProcessingContextClass }}**
+1. **{{ page.HttpRequestContextClass }}**
 
    This context will be sent to your actor when a HTTP Request is received.
    
-   To read the request, use `readStringContent()` or `readBinaryContent()`.  Refer to the [file upload example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload)
+   To read the request, use `request.content.toString()` or `request.content.toBytes()`. Refer to the [file upload example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload)
    for the decoding of HTTP post data.
    
-   To write a response, use `writeResponse()`. If you wish to stream your response, you will need to use 
-   `writeChunkResponse()` and `writeChunk()` instead. Refer to the [streaming example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/streaming)
+   To write a response, use `response.write()`. If you wish to stream your response, you will need to use 
+   `response.writeFirstChunk()`, `writeChunk()` and `writeLastChunk()` instead. Refer to the [streaming example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/streaming)
    for usage.
 
-2. **{{ page.HttpChunkProcessingContextClass }}**
+2. **{{ page.HttpChunkContextClass }}**
 
    This context will be sent to your actor when a HTTP Chunk is received and is only applicable if you turn off 
    [chunk aggregation](#Configuration).
    
-   Reading requests and writing responses is as per {{ page.HttpRequestProcessingContextClass }}.
+   Reading requests and writing responses is as per {{ page.HttpRequestContextClass }}.
 
-3. **{{ page.WsFrameProcessingContextClass }}**
+3. **{{ page.WebSocketFrameContextClass }}**
 
    This context will be sent to your actor when a Web Socket Frame is received.
    
@@ -104,7 +104,7 @@ There are 4 types of {{ page.ProcessingContextClass }}:
    
    To write a frame, use `writeText()` or `writeBinary()`.
 
-4. **{{ page.WsHandshakeProcessingContextClass }}**
+4. **{{ page.WebSocketHandshakeContextClass }}**
 
    This context is only used for Web Socket handshaking within your [Route](#Step2). 
 
@@ -202,10 +202,10 @@ For a more detailed example, see our [example route app](https://github.com/mash
 
 These extractors allows you to match different types of {{ page.ProcessingContextClass }}.
 
- - [`HttpRequest`](../api/#org.mashupbots.socko.routes.HttpRequest$) matches {{ page.HttpRequestProcessingContextClass }}
- - [`HttpChunk`](../api/#org.mashupbots.socko.routes.HttpChunk$) matches {{ page.HttpChunkProcessingContextClass }}
- - [`WebSocketFrame`](../api/#org.mashupbots.socko.routes.WebSocketFrame$) matches {{ page.WsFrameProcessingContextClass }}
- - [`WebSocketHandshake`](../api/#org.mashupbots.socko.routes.WebSocketHandshake$) matches {{ page.WsHandshakeProcessingContextClass }}
+ - [`HttpRequest`](../api/#org.mashupbots.socko.routes.HttpRequest$) matches {{ page.HttpRequestContextClass }}
+ - [`HttpChunk`](../api/#org.mashupbots.socko.routes.HttpChunk$) matches {{ page.HttpChunkContextClass }}
+ - [`WebSocketFrame`](../api/#org.mashupbots.socko.routes.WebSocketFrame$) matches {{ page.WebSocketFrameContextClass }}
+ - [`WebSocketHandshake`](../api/#org.mashupbots.socko.routes.WebSocketHandshake$) matches {{ page.WebSocketHandshakeContextClass }}
 
 The following code taken from our [web socket example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket) 
 illustrates usage:
@@ -219,15 +219,15 @@ illustrates usage:
         }
         case Path("/favicon.ico") => {
           // If favicon.ico, just return a 404 because we don't have that file
-          httpRequest.writeErrorResponse(HttpResponseStatus.NOT_FOUND, false, "")
+          httpRequest.response.write(HttpResponseStatus.NOT_FOUND)
         }
       }
       
       case WebSocketHandshake(wsHandshake) => wsHandshake match {
         case Path("/websocket/") => {
-          // For WebSocket processing, we first have to authorize the handshake by setting the "isAllowed" property.
+          // To start Web Socket processing, we first have to authorize the handshake.
           // This is a security measure to make sure that web sockets can only be established at your specified end points.
-          wsHandshake.isAllowed = true
+          wsHandshake.authorize()
         }
       }
     
@@ -245,10 +245,10 @@ Dispatching to an actor is not required and not recommended.
 
 Host extractors matches the host name received in the request.
 
-For {{ page.HttpRequestProcessingContextClass }}, the host is the value specified in the `HOST` header variable. 
-For {{ page.HttpChunkProcessingContextClass }}, {{ page.WsFrameProcessingContextClass }} and 
-{{ page.WsHandshakeProcessingContextClass }}, the host is that of the associated initial 
-{{ page.HttpRequestProcessingContextClass }}.
+For {{ page.HttpRequestContextClass }}, the host is the value specified in the `HOST` header variable. 
+For {{ page.HttpChunkContextClass }}, {{ page.WebSocketFrameContextClass }} and 
+{{ page.WebSocketHandshakeContextClass }}, the host is that of the associated initial 
+{{ page.HttpRequestContextClass }}.
 
 For example, the following HTTP request has a host value of `www.sockoweb.org`:
 
@@ -314,10 +314,10 @@ in your route.
 
 Method extractors matches the method received in the request.
 
-For {{ page.HttpRequestProcessingContextClass }}, the method is the extracted from the 1st line. 
-For {{ page.HttpChunkProcessingContextClass }}, {{ page.WsFrameProcessingContextClass }} and 
-{{ page.WsHandshakeProcessingContextClass }}, the method is that of the associated initial 
-{{ page.HttpRequestProcessingContextClass }}.
+For {{ page.HttpRequestContextClass }}, the method is the extracted from the 1st line. 
+For {{ page.HttpChunkContextClass }}, {{ page.WebSocketFrameContextClass }} and 
+{{ page.WebSocketHandshakeContextClass }}, the method is that of the associated initial 
+{{ page.HttpRequestContextClass }}.
 
 For example, the following HTTP request has a method `GET`:
 
@@ -359,10 +359,10 @@ For example, to match HTTP GET with a path of "/clients"
 
 Path extractors matches the path received in the request.
 
-For {{ page.HttpRequestProcessingContextClass }}, the path is the extracted from the 1st line without any query string. 
-For {{ page.HttpChunkProcessingContextClass }}, {{ page.WsFrameProcessingContextClass }} and 
-{{ page.WsHandshakeProcessingContextClass }}, the path is that of the associated initial 
-{{ page.HttpRequestProcessingContextClass }}.
+For {{ page.HttpRequestContextClass }}, the path is the extracted from the 1st line without any query string. 
+For {{ page.HttpChunkContextClass }}, {{ page.WebSocketFrameContextClass }} and 
+{{ page.WebSocketHandshakeContextClass }}, the path is that of the associated initial 
+{{ page.HttpRequestContextClass }}.
 
 For example, the following HTTP requests have a path value of `/index.html`:
 
@@ -432,9 +432,9 @@ in your route.
 
 Query string extractors matches the query string received in the request.
 
-For {{ page.HttpRequestProcessingContextClass }}, the query string is the extracted from the 1st line. 
-For {{ page.HttpChunkProcessingContextClass }}, {{ page.WsFrameProcessingContextClass }} and 
-{{ page.WsHandshakeProcessingContextClass }}, the query string is that of the associated initial HTTP Request.
+For {{ page.HttpRequestContextClass }}, the query string is the extracted from the 1st line. 
+For {{ page.HttpChunkContextClass }}, {{ page.WebSocketFrameContextClass }} and 
+{{ page.WebSocketHandshakeContextClass }}, the query string is that of the associated initial HTTP Request.
 
 For example, the following HTTP request has a query string value of `name=value`:
 
@@ -692,7 +692,7 @@ You can control where these logs are written by configuring your logger. For exa
 
 Web log events can be recorded using the processing context.
 
- - {{ page.HttpRequestProcessingContextClass }}
+ - {{ page.HttpRequestContextClass }}
  
    Web logs events are automatically recorded for you when you call `writeResponse()`, `writeErrorResponse()` or
    `redirect()` methods.
@@ -702,11 +702,11 @@ Web log events can be recorded using the processing context.
    If you wish to return a chunked response (for example, our `StaticFileProcessor`), you will have to record the web
    log event yourself using the `writeWebLog()` method.
 
- - {{ page.HttpChunkProcessingContextClass }}
+ - {{ page.HttpChunkContextClass }}
 
-   As per {{ page.HttpRequestProcessingContextClass }}.
+   As per {{ page.HttpRequestContextClass }}.
    
- - {{ page.WsFrameProcessingContextClass }}
+ - {{ page.WebSocketFrameContextClass }}
  
    Web log events are **NOT** automatically recorded for you. This is becasue web sockets do not strictly follow 
    the request/response structure of HTTP. For example, in a chat server, a broadcast message will not have a request
@@ -715,7 +715,7 @@ Web log events can be recorded using the processing context.
    If you wish to record a web log event, you can use the `writeWebLog()` method. The method, uri and other details
    of the event to be recorded is arbitrarily set by you.
    
- - {{ page.WsHandshakeProcessingContextClass }}
+ - {{ page.WebSocketHandshakeContextClass }}
    
    Web log events are automatically recorded for you.
    

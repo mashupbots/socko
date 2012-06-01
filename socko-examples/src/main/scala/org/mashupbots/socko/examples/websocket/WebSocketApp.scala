@@ -47,22 +47,22 @@ object WebSocketApp extends Logger {
   //
   val routes = Routes({
 
-    case HttpRequest(httpRequest) => httpRequest match {
+    case HttpRequest(rq) => rq match {
       case GET(Path("/html")) => {
         // Return HTML page to establish web socket
-        actorSystem.actorOf(Props[WebSocketProcessor]) ! httpRequest
+        actorSystem.actorOf(Props[WebSocketProcessor]) ! rq
       }
       case Path("/favicon.ico") => {
         // If favicon.ico, just return a 404 because we don't have that file
-        httpRequest.writeErrorResponse(HttpResponseStatus.NOT_FOUND, false, "")
+        rq.response.write(HttpResponseStatus.NOT_FOUND)
       }
     }
 
     case WebSocketHandshake(wsHandshake) => wsHandshake match {
       case Path("/websocket/") => {
-        // For WebSocket processing, we first have to authorize the handshake by setting the "isAllowed" property.
+        // To start Web Socket processing, we first have to authorize the handshake.
         // This is a security measure to make sure that web sockets can only be established at your specified end points.
-        wsHandshake.isAllowed = true
+        wsHandshake.authorize()
       }
     }
 

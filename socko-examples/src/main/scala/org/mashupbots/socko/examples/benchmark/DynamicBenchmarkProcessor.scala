@@ -15,7 +15,7 @@
 //
 package org.mashupbots.socko.examples.benchmark
 
-import org.mashupbots.socko.context.HttpRequestProcessingContext
+import org.mashupbots.socko.context.HttpRequestContext
 import akka.actor.Actor
 import java.util.Date
 
@@ -24,14 +24,14 @@ import java.util.Date
  */
 class DynamicBenchmarkProcessor extends Actor {
   def receive = {
-    case request: HttpRequestProcessingContext =>
+    case msg: HttpRequestContext =>
       val buf = new StringBuilder()
       buf.append("<html>\n")
       buf.append("<body>\n")
       buf.append("Hello\n")
       buf.append("</body>\n")
       buf.append("</html>\n")
-      request.writeResponse(buf.toString, "text/html; charset=UTF-8")
+      msg.response.write(buf.toString, "text/html; charset=UTF-8")
       context.stop(self)
   }
 }

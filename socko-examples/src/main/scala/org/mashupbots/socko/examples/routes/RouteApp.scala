@@ -50,30 +50,30 @@ object RouteApp extends Logger {
   //
   val routes = Routes({
     
-    case HttpRequest(httpRequest) => httpRequest match {
+    case HttpRequest(rq) => rq match {
       // *** HOW TO EXTRACT QUERYSTRING VARIABLES AND USE CONCATENATION ***
       // If the timezone is specified on the query string, (like "/time?tz=sydney"), pass the
       // timezone to the TimeProcessor    
       case (GET(Path("/time")) & TimezoneQueryString(timezone)) => {
-        actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(httpRequest, Some(timezone))
+        actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(rq, Some(timezone))
       }
 
       // *** HOW TO MATCH AND EXTRACT A PATH SEGMENT ***
       // If the timezone is specified on the path (like "/time/sydney"), pass the
       // timezone to the TimeProcessor
       case GET(PathSegments("time" :: timezone :: Nil)) => {
-        actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(httpRequest, Some(timezone))
+        actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(rq, Some(timezone))
       }
 
       // *** HOW TO MATCH AN EXACT PATH ***
       // No timezone specified, make TimeProcessor return the time in the default timezone
       case GET(Path("/time")) => {
-        actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(httpRequest, None)
+        actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(rq, None)
       }
 
       // If favicon.ico, just return a 404 because we don't have that file
       case Path("/favicon.ico") => {
-        httpRequest.writeErrorResponse(HttpResponseStatus.NOT_FOUND, false, "")
+        rq.response.write(HttpResponseStatus.NOT_FOUND)
       }
     }
     
