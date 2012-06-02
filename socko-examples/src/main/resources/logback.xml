@@ -7,11 +7,11 @@
 
   <appender name="WEBLOG" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%msg%n</pattern>
+      <pattern>WEBLOG: %msg%n</pattern>
     </encoder>
   </appender>
 
-  <logger name="org.mashupbots.socko.utils.DefaultWebLogWriter" level="info">
+  <logger name="org.mashupbots.socko.utils.WebLogWriter" level="info">
     <appender-ref ref="WEBLOG" />
   </logger>
 

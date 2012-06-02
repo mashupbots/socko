@@ -10,9 +10,7 @@ WebSocketHandshakeContextClass: <code><a href="../api/#org.mashupbots.socko.cont
 WebServerClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServer">WebServer</a></code>
 WebServerConfigClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServerConfig">WebServerConfig</a></code>
 WebLogEventClass: <code><a href="../api/#org.mashupbots.socko.utils.WebLogEvent">WebLogEvent</a></code>
-WebLogQueueClass: <code><a href="../api/#org.mashupbots.socko.utils.WebLogQueue">WebLogQueue</a></code>
-DefaultWebLogQueueClass: <code><a href="../api/#org.mashupbots.socko.utils.DefaultWebLogQueue">DefaultWebLogQueue</a></code>
-DefaultWebLogWriterClass: <code><a href="../api/#org.mashupbots.socko.utils.DefaultWebLogWriter">DefaultWebLogWriter</a></code>
+WebLogWriterClass: <code><a href="../api/#org.mashupbots.socko.utils.WebLogWriter">WebLogWriter</a></code>
 ---
 # Socko User Guide
 
@@ -637,24 +635,34 @@ To turn web logs on, add the following `web-log` section to your `application.co
       # Optional web log. If not supplied, web server activity logging is turned off.
       web-log {
       
+        # Optional path of actor to which web log events will be sent for writing. If not specified, the default
+        # web log writer will be created
+        custom-actor-path = 
+
         # Optional Web log format: Common (Default) or Extended 
         format = Common
-        
-        # Optional asynchronous log queue size. Defaults to 512 events in the queue 
-        # before new events are discarded.
-        buffer-size = 512
       }
     }
     
-You can also turn it on programmatically as illustrated in the [route example app](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/routes/RouteApp.scala).
+You can also turn it on programmatically as illustrated in the [web log example app](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/weblog/WebLogApp.scala).
 
     // Turn on web logs
     // Web logs will be written to the logger. You can control output via logback.xml.
-    val config = WebServerConfig(webLog = Some(WebLogConfig()))
-    val webServer = new WebServer(config, routes)
+    val config = WebServerConfig(webLog = Some(WebLogConfig(None, WebLogFormat.Common)))
+    val webServer = new WebServer(config, routes, actorSystem)
     
-When turned on, the default behaviour is to write web logs to your installed logger using {{ page.DefaultWebLogWriterClass }}. 
-You can control where these logs are written by configuring your logger. For example, if you are using 
+When turned on, the default behaviour is to write web logs to your installed [akka logger](http://doc.akka.io/docs/akka/2.0.1/scala/logging.html) 
+using {{ page.WebLogWriterClass }}. The akka logger asynchronously writes to the log so it will not slow down 
+your application down.
+
+To activate akka logging, add the following to `application.conf`:
+
+    akka {
+      event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+      loglevel = "DEBUG"
+    }
+
+You can configure where web logs are written by configuring your installed logger. For example, if you are using 
 [Logback](http://logback.qos.ch/), you can write to a daily rolling file by changing `logback.xml` to include:
 
     <configuration>
@@ -679,7 +687,7 @@ You can control where these logs are written by configuring your logger. For exa
         </encoder>
       </appender> 
   
-      <logger name="org.mashupbots.socko.utils.DefaultWebLogWriter" level="info">
+      <logger name="org.mashupbots.socko.utils.WebLogWriter" level="info">
         <appender-ref ref="WEBLOG" />
       </logger>
 
@@ -690,16 +698,12 @@ You can control where these logs are written by configuring your logger. For exa
 
 ### Recording Web Logs Events
 
-Web log events can be recorded using the processing context.
+Web log events can be recorded via the processing context.
 
  - {{ page.HttpRequestContextClass }}
  
-   Web logs events are automatically recorded for you when you call `response.write()` or `response.redirect()` methods.
-
-   These methods assume a non-chunked response.
-   
-   If you wish to return a chunked response (for example, our `StaticFileProcessor`), you will have to record the web
-   log event yourself using the `writeWebLog()` method.
+   Web logs events are automatically recorded for you when you call `response.write()`, `response.writeLastChunk()` 
+   or `response.redirect()` methods.
 
  - {{ page.HttpChunkContextClass }}
 
@@ -711,7 +715,7 @@ Web log events can be recorded using the processing context.
    the request/response structure of HTTP. For example, in a chat server, a broadcast message will not have a request
    frame.
    
-   If you wish to record a web log event, you can use the `writeWebLog()` method. The method, uri and other details
+   If you wish to record a web log event, you can call `writeWebLog()`. The method, uri and other details
    of the event to be recorded is arbitrarily set by you.
    
  - {{ page.WebSocketHandshakeContextClass }}
@@ -721,24 +725,22 @@ Web log events can be recorded using the processing context.
 
 ### Custom Web Log Output
 
-If you prefer to use your own method and/or format of writing web logs, you can specify a custom {{ page.WebLogQueueClass }}
-implementation as follows:
+If you prefer to use your own method and/or format of writing web logs, you can specify the path of a custom actor 
+to recieve {{ page.WebLogEventClass }} messages in your `application.conf`.
 
-    val config = WebServerConfig()
-    val routes = ...
-    val myWebLogQueue = Some(new MyCustomWebLogQueue())
-    val webServer = new WebServer(config, routes, myWebLogQueue)
+    akka-config-example {
+      server-name=AkkaConfigExample
+      hostname=localhost
+      port=9000
+      
+      # Optional web log. If not supplied, web server activity logging is turned off.
+      web-log {
+        custom-actor-path = "akka://my-system/user/my-web-log-writer"
+      }
+    }
 
-You can then use the {{ page.DefaultWebLogWriterClass }} or your own customer writer to dequeue and write out the web log events.
-For optimal performance, we strongly recommend you dequeue and write web logs in a separate thread.
+For more details, refer to the [custom web log example app](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/weblog/CustomWebLogApp.scala).
 
-    // Using the default web log writer
-    val defaultWriterThread = new Thread(new DefaultWebLogWriter(myWebLogQueue, WebLogFormat.Extended))
-    defaultWriterThread.start()
-    
-    // Using your own writer
-    val myWriterThread = new Thread(new MyCustomWebLogWriter(myWebLogQueue))
-    myWriterThread.start()
 
 
 

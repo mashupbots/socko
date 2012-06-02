@@ -47,5 +47,4 @@ class WebLogWriter(format: WebLogFormat.Value) extends Actor {
     }
 
   }
-
 }
