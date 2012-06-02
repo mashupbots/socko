@@ -15,22 +15,24 @@
 //
 package org.mashupbots.socko.context
 
-import org.mashupbots.socko.utils.WebLogQueue
+import akka.actor.ActorRef
 
 /**
- * HTTP processing context configuration used by the context
- * 
- * @param minCompressibleContentSizeInBytes Minimum number of bytes before content will be compressed if requested by 
+ * HTTP processing context configuration used by [[org.mashupbots.socko.context.HttpContext]].
+ *
+ * @param serverName Name of this instance of the Socko Web Server
+ * @param minCompressibleContentSizeInBytes Minimum number of bytes before content will be compressed if requested by
  *   the client. Set to `-1` to turn off compression.
  * @param maxCompressibleContentSizeInBytes Maximum number of bytes before HTTP content will be not be compressed if
  *   requested by the client. Defaults to 1MB otherwise too much CPU maybe taken up for compression.
  * @param compressibleContentTypes List of MIME types of that can be compressed.
- * @param webLog web log for recording events
+ * @param webLogWriter Actor to which web log events to be sent
  */
 case class HttpContextConfig(
-    minCompressibleContentSizeInBytes: Int,
-    maxCompressibleContentSizeInBytes: Int,
-    compressibleContentTypes: List[String],
-    webLog: Option[WebLogQueue]) {
+  serverName: String,
+  minCompressibleContentSizeInBytes: Int,
+  maxCompressibleContentSizeInBytes: Int,
+  compressibleContentTypes: List[String],
+  webLogWriter: Option[ActorRef]) {
 
 }

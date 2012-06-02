@@ -15,13 +15,15 @@
 //
 package org.mashupbots.socko.context
 
-import org.mashupbots.socko.utils.WebLogQueue
+import akka.actor.ActorRef
 
 /**
- * Web Socket configuration used by the context
+ * Web Socket configuration used by [[org.mashupbots.socko.context.WebSocketFrameContext]]
  *
- * @param webLog web log for recording events
+ * @param serverName Name of this instance of the Socko Web Server
+ * @param webLogWriter Actor to which web log events to be sent
  */
 case class WebSocketContextConfig(
-  webLog: Option[WebLogQueue]) {
+  serverName: String,
+  webLogWriter: Option[ActorRef]) {
 }

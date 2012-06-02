@@ -89,7 +89,7 @@ object SecureApp extends Logger {
     }
 
     val sslConfig = SslConfig(keyStoreFile, keyStoreFilePassword, None, None)
-    val webServer = new WebServer(WebServerConfig(ssl = Some(sslConfig)), routes)
+    val webServer = new WebServer(WebServerConfig(ssl = Some(sslConfig)), routes, actorSystem)
     webServer.start()
 
     Runtime.getRuntime.addShutdownHook(new Thread {

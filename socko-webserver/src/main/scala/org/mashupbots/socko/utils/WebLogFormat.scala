@@ -20,8 +20,6 @@ package org.mashupbots.socko.utils
  */
 object WebLogFormat extends Enumeration {
 
-  type Type = Value
-
   /**
    * Log in common format. See http://en.wikipedia.org/wiki/Common_Log_Format
    *

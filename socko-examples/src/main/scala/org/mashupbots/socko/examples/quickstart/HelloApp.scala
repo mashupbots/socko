@@ -55,7 +55,7 @@ object HelloApp extends Logger {
   // STEP #3 - Start and Stop Socko Web Server
   //
   def main(args: Array[String]) {
-    val webServer = new WebServer(WebServerConfig(), routes)
+    val webServer = new WebServer(WebServerConfig(), routes, actorSystem)
     webServer.start()
 
     Runtime.getRuntime.addShutdownHook(new Thread {

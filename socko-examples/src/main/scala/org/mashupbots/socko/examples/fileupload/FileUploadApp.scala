@@ -117,7 +117,7 @@ object FileUploadApp extends Logger {
     createContent(contentDir)
 
     // Start web server
-    val webServer = new WebServer(WebServerConfig(), routes)
+    val webServer = new WebServer(WebServerConfig(), routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run {
         webServer.stop()

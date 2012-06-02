@@ -16,17 +16,17 @@
 package org.mashupbots.socko.webserver
 
 import java.util.concurrent.Executors
-
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.mashupbots.socko.context.ProcessingContext
 import org.mashupbots.socko.utils.Cache
-import org.mashupbots.socko.utils.DefaultWebLogQueue
-import org.mashupbots.socko.utils.DefaultWebLogWriter
 import org.mashupbots.socko.utils.LocalCache
 import org.mashupbots.socko.utils.Logger
-import org.mashupbots.socko.utils.WebLogQueue
+import akka.actor.ActorSystem
+import akka.actor.ActorRef
+import akka.actor.Props
+import org.mashupbots.socko.utils.WebLogWriter
 
 /**
  * Socko Web Server
@@ -41,15 +41,12 @@ import org.mashupbots.socko.utils.WebLogQueue
  *
  * @param config Web server configuration
  * @param routes Routes for processing requests
- * @param cache Cache to use for web server. Defaults to local in-memory cache.
- * @param customWebLogQueue Your custom implementation of the [[org.mashupbots.socko.utils.WebLogQueue]] that is used
- *   to queue web log entries.
+ * @param actorSystem Actor system that can be used to host Socko actors
  */
 class WebServer(
   val config: WebServerConfig,
   val routes: PartialFunction[ProcessingContext, Unit],
-  cache: Cache = new LocalCache(),
-  customWebLogQueue: Option[WebLogQueue] = None) extends Logger {
+  val actorSystem: ActorSystem) extends Logger {
 
   require(config != null)
   config.validate()
@@ -71,16 +68,18 @@ class WebServer(
     Some(new SslManager(this))
 
   /**
-   * Queue for storing web logs so they can be written asynchronously
+   * Actor to which web log events will be sent
    */
-  val webLog: Option[WebLogQueue] = if (customWebLogQueue.isDefined) customWebLogQueue else if (config.webLog.isEmpty) None else
-    Some(new DefaultWebLogQueue(config.webLog.get.bufferSize))
-
-  /**
-   * Thread for writing queued web events to the logger
-   */
-  val webLogWriterThread: Option[Thread] = if (config.webLog.isEmpty) None else
-    Some((new Thread(new DefaultWebLogWriter(this.webLog.get, config.webLog.get.format))))
+  val webLogWriter: Option[ActorRef] = if (config.webLog.isEmpty) {
+    // Web log turned off
+    None
+  } else if (config.webLog.get.customActorPath.isEmpty) {
+    // Turn on default web log writer
+    Some(actorSystem.actorOf(Props(new WebLogWriter(config.webLog.get.format))))
+  } else {
+    // Use custom provided web log writer
+    Some(actorSystem.actorFor(config.webLog.get.customActorPath.get))
+  }
 
   /**
    * Starts the server
@@ -96,7 +95,7 @@ class WebServer(
     channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
 
     val bootstrap = new ServerBootstrap(channelFactory)
-    bootstrap.setPipelineFactory(new PipelineFactory(WebServer.this))
+    bootstrap.setPipelineFactory(new PipelineFactory(this))
 
     config.hostname.split(",").foreach(address => {
       address.trim() match {
@@ -108,10 +107,6 @@ class WebServer(
           }
       }
     })
-
-    if (webLogWriterThread.isDefined && !webLogWriterThread.get.isAlive) {
-      webLogWriterThread.get.start()
-    }
 
     log.info("Socko server '{}' started on {}:{}",
       Array[AnyRef](config.serverName, config.hostname, config.port.toString).toArray)

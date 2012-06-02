@@ -58,7 +58,7 @@ object CodedConfigApp extends Logger {
         port = 9001)
     log.info("Config is: " + myWebServerConfig.toString)
 
-    val webServer = new WebServer(myWebServerConfig, routes)
+    val webServer = new WebServer(myWebServerConfig, routes, actorSystem)
     webServer.start()
 
     Runtime.getRuntime.addShutdownHook(new Thread {

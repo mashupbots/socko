@@ -32,6 +32,9 @@ import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
 import org.mashupbots.socko.webserver.HttpConfig
+import org.mashupbots.socko.webserver.WebLogConfig
+import org.mashupbots.socko.utils.WebLogFormat
+import com.typesafe.config.ConfigFactory
 
 /**
  * Test
@@ -39,7 +42,14 @@ import org.mashupbots.socko.webserver.HttpConfig
 @RunWith(classOf[JUnitRunner])
 class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient {
 
-  val actorSystem = ActorSystem("SnoopActorSystem")
+  val akkaConfig = 
+    """
+      akka {
+        event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+        loglevel = "DEBUG"
+	  }    
+    """
+  val actorSystem = ActorSystem("SnoopActorSystem", ConfigFactory.parseString(akkaConfig))
   var webServer: WebServer = null
   val port = 9000
   val path = "http://localhost:" + port + "/"
@@ -67,7 +77,10 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
   override def beforeAll(configMap: Map[String, Any]) {
     // Make all content compressible to pass our tests
     val httpConfig = HttpConfig(minCompressibleContentSizeInBytes = 0)
-    webServer = new WebServer(WebServerConfig(port = port, http = httpConfig), routes)
+    val webLogConfig = Some(WebLogConfig(None, WebLogFormat.Common))
+    val config = WebServerConfig(port = port, webLog = webLogConfig, http = httpConfig)
+    
+    webServer = new WebServer(config, routes, actorSystem)
     webServer.start()
   }
 

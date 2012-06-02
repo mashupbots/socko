@@ -125,12 +125,14 @@ case class WebSocketFrameContext(
    * @param responseSize Length of response frame in bytes. Set to 0 if none.
    */
   def writeWebLog(method: String, uri: String, requestSize: Long, responseStatusCode: Int, responseSize: Long) {
-    if (config.webLog.isEmpty) {
+    if (config.webLogWriter.isEmpty) {
       return
     }
 
-    config.webLog.get.enqueue(WebLogEvent(
+    config.webLogWriter.get ! WebLogEvent(
       this.createdOn,
+      config.serverName,
+      channel.getId,
       channel.getRemoteAddress,
       channel.getLocalAddress,
       username,
@@ -142,7 +144,7 @@ case class WebSocketFrameContext(
       duration,
       protocolVersion,
       None,
-      None))
+      None)
   }
 
 }

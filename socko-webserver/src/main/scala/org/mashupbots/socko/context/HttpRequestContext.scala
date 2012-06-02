@@ -64,12 +64,14 @@ case class HttpRequestContext(
    * @param responseSize length of response content in bytes
    */
   def writeWebLog(responseStatusCode: Int, responseSize: Long) {
-    if (config.webLog.isEmpty) {
+    if (config.webLogWriter.isEmpty) {
       return
     }
 
-    config.webLog.get.enqueue(WebLogEvent(
+    config.webLogWriter.get ! WebLogEvent(
       this.createdOn,
+      config.serverName,
+      channel.getId,
       channel.getRemoteAddress,
       channel.getLocalAddress,
       username,
@@ -81,6 +83,6 @@ case class HttpRequestContext(
       duration,
       request.httpVersion,
       request.headers.get(HttpHeaders.Names.USER_AGENT),
-      request.headers.get(HttpHeaders.Names.REFERER)))
+      request.headers.get(HttpHeaders.Names.REFERER))
   }
 }

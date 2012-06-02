@@ -106,7 +106,7 @@ class StaticFileProcessorSpec
       .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "my-router")
 
     // Start web server
-    webServer = new WebServer(WebServerConfig(port = port), routes)
+    webServer = new WebServer(WebServerConfig(port = port), routes, actorSystem)
     webServer.start()
   }
 

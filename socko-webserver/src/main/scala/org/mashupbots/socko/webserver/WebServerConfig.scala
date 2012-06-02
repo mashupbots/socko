@@ -41,12 +41,13 @@ import scala.collection.JavaConversions._
  *     # Optional web log. If not supplied, web server activity logging is turned off.
  *     web-log {
  *
- *       # Optional Web log format: Common (Default) or Extended
- *       format = Common
+ *       # Optional path of actor to which web log events will be sent for writing. If not specified, the default
+ *       # web log writer will be created
+ *       custom-actor-path = "akka://my-system/user/web-log-writer"
  *
- *       # Optional asynchronous log queue size. Defaults to 512 events in the queue
- *       # before new events are discarded.
- *       buffer-size = 512
+ *       # Optional web log format for the default web log writer: Common, Combined or Extended. 
+ *       # If no specified, Common is the default. 
+ *       format = Common
  *     }
  *
  *     # Optional SSL. If not supplied, ssl is turned off.
@@ -87,10 +88,10 @@ import scala.collection.JavaConversions._
  *       # Content under this size is not compressed. Defaults to 1024 bytes (1K).
  *       # Set to -1 to turn off compression; or 0 to compress all content.
  *       min-compressible-content-size-in-bytes=1024
- *       
+ *
  *       # Content over this size is not compressed. Defaults to 1MB
  *       max-compressible-content-size-in-bytes=60
- *       
+ *
  *       # Only content with the specified MIME type will be compressed
  *       compressible-content-types=[
  *         "text/plain", "text/html", "text/xml", "text/css",
@@ -119,8 +120,10 @@ import scala.collection.JavaConversions._
  * 	You can also specify comma separated hostnames/ip address like `localhost,192.168.1.1`.
  *  Defaults to `localhost`.
  * @param port IP port number to bind to. Defaults to `8888`.
- * @param webLog Web server activity log configuration. If `None`, activity will not be
- *  logged. If supplied, activities will be asynchronously written to the logger.
+ * @param webLogActorPath Path to an actor that will be sent [[org.mashupbots.socko.utils.WebLogEvent]] to be recoreded.
+ *  If no actor exists at the path at the time of WebServer startup, the default
+ *  [[org.mashupbots.socko.utils.WebLogWriter]] will be created. If `None`, web log events will not be sent to any
+ *  actors.
  * @param ssl SSL protocol configuration. If `None`, then SSL will not be turned on.
  *  Defaults to `None`.
  * @param http HTTP protocol configuration. Defaults to an instance of
@@ -241,7 +244,7 @@ case class SslConfig(
 
 /**
  * HTTP protocol handling configuration
- * 
+ *
  * HTTP compression parameters only applies to HTTP request and responses and not web sockets.
  *
  * @param maxLengthInMB Maximum size of HTTP request in megabytes. Defaults to 4MB.
@@ -286,22 +289,20 @@ case class HttpConfig(
 /**
  * Configuration for web server activity logs.
  *
- * The events are queued before being asynchronously written to the logger.
- *
- * @param format Format of the web log
- * @param bufferSize Number of events to queue before new events are discarded. This prevents a slow writer
- *   causing the queue the grow until web server to run out of memory.
+ * @param customActorPath Optional path of actor to which [[org.mashupbots.socko.utils.WebLogEvent]] will be sent for writing.
+ *   If this path is not present, [[org.mashupbots.socko.utils.WebLogWriter]] will be used.  
+ * @param format Format of the web log. Defaults to `Common`.
  */
 case class WebLogConfig(
-  format: WebLogFormat.Type = WebLogFormat.Common,
-  bufferSize: Int = 512) {
+  customActorPath: Option[String],
+  format: WebLogFormat.Value = WebLogFormat.Common) {
 
   /**
    * Read configuration from AKKA's `application.conf`
    */
   def this(config: Config, prefix: String) = this(
-    WebLogFormat.withName(config.getString(prefix + ".format")),
-    WebServerConfig.getInt(config, prefix + ".buffer-size", 512))
+    WebServerConfig.getOptionalString(config, prefix + ".custom-actor-path"),
+    WebLogFormat.withName(config.getString(prefix + ".format")))
 }
 
 /**
@@ -439,7 +440,7 @@ object WebServerConfig extends Logger {
       }
     }
   }
-
+  
   val defaultCompressibleContentTypes: List[String] =
     "text/plain" :: "text/html" :: "text/xml" :: "text/css" ::
       "application/xml" :: "application/xhtml+xml" :: "application/rss+xml" ::

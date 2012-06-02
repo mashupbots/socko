@@ -17,7 +17,6 @@ package org.mashupbots.socko.context
 
 import java.nio.charset.Charset
 import org.jboss.netty.channel.Channel
-import org.mashupbots.socko.utils.WebLogQueue
 import java.util.Date
 
 /**

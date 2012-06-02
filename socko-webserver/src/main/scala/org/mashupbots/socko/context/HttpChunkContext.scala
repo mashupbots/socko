@@ -71,12 +71,14 @@ case class HttpChunkContext(
    * @param responseSize length of response content in bytes
    */
   def writeWebLog(responseStatusCode: Int, responseSize: Long) {
-    if (config.webLog.isEmpty) {
+    if (config.webLogWriter.isEmpty) {
       return
     }
 
-    config.webLog.get.enqueue(WebLogEvent(
+    config.webLogWriter.get ! WebLogEvent(
       this.createdOn,
+      config.serverName,
+      channel.getId,
       channel.getRemoteAddress,
       channel.getLocalAddress,
       username,
@@ -88,7 +90,7 @@ case class HttpChunkContext(
       initialHttpRequest.duration,
       initialHttpRequest.httpVersion,
       initialHttpRequest.headers.get(HttpHeaders.Names.USER_AGENT),
-      initialHttpRequest.headers.get(HttpHeaders.Names.REFERER)))
+      initialHttpRequest.headers.get(HttpHeaders.Names.REFERER))
   }
 
 }

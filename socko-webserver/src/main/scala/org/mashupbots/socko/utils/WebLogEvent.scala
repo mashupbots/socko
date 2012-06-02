@@ -30,11 +30,13 @@ import java.util.TimeZone
  * A web log event to record
  *
  * @param timestamp Timestamp for the event
+ * @param serverName Socko Web Server instance name
+ * @param channelId Netty channel id 
  * @param clientAddress Client's socket address. We don't convert to string here in case JDK performs a blocknig
  *  reverse DNS lookup.
  * @param serverAddress Server's socket address. We don't convert to string here in case JDK performs a blocknig
  *  reverse DNS lookup.
- * @param username Authenticated user naem
+ * @param username Authenticated user name
  * @param method The action the client was trying to perform (for example, a GET method).
  * @param uri The resource accessed; for example, Default.htm.
  * @param requestSize The number of bytes received by the server.
@@ -48,6 +50,8 @@ import java.util.TimeZone
  */
 case class WebLogEvent(
   timestamp: Date,
+  serverName: String,
+  channelId: Int,  
   clientAddress: SocketAddress,
   serverAddress: SocketAddress,
   username: Option[String],

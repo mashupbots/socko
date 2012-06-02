@@ -197,8 +197,8 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
 		  hostname = localhost
 		  port=10000
           web-log {
+            custom-actor-path = "akka://my-system/user/web-log-writer"
             format = Extended
-            buffer-size = 1024
           }
 		  ssl {
 		    key-store-file=/tmp/ks.dat
@@ -239,7 +239,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       all.port should equal(10000)
 
       all.webLog.get.format should be(WebLogFormat.Extended)
-      all.webLog.get.bufferSize should be(1024)
+      all.webLog.get.customActorPath.get should be("akka://my-system/user/web-log-writer")
 
       all.ssl.get.keyStoreFile.getAbsolutePath should equal("/tmp/ks.dat")
       all.ssl.get.keyStorePassword should equal("kspwd")

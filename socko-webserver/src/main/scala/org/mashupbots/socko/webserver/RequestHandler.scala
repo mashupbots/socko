@@ -74,12 +74,16 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
    * HTTP processing configuration
    */
   private val httpConfig = HttpContextConfig(
+    server.config.serverName,
     server.config.http.minCompressibleContentSizeInBytes,
     server.config.http.maxCompressibleContentSizeInBytes,
     server.config.http.compressibleContentTypes,
-    server.webLog)
+    server.webLogWriter)
 
-  private lazy val wsConfig = WebSocketContextConfig(server.webLog)
+  /**
+   * Web socket processing configuration
+   */
+  private lazy val wsConfig = WebSocketContextConfig(server.config.serverName, server.webLogWriter)
 
   /**
    * Dispatch message to actor system for processing

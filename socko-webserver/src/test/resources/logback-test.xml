@@ -1,17 +1,17 @@
 <configuration>
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%d{HH:mm:ss.SSS} [%thread] [%X{sourceThread}] %-5level %logger{36} %X{akkaSource} - %msg%n</pattern>
+      <pattern>%d{HH:mm:ss.SSS} [%-5level] [%thread] [%X{sourceThread}] [%logger{36}] [%X{akkaSource}] - %msg%n</pattern>
     </encoder>
   </appender>
 
   <appender name="WEBLOG" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%msg%n</pattern>
+      <pattern>WEBLOG: %msg%n</pattern>
     </encoder>
   </appender>
 
-  <logger name="org.mashupbots.socko.utils.DefaultWebLogWriter" level="info">
+  <logger name="org.mashupbots.socko.utils.WebLogWriter" level="info">
     <appender-ref ref="WEBLOG" />
   </logger>
   
