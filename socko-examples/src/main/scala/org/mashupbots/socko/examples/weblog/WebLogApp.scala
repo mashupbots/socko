@@ -54,7 +54,7 @@ object WebLogApp extends Logger {
   // STEP #3 - Start and Stop Socko Web Server
   //
   def main(args: Array[String]) {
-    val config = WebServerConfig(webLog = Some(WebLogConfig(None, WebLogFormat.Common)))
+    val config = WebServerConfig(webLog = Some(WebLogConfig()))
     val webServer = new WebServer(config, routes, actorSystem)
     webServer.start()
 

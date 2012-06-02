@@ -639,7 +639,7 @@ To turn web logs on, add the following `web-log` section to your `application.co
         # web log writer will be created
         custom-actor-path = 
 
-        # Optional Web log format: Common (Default) or Extended 
+        # Optional web log format: Common (Default), Combined or Extended 
         format = Common
       }
     }
@@ -648,7 +648,7 @@ You can also turn it on programmatically as illustrated in the [web log example 
 
     // Turn on web logs
     // Web logs will be written to the logger. You can control output via logback.xml.
-    val config = WebServerConfig(webLog = Some(WebLogConfig(None, WebLogFormat.Common)))
+    val config = WebServerConfig(webLog = Some(WebLogConfig()))
     val webServer = new WebServer(config, routes, actorSystem)
     
 When turned on, the default behaviour is to write web logs to your installed [akka logger](http://doc.akka.io/docs/akka/2.0.1/scala/logging.html) 
@@ -687,7 +687,7 @@ You can configure where web logs are written by configuring your installed logge
         </encoder>
       </appender> 
   
-      <logger name="org.mashupbots.socko.utils.WebLogWriter" level="info">
+      <logger name="org.mashupbots.socko.utils.WebLogWriter" level="info" additivity="false">
         <appender-ref ref="WEBLOG" />
       </logger>
 
@@ -732,8 +732,6 @@ to recieve {{ page.WebLogEventClass }} messages in your `application.conf`.
       server-name=AkkaConfigExample
       hostname=localhost
       port=9000
-      
-      # Optional web log. If not supplied, web server activity logging is turned off.
       web-log {
         custom-actor-path = "akka://my-system/user/my-web-log-writer"
       }

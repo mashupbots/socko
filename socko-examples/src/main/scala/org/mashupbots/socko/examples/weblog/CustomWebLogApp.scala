@@ -57,7 +57,7 @@ object CustomWebLogApp extends Logger {
   // STEP #3 - Start and Stop Socko Web Server
   //
   def main(args: Array[String]) {
-    val webLogConfig = Some(WebLogConfig(Some(customWebLogWriter.path.toString), WebLogFormat.Common))
+    val webLogConfig = Some(WebLogConfig(Some(customWebLogWriter.path.toString)))
     val config = WebServerConfig(webLog = webLogConfig)
     val webServer = new WebServer(config, routes, actorSystem)
     webServer.start()

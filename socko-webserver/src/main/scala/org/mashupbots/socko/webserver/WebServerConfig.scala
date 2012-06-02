@@ -294,7 +294,7 @@ case class HttpConfig(
  * @param format Format of the web log. Defaults to `Common`.
  */
 case class WebLogConfig(
-  customActorPath: Option[String],
+  customActorPath: Option[String] = None,
   format: WebLogFormat.Value = WebLogFormat.Common) {
 
   /**
