@@ -17,18 +17,19 @@
 package org.mashupbots.socko.processors
 
 import scala.collection.JavaConversions.asScalaBuffer
+
 import org.jboss.netty.channel.ChannelLocal
-import org.jboss.netty.handler.codec.http.HttpHeaders
+import org.mashupbots.socko.context.HttpChunkContext
+import org.mashupbots.socko.context.HttpRequestContext
+import org.mashupbots.socko.context.WebSocketFrameContext
 import org.mashupbots.socko.postdecoder.InterfaceHttpData.HttpDataType
 import org.mashupbots.socko.postdecoder.Attribute
 import org.mashupbots.socko.postdecoder.DefaultHttpDataFactory
 import org.mashupbots.socko.postdecoder.FileUpload
 import org.mashupbots.socko.postdecoder.HttpPostRequestDecoder
+
 import akka.actor.Actor
 import akka.event.Logging
-import org.mashupbots.socko.context.HttpRequestContext
-import org.mashupbots.socko.context.HttpChunkContext
-import org.mashupbots.socko.context.WebSocketFrameContext
 
 /**
  * A processor that send a response containing information about the request.

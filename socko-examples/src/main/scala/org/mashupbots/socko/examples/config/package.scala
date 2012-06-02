@@ -16,7 +16,7 @@
 package org.mashupbots.socko.examples
 
 /**
- * Examples of show to customise web server settings like bind ip address and ports.
+ * Examples of show to customise web server settings like IP address and ports.
  */
 package object config {
 }

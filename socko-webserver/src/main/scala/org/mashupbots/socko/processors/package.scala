@@ -16,7 +16,8 @@
 package org.mashupbots.socko
 
 /**
- * Processors are Akka actors that receives and processes [[org.mashupbots.socko.context.ProcessingContext]] messages.
+ * Processors are Akka actors that receives and processes [[org.mashupbots.socko.context.ProcessingContext]] messages
+ * sent by the routes.
  * 
  * This package contains our "pre-fabricated" processors.
  */

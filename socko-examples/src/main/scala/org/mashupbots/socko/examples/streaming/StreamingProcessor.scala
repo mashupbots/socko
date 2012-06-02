@@ -35,6 +35,7 @@ class StreamingProcessor extends Actor {
       msg.response.writeChunk("This is the second line in the second chunk\n".getBytes(CharsetUtil.UTF_8))
       msg.response.writeChunk("This is the third line ... ".getBytes(CharsetUtil.UTF_8))
       msg.response.writeChunk("split into 2 chunks.".getBytes(CharsetUtil.UTF_8))
+      
       msg.response.writeLastChunk()
             
       context.stop(self)

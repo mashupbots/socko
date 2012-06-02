@@ -20,9 +20,10 @@ import akka.event.Logging
 import akka.actor.Actor
 
 /**
- * Default log writer that writes the web log events to the AKKA logger.
+ * Default log writer that writes web log events to the AKKA logger.
  *
- * AKKA logger is used because it asynchronously writes to the log in a separate thread.
+ * AKKA logger is used because it asynchronously writes to the log in a separate thread so it does not slow down
+ * your app.
  * 
  * @param format Web log format
  */

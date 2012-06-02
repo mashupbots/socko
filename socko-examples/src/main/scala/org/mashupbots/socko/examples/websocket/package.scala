@@ -16,7 +16,7 @@
 package org.mashupbots.socko.examples
 
 /**
- * Illustrates how to setup Socko to support web sockets.
+ * Illustrates how to configure Socko to support web sockets.
  */
 package object websocket {
 }

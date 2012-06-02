@@ -20,7 +20,6 @@ import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.mashupbots.socko.context.ProcessingContext
-import org.mashupbots.socko.utils.Cache
 import org.mashupbots.socko.utils.LocalCache
 import org.mashupbots.socko.utils.Logger
 import akka.actor.ActorSystem
