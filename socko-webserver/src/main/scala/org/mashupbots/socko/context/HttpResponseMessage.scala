@@ -108,9 +108,14 @@ case class HttpResponseMessage(context: HttpContext) {
     val response = new DefaultHttpResponse(HttpVersion.valueOf(request.httpVersion), HttpResponseStatus.CONTINUE.toNetty)
     context.channel.write(response)
   }
-  
+
   /**
-   * Sends a binary HTTP response to the client
+   * Sends a binary HTTP response to the client.
+   *
+   * This write is NOT buffered. The response is immediately sent to the client.
+   *
+   * Calling `write()` more than once results in an exception being thrown because only 1 response is permitted per
+   * request.
    *
    * @param content Bytes to send
    */
@@ -154,38 +159,31 @@ case class HttpResponseMessage(context: HttpContext) {
    *
    * The content type will default to `text/plain; charset=UTF-8` if not already set in the headers.
    *
-   * @param content String to send
+   * This write is NOT buffered. The response is immediately sent to the client.
+   *
+   * Calling `write()` more than once results in an exception being thrown because only 1 response is permitted per
+   * request.
+   *
+   * @param content String to send in the response body
    */
   def write(content: String): Unit = {
     if (contentType.isEmpty) {
       contentType = "text/plain; charset=UTF-8"
     }
 
-    // Quick and dirty MIME type character set value parsing
-    val items = this.contentType.get.split(";")
-    val csNameValue = items.find(i => i.contains("charset"))
-    val charset = if (csNameValue.isDefined) {
-      val csValue = csNameValue.get.replace(" ", "").replace("charset", "").replace("=", "").toUpperCase
-      csValue match {
-        case "UTF-8" => CharsetUtil.UTF_8
-        case "US-ASCII" => CharsetUtil.US_ASCII
-        case "ISO-8859-1" => CharsetUtil.ISO_8859_1
-        case "UTF-16" => CharsetUtil.UTF_16
-        case "UTF-16BE" => CharsetUtil.UTF_16BE
-        case "UTF-16LE" => CharsetUtil.UTF_16LE
-        case _ => Charset.forName(csValue)
-      }
-    } else {
-      CharsetUtil.UTF_8
-    }
-
+    val charset =  HttpResponseMessage.extractMimeTypeCharset(contentType.get).getOrElse(CharsetUtil.UTF_8)
     write(content.getBytes(charset))
   }
 
   /**
    * Sends a string HTTP response to the client
    *
-   * @param content String to send
+   * This write is NOT buffered. The response is immediately sent to the client.
+   *
+   * Calling `write()` more than once results in an exception being thrown because only 1 response is permitted per
+   * request.
+   *
+   * @param content String to send in the response body
    * @param contentType MIME content type. If the `charset` is not set, `UTF-8` is assumed
    */
   def write(content: String, contentType: String): Unit = {
@@ -196,7 +194,12 @@ case class HttpResponseMessage(context: HttpContext) {
   /**
    * Sends a string HTTP response to the client
    *
-   * @param content String to send
+   * This write is NOT buffered. The response is immediately sent to the client.
+   *
+   * Calling `write()` more than once results in an exception being thrown because only 1 response is permitted per
+   * request.
+   *
+   * @param content String to send in the response body
    * @param contentType MIME content type. If the `charset` is not set, `UTF-8` is assumed
    * @param headers Headers to add to the HTTP response.
    */
@@ -209,7 +212,12 @@ case class HttpResponseMessage(context: HttpContext) {
   /**
    * Sends a binary HTTP response to the client
    *
-   * @param content Bytes to send
+   * This write is NOT buffered. The response is immediately sent to the client.
+   *
+   * Calling `write()` more than once results in an exception being thrown because only 1 response is permitted per
+   * request.
+   *
+   * @param content Binary data to send in the response body.
    * @param contentType MIME content type
    */
   def write(content: Array[Byte], contentType: String): Unit = {
@@ -220,9 +228,14 @@ case class HttpResponseMessage(context: HttpContext) {
   /**
    * Sends a binary HTTP response to the client
    *
-   * @param content Bytes to send
+   * This write is NOT buffered. The response is immediately sent to the client.
+   *
+   * Calling `write()` more than once results in an exception being thrown because only 1 response is permitted per
+   * request.
+   *
+   * @param content Binary data to send in the response body.
    * @param contentType MIME content type
-   * @param headers Headers to add to the HTTP response.
+   * @param headers Headers to add to the HTTP response. It will be added to the `headers` map.
    */
   def write(content: Array[Byte], contentType: String, headers: Map[String, String]): Unit = {
     this.contentType = contentType
@@ -231,7 +244,12 @@ case class HttpResponseMessage(context: HttpContext) {
   }
 
   /**
-   * Sends a HTTP response to the client with just the status. This is typically used for an error or not modified.
+   * Sends a HTTP response to the client with just the status and not content. This is typically used for an error.
+   *
+   * This write is NOT buffered. The response is immediately sent to the client.
+   *
+   * Calling `write()` more than once results in an exception being thrown because only 1 response is permitted per
+   * request.
    *
    * @param status HTTP Status
    */
@@ -241,24 +259,29 @@ case class HttpResponseMessage(context: HttpContext) {
   }
 
   /**
-   * Sends a HTTP response to the client with just the status. This is typically used for an error or not modified.
+   * Sends a HTTP response to the client with the status as well as a text message. This is typically used for in
+   * the event of an error.
    *
    * @param status HTTP Status
-   * @param content String to send to the client
+   * @param content String to send in the response body. The MIME type will be set to `text/plain; charset=UTF-8`.
    */
   def write(status: HttpResponseStatus, content: String): Unit = {
     this.status = status
     write(content)
   }
 
-  
   /**
    * Sends a binary HTTP response to the client
    *
+   * This write is NOT buffered. The response is immediately sent to the client.
+   *
+   * Calling `write()` more than once results in an exception being thrown because only 1 response is permitted per
+   * request.
+   *
    * @param status HTTP Status
-   * @param content String to send
+   * @param content Binary data to send in the response body
    * @param contentType MIME content type to set in the response header. For example, "image/gif"
-   * @param headers Additional headers to add to the HTTP response. Defaults to empty map; i.e. no additional headers.
+   * @param headers Headers to add to the HTTP response. It will be added to the `headers` map.
    */
   def write(
     status: HttpResponseStatus,
@@ -328,6 +351,11 @@ case class HttpResponseMessage(context: HttpContext) {
    * Use this method to initiate the response. Call `writeChunk()` to send the individual chunks and finish by
    * calling `writeLastChunk()`.
    *
+   * Writing the first chunk is NOT buffered. The chunk is immediately sent to the client.
+   *
+   * Calling `writeFirstChunk()` more than once results in an exception being thrown because only 1 response is 
+   * permitted per request.
+   *
    * @param contentType MIME content type to set in the response header. For example, "image/gif". If omitted, the
    *  content type set in `headers` will be used.
    * @param headers Headers to add to the HTTP response.
@@ -374,6 +402,8 @@ case class HttpResponseMessage(context: HttpContext) {
    *
    * This method must be called AFTER `writeFirstChunk()`.
    *
+   * Writing the a chunk is NOT buffered. The chunk is immediately sent to the client.
+   *
    * @param chunkConent Binary content to send to the client.
    */
   def writeChunk(chunkContent: Array[Byte]): Unit = {
@@ -391,6 +421,10 @@ case class HttpResponseMessage(context: HttpContext) {
    *
    * This method must be called AFTER the last `writeChunk()`.
    *
+   * Writing the last chunk is NOT buffered. The last chunk is immediately sent to the client.
+   *
+   * Calling `writeLastChunk()` more than once will result in an exception being throw.
+   * 
    * @param trailingHeaders Trailing headers
    */
   def writeLastChunk(trailingHeaders: Map[String, String] = Map.empty[String, String]): Unit = {
@@ -423,6 +457,11 @@ case class HttpResponseMessage(context: HttpContext) {
    * HTTP/1.1 302 Found
    * Location: http://www.newurl.org/
    * }}}
+   * 
+   * Redirection is NOT buffered. The response is immediately sent to the client.
+   *
+   * Calling `redirect()` more than once results in an exception being thrown because only 1 response is 
+   * permitted per request.
    *
    * @param url URL to which the browser will be redirected
    */
@@ -555,10 +594,39 @@ object HttpResponseMessage {
       response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
     }
   }
+
+  /**
+   * Returns the character set from the MIME type
+   *
+   * For example, `UTF-8` will be extracted from `text/plain; charset=UTF-8`
+   *
+   * @param mimeType MIME type code.
+   * @return `Charset` if specified in the MIME type, else `None`
+   */
+  def extractMimeTypeCharset(mimeType: String): Option[Charset] = {
+    val items = mimeType.split(";")
+    val csNameValue = items.find(i => i.contains("charset"))
+    val charset = if (csNameValue.isDefined) {
+      val csValue = csNameValue.get.replace(" ", "").replace("charset", "").replace("=", "").toUpperCase
+      csValue match {
+        case "UTF-8" => Some(CharsetUtil.UTF_8)
+        case "US-ASCII" => Some(CharsetUtil.US_ASCII)
+        case "ISO-8859-1" => Some(CharsetUtil.ISO_8859_1)
+        case "UTF-16" => Some(CharsetUtil.UTF_16)
+        case "UTF-16BE" => Some(CharsetUtil.UTF_16BE)
+        case "UTF-16LE" => Some(CharsetUtil.UTF_16LE)
+        case _ => Some(Charset.forName(csValue))
+      }
+    } else {
+      None
+    }
+
+    charset
+  }
 }
 
 /**
- * Port of Netty's HttpResponseStatus class for convenience. Socko user won't have to refer to Netty javadoc.
+ * Port of Netty's HttpResponseStatus class for convenience.
  *
  * @param code HTTP response status code as per [[http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html RFC 2616]].
  */
@@ -577,6 +645,9 @@ case class HttpResponseStatus(code: Int) {
   }
 }
 
+/**
+ * Standard HTTP response status codes
+ */
 object HttpResponseStatus {
   /**
    * 100 Continue

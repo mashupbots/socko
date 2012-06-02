@@ -213,24 +213,38 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
   /**
    * Body of the HTTP request
    */
-  val content = new HttpContent(if (nettyHttpRequest.getContent == null) None else Some(nettyHttpRequest.getContent))
+  val content = new HttpContent(
+    if (nettyHttpRequest.getContent == null) None else Some(nettyHttpRequest.getContent),
+    this.contentType)
 }
 
 /**
  * Represents the contents or body of the HTTP request
  *
- * @param nettyHttpRequest Netty HTTP request message
+ * @param buffer Request body
+ * @param contentType MIME type of the request body
  */
-class HttpContent(buffer: Option[ChannelBuffer]) {
+class HttpContent(buffer: Option[ChannelBuffer], contentType: String) {
 
+  /**
+   * Returns a string representation of the content.
+   * 
+   * The character set in the content type will be used.  If not supplied, UTF-8 is assumed.
+   */
   override def toString() = {
+    val charset =  HttpResponseMessage.extractMimeTypeCharset(contentType).getOrElse(CharsetUtil.UTF_8)
     if (buffer.isEmpty) {
       ""
     } else {
-      if (buffer.get.readable) buffer.get.toString(CharsetUtil.UTF_8) else ""
+      if (buffer.get.readable) buffer.get.toString(charset) else ""
     }
   }
 
+  /**
+   * Returns a string representation of the content using the specified character set.
+   * 
+   * @param charset Character set to use to decode the string
+   */
   def toString(charset: Charset) = {
     if (buffer.isEmpty) {
       ""
@@ -239,6 +253,9 @@ class HttpContent(buffer: Option[ChannelBuffer]) {
     }
   }
 
+  /**
+   * Returns the contents as a byte array
+   */
   def toBytes() = {
     if (buffer.isEmpty) {
       Array.empty[Byte]
@@ -247,6 +264,9 @@ class HttpContent(buffer: Option[ChannelBuffer]) {
     }
   }
 
+  /**
+   * Returns the contents as a Netty native channel buffer 
+   */
   def toChannelBuffer() = {
     buffer.getOrElse(ChannelBuffers.EMPTY_BUFFER)
   }
@@ -285,7 +305,7 @@ case class InitialHttpRequestMessage(
     current.contentLength,
     createdOn)
 
-  val content: HttpContent = new HttpContent(None)
+  val content: HttpContent = new HttpContent(None, "")
 
   /**
    * Number of milliseconds from the time when the initial request was made
@@ -302,6 +322,12 @@ case class InitialHttpRequestMessage(
   @volatile var totalChunkContentLength: Long = 0
 }
 
+/**
+ * HTTP chunk sent from client to sever
+ *
+ * @param nettyHttpChunk Netty representation of the HTTP Chunk
+ * @param contentType Content type of the data
+ */
 case class HttpChunkMessage(nettyHttpChunk: HttpChunk) {
 
   /**
@@ -323,7 +349,7 @@ case class HttpChunkMessage(nettyHttpChunk: HttpChunk) {
   /**
    * Body of the HTTP chunk
    */
-  val content = new HttpContent(if (nettyHttpChunk.getContent == null) None else Some(nettyHttpChunk.getContent))
+  val content = new HttpContent(if (nettyHttpChunk.getContent == null) None else Some(nettyHttpChunk.getContent), "")
 
 }
 

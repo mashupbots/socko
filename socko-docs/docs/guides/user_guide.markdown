@@ -694,8 +694,7 @@ Web log events can be recorded using the processing context.
 
  - {{ page.HttpRequestContextClass }}
  
-   Web logs events are automatically recorded for you when you call `writeResponse()`, `writeErrorResponse()` or
-   `redirect()` methods.
+   Web logs events are automatically recorded for you when you call `response.write()` or `response.redirect()` methods.
 
    These methods assume a non-chunked response.
    
