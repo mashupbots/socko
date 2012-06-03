@@ -13,19 +13,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.examples.weblog
+package org.mashupbots.socko.examples.secure
 
-import org.mashupbots.socko.context.HttpRequestContext
-import akka.actor.Actor
 import java.util.Date
 
+import org.mashupbots.socko.events.HttpRequestEvent
+
+import akka.actor.Actor
+
 /**
- * Hello processor writes a greeting and stops.
+ * Writes a greeting and terminates.
  */
-class HelloProcessor extends Actor {
+class SecureHelloHandler extends Actor {
   def receive = {
-    case msg: HttpRequestContext =>
-      msg.response.write("Hello from Socko (" + new Date().toString + "). You have been logged.")
+    case event: HttpRequestEvent =>
+      event.response.write("Hello from a Secure Socko (" + new Date().toString + ")")
       context.stop(self)
   }
 }

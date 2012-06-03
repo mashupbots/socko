@@ -13,19 +13,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.examples.quickstart
+package org.mashupbots.socko.examples.benchmark
 
-import org.mashupbots.socko.context.HttpRequestContext
+import org.mashupbots.socko.events.HttpRequestEvent
 import akka.actor.Actor
 import java.util.Date
 
 /**
- * Hello processor writes a greeting and stops.
+ * Returns dynamic content
  */
-class HelloProcessor extends Actor {
+class DynamicBenchmarkHandler extends Actor {
   def receive = {
-    case msg: HttpRequestContext =>
-      msg.response.write("Hello from Socko (" + new Date().toString + ")")
+    case event: HttpRequestEvent =>
+      val buf = new StringBuilder()
+      buf.append("<html>\n")
+      buf.append("<body>\n")
+      buf.append("Hello\n")
+      buf.append("</body>\n")
+      buf.append("</html>\n")
+      event.response.write(buf.toString, "text/html; charset=UTF-8")
       context.stop(self)
   }
 }

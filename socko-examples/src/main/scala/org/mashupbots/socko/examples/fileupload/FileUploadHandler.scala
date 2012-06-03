@@ -18,8 +18,8 @@ package org.mashupbots.socko.examples.fileupload
 import java.io.File
 
 import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.mashupbots.socko.context.HttpResponseStatus
-import org.mashupbots.socko.context.HttpRequestContext
+import org.mashupbots.socko.events.HttpResponseStatus
+import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.postdecoder.Attribute
 import org.mashupbots.socko.postdecoder.DefaultHttpDataFactory
 import org.mashupbots.socko.postdecoder.FileUpload
@@ -31,13 +31,13 @@ import akka.event.Logging
 /**
  * Processes file uploads
  */
-class FileUploadProcessor extends Actor {
+class FileUploadHandler extends Actor {
 
   private val log = Logging(context.system, this)
 
   def receive = {
     case msg: FileUploadRequest => {
-      val ctx = msg.context
+      val ctx = msg.event
       try {
         val contentType = ctx.request.contentType
         if (contentType != "" &&
@@ -90,7 +90,7 @@ class FileUploadProcessor extends Actor {
 }
 
 case class FileUploadRequest(
-  context: HttpRequestContext,
+  event: HttpRequestEvent,
   saveDir: File)
 
 /**

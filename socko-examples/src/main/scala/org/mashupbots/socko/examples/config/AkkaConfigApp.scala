@@ -15,9 +15,9 @@
 //
 package org.mashupbots.socko.examples.config
 
-import org.mashupbots.socko.examples.quickstart.HelloProcessor
+import org.mashupbots.socko.examples.quickstart.HelloHandler
 import org.mashupbots.socko.routes._
-import org.mashupbots.socko.utils.Logger
+import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
@@ -37,7 +37,7 @@ import akka.actor.Props
 object AkkaConfigApp extends Logger {
   //
   // STEP #1 - Define Actors and Start Akka
-  // See `HelloProcessor`
+  // See `HelloHandler`
   //
   val actorSystem = ActorSystem("AkkaConfigActorSystem")
 
@@ -45,8 +45,8 @@ object AkkaConfigApp extends Logger {
   // STEP #2 - Define Routes
   //
   val routes = Routes({
-    case GET(context) => {
-      actorSystem.actorOf(Props[HelloProcessor]) ! context
+    case GET(request) => {
+      actorSystem.actorOf(Props[HelloHandler]) ! request
     }
   })
 

@@ -15,9 +15,9 @@
 //
 package org.mashupbots.socko.examples.websocket
 
-import org.mashupbots.socko.context.HttpResponseStatus
+import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.routes._
-import org.mashupbots.socko.utils.Logger
+import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
@@ -36,25 +36,25 @@ import akka.actor.actorRef2Scala
 object WebSocketApp extends Logger {
   //
   // STEP #1 - Define Actors and Start Akka
-  // See `WebSocketProcessor`.
+  // See `WebSocketHandler`.
   //
   val actorSystem = ActorSystem("WebSocketExampleActorSystem")
 
   //
   // STEP #2 - Define Routes
-  // Each route dispatches the request to a newly instanced `WebSocketProcessor` actor for processing.
-  // `WebSocketProcessor` will `stop()` itself after processing the request. 
+  // Each route dispatches the request to a newly instanced `WebSocketHandler` actor for processing.
+  // `WebSocketHandler` will `stop()` itself after processing the request. 
   //
   val routes = Routes({
 
-    case HttpRequest(rq) => rq match {
+    case HttpRequest(httpRequest) => httpRequest match {
       case GET(Path("/html")) => {
         // Return HTML page to establish web socket
-        actorSystem.actorOf(Props[WebSocketProcessor]) ! rq
+        actorSystem.actorOf(Props[WebSocketHandler]) ! httpRequest
       }
       case Path("/favicon.ico") => {
         // If favicon.ico, just return a 404 because we don't have that file
-        rq.response.write(HttpResponseStatus.NOT_FOUND)
+        httpRequest.response.write(HttpResponseStatus.NOT_FOUND)
       }
     }
 
@@ -68,7 +68,7 @@ object WebSocketApp extends Logger {
 
     case WebSocketFrame(wsFrame) => {
       // Once handshaking has taken place, we can now process frames sent from the client
-      actorSystem.actorOf(Props[WebSocketProcessor]) ! wsFrame
+      actorSystem.actorOf(Props[WebSocketHandler]) ! wsFrame
     }
 
   })

@@ -16,7 +16,7 @@
 package org.mashupbots.socko.examples
 
 /**
- * Illustrates how to use our [[org.mashupbots.socko.processors.SnoopProcessor]] to assist with debugging
+ * Illustrates how to use our [[org.mashupbots.socko.handlers.SnoopHandler]] to assist with debugging
  * incoming web requests.
  */
 package object snoop {

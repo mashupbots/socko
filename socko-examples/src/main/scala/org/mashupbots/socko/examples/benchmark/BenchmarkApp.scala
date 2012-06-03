@@ -18,20 +18,20 @@ package org.mashupbots.socko.examples.benchmark
 import java.io.File
 import java.io.FileOutputStream
 
-import org.mashupbots.socko.context.HttpResponseStatus
-import org.mashupbots.socko.processors.StaticFileProcessor
-import org.mashupbots.socko.processors.StaticFileRequest
+import org.mashupbots.socko.events.HttpResponseStatus
+import org.mashupbots.socko.handlers.StaticContentHandler
+import org.mashupbots.socko.handlers.StaticFileRequest
+import org.mashupbots.socko.infrastructure.CharsetUtil
+import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes._
-import org.mashupbots.socko.utils.CharsetUtil
-import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
 import com.typesafe.config.ConfigFactory
 
+import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
-import akka.actor.actorRef2Scala
 import akka.routing.FromConfig
 
 /**
@@ -48,10 +48,8 @@ object BenchmarkApp extends Logger {
   //
   // STEP #1 - Define Actors and Start Akka
   //
-  // We are going to start StaticFileProcessor actor as a router.
+  // We are going to start StaticContentHandler actor as a router.
   // There will be 5 instances, each instance having its own thread since there is a lot of blocking IO.
-  //
-  // FileUploadProcessor will also be started as a router with a PinnedDispatcher since it involves IO.
   //
   val actorConfig = """
 	my-pinned-dispatcher {
@@ -73,35 +71,35 @@ object BenchmarkApp extends Logger {
 
   val actorSystem = ActorSystem("BenchmarkActorSystem", ConfigFactory.parseString(actorConfig))
 
-  val staticFileProcessorRouter = actorSystem.actorOf(Props[StaticFileProcessor]
+  val staticContentHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
     .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
 
   //
   // STEP #2 - Define Routes
   //
   val routes = Routes({
-    case HttpRequest(rq) => rq match {
+    case HttpRequest(request) => request match {
       case GET(Path("/test.html")) => {
         val staticFileRequest = new StaticFileRequest(
-          rq,
+          request,
           contentDir,
           new File(contentDir, "test.html"),
           tempDir)
-        staticFileProcessorRouter ! staticFileRequest
+        staticContentHandlerRouter ! staticFileRequest
       }
       case GET(Path("/data.dat")) => {
         val staticFileRequest = new StaticFileRequest(
-          rq,
+          request,
           contentDir,
           new File(contentDir, "data.dat"),
           tempDir)
-        staticFileProcessorRouter ! staticFileRequest
+        staticContentHandlerRouter ! staticFileRequest
       }
       case GET(Path("/dynamic")) => {
-        actorSystem.actorOf(Props[DynamicBenchmarkProcessor]) ! rq
+        actorSystem.actorOf(Props[DynamicBenchmarkHandler]) ! request
       }
       case GET(Path("/favicon.ico")) => {
-        rq.response.write(HttpResponseStatus.NOT_FOUND)
+        request.response.write(HttpResponseStatus.NOT_FOUND)
       }
     }
   })

@@ -2,15 +2,16 @@
 layout: docs
 title: Socko User Guide
 
-ProcessingContextClass: <code><a href="../api/#org.mashupbots.socko.context.ProcessingContext">ProcessingContext</a></code>
-HttpRequestContextClass: <code><a href="../api/#org.mashupbots.socko.context.HttpRequestContext">HttpRequestContext</a></code>
-HttpChunkContextClass: <code><a href="../api/#org.mashupbots.socko.context.HttpChunkContext">HttpChunkContext</a></code>
-WebSocketFrameContextClass: <code><a href="../api/#org.mashupbots.socko.context.WebSocketFrameContext">WebSocketFrameContext</a></code>
-WebSocketHandshakeContextClass: <code><a href="../api/#org.mashupbots.socko.context.WebSocketHandshakeContext">WebSocketHandshakeContext</a></code>
+SockoEventClass: <code><a href="../api/#org.mashupbots.socko.events.SockoEvent">SockoEvent</a></code>
+HttpRequestEventClass: <code><a href="../api/#org.mashupbots.socko.events.HttpRequestEvent">HttpRequestEvent</a></code>
+HttpChunkEventClass: <code><a href="../api/#org.mashupbots.socko.events.HttpChunkEvent">HttpChunkEvent</a></code>
+WebSocketFrameEventClass: <code><a href="../api/#org.mashupbots.socko.events.WebSocketFrameEvent">WebSocketFrameEvent</a></code>
+WebSocketHandshakeEventClass: <code><a href="../api/#org.mashupbots.socko.events.WebSocketHandshakeEvent">WebSocketHandshakeEvent</a></code>
 WebServerClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServer">WebServer</a></code>
 WebServerConfigClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServerConfig">WebServerConfig</a></code>
-WebLogEventClass: <code><a href="../api/#org.mashupbots.socko.utils.WebLogEvent">WebLogEvent</a></code>
-WebLogWriterClass: <code><a href="../api/#org.mashupbots.socko.utils.WebLogWriter">WebLogWriter</a></code>
+WebLogEventClass: <code><a href="../api/#org.mashupbots.socko.infrastructure.WebLogEvent">WebLogEvent</a></code>
+WebLogWriterClass: <code><a href="../api/#org.mashupbots.socko.infrastructure.WebLogWriter">WebLogWriter</a></code>
+WebSocketBroadcasterClass: <code><a href="../api/#org.mashupbots.socko.handler.WebSocketBroadcaster">WebSocketBroadcaster</a></code>
 ---
 # Socko User Guide
 
@@ -20,6 +21,7 @@ WebLogWriterClass: <code><a href="../api/#org.mashupbots.socko.utils.WebLogWrite
  - [Step 2. Define Routes.](#Step2)
  - [Step 3. Start/Stop Web Server.](#Step3)
  - [Configuration](#Configuration)
+ - [Web Sockets](#WebSockets)
  - [Web Logs](#WebLogs)
  - [Code Examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
 
@@ -29,17 +31,18 @@ WebLogWriterClass: <code><a href="../api/#org.mashupbots.socko.utils.WebLogWrite
 
 Socko assumes that you have your business rules implemented as Akka v2 Actors.
 
-Requests received by Socko will be passed to your actors within a Socko {{ page.ProcessingContextClass }}.
-Your actors use {{ page.ProcessingContextClass }} to read the request and write a response.
+Incoming messages received by Socko will be wrapped within a {{ page.SockoEventClass }} and passed to your routes
+for dispatching to your Akka actor handlers. Your actors use {{ page.SockoEventClass }} to read incoming data and 
+write outgoing data.
 
-In the following `HelloApp` example, we have defined an actor called `HelloProcessor` and started an Akka
-system called `HelloExampleActorSystem`.  The `HttpRequestContext` is used by `HelloProcessor`
+In the following `HelloApp` example, we have defined an actor called `HelloHandler` and started an Akka
+system called `HelloExampleActorSystem`.  The `HttpRequestEvent` is used by the `HelloHandler`
 to write a response to the client.
 
     object HelloApp extends Logger {
       //
       // STEP #1 - Define Actors and Start Akka
-      // See `HelloProcessor`
+      // See `HelloHandler`
       //
       val actorSystem = ActorSystem("HelloExampleActorSystem")
     }
@@ -47,69 +50,68 @@ to write a response to the client.
     /**
      * Hello processor writes a greeting and stops.
      */
-    class HelloProcessor extends Actor {
+    class HelloHandler extends Actor {
       def receive = {
-        case request: HttpRequestContext =>
+        case request: HttpRequestEvent =>
           request.writeResponse("Hello from Socko (" + new Date().toString + ")")
           context.stop(self)
       }
     }
     
 For maximum scalability and performance, you will need to carefully choose your Akka dispatchers.
-The default dispatcher is optimized for non blocking code. If your code blocks though execution of 
-database, file system and/or network IO, then it is advisable to configure Akka to use dispatchers based
-on thread pools.
+The default dispatcher is optimized for non blocking code. If your code blocks though reading from and writing to 
+database and/or file system, then it is advisable to configure Akka to use dispatchers based on thread pools.
 
-### Processing Context
-In order to read requests and writes responses, your actors must use Socko's {{ page.ProcessingContextClass }}.
+### Socko Events
+{{ page.SockoEventClass }} is used to read incoming and write outgoing data.
 
 Two ways to achieve this are:
 
-1. You can change your actors to be Socko {{ page.ProcessingContextClass }} aware by adding a {{ page.ProcessingContextClass }} 
-   property to messages that it receives - as per above example.
+1. You can change your actors to be Socko {{ page.SockoEventClass }} aware by adding a {{ page.SockoEventClass }} 
+   property to messages that it receives.
 
-2. You can write a facade actor to specifically handle Socko {{ page.ProcessingContextClass }}. Your facade can
-   read the request from the {{ page.ProcessingContextClass }} in order to create messages to pass to your actors
-   for processing. Your facade should also setup Akka [futures](http://doc.akka.io/docs/akka/2.0.1/scala/futures.html)
-   so that when processing is completed, the {{ page.ProcessingContextClass }} can be used to write your response.
+2. You can write a facade actor to specifically handle {{ page.SockoEventClass }}. Your facade can
+   read the request from the {{ page.SockoEventClass }} in order to create messages to pass to your actors
+   for processing. Your facade actor could store the {{ page.SockoEventClass }} to use it to write responses.
 
-There are 4 types of {{ page.ProcessingContextClass }}:
+There are 4 types of {{ page.SockoEventClass }}:
 
-1. **{{ page.HttpRequestContextClass }}**
+1. **{{ page.HttpRequestEventClass }}**
 
-   This context will be sent to your actor when a HTTP Request is received.
+   This event is fired when a HTTP Request is received.
    
    To read the request, use `request.content.toString()` or `request.content.toBytes()`. Refer to the [file upload example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload)
    for the decoding of HTTP post data.
    
    To write a response, use `response.write()`. If you wish to stream your response, you will need to use 
-   `response.writeFirstChunk()`, `writeChunk()` and `writeLastChunk()` instead. Refer to the [streaming example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/streaming)
+   `response.writeFirstChunk()`, `response.writeChunk()` and `response.writeLastChunk()` instead. 
+   Refer to the [streaming example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/streaming)
    for usage.
 
-2. **{{ page.HttpChunkContextClass }}**
+2. **{{ page.HttpChunkEventClass }}**
 
-   This context will be sent to your actor when a HTTP Chunk is received and is only applicable if you turn off 
+   This event is fired when a HTTP Chunk is received and is only applicable if you turn off 
    [chunk aggregation](#Configuration).
    
-   Reading requests and writing responses is as per {{ page.HttpRequestContextClass }}.
+   Reading requests and writing responses is as per {{ page.HttpRequestEventClass }}.
 
-3. **{{ page.WebSocketFrameContextClass }}**
+3. **{{ page.WebSocketFrameEventClass }}**
 
-   This context will be sent to your actor when a Web Socket Frame is received.
+   This event is fired when a Web Socket Frame is received.
    
    To read a frame, first check if it `isText` or `isBinary`.  If text, use `readText()`. If binary, use 
    `readBinary()`.
    
    To write a frame, use `writeText()` or `writeBinary()`.
 
-4. **{{ page.WebSocketHandshakeContextClass }}**
+4. **{{ page.WebSocketHandshakeEventClass }}**
 
-   This context is only used for Web Socket handshaking within your [Route](#Step2). 
+   This event is fired for Web Socket handshaking within your [Route](#Step2). 
 
    It should **not** be sent to your actor.
 
 
-All {{ page.ProcessingContextClass }} must be used by **local actors** only.
+All {{ page.SockoEventClass }} must be used by **local actors** only.
 
 ### Akka Dispatchers and Thread Pools
 
@@ -125,8 +127,8 @@ we recommend that you use a dispatcher driven by the `thread-pool-executor`.  Fo
 Isolating blocking operations to a thread pool means that other actors can continue processing without
 waiting for your actor's blocking operation to finish.
 
-The following code is taken from our file upload example application. Because `StaticFileProcessor`
-and `FileUploadProcessor` reads and writes lots of files, we have set them up to use a `PinnedDispatcher`.
+The following code is taken from our file upload example application. Because `StaticFileHandler`
+and `FileUploadHandler` reads and writes lots of files, we have set them up to use a `PinnedDispatcher`.
 Note that we have only allocated 5 threads to each processor. To scale, you will need to allocate
 more threads.
 
@@ -154,10 +156,10 @@ more threads.
 
     val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
 
-    val staticFileProcessorRouter = actorSystem.actorOf(Props[StaticFileProcessor]
+    val staticFileHandlerRouter = actorSystem.actorOf(Props[StaticFileHandler]
       .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
     
-    val fileUploadProcessorRouter = actorSystem.actorOf(Props[FileUploadProcessor]
+    val fileUploadHandlerRouter = actorSystem.actorOf(Props[FileUploadHandler]
       .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "file-upload-router")
 
 
@@ -166,17 +168,17 @@ more threads.
 
 ## Step 2. Define Routes <a class="blank" id="Step2">&nbsp;</a>
 
-Routes allows you to control how Socko dispatches incoming requests to your actors.
+Routes allows you to control how Socko dispatches incoming events to your actors.
 
-Routes are implemented in Socko using partial functions that take a {{ page.ProcessingContextClass }}
+Routes are implemented in Socko using partial functions that take a {{ page.SockoEventClass }}
 as input and returns `Unit` (or void).
 
 Within your implementation of the partial function, your code will need to dispatch the 
-{{ page.ProcessingContextClass }} to your intended actor for processing.
+{{ page.SockoEventClass }} to your intended actor for processing.
 
-To assist with dispatching, we have included extractors that can match the type of {{ page.ProcessingContextClass }}
+To assist with dispatching, we have included pattern matching extractors:
 
- - [Processing Context](#ProcessingContextExtractors)
+ - [Event](#SockoEventExtractors)
  - [Host](#HostExtractors) such as `www.mydomain.com`
  - [Method](#MethodExtractors) such as `GET`
  - [Path](#PathExtractors) such as `/record/1`
@@ -184,26 +186,25 @@ To assist with dispatching, we have included extractors that can match the type 
  
 [Concatenation](#ConcatenatingExtractors) of 2 or more extractors is also supported.
  
-The following example illustrates matching HTTP GET requests and dispatching the request to a 
-`HelloProcessor` actor:
+The following example illustrates matching HTTP GET event and dispatching it to a `HelloHandler` actor:
 
     val routes = Routes({
       case GET(request) => {
-        actorSystem.actorOf(Props[HelloProcessor]) ! request
+        actorSystem.actorOf(Props[HelloHandler]) ! request
       }
     })
 
 For a more detailed example, see our [example route app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/routes).
 
 
-### Processing Context Extractors <a class="blank" id="ProcessingContextExtractors">&nbsp;</a>
+### Event Extractors <a class="blank" id="SockoEventExtractors">&nbsp;</a>
 
-These extractors allows you to match different types of {{ page.ProcessingContextClass }}.
+These extractors allows you to match different types of {{ page.SockoEventClass }}.
 
- - [`HttpRequest`](../api/#org.mashupbots.socko.routes.HttpRequest$) matches {{ page.HttpRequestContextClass }}
- - [`HttpChunk`](../api/#org.mashupbots.socko.routes.HttpChunk$) matches {{ page.HttpChunkContextClass }}
- - [`WebSocketFrame`](../api/#org.mashupbots.socko.routes.WebSocketFrame$) matches {{ page.WebSocketFrameContextClass }}
- - [`WebSocketHandshake`](../api/#org.mashupbots.socko.routes.WebSocketHandshake$) matches {{ page.WebSocketHandshakeContextClass }}
+ - [`HttpRequest`](../api/#org.mashupbots.socko.routes.HttpRequest$) matches {{ page.HttpRequestEventClass }}
+ - [`HttpChunk`](../api/#org.mashupbots.socko.routes.HttpChunk$) matches {{ page.HttpChunkEventClass }}
+ - [`WebSocketFrame`](../api/#org.mashupbots.socko.routes.WebSocketFrame$) matches {{ page.WebSocketFrameEventClass }}
+ - [`WebSocketHandshake`](../api/#org.mashupbots.socko.routes.WebSocketHandshake$) matches {{ page.WebSocketHandshakeEventClass }}
 
 The following code taken from our [web socket example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket) 
 illustrates usage:
@@ -213,7 +214,7 @@ illustrates usage:
       case HttpRequest(httpRequest) => httpRequest match {
         case GET(Path("/html")) => {
           // Return HTML page to establish web socket
-          actorSystem.actorOf(Props[WebSocketProcessor]) ! httpRequest
+          actorSystem.actorOf(Props[WebSocketHandler]) ! httpRequest
         }
         case Path("/favicon.ico") => {
           // If favicon.ico, just return a 404 because we don't have that file
@@ -231,22 +232,20 @@ illustrates usage:
     
       case WebSocketFrame(wsFrame) => {
         // Once handshaking has taken place, we can now process frames sent from the client
-        actorSystem.actorOf(Props[WebSocketProcessor]) ! wsFrame
+        actorSystem.actorOf(Props[WebSocketHandler]) ! wsFrame
       }
     
     })
 
-Note that for a web socket handshake, you only need to set the context's `isAllowed` property to true.
-Dispatching to an actor is not required and not recommended.
 
 ### Host Extractors <a class="blank" id="HostExtractors">&nbsp;</a>
 
 Host extractors matches the host name received in the request.
 
-For {{ page.HttpRequestContextClass }}, the host is the value specified in the `HOST` header variable. 
-For {{ page.HttpChunkContextClass }}, {{ page.WebSocketFrameContextClass }} and 
-{{ page.WebSocketHandshakeContextClass }}, the host is that of the associated initial 
-{{ page.HttpRequestContextClass }}.
+For {{ page.HttpRequestEventClass }}, the host is the value specified in the `HOST` header variable. 
+For {{ page.HttpChunkEventClass }}, {{ page.WebSocketFrameEventClass }} and 
+{{ page.WebSocketHandshakeEventClass }}, the host is that of the associated initial 
+{{ page.HttpRequestEventClass }}.
 
 For example, the following HTTP request has a host value of `www.sockoweb.org`:
 
@@ -312,10 +311,10 @@ in your route.
 
 Method extractors matches the method received in the request.
 
-For {{ page.HttpRequestContextClass }}, the method is the extracted from the 1st line. 
-For {{ page.HttpChunkContextClass }}, {{ page.WebSocketFrameContextClass }} and 
-{{ page.WebSocketHandshakeContextClass }}, the method is that of the associated initial 
-{{ page.HttpRequestContextClass }}.
+For {{ page.HttpRequestEventClass }}, the method is the extracted from the 1st line. 
+For {{ page.HttpChunkEventClass }}, {{ page.WebSocketFrameEventClass }} and 
+{{ page.WebSocketHandshakeEventClass }}, the method is that of the associated initial 
+{{ page.HttpRequestEventClass }}.
 
 For example, the following HTTP request has a method `GET`:
 
@@ -340,7 +339,7 @@ For example, to match every HTTP GET:
       }
     })
   
-Method extractors return the {{ page.ProcessingContextClass }} so it can be used with other extractors
+Method extractors return the {{ page.SockoEventClass }} so it can be used with other extractors
 in the same case statement. 
 
 For example, to match HTTP GET with a path of "/clients"
@@ -357,10 +356,10 @@ For example, to match HTTP GET with a path of "/clients"
 
 Path extractors matches the path received in the request.
 
-For {{ page.HttpRequestContextClass }}, the path is the extracted from the 1st line without any query string. 
-For {{ page.HttpChunkContextClass }}, {{ page.WebSocketFrameContextClass }} and 
-{{ page.WebSocketHandshakeContextClass }}, the path is that of the associated initial 
-{{ page.HttpRequestContextClass }}.
+For {{ page.HttpRequestEventClass }}, the path is the extracted from the 1st line without any query string. 
+For {{ page.HttpChunkEventClass }}, {{ page.WebSocketFrameEventClass }} and 
+{{ page.WebSocketHandshakeEventClass }}, the path is that of the associated initial 
+{{ page.HttpRequestEventClass }}.
 
 For example, the following HTTP requests have a path value of `/index.html`:
 
@@ -430,9 +429,9 @@ in your route.
 
 Query string extractors matches the query string received in the request.
 
-For {{ page.HttpRequestContextClass }}, the query string is the extracted from the 1st line. 
-For {{ page.HttpChunkContextClass }}, {{ page.WebSocketFrameContextClass }} and 
-{{ page.WebSocketHandshakeContextClass }}, the query string is that of the associated initial HTTP Request.
+For {{ page.HttpRequestEventClass }}, the query string is the extracted from the 1st line. 
+For {{ page.HttpChunkEventClass }}, {{ page.WebSocketFrameEventClass }} and 
+{{ page.WebSocketHandshakeEventClass }}, the query string is that of the associated initial HTTP Request.
 
 For example, the following HTTP request has a query string value of `name=value`:
 
@@ -598,6 +597,53 @@ A complete example `application.conf` can be found in {{ page.WebServerConfigCla
 
 
 
+## Web Sockets <a class="blank" id="WebSockets">&nbsp;</a>
+
+For a detailed discussions on how web sockets work, refer to [RFC 6455](http://tools.ietf.org/html/rfc6455)
+
+Prior to a web socket connection being established, a web socket handshake must take place. In Socko, a
+{{ page.WebSocketHandshakeEventClass }} is fired when a handshake is required.
+
+After a successful handshake, {{ page.WebSocketFrameEventClass }} is fired when a web socket text or binary
+frame is received.
+
+The following route from our web socket example app illustrates:
+
+    val routes = Routes({
+    
+      case HttpRequest(httpRequest) => httpRequest match {
+        case GET(Path("/html")) => {
+          // Return HTML page to establish web socket
+          actorSystem.actorOf(Props[WebSocketHandler]) ! httpRequest
+        }
+        case Path("/favicon.ico") => {
+          // If favicon.ico, just return a 404 because we don't have that file
+          httpRequest.response.write(HttpResponseStatus.NOT_FOUND)
+        }
+      }
+      
+      case WebSocketHandshake(wsHandshake) => wsHandshake match {
+        case Path("/websocket/") => {
+          // To start Web Socket processing, we first have to authorize the handshake.
+          // This is a security measure to make sure that web sockets can only be established at your specified end points.
+          wsHandshake.authorize()
+        }
+      }
+    
+      case WebSocketFrame(wsFrame) => {
+        // Once handshaking has taken place, we can now process frames sent from the client
+        actorSystem.actorOf(Props[WebSocketHandler]) ! wsFrame
+      }
+    
+    })
+
+Note that for a web socket handshake, you only need to call `wsHandshake.authorize()`.
+Dispatching to an actor is not required and not recommended.
+
+If you wish to push or broadcast messages to a group of web socket connections, use {{ page.WebSocketBroadcasterClass }}.
+See the example web socket [ChatApp](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket/ChatApp.scala) for usage.
+
+
 ## Web Logs <a class="blank" id="WebLogs">&nbsp;</a>
 
 Socko supports 3 web log formats:
@@ -687,7 +733,7 @@ You can configure where web logs are written by configuring your installed logge
         </encoder>
       </appender> 
   
-      <logger name="org.mashupbots.socko.utils.WebLogWriter" level="info" additivity="false">
+      <logger name="org.mashupbots.socko.infrastructure.WebLogWriter" level="info" additivity="false">
         <appender-ref ref="WEBLOG" />
       </logger>
 
@@ -700,16 +746,16 @@ You can configure where web logs are written by configuring your installed logge
 
 Web log events can be recorded via the processing context.
 
- - {{ page.HttpRequestContextClass }}
+ - {{ page.HttpRequestEventClass }}
  
    Web logs events are automatically recorded for you when you call `response.write()`, `response.writeLastChunk()` 
    or `response.redirect()` methods.
 
- - {{ page.HttpChunkContextClass }}
+ - {{ page.HttpChunkEventClass }}
 
-   As per {{ page.HttpRequestContextClass }}.
+   As per {{ page.HttpRequestEventClass }}.
    
- - {{ page.WebSocketFrameContextClass }}
+ - {{ page.WebSocketFrameEventClass }}
  
    Web log events are **NOT** automatically recorded for you. This is becasue web sockets do not strictly follow 
    the request/response structure of HTTP. For example, in a chat server, a broadcast message will not have a request
@@ -718,7 +764,7 @@ Web log events can be recorded via the processing context.
    If you wish to record a web log event, you can call `writeWebLog()`. The method, uri and other details
    of the event to be recorded is arbitrarily set by you.
    
- - {{ page.WebSocketHandshakeContextClass }}
+ - {{ page.WebSocketHandshakeEventClass }}
    
    Web log events are automatically recorded for you.
    

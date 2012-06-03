@@ -18,7 +18,7 @@ package org.mashupbots.socko.examples.secure
 import java.io.File
 
 import org.mashupbots.socko.routes._
-import org.mashupbots.socko.utils.Logger
+import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.webserver.SslConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
@@ -50,7 +50,7 @@ import akka.actor.Props
 object SecureApp extends Logger {
   //
   // STEP #1 - Define Actors and Start Akka
-  // See `HelloProcessor`
+  // See `HelloHandler`
   //
   val actorSystem = ActorSystem("SecureExampleActorSystem")
 
@@ -59,7 +59,7 @@ object SecureApp extends Logger {
   //
   val routes = Routes({
     case GET(request) => {
-      actorSystem.actorOf(Props[SecureHelloProcessor]) ! request
+      actorSystem.actorOf(Props[SecureHelloHandler]) ! request
     }
   })
 

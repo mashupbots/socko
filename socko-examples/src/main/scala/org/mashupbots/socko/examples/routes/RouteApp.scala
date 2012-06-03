@@ -15,9 +15,9 @@
 //
 package org.mashupbots.socko.examples.routes
 
-import org.mashupbots.socko.context.HttpResponseStatus
+import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.routes._
-import org.mashupbots.socko.utils.Logger
+import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.webserver.WebLogConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
@@ -39,41 +39,41 @@ import akka.actor.actorRef2Scala
 object RouteApp extends Logger {
   //
   // STEP #1 - Define Actors and Start Akka
-  // See `TimeProcessor`
+  // See `TimeHandler`
   //
   val actorSystem = ActorSystem("RouteExampleActorSystem")
 
   //
   // STEP #2 - Define Routes
-  // Each route dispatches the request to a newly instanced `TimeProcessor` actor for processing.
-  // `TimeProcessor` will `stop()` itself after processing each request.
+  // Each route dispatches the request to a newly instanced `TimeHandler` actor for processing.
+  // `TimeHandler` will `stop()` itself after processing each request.
   //
   val routes = Routes({
     
-    case HttpRequest(rq) => rq match {
+    case HttpRequest(request) => request match {
       // *** HOW TO EXTRACT QUERYSTRING VARIABLES AND USE CONCATENATION ***
       // If the timezone is specified on the query string, (like "/time?tz=sydney"), pass the
-      // timezone to the TimeProcessor    
+      // timezone to the TimeHandler    
       case (GET(Path("/time")) & TimezoneQueryString(timezone)) => {
-        actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(rq, Some(timezone))
+        actorSystem.actorOf(Props[TimeHandler]) ! TimeRequest(request, Some(timezone))
       }
 
       // *** HOW TO MATCH AND EXTRACT A PATH SEGMENT ***
       // If the timezone is specified on the path (like "/time/sydney"), pass the
-      // timezone to the TimeProcessor
+      // timezone to the TimeHandler
       case GET(PathSegments("time" :: timezone :: Nil)) => {
-        actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(rq, Some(timezone))
+        actorSystem.actorOf(Props[TimeHandler]) ! TimeRequest(request, Some(timezone))
       }
 
       // *** HOW TO MATCH AN EXACT PATH ***
-      // No timezone specified, make TimeProcessor return the time in the default timezone
+      // No timezone specified, make TimeHandler return the time in the default timezone
       case GET(Path("/time")) => {
-        actorSystem.actorOf(Props[TimeProcessor]) ! TimeRequest(rq, None)
+        actorSystem.actorOf(Props[TimeHandler]) ! TimeRequest(request, None)
       }
 
       // If favicon.ico, just return a 404 because we don't have that file
       case Path("/favicon.ico") => {
-        rq.response.write(HttpResponseStatus.NOT_FOUND)
+        request.response.write(HttpResponseStatus.NOT_FOUND)
       }
     }
     

@@ -18,29 +18,29 @@ package org.mashupbots.socko.examples.websocket
 import java.text.SimpleDateFormat
 import java.util.GregorianCalendar
 
-import org.mashupbots.socko.context.HttpRequestContext
-import org.mashupbots.socko.context.WebSocketFrameContext
+import org.mashupbots.socko.events.HttpRequestEvent
+import org.mashupbots.socko.events.WebSocketFrameEvent
 
 import akka.actor.Actor
 import akka.event.Logging
 
 /**
- * Web Socket processor that echos incoming text frames in upper case.
+ * Delivers HTML page to setup web sockets in the browser and echos incoming text frames in upper case.
  */
-class WebSocketProcessor extends Actor {
+class WebSocketHandler extends Actor {
   val log = Logging(context.system, this)
 
   /**
    * Process incoming messages
    */
   def receive = {
-    case msg: HttpRequestContext =>
+    case event: HttpRequestEvent =>
       // Return the HTML page to setup web sockets in the browser
-      writeHTML(msg)
+      writeHTML(event)
       context.stop(self)
-    case msg: WebSocketFrameContext =>
+    case event: WebSocketFrameEvent =>
       // Echo web socket text frames
-      writeWebSocketResponse(msg)
+      writeWebSocketResponse(event)
       context.stop(self)
     case _ => {
       log.info("received unknown message of type: ")
@@ -51,7 +51,7 @@ class WebSocketProcessor extends Actor {
   /**
    * Write HTML page to setup a web socket on the browser
    */
-  private def writeHTML(ctx: HttpRequestContext) {
+  private def writeHTML(ctx: HttpRequestEvent) {
     // Send 100 continue if required
     if (ctx.request.is100ContinueExpected) {
       ctx.response.write100Continue()
@@ -100,7 +100,7 @@ class WebSocketProcessor extends Actor {
   /**
    * Echo the details of the web socket frame that we just received; but in upper case.
    */
-  private def writeWebSocketResponse(ctx: WebSocketFrameContext) {
+  private def writeWebSocketResponse(ctx: WebSocketFrameEvent) {
     log.info("TextWebSocketFrame: " + ctx.readText)
 
     val dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")

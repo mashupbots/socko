@@ -15,15 +15,15 @@
 //
 package org.mashupbots.socko.examples.weblog
 
+import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes._
-import org.mashupbots.socko.utils.Logger
+import org.mashupbots.socko.webserver.WebLogConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
+
 import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
-import org.mashupbots.socko.webserver.WebLogConfig
-import org.mashupbots.socko.utils.WebLogFormat
 
 /**
  * This example shows how to turn on logging.
@@ -46,7 +46,7 @@ object WebLogApp extends Logger {
   //
   val routes = Routes({
     case GET(request) => {
-      actorSystem.actorOf(Props[HelloProcessor]) ! request
+      actorSystem.actorOf(Props[HelloHandler]) ! request
     }
   })
 

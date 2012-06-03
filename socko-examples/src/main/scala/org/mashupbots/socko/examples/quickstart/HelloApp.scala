@@ -16,7 +16,7 @@
 package org.mashupbots.socko.examples.quickstart
 
 import org.mashupbots.socko.routes._
-import org.mashupbots.socko.utils.Logger
+import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
@@ -30,24 +30,27 @@ import akka.actor.Props
  *  - Open your browser and navigate to `http://localhost:8888/`
  *
  * Socko uses Netty to handle incoming requests and Akka to process them
- *  - Incoming requests are initial executed using threads from the Netty thread pool
- *  - As part of handling a request, `routes` will be called to dispatch it for processing
- *  - Inside our route definition, we instance a new `HelloProcessor` actor and pass the context to it
- *  - The `HelloProcessor` actor is executed in Akka default thread pool
+ *  - Incoming requests are converted into Socko events using threads from the Netty thread pool
+ *  - Your `routes` are then called to dispatch the event for processing
+ *  - Inside our route definition, we instance a new `HelloHandler` actor and pass the event to it
+ *  - The `HelloHandler` actor is executed in Akka default thread pool. This frees up the Netty thread pool to 
+ *    undertake more networking activities.
  */
 object HelloApp extends Logger {
   //
   // STEP #1 - Define Actors and Start Akka
-  // See `HelloProcessor`
+  // See `HelloHandler`
   //
   val actorSystem = ActorSystem("HelloExampleActorSystem")
 
   //
   // STEP #2 - Define Routes
+  // Dispatch all HTTP GET events to a newly instanced `HelloHandler` actor for processing.
+  // `HelloHandler` will `stop()` itself after processing each request.
   //
   val routes = Routes({
     case GET(request) => {
-      actorSystem.actorOf(Props[HelloProcessor]) ! request
+      actorSystem.actorOf(Props[HelloHandler]) ! request
     }
   })
 

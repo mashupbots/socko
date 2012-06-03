@@ -19,11 +19,10 @@ import java.io.File
 import java.io.FileOutputStream
 
 import org.jboss.netty.util.CharsetUtil
-import org.mashupbots.socko.context.HttpRequestContext
-import org.mashupbots.socko.processors.StaticFileProcessor
-import org.mashupbots.socko.processors.StaticFileRequest
+import org.mashupbots.socko.handlers.StaticContentHandler
+import org.mashupbots.socko.handlers.StaticFileRequest
+import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes._
-import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
@@ -35,7 +34,7 @@ import akka.actor.Props
 import akka.routing.FromConfig
 
 /**
- * This example shows how use [[org.mashupbots.socko.processors.StaticFileProcessor]] to download files and
+ * This example shows how use [[org.mashupbots.socko.handler.StaticContentHandler]] to download files and
  * [[org.mashupbots.socko.postdecoder.HttpPostRequestDecoder]] to process file uploads.
  *  - Run this class as a Scala Application
  *  - Open your browser and navigate to `http://localhost:8888`.
@@ -48,10 +47,10 @@ object FileUploadApp extends Logger {
   //
   // STEP #1 - Define Actors and Start Akka
   //
-  // We are going to start StaticFileProcessor actor as a router.
+  // We are going to start StaticContentHandler actor as a router.
   // There will be 5 instances, each instance having its own thread since there is a lot of blocking IO.
   //
-  // FileUploadProcessor will also be started as a router with a PinnedDispatcher since it involves IO.
+  // FileUploadHandler will also be started as a router with a PinnedDispatcher since it involves IO.
   //
   val actorConfig = """
 	my-pinned-dispatcher {
@@ -77,34 +76,34 @@ object FileUploadApp extends Logger {
 
   val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
 
-  val staticFileProcessorRouter = actorSystem.actorOf(Props[StaticFileProcessor]
+  val staticFileHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
     .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
 
-  val fileUploadProcessorRouter = actorSystem.actorOf(Props[FileUploadProcessor]
+  val fileUploadHandlerRouter = actorSystem.actorOf(Props[FileUploadHandler]
     .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "file-upload-router")
 
   //
   // STEP #2 - Define Routes
   //
   val routes = Routes({
-    case HttpRequest(rq) => rq match {
+    case HttpRequest(request) => request match {
       case GET(Path("/")) => {
         // Redirect to index.html
         // This is a quick non-blocking operation so executing it in the netty thread pool is OK. 
-        rq.response.redirect("http://localhost:8888/index.html")
+        request.response.redirect("http://localhost:8888/index.html")
       }
       case GET(PathSegments(fileName :: Nil)) => {
         // Download requested file
         val staticFileRequest = new StaticFileRequest(
-          rq,
+          request,
           contentDir,
           new File(contentDir, fileName),
           tempDir)
-        staticFileProcessorRouter ! staticFileRequest
+        staticFileHandlerRouter ! staticFileRequest
       }
       case POST(Path("/upload")) => {
         // Save file to the content directory so it can be downloaded
-        fileUploadProcessorRouter ! FileUploadRequest(rq, contentDir)
+        fileUploadHandlerRouter ! FileUploadRequest(request, contentDir)
       }
     }
   })

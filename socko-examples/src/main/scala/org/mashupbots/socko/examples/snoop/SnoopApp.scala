@@ -15,9 +15,9 @@
 //
 package org.mashupbots.socko.examples.snoop
 
-import org.mashupbots.socko.processors.SnoopProcessor
+import org.mashupbots.socko.handlers.SnoopHandler
+import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes.Routes
-import org.mashupbots.socko.utils.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
@@ -33,18 +33,18 @@ import akka.actor.Props
 object SnoopApp extends Logger {
   //
   // STEP #1 - Define Actors and Start Akka
-  // `SnoopProcessor` actor already defined.
+  // `SnoopHandler` actor already defined.
   //
   val actorSystem = ActorSystem("SnoopExampleActorSystem")
 
   //
   // STEP #2 - Define Routes
-  // Each route dispatches the request to a newly instanced `SnoopProcessor` actor for processing.
-  // `SnoopProcessor` will `stop()` itself after processing each request.
+  // Dispatch the event to a newly instanced `SnoopHandler` actor for processing.
+  // `SnoopHandler` will `stop()` itself after processing each request.
   //
   val routes = Routes({
-    case context => {
-      actorSystem.actorOf(Props[SnoopProcessor]) ! context
+    case request => {
+      actorSystem.actorOf(Props[SnoopHandler]) ! request
     }
   })
 
