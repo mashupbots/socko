@@ -13,19 +13,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.routes
+package org.mashupbots.socko.infrastructure
 
-import java.nio.charset.Charset
-import org.jboss.netty.channel.Channel
-import org.mashupbots.socko.events.EndPoint
-import org.mashupbots.socko.events.SockoEvent
+import org.slf4j.LoggerFactory
 
 /**
- *  Context for testing routing
+ * Adds logging functionality to our classes.
+ * 
+ * We try not to use this logger too often because it is synchronous. 
+ * Most of Socko's logging is performed inside Akka because it is asynchronous.
+ * 
+ * Usage:
+ * {{{
+ * log.debug("Hello")
+ * log.error("Message: {} {}", Array[Object]("value1", "value2"))
+ * }}}
  */
-case class TestContext(endPoint: EndPoint) extends SockoEvent {
-  val channel: Channel = null
-  def readStringContent(): String = ""
-  def readStringContent(charset: Charset): String = ""
-  def readBinaryContent(): Array[Byte] = null
+trait Logger {
+  /**
+   * Logger name is inferred from the class name.
+   */
+  lazy val log = LoggerFactory.getLogger(this.getClass)
 }

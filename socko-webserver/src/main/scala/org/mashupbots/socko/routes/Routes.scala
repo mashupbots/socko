@@ -16,17 +16,18 @@
 package org.mashupbots.socko.routes
 
 import scala.util.matching.Regex
-import org.mashupbots.socko.context.ProcessingContext
-import org.mashupbots.socko.context.HttpRequestContext
-import org.mashupbots.socko.context.HttpChunkContext
-import org.mashupbots.socko.context.WebSocketHandshakeContext
-import org.mashupbots.socko.context.WebSocketFrameContext
+
+import org.mashupbots.socko.events.HttpChunkEvent
+import org.mashupbots.socko.events.HttpRequestEvent
+import org.mashupbots.socko.events.SockoEvent
+import org.mashupbots.socko.events.WebSocketFrameEvent
+import org.mashupbots.socko.events.WebSocketHandshakeEvent
 
 /**
- * Routes define the rules for dispatching requests to its intended Akka actor processors. It is implemented as a
+ * Routes define the rules for dispatching events to its intended Akka handlers. It is implemented as a
  * list of PartialFunctions.
  *
- * To assist with routing, use the following extractors:
+ * To assist with routing, Socko has the following extractors:
  *  - HTTP Method: GET, POST, PUT, DELETE, HEAD, CONNECT, OPTIONS, TRACE
  *  - HTTP Path: Path, PathSegments, PathRegex
  *  - HTTP Host: Host, HostSegments, HostRegex
@@ -65,26 +66,26 @@ import org.mashupbots.socko.context.WebSocketFrameContext
  *     })
  * }}}
  *
- * This area of code uses extractors or, the `unapply` method. It is important to understand
+ * This area of code uses extractors, also known as the `unapply` method. It is important to understand
  * how to use these patterns.
- *  - `ctx @` is scala's variable binding pattern. It will be assigned the value of the matching ProcessingContext
- *  - `GET(x)` and `Path(y)` are extractors. In the case of `GET, `x` is the same ProcessingContext as `ctx`. For `Path`,
+ *  - `event @` is scala's variable binding pattern. It will be assigned the value of the matching SockoEvent
+ *  - `GET(x)` and `Path(y)` are extractors. In the case of `GET, `x` is the same SockoEvent as `event`. For `Path`,
  *     `y` is the path as a string. In other words, the value in between the parentheses is the return value of the
  *     associated `unapply` method.
- *  - `&` chains together extractors like a logical AND
+ *  - `&` chains together extractors like a logical `AND`
  *
  * This [[http://daily-scala.blogspot.com.au/2010/02/chaining-partial-functions-with-orelse.html article]]
  * explains how chaining of `PartialFunction` works using `orElse`.
  *
  */
 object Routes {
-  def apply(funcList: PartialFunction[ProcessingContext, Unit]*) = {
+  def apply(funcList: PartialFunction[SockoEvent, Unit]*) = {
     funcList.toList.reduceLeft { (functions, f) => functions orElse f }
   }
 }
 
 /**
- * Used to help match an HTTP Request context.
+ * Used to help match an HTTP Request event.
  *
  * For example:
  * {{{
@@ -96,13 +97,13 @@ object Routes {
  * }}}
  */
 object HttpRequest {
-  def unapply(ctx: ProcessingContext) =
-    if (ctx.isInstanceOf[HttpRequestContext]) Some(ctx.asInstanceOf[HttpRequestContext])
+  def unapply(ctx: SockoEvent) =
+    if (ctx.isInstanceOf[HttpRequestEvent]) Some(ctx.asInstanceOf[HttpRequestEvent])
     else None
 }
 
 /**
- * Used to help match an WebSocket Handshake context.
+ * Used to help match an WebSocket Handshake event.
  *
  * For example:
  * {{{
@@ -114,13 +115,13 @@ object HttpRequest {
  * }}}
  */
 object WebSocketHandshake {
-  def unapply(ctx: ProcessingContext) =
-    if (ctx.isInstanceOf[WebSocketHandshakeContext]) Some(ctx.asInstanceOf[WebSocketHandshakeContext])
+  def unapply(ctx: SockoEvent) =
+    if (ctx.isInstanceOf[WebSocketHandshakeEvent]) Some(ctx.asInstanceOf[WebSocketHandshakeEvent])
     else None
 }
 
 /**
- * Used to help match an WebSocket Frame context.
+ * Used to help match an WebSocket Frame event.
  *
  * For example:
  * {{{
@@ -132,13 +133,13 @@ object WebSocketHandshake {
  * }}}
  */
 object WebSocketFrame {
-  def unapply(ctx: ProcessingContext) =
-    if (ctx.isInstanceOf[WebSocketFrameContext]) Some(ctx.asInstanceOf[WebSocketFrameContext])
+  def unapply(ctx: SockoEvent) =
+    if (ctx.isInstanceOf[WebSocketFrameEvent]) Some(ctx.asInstanceOf[WebSocketFrameEvent])
     else None
 }
 
 /**
- * Used to help match an HTTP Chunk context.
+ * Used to help match an HTTP Chunk event.
  *
  * For example:
  * {{{
@@ -150,21 +151,21 @@ object WebSocketFrame {
  * }}}
  */
 object HttpChunk {
-  def unapply(ctx: ProcessingContext) =
-    if (ctx.isInstanceOf[HttpChunkContext]) Some(ctx.asInstanceOf[HttpChunkContext])
+  def unapply(ctx: SockoEvent) =
+    if (ctx.isInstanceOf[HttpChunkEvent]) Some(ctx.asInstanceOf[HttpChunkEvent])
     else None
 }
 
 /**
- * Used to help match the HTTP method.
+ * Used to help match the "method" of the HTTP end point 
  *
  * You should not need to use this class. Rather use the objects that extends from this class. For example:
  * [[org.mashupbots.socko.routes.GET]].
  *
- * @param method HTTP Method
+ * @param method Name of the HTTP method
  */
 class Method(method: String) {
-  def unapply(ctx: ProcessingContext) =
+  def unapply(ctx: SockoEvent) =
     if (ctx.endPoint.method.equalsIgnoreCase(method)) Some(ctx)
     else None
 }
@@ -296,8 +297,8 @@ object TRACE extends Method("TRACE")
  * This will match `/folderX` but not: `/folderx`, `/folderX/` or `/TheFolderX`
  */
 object Path {
-  def unapply(ctx: ProcessingContext) = Some(ctx.endPoint.path)
-  def apply(ctx: ProcessingContext) = ctx.endPoint.path
+  def unapply(ctx: SockoEvent) = Some(ctx.endPoint.path)
+  def apply(ctx: SockoEvent) = ctx.endPoint.path
 }
 
 /**
@@ -314,7 +315,7 @@ object Path {
  * }}}
  */
 object PathSegments {
-  def unapply(ctx: ProcessingContext): Option[List[String]] = ctx.endPoint.path.split("/").toList match {
+  def unapply(ctx: SockoEvent): Option[List[String]] = ctx.endPoint.path.split("/").toList match {
     case "" :: rest => Some(rest) // skip a leading slash
     case all => Some(all)
   }
@@ -340,7 +341,7 @@ object PathSegments {
  * }}}
  */
 class PathRegex(regex: Regex) {
-  def unapply(ctx: ProcessingContext) = regex.findFirstMatchIn(ctx.endPoint.path)
+  def unapply(ctx: SockoEvent) = regex.findFirstMatchIn(ctx.endPoint.path)
 }
 
 /**
@@ -358,8 +359,8 @@ class PathRegex(regex: Regex) {
  * This will match `www.sockoweb.com` but not: `www1.sockoweb.com`, `sockoweb.com` or `sockoweb.org`
  */
 object Host {
-  def unapply(ctx: ProcessingContext) = Some(ctx.endPoint.host)
-  def apply(ctx: ProcessingContext) = ctx.endPoint.host
+  def unapply(ctx: SockoEvent) = Some(ctx.endPoint.host)
+  def apply(ctx: SockoEvent) = ctx.endPoint.host
 }
 
 /**
@@ -376,7 +377,7 @@ object Host {
  * }}}
  */
 object HostSegments {
-  def unapply(ctx: ProcessingContext): Option[List[String]] = Some(ctx.endPoint.host.split("""\.""").toList)
+  def unapply(ctx: SockoEvent): Option[List[String]] = Some(ctx.endPoint.host.split("""\.""").toList)
 }
 
 /**
@@ -398,7 +399,7 @@ object HostSegments {
  * }}}
  */
 class HostRegex(regex: Regex) {
-  def unapply(ctx: ProcessingContext) = {
+  def unapply(ctx: SockoEvent) = {
     regex.findFirstMatchIn(ctx.endPoint.host)
   }
 }
@@ -416,8 +417,8 @@ class HostRegex(regex: Regex) {
  * }}}
  */
 object QueryString {
-  def unapply(ctx: ProcessingContext) = Some(ctx.endPoint.queryString)
-  def apply(ctx: ProcessingContext) = ctx.endPoint.queryString
+  def unapply(ctx: SockoEvent) = Some(ctx.endPoint.queryString)
+  def apply(ctx: SockoEvent) = ctx.endPoint.queryString
 }
 
 /**
@@ -439,7 +440,7 @@ object QueryString {
  * }}}
  */
 class QueryStringRegex(regex: Regex) {
-  def unapply(ctx: ProcessingContext) = {
+  def unapply(ctx: SockoEvent) = {
     regex.findFirstMatchIn(ctx.endPoint.queryString)
   }
 }
@@ -465,7 +466,7 @@ class QueryStringRegex(regex: Regex) {
  * }}}
  */
 class QueryStringField(name: String) {
-  def unapply(ctx: ProcessingContext) = {
+  def unapply(ctx: SockoEvent) = {
     ctx.endPoint.getQueryString(name)
   }
 }

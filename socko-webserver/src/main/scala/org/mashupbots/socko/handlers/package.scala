@@ -13,19 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.routes
-
-import java.nio.charset.Charset
-import org.jboss.netty.channel.Channel
-import org.mashupbots.socko.events.EndPoint
-import org.mashupbots.socko.events.SockoEvent
+package org.mashupbots.socko
 
 /**
- *  Context for testing routing
+ * Handlers are Akka actors that receives and processes [[org.mashupbots.socko.events.SockoEvent]]s
+ * sent by the routes.
+ * 
+ * This package contains our "pre-fabricated" handlers.
  */
-case class TestContext(endPoint: EndPoint) extends SockoEvent {
-  val channel: Channel = null
-  def readStringContent(): String = ""
-  def readStringContent(charset: Charset): String = ""
-  def readBinaryContent(): Array[Byte] = null
+package org.mashupbots.socko.handlers {
 }

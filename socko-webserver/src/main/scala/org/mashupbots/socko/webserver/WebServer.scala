@@ -16,16 +16,17 @@
 package org.mashupbots.socko.webserver
 
 import java.util.concurrent.Executors
+
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
-import org.mashupbots.socko.context.ProcessingContext
-import org.mashupbots.socko.utils.LocalCache
-import org.mashupbots.socko.utils.Logger
-import akka.actor.ActorSystem
+import org.mashupbots.socko.events.SockoEvent
+import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.infrastructure.WebLogWriter
+
 import akka.actor.ActorRef
+import akka.actor.ActorSystem
 import akka.actor.Props
-import org.mashupbots.socko.utils.WebLogWriter
 
 /**
  * Socko Web Server
@@ -44,7 +45,7 @@ import org.mashupbots.socko.utils.WebLogWriter
  */
 class WebServer(
   val config: WebServerConfig,
-  val routes: PartialFunction[ProcessingContext, Unit],
+  val routes: PartialFunction[SockoEvent, Unit],
   val actorSystem: ActorSystem) extends Logger {
 
   require(config != null)

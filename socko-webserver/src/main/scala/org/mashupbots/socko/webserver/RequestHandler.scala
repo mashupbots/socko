@@ -17,8 +17,8 @@ package org.mashupbots.socko.webserver
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
+
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.group.ChannelGroup
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.channel.ChannelHandlerContext
@@ -42,16 +42,14 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.util.CharsetUtil
-import org.mashupbots.socko.context.HttpChunkContext
-import org.mashupbots.socko.context.HttpContextConfig
-import org.mashupbots.socko.context.HttpRequestContext
-import org.mashupbots.socko.context.InitialHttpRequestMessage
-import org.mashupbots.socko.context.ProcessingContext
-import org.mashupbots.socko.context.WebSocketFrameContext
-import org.mashupbots.socko.context.WebSocketHandshakeContext
-import org.mashupbots.socko.context.WebSocketContextConfig
-import org.mashupbots.socko.utils.Logger
-import org.mashupbots.socko.context.InitialHttpRequestMessage
+import org.mashupbots.socko.events.HttpChunkEvent
+import org.mashupbots.socko.events.HttpEventConfig
+import org.mashupbots.socko.events.HttpRequestEvent
+import org.mashupbots.socko.events.InitialHttpRequestMessage
+import org.mashupbots.socko.events.WebSocketEventConfig
+import org.mashupbots.socko.events.WebSocketFrameEvent
+import org.mashupbots.socko.events.WebSocketHandshakeEvent
+import org.mashupbots.socko.infrastructure.Logger
 
 /**
  * Handles incoming HTTP messages from Netty
@@ -73,7 +71,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
   /**
    * HTTP processing configuration
    */
-  private val httpConfig = HttpContextConfig(
+  private val httpConfig = HttpEventConfig(
     server.config.serverName,
     server.config.http.minCompressibleContentSizeInBytes,
     server.config.http.maxCompressibleContentSizeInBytes,
@@ -83,7 +81,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
   /**
    * Web socket processing configuration
    */
-  private lazy val wsConfig = WebSocketContextConfig(server.config.serverName, server.webLogWriter)
+  private lazy val wsConfig = WebSocketEventConfig(server.config.serverName, server.webLogWriter)
 
   /**
    * Dispatch message to actor system for processing
@@ -94,39 +92,39 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     e.getMessage match {
       case httpRequest: HttpRequest =>
-        var ctx = HttpRequestContext(e.getChannel, httpRequest, httpConfig)
+        var event = HttpRequestEvent(e.getChannel, httpRequest, httpConfig)
 
-        log.debug("HTTP {} CHANNEL={}", ctx.endPoint, e.getChannel.getId)
+        log.debug("HTTP {} CHANNEL={}", event.endPoint, e.getChannel.getId)
 
-        if (ctx.request.isChunked) {
-          validateFirstChunk(ctx)
-          server.routes(ctx)
-          initialHttpRequest = Some(new InitialHttpRequestMessage(ctx.request, ctx.createdOn))
-        } else if (ctx.request.isWebSocketUpgrade) {
-          var wsctx = WebSocketHandshakeContext(e.getChannel, httpRequest, httpConfig)
+        if (event.request.isChunked) {
+          validateFirstChunk(event)
+          server.routes(event)
+          initialHttpRequest = Some(new InitialHttpRequestMessage(event.request, event.createdOn))
+        } else if (event.request.isWebSocketUpgrade) {
+          var wsctx = WebSocketHandshakeEvent(e.getChannel, httpRequest, httpConfig)
           server.routes(wsctx)
           doWebSocketHandshake(wsctx)
-          initialHttpRequest = Some(new InitialHttpRequestMessage(ctx.request, ctx.createdOn))
+          initialHttpRequest = Some(new InitialHttpRequestMessage(event.request, event.createdOn))
         } else {
-          server.routes(ctx)
+          server.routes(event)
         }
 
       case httpChunk: HttpChunk =>
-        var ctx = HttpChunkContext(e.getChannel, initialHttpRequest.get, httpChunk, httpConfig)
+        var event = HttpChunkEvent(e.getChannel, initialHttpRequest.get, httpChunk, httpConfig)
         initialHttpRequest.get.totalChunkContentLength += httpChunk.getContent.readableBytes
 
-        log.debug("CHUNK {} CHANNEL={}", ctx.endPoint, e.getChannel.getId)
+        log.debug("CHUNK {} CHANNEL={}", event.endPoint, e.getChannel.getId)
 
-        server.routes(ctx)
+        server.routes(event)
 
-        if (ctx.chunk.isLastChunk) {
-          validateLastChunk(ctx)
+        if (event.chunk.isLastChunk) {
+          validateLastChunk(event)
         }
 
       case wsFrame: WebSocketFrame =>
-        var ctx = WebSocketFrameContext(e.getChannel, initialHttpRequest.get, wsFrame, wsConfig)
+        var event = WebSocketFrameEvent(e.getChannel, initialHttpRequest.get, wsFrame, wsConfig)
 
-        log.debug("WS {} CHANNEL={}", ctx.endPoint, e.getChannel.getId)
+        log.debug("WS {} CHANNEL={}", event.endPoint, e.getChannel.getId)
 
         if (wsFrame.isInstanceOf[CloseWebSocketFrame]) {
           // This will also close the channel
@@ -134,7 +132,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
         } else if (wsFrame.isInstanceOf[PingWebSocketFrame]) {
           e.getChannel.write(new PongWebSocketFrame(wsFrame.getBinaryData()))
         } else {
-          server.routes(ctx)
+          server.routes(event)
         }
 
       case _ =>
@@ -143,33 +141,33 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
   }
 
   /**
-   * Check if it is valid to process chunks and store state information
+   * Check if it is valid to process chunks and store state information.
+   * 
+   * An exception is thrown if invalid.
    *
-   * @param channel Netty channel that can be used to write response
-   * @param httpRequest Request for processing
-   * @param matchingRoute Matching route that was found
+   * @param event HTTP request event that is chunked
    */
-  private def validateFirstChunk(ctx: HttpRequestContext) {
-    if (isAggreatingChunks(ctx.channel)) {
-      if (ctx.request.isChunked) {
+  private def validateFirstChunk(event: HttpRequestEvent) {
+    if (isAggreatingChunks(event.channel)) {
+      if (event.request.isChunked) {
         if (initialHttpRequest.isDefined) {
           throw new IllegalStateException("New chunk started before the previous chunk ended")
         }
       }
-      if (!ctx.request.isChunked && initialHttpRequest.isDefined) {
+      if (!event.request.isChunked && initialHttpRequest.isDefined) {
         throw new IllegalStateException("New request received before the previous chunk ended")
       }
-    } else if (ctx.request.isChunked) {
+    } else if (event.request.isChunked) {
       throw new IllegalStateException("Received a chunk when chunks should have been aggreated")
     }
   }
 
   /**
-   * Check for last chunk and reset context
+   * Check for last chunk
    */
-  private def validateLastChunk(ctx: HttpChunkContext) {
-    if (isAggreatingChunks(ctx.channel)) {
-      if (ctx.chunk.isLastChunk) {
+  private def validateLastChunk(event: HttpChunkEvent) {
+    if (isAggreatingChunks(event.channel)) {
+      if (event.chunk.isLastChunk) {
         initialHttpRequest = None
       }
     } else {
@@ -205,7 +203,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
   /**
    * Write HTTP error response and close the channel
    *
-   * @param ctx Channel Context
+   * @param ctx Channel Event
    * @param status HTTP error status indicating the nature of the error
    * @param ex Exception
    */
@@ -246,7 +244,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
    *
    * @param ctx Handshake context
    */
-  private def createWebSocketLocation(ctx: WebSocketHandshakeContext): String = {
+  private def createWebSocketLocation(ctx: WebSocketHandshakeEvent): String = {
     val sb = new StringBuilder
     sb.append(if (isSSLConnection(ctx.channel)) "wss" else "ws")
     sb.append("://")
@@ -258,24 +256,24 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
   /**
    * Performs web socket handshake
    *
-   * @param ctx Handshake context
+   * @param event Handshake event
    */
-  private def doWebSocketHandshake(ctx: WebSocketHandshakeContext): Unit = {
-    if (!ctx.isAuthorized) {
+  private def doWebSocketHandshake(event: WebSocketHandshakeEvent): Unit = {
+    if (!event.isAuthorized) {
       throw new UnsupportedOperationException("Websocket not supported at this end point")
     }
 
     val wsFactory = new WebSocketServerHandshakerFactory(
-      createWebSocketLocation(ctx),
-      if (ctx.authorizedSubprotocols.isDefined) ctx.authorizedSubprotocols.get else null,
+      createWebSocketLocation(event),
+      if (event.authorizedSubprotocols.isDefined) event.authorizedSubprotocols.get else null,
       false)
-    wsHandshaker = wsFactory.newHandshaker(ctx.nettyHttpRequest)
+    wsHandshaker = wsFactory.newHandshaker(event.nettyHttpRequest)
     if (wsHandshaker == null) {
-      wsFactory.sendUnsupportedWebSocketVersionResponse(ctx.channel)
-      ctx.writeWebLog(HttpResponseStatus.UPGRADE_REQUIRED.getCode, 0)
+      wsFactory.sendUnsupportedWebSocketVersionResponse(event.channel)
+      event.writeWebLog(HttpResponseStatus.UPGRADE_REQUIRED.getCode, 0)
     } else {
-      wsHandshaker.handshake(ctx.channel, ctx.nettyHttpRequest)
-      ctx.writeWebLog(HttpResponseStatus.SWITCHING_PROTOCOLS.getCode, 0)
+      wsHandshaker.handshake(event.channel, event.nettyHttpRequest)
+      event.writeWebLog(HttpResponseStatus.SWITCHING_PROTOCOLS.getCode, 0)
     }
   }
 

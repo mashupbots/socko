@@ -16,7 +16,7 @@
 package org.mashupbots.socko
 
 /**
- * Web server built on top of Netty.
+ * Socoko web server built on top of Netty networking and Akka processing.
  */
 package object webserver {
 }

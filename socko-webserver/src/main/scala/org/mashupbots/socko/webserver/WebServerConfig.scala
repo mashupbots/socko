@@ -16,15 +16,16 @@
 package org.mashupbots.socko.webserver
 
 import java.io.File
-import akka.actor.ExtensionId
-import akka.actor.ExtensionIdProvider
-import akka.actor.ExtendedActorSystem
-import akka.actor.Extension
+
+import scala.collection.JavaConversions.asScalaBuffer
+
+import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.infrastructure.WebLogFormat
+
 import com.typesafe.config.Config
-import org.mashupbots.socko.utils.Logger
 import com.typesafe.config.ConfigException
-import org.mashupbots.socko.utils.WebLogFormat
-import scala.collection.JavaConversions._
+
+import akka.actor.Extension
 
 /**
  * Web server configuration
@@ -120,10 +121,7 @@ import scala.collection.JavaConversions._
  * 	You can also specify comma separated hostnames/ip address like `localhost,192.168.1.1`.
  *  Defaults to `localhost`.
  * @param port IP port number to bind to. Defaults to `8888`.
- * @param webLogActorPath Path to an actor that will be sent [[org.mashupbots.socko.utils.WebLogEvent]] to be recoreded.
- *  If no actor exists at the path at the time of WebServer startup, the default
- *  [[org.mashupbots.socko.utils.WebLogWriter]] will be created. If `None`, web log events will not be sent to any
- *  actors.
+ * @param webLog Optional web log configuration.  If `None`, web log events will NOT be generated.
  * @param ssl SSL protocol configuration. If `None`, then SSL will not be turned on.
  *  Defaults to `None`.
  * @param http HTTP protocol configuration. Defaults to an instance of

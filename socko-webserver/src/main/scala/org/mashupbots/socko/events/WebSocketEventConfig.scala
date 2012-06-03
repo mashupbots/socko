@@ -13,19 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.routes
+package org.mashupbots.socko.events
 
-import java.nio.charset.Charset
-import org.jboss.netty.channel.Channel
-import org.mashupbots.socko.events.EndPoint
-import org.mashupbots.socko.events.SockoEvent
+import akka.actor.ActorRef
 
 /**
- *  Context for testing routing
+ * Web Socket configuration used by [[org.mashupbots.socko.events.WebSocketFrameEvent]
+ *
+ * @param serverName Name of this instance of the Socko Web Server
+ * @param webLogWriter Actor to which web log events to be sent
  */
-case class TestContext(endPoint: EndPoint) extends SockoEvent {
-  val channel: Channel = null
-  def readStringContent(): String = ""
-  def readStringContent(charset: Charset): String = ""
-  def readBinaryContent(): Array[Byte] = null
+case class WebSocketEventConfig(
+  serverName: String,
+  webLogWriter: Option[ActorRef]) {
 }

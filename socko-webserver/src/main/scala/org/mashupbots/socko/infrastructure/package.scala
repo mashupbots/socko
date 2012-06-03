@@ -13,19 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.routes
-
-import java.nio.charset.Charset
-import org.jboss.netty.channel.Channel
-import org.mashupbots.socko.events.EndPoint
-import org.mashupbots.socko.events.SockoEvent
+package org.mashupbots.socko
 
 /**
- *  Context for testing routing
+ * Utility classes and objects
  */
-case class TestContext(endPoint: EndPoint) extends SockoEvent {
-  val channel: Channel = null
-  def readStringContent(): String = ""
-  def readStringContent(charset: Charset): String = ""
-  def readBinaryContent(): Array[Byte] = null
+package org.mashupbots.socko.infrastructure {
 }

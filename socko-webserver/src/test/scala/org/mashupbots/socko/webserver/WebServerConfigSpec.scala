@@ -27,7 +27,7 @@ import akka.actor.ActorSystem
 import akka.actor.ExtendedActorSystem
 import akka.actor.ExtensionId
 import akka.actor.ExtensionIdProvider
-import org.mashupbots.socko.utils.WebLogFormat
+import org.mashupbots.socko.infrastructure.WebLogFormat
 
 @RunWith(classOf[JUnitRunner])
 class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll  {

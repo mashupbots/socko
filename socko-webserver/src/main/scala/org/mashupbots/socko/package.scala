@@ -20,15 +20,21 @@ package org.mashupbots
  * 
  * Package dependency hierarchy
  * {{{
- *                 utils
+ *             infrastructure
  *                   |
- *                context
+ *                 events
  *               ____|____
  *               |       |
- *            routes   processors
+ *            routes   handlers
  *               \       /
  *               webserver
  * }}}
+ * 
+ *  - **infrastructure** - utility classes 
+ *  - **events** - events are created by Socko and dispatched by your routes to your handlers
+ *  - **routes** - extracts to assist with pattern matching in your routes
+ *  - **handlers** - akka actors that executes business logic
+ *  - **webserver** - Socko web server and its configuration
  */
 package object socko {
 }
