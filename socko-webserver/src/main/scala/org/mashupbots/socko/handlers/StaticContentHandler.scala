@@ -262,7 +262,8 @@ class StaticContentHandler() extends Actor {
   private def sendResource(resourceRequest: StaticResourceRequest, cacheEntry: CachedResource): Unit = {
     val event = resourceRequest.event
 
-    val isModified = (event.request.headers.getOrElse(HttpHeaders.Names.ETAG, "") != cacheEntry.etag)
+    val etag = event.request.headers.getOrElse(HttpHeaders.Names.IF_NONE_MATCH, "")
+    val isModified = (etag!= cacheEntry.etag)
     if (isModified) {
       val now = new GregorianCalendar()
       var content = cacheEntry.content
@@ -418,7 +419,8 @@ class StaticContentHandler() extends Actor {
   private def sendSmallFile(fileRequest: StaticFileRequest, cacheEntry: CachedSmallFile): Unit = {
     val event = fileRequest.event
 
-    val isModified = (event.request.headers.getOrElse(HttpHeaders.Names.ETAG, "") != cacheEntry.etag)
+    val etag = event.request.headers.getOrElse(HttpHeaders.Names.IF_NONE_MATCH, "")
+    val isModified = (etag != cacheEntry.etag)
     if (isModified) {
       val now = new GregorianCalendar()
       var content = cacheEntry.content

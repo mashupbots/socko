@@ -62,13 +62,13 @@ class StaticContentSpec
 	  }
 	}"""
 
-  var actorSystem: ActorSystem = null
+  val actorSystem: ActorSystem = ActorSystem("StaticFileProcessorSpec", ConfigFactory.parseString(actorConfig))
   var webServer: WebServer = null
   val port = 9001
   val path = "http://localhost:" + port + "/"
-  var router: ActorRef = null
   var rootDir: File = null
   var tempDir: File = null
+  var router: ActorRef = null
 
   val routes = Routes({
     case event @ GET(PathSegments("files" :: relativePath)) => {
@@ -77,12 +77,15 @@ class StaticContentSpec
         new File(rootDir, relativePath.mkString("/", "/", "")))
       router ! request
     }
+    case event @ GET(PathSegments("resource" :: relativePath)) => {
+      val request = new StaticResourceRequest(
+        event.asInstanceOf[HttpRequestEvent],
+        relativePath.mkString("", "/", ""))
+      router ! request
+    }
   })
 
   override def beforeAll(configMap: Map[String, Any]) {
-    // Instance akka system
-    actorSystem = ActorSystem("StaticFileProcessorSpec", ConfigFactory.parseString(actorConfig))
-
     // Create root and temp dir
     rootDir = File.createTempFile("Root_", "")
     rootDir.delete()
@@ -93,6 +96,7 @@ class StaticContentSpec
     tempDir.mkdir()
 
     StaticContentHandlerConfig.rootFilePaths = Seq(rootDir.getAbsolutePath)
+    StaticContentHandlerConfig.tempDir = tempDir
     StaticContentHandlerConfig.browserCacheTimeoutSeconds = 60
     StaticContentHandlerConfig.serverCacheTimeoutSeconds = 2
 
@@ -123,7 +127,6 @@ class StaticContentSpec
     }
 
     actorSystem.shutdown()
-    actorSystem = null
   }
 
   def deleteDirectory(path: File): Boolean = {
@@ -147,9 +150,9 @@ class StaticContentSpec
     out.close()
   }
 
-  "StaticFileProcessor" should {
+  "StaticContentProcessor" should {
 
-    "correctly HTTP GET a file" in {
+    "correctly HTTP GET a small file" in {
       val content = "test data test data test data"
       val file = new File(rootDir, "gettest1.txt")
       writeTextFile(file, content)
@@ -175,16 +178,43 @@ class StaticContentSpec
       (expires.getTime - date.getTime) should equal(StaticContentHandlerConfig.browserCacheTimeoutSeconds * 1000)
     }
 
-    "correctly cache a file" in {
+    "correctly get and cache a resource" in {
+      // Initial get
+      val url = new URL(path + "resource/META-INF/mime.types")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection];
+      val resp = getResponseContent(conn)
+      //log.debug(resp.toString)
+
+      resp.status should equal("200")
+      resp.content.length should be > 0
+      resp.headers("Date").length should be > 0
+      resp.headers("Content-Type") should equal("application/octet-stream")
+      resp.headers("Cache-Control") should equal("private, max-age=60")
+      resp.headers("ETag").length should be > 0
+      resp.headers.getOrElse("Last-Modified", "") should be("")
+
+      val etag = resp.headers("ETag")
+
+      // Getting resource again should get a 304 Not Modified
+      val conn2 = url.openConnection().asInstanceOf[HttpURLConnection];
+      conn2.setRequestProperty("If-None-Match", etag)
+      val resp2 = getResponseContent(conn2)
+      //log.debug(resp2.toString)
+
+      resp2.status should equal("304")
+      resp2.headers("Date").length should be > 0
+    }
+
+    "correctly get and cache a small file" in {
       val sb = new StringBuilder
-      for (i <- 1 to 100000) sb.append("a")
+      for (i <- 1 to 1000) sb.append("a")
       val content = sb.toString
 
-      val file = new File(rootDir, "getCached.txt")
+      val file = new File(rootDir, "smallFile.txt")
       writeTextFile(file, content)
 
       // Initial get
-      val url = new URL(path + "files/getCached.txt")
+      val url = new URL(path + "files/smallFile.txt")
       val conn = url.openConnection().asInstanceOf[HttpURLConnection];
       val resp = getResponseContent(conn)
 
@@ -193,27 +223,93 @@ class StaticContentSpec
       resp.headers("Date").length should be > 0
       resp.headers("Content-Type") should equal("text/plain")
       resp.headers("Cache-Control") should equal("private, max-age=60")
+      resp.headers("ETag").length should be > 0
+      resp.headers("Last-Modified").length should be > 0
+
+      val etag = resp.headers("ETag")
+
+      // Getting file again should get a 304 Not Modified
+      val conn2 = url.openConnection().asInstanceOf[HttpURLConnection];
+      conn2.setRequestProperty("If-None-Match", etag)
+      val resp2 = getResponseContent(conn2)
+      //log.debug(resp2.toString)
+
+      resp2.status should equal("304")
+      resp2.headers("Date").length should be > 0
+
+      // Update file to force new file timestamp
+      // ETag should be cached
+      val content3 = "test"
+      writeTextFile(file, content3)
+      file.setLastModified(new Date().getTime + 2000)
+
+      val conn3 = url.openConnection().asInstanceOf[HttpURLConnection];
+      conn3.setRequestProperty("If-None-Match", etag)
+      val resp3 = getResponseContent(conn3)
+      //log.debug(resp3.toString)
+
+      resp3.status should equal("304")
+      resp3.headers("Date").length should be > 0
+
+      // Wait until cache times out
+      // We should get the file again
+      Thread.sleep(2000)
+
+      val conn4 = url.openConnection().asInstanceOf[HttpURLConnection];
+      conn4.setRequestProperty("If-None-Match", etag)
+      val resp4 = getResponseContent(conn4)
+      log.debug(resp4.toString)
+
+      resp4.status should equal("200")
+      resp4.content should equal("test")
+      resp4.headers("Date").length should be > 0
+      resp4.headers("Content-Type") should equal("text/plain")
+      resp4.headers("Cache-Control") should equal("private, max-age=60")
+      resp4.headers("ETag") should not equal (etag)
+    }
+
+    "correctly get and cache a big file" in {
+      val sb = new StringBuilder
+      for (i <- 1 to ((1024 * 100) + 1)) sb.append("a")
+      val content = sb.toString
+
+      val file = new File(rootDir, "bigfile.txt")
+      writeTextFile(file, content)
+
+      // Initial get
+      val url = new URL(path + "files/bigfile.txt")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection];
+      val resp = getResponseContent(conn)
+
+      resp.status should equal("200")
+      resp.content should equal(content)
+      resp.headers("Date").length should be > 0
+      resp.headers("Content-Type") should equal("text/plain")
+      resp.headers("Cache-Control") should equal("private, max-age=60")
+      resp.headers.getOrElse("ETag", "") should be("")
+      resp.headers("Last-Modified").length should be > 0
+
       val lastModified = resp.headers("Last-Modified")
 
       // Getting file again should get a 304 Not Modified
       val conn2 = url.openConnection().asInstanceOf[HttpURLConnection];
       conn2.setRequestProperty("If-Modified-Since", lastModified)
       val resp2 = getResponseContent(conn2)
-      log.debug(resp2.toString)
+      //log.debug(resp2.toString)
 
       resp2.status should equal("304")
       resp2.headers("Date").length should be > 0
 
       // Update file to force new file timestamp
-      // Last modified should be cached
-      val content3 = "test"
-      writeTextFile(file, content3)
+      // ETag should be cached
+      sb.append("xxx")
+      writeTextFile(file, sb.toString)
       file.setLastModified(new Date().getTime + 2000)
 
       val conn3 = url.openConnection().asInstanceOf[HttpURLConnection];
       conn3.setRequestProperty("If-Modified-Since", lastModified)
       val resp3 = getResponseContent(conn3)
-      log.debug(resp3.toString)
+      //log.debug(resp3.toString)
 
       resp3.status should equal("304")
       resp3.headers("Date").length should be > 0
@@ -225,10 +321,10 @@ class StaticContentSpec
       val conn4 = url.openConnection().asInstanceOf[HttpURLConnection];
       conn4.setRequestProperty("If-Modified-Since", lastModified)
       val resp4 = getResponseContent(conn4)
-      log.debug(resp4.toString)
+      ///log.debug(resp4.toString)
 
       resp4.status should equal("200")
-      resp4.content should equal("test")
+      resp4.content should equal(sb.toString)
       resp4.headers("Date").length should be > 0
       resp4.headers("Content-Type") should equal("text/plain")
       resp4.headers("Cache-Control") should equal("private, max-age=60")
@@ -281,19 +377,139 @@ class StaticContentSpec
       resp.headers("Date").length should be > 0
     }
 
-    "correctly return GZIP encode content" in {
+    "return '404 Not Found' if requested resource is not found" in {
+      val url = new URL(path + "resource/META-INF/notexist.txt")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection];
+      val resp = getResponseContent(conn)
+      log.debug(resp.toString)
+
+      resp.status should equal("404")
+      resp.headers("Date").length should be > 0
+    }
+    
+    "correctly GZIP encode resource content" in {
+      val url = new URL(path + "resource/META-INF/mime.types")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection];
+      conn.setRequestProperty("Accept-Encoding", "gzip")
+      val resp = getResponseContent(conn)
+
+      resp.status should equal("200")
+      resp.headers("Date").length should be > 0
+      resp.headers("Content-Encoding") should equal("gzip")
+      resp.content.length should be > 0
+      val etag = resp.headers("ETag")
+      log.debug(resp.headers.toString)
+
+      // Getting file again should get a 304 Not Modified
+      val conn2 = url.openConnection().asInstanceOf[HttpURLConnection];
+      conn2.setRequestProperty("If-None-Match", etag)
+      val resp2 = getResponseContent(conn2)
+      log.debug(resp2.toString)
+
+      resp2.status should equal("304")
+      resp2.headers("Date").length should be > 0
+    }
+
+    "correctly DEFLATE encode resource content" in {
+      val url = new URL(path + "resource/META-INF/mime.types")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection];
+      conn.setRequestProperty("Accept-Encoding", "deflate")
+      val resp = getResponseContent(conn)
+
+      resp.status should equal("200")
+      resp.headers("Date").length should be > 0
+      resp.headers("Content-Encoding") should equal("deflate")
+      resp.content.length should be > 0
+      val etag = resp.headers("ETag")
+      log.debug(resp.headers.toString)
+
+      // Getting file again should get a 304 Not Modified
+      val conn2 = url.openConnection().asInstanceOf[HttpURLConnection];
+      conn2.setRequestProperty("If-None-Match", etag)
+      val resp2 = getResponseContent(conn2)
+      log.debug(resp2.toString)
+
+      resp2.status should equal("304")
+      resp2.headers("Date").length should be > 0
+    }
+    
+    "correctly GZIP encode small file content" in {
+      val sb = new StringBuilder
+      for (i <- 1 to 10000) sb.append("b")
+      val content = sb.toString
+
+      val file = new File(rootDir, "getSmallGZippedContent.txt")
+      writeTextFile(file, content)
+
+      // Initial get
+      val url = new URL(path + "files/getSmallGZippedContent.txt")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection];
+      conn.setRequestProperty("Accept-Encoding", "gzip")
+      val resp = getResponseContent(conn)
+
+      resp.status should equal("200")
+      resp.headers("Date").length should be > 0
+      resp.headers("Content-Encoding") should equal("gzip")
+      resp.content should equal(content)
+      val etag = resp.headers("ETag")
+      log.debug(resp.headers.toString)
+
+      // Getting file again should get a 304 Not Modified
+      val conn2 = url.openConnection().asInstanceOf[HttpURLConnection];
+      conn2.setRequestProperty("If-None-Match", etag)
+      val resp2 = getResponseContent(conn2)
+      log.debug(resp2.toString)
+
+      resp2.status should equal("304")
+      resp2.headers("Date").length should be > 0
+    }
+
+    "correctly DEFLATE encode small file content" in {
       val sb = new StringBuilder
       for (i <- 1 to 100000) sb.append("b")
       val content = sb.toString
 
-      val file = new File(rootDir, "getGZippedContent.txt")
+      val file = new File(rootDir, "getSmallDeflatedContent.txt")
       writeTextFile(file, content)
 
       // Initial get
-      val url = new URL(path + "files/getGZippedContent.txt")
+      val url = new URL(path + "files/getSmallDeflatedContent.txt")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection];
+      conn.setRequestProperty("Accept-Encoding", "deflate")
+      val resp = getResponseContent(conn)
+
+      resp.status should equal("200")
+      resp.headers("Date").length should be > 0
+      resp.headers("Content-Encoding") should equal("deflate")
+      resp.content should equal(content)
+      val etag = resp.headers("ETag")
+      log.debug(resp.headers.toString)
+
+      // Getting file again should get a 304 Not Modified
+      val conn2 = url.openConnection().asInstanceOf[HttpURLConnection];
+      conn2.setRequestProperty("If-None-Match", etag)
+      val resp2 = getResponseContent(conn2)
+      log.debug(resp2.toString)
+
+      resp2.status should equal("304")
+      resp2.headers("Date").length should be > 0
+    }
+
+    "correctly GZIP encode big file content" in {
+      val sb = new StringBuilder
+      for (i <- 1 to 200000) sb.append("b")
+      val content = sb.toString
+
+      val file = new File(rootDir, "getBigGZippedContent.txt")
+      writeTextFile(file, content)
+
+      // Initial get
+      val url = new URL(path + "files/getBigGZippedContent.txt")
       val conn = url.openConnection().asInstanceOf[HttpURLConnection];
       conn.setRequestProperty("Accept-Encoding", "gzip")
       val resp = getResponseContent(conn)
+
+      val x = resp.content.length
 
       resp.status should equal("200")
       resp.headers("Date").length should be > 0
@@ -306,22 +522,22 @@ class StaticContentSpec
       val conn2 = url.openConnection().asInstanceOf[HttpURLConnection];
       conn2.setRequestProperty("If-Modified-Since", lastModified)
       val resp2 = getResponseContent(conn2)
-      log.debug(resp2.toString)
+      //log.debug(resp2.toString)
 
       resp2.status should equal("304")
       resp2.headers("Date").length should be > 0
     }
 
-    "correctly return DEFLATE encode content" in {
+    "correctly DEFLATE encode big file content" in {
       val sb = new StringBuilder
-      for (i <- 1 to 100000) sb.append("b")
+      for (i <- 1 to 200000) sb.append("b")
       val content = sb.toString
 
-      val file = new File(rootDir, "getDeflatedContent.txt")
+      val file = new File(rootDir, "getBigGDeflatedContent.txt")
       writeTextFile(file, content)
 
       // Initial get
-      val url = new URL(path + "files/getDeflatedContent.txt")
+      val url = new URL(path + "files/getBigGDeflatedContent.txt")
       val conn = url.openConnection().asInstanceOf[HttpURLConnection];
       conn.setRequestProperty("Accept-Encoding", "deflate")
       val resp = getResponseContent(conn)

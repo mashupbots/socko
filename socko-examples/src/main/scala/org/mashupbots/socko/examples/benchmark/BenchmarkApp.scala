@@ -17,7 +17,6 @@ package org.mashupbots.socko.examples.benchmark
 
 import java.io.File
 import java.io.FileOutputStream
-
 import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.handlers.StaticContentHandler
 import org.mashupbots.socko.handlers.StaticFileRequest
@@ -26,13 +25,12 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes._
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
-
 import com.typesafe.config.ConfigFactory
-
 import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.routing.FromConfig
+import org.mashupbots.socko.handlers.StaticContentHandlerConfig
 
 /**
  * This example is used for benchmarking
@@ -44,6 +42,9 @@ object BenchmarkApp extends Logger {
 
   val contentDir = createTempDir("content_")
   val tempDir = createTempDir("temp_")
+
+  StaticContentHandlerConfig.rootFilePaths = Seq(contentDir.getAbsolutePath)
+  StaticContentHandlerConfig.tempDir = tempDir
 
   //
   // STEP #1 - Define Actors and Start Akka
@@ -69,8 +70,7 @@ object BenchmarkApp extends Logger {
 	  }
 	}"""
 
-  val actorSystem = ActorSystem("BenchmarkActorSystem", ConfigFactory.parseString(actorConfig))
-
+  val actorSystem = ActorSystem("BenchmarkActorSystem", ConfigFactory.parseString(actorConfig))  
   val staticContentHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
     .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
 
@@ -82,17 +82,13 @@ object BenchmarkApp extends Logger {
       case GET(Path("/test.html")) => {
         val staticFileRequest = new StaticFileRequest(
           request,
-          contentDir,
-          new File(contentDir, "test.html"),
-          tempDir)
+          new File(contentDir, "test.html"))
         staticContentHandlerRouter ! staticFileRequest
       }
-      case GET(Path("/data.dat")) => {
+      case GET(Path("/data.txt")) => {
         val staticFileRequest = new StaticFileRequest(
           request,
-          contentDir,
-          new File(contentDir, "data.dat"),
-          tempDir)
+          new File(contentDir, "data.txt"))
         staticContentHandlerRouter ! staticFileRequest
       }
       case GET(Path("/dynamic")) => {
@@ -124,7 +120,7 @@ object BenchmarkApp extends Logger {
 
     System.out.println("Content directory is " + contentDir.getCanonicalPath)
     System.out.println("Small Static File: http://localhost:8888/test.html")
-    System.out.println("Big Static File  : http://localhost:8888/data.dat")
+    System.out.println("Big Static File  : http://localhost:8888/data.txt")
     System.out.println("Dynamic Content  : http://localhost:8888/dynamic")
   }
 
@@ -183,7 +179,7 @@ object BenchmarkApp extends Logger {
       buf.append('a')
     }
 
-    val bigFile = new File(dir, "data.dat")
+    val bigFile = new File(dir, "data.txt")
     val out2 = new FileOutputStream(bigFile)
     out2.write(buf.toString.getBytes(CharsetUtil.UTF_8))
     out2.close()

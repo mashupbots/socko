@@ -20,6 +20,7 @@ import java.io.FileOutputStream
 
 import org.jboss.netty.util.CharsetUtil
 import org.mashupbots.socko.handlers.StaticContentHandler
+import org.mashupbots.socko.handlers.StaticContentHandlerConfig
 import org.mashupbots.socko.handlers.StaticFileRequest
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes._
@@ -28,9 +29,9 @@ import org.mashupbots.socko.webserver.WebServerConfig
 
 import com.typesafe.config.ConfigFactory
 
-import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
+import akka.actor.actorRef2Scala
 import akka.routing.FromConfig
 
 /**
@@ -44,6 +45,9 @@ object FileUploadApp extends Logger {
   val contentDir = createTempDir("content_")
   val tempDir = createTempDir("temp_")
 
+  StaticContentHandlerConfig.rootFilePaths = Seq(contentDir.getAbsolutePath)
+  StaticContentHandlerConfig.tempDir = tempDir
+  
   //
   // STEP #1 - Define Actors and Start Akka
   //
@@ -96,9 +100,7 @@ object FileUploadApp extends Logger {
         // Download requested file
         val staticFileRequest = new StaticFileRequest(
           request,
-          contentDir,
-          new File(contentDir, fileName),
-          tempDir)
+          new File(contentDir, fileName))
         staticFileHandlerRouter ! staticFileRequest
       }
       case POST(Path("/upload")) => {
