@@ -55,11 +55,3 @@ abstract class HttpEvent() extends SockoEvent {
    */
   def writeWebLog(responseStatusCode: Int, responseSize: Long)
 }
-
-/**
- * Statics
- */
-object HttpEvent {
-  val HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz"
-  val HTTP_DATE_GMT_TIMEZONE = "GMT"
-}

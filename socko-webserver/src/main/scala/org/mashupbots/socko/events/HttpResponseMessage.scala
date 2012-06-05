@@ -17,7 +17,6 @@ package org.mashupbots.socko.events
 
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import java.nio.charset.Charset
-
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import javax.activation.MimetypesFileTypeMap
 import java.io.File
@@ -37,6 +36,8 @@ import java.util.zip.GZIPOutputStream
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.DefaultHttpChunk
 import org.jboss.netty.handler.codec.http.DefaultHttpChunkTrailer
+import org.mashupbots.socko.infrastructure.MimeTypes
+import org.mashupbots.socko.infrastructure.DateUtil
 
 /**
  * Encapsulates the all the data sent to be sent to the client in an HTTP response; i.e. headers and content.
@@ -172,7 +173,7 @@ case class HttpResponseMessage(event: HttpEvent) {
       contentType = "text/plain; charset=UTF-8"
     }
 
-    val charset =  HttpResponseMessage.extractMimeTypeCharset(contentType.get).getOrElse(CharsetUtil.UTF_8)
+    val charset = HttpResponseMessage.extractMimeTypeCharset(contentType.get).getOrElse(CharsetUtil.UTF_8)
     write(content.getBytes(charset))
   }
 
@@ -354,7 +355,7 @@ case class HttpResponseMessage(event: HttpEvent) {
    *
    * Writing the first chunk is NOT buffered. The chunk is immediately sent to the client.
    *
-   * Calling `writeFirstChunk()` more than once results in an exception being thrown because only 1 response is 
+   * Calling `writeFirstChunk()` more than once results in an exception being thrown because only 1 response is
    * permitted per request.
    *
    * @param contentType MIME content type to set in the response header. For example, "image/gif". If omitted, the
@@ -425,7 +426,7 @@ case class HttpResponseMessage(event: HttpEvent) {
    * Writing the last chunk is NOT buffered. The last chunk is immediately sent to the client.
    *
    * Calling `writeLastChunk()` more than once will result in an exception being throw.
-   * 
+   *
    * @param trailingHeaders Trailing headers
    */
   def writeLastChunk(trailingHeaders: Map[String, String] = Map.empty[String, String]): Unit = {
@@ -458,10 +459,10 @@ case class HttpResponseMessage(event: HttpEvent) {
    * HTTP/1.1 302 Found
    * Location: http://www.newurl.org/
    * }}}
-   * 
+   *
    * Redirection is NOT buffered. The response is immediately sent to the client.
    *
-   * Calling `redirect()` more than once results in an exception being thrown because only 1 response is 
+   * Calling `redirect()` more than once results in an exception being thrown because only 1 response is
    * permitted per request.
    *
    * @param url URL to which the browser will be redirected
@@ -505,60 +506,9 @@ object HttpResponseMessage {
    * @param response HTTP response
    */
   def setDateHeader(response: HttpResponse) {
-    val dateFormatter = new SimpleDateFormat(HttpEvent.HTTP_DATE_FORMAT, Locale.US)
-    dateFormatter.setTimeZone(TimeZone.getTimeZone(HttpEvent.HTTP_DATE_GMT_TIMEZONE))
-
+    val dateFormatter = DateUtil.rfc1123DateFormatter
     val time = new GregorianCalendar()
     response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(time.getTime()))
-  }
-
-  /**
-   * Sets the Date, Last-Modified, Expires and Cache-Control headers in the HTTP Response
-   *
-   * For example:
-   * {{{
-   * Date:          Tue, 01 Mar 2011 22:44:26 GMT
-   * Last-Modified: Wed, 30 Jun 2010 21:36:48 GMT
-   * Expires:       Tue, 01 Mar 2012 22:44:26 GMT
-   * Cache-Control: private, max-age=31536000
-   * }}}
-   *
-   * @param response HTTP response
-   * @param lastModified When the file was last modified
-   * @param browserCacheSeconds Number of seconds for which the file should be cached by the browser
-   */
-  def setDateAndCacheHeaders(response: HttpResponse, lastModified: Date, browserCacheSeconds: Int) {
-    val dateFormatter = new SimpleDateFormat(HttpEvent.HTTP_DATE_FORMAT, Locale.US)
-    dateFormatter.setTimeZone(TimeZone.getTimeZone(HttpEvent.HTTP_DATE_GMT_TIMEZONE))
-
-    // Date header
-    val time = new GregorianCalendar()
-    response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(time.getTime()))
-
-    // Add cache headers
-    time.add(Calendar.SECOND, browserCacheSeconds)
-    response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(time.getTime()))
-    response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
-    response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(lastModified))
-  }
-
-  /**
-   * Sets the content type header for the HTTP Response based on the file name extension
-   *
-   * For example:
-   * {{{
-   * Content-Type: image/gif
-   * }}}
-   *
-   * This implementation uses <a href="http://docs.oracle.com/javase/6/docs/api/javax/activation/MimetypesFileTypeMap.html">
-   * `MimetypesFileTypeMap`</a> and relies on the presence of the file extening in a `mime.types` file.
-   *
-   * @param response  HTTP response
-   * @param file file to extract content type
-   */
-  def setContentTypeHeader(response: HttpResponse, file: File) {
-    val mimeTypesMap = new MimetypesFileTypeMap()
-    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, mimeTypesMap.getContentType(file.getCanonicalPath))
   }
 
   /**

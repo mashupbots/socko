@@ -76,11 +76,7 @@ class StaticContentSpec
     case event @ GET(PathSegments("files" :: relativePath)) => {
       val request = new StaticFileRequest(
         event.asInstanceOf[HttpRequestEvent],
-        rootDir,
-        new File(rootDir, relativePath.mkString("/", "/", "")),
-        tempDir,
-        browserCacheTimeoutSeconds,
-        fileLastModifiedCacheTimeoutSeconds)
+        new File(rootDir, relativePath.mkString("/", "/", "")))
       router ! request
     }
   })

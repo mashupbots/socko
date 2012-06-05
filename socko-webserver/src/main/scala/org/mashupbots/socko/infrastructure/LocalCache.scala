@@ -35,7 +35,7 @@ class LocalCache(capacity: Long = 1000, concurrentThreadCount: Int = 16) {
     .concurrencyLevel(concurrentThreadCount)
     .build()
 
-  case class CachedItem(value: Any, expiry: Long)
+  private[LocalCache] case class CachedItem(value: Any, expiry: Long)
 
   /**
    * Retrieves the value associated with the specified key
@@ -64,8 +64,8 @@ class LocalCache(capacity: Long = 1000, concurrentThreadCount: Int = 16) {
    *
    * @param key Unique identifier for the value
    * @param value Value to cache
-   * @param timeToLive After this number of milliseconds, item will be evicted. If `0` (default), item will stay in 
-   *   the cache indefinitely until the cache's capacity is reached. 
+   * @param timeToLive After this number of milliseconds, item will be evicted. If `0` (default), item will stay in
+   *   the cache indefinitely until the cache's capacity is reached.
    */
   def set(key: String, value: Any, timeToLive: Long = 0) {
     require(key != null, "Key cannot be null")

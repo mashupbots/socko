@@ -19,9 +19,7 @@ import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
 import scala.collection.JavaConversions._
-
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.HttpChunk
@@ -30,6 +28,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.handler.codec.http.HttpRequest
 import org.jboss.netty.handler.codec.http.HttpVersion
 import org.mashupbots.socko.infrastructure.CharsetUtil
+import org.mashupbots.socko.infrastructure.DateUtil
 
 /**
  * Encapsulates the all the data sent in a HTTP request; i.e. headers and content.
@@ -156,6 +155,17 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
   }
 
   /**
+   * Our supported encoding; `None` if `acceptedEncodings` does not contain an encoding that we support  
+   */
+  val supportedEncoding: Option[String] = if (acceptedEncodings.contains("gzip")) {
+    Some("gzip")
+  } else if (acceptedEncodings.contains("deflate")) {
+    Some("deflate")
+  } else {
+    None
+  }
+
+  /**
    * HTTP version
    */
   val httpVersion = nettyHttpRequest.getProtocolVersion.toString
@@ -173,7 +183,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
     try {
       val ifModifiedSince = headers.get(HttpHeaders.Names.IF_MODIFIED_SINCE)
       if (ifModifiedSince.isDefined) {
-        val dateFormatter = new SimpleDateFormat(HttpEvent.HTTP_DATE_FORMAT, Locale.US)
+        val dateFormatter = DateUtil.rfc1123DateFormatter
         Some(dateFormatter.parse(ifModifiedSince.get))
       } else {
         None
@@ -230,11 +240,11 @@ class HttpContent(buffer: Option[ChannelBuffer], contentType: String) {
 
   /**
    * Returns a string representation of the content.
-   * 
+   *
    * The character set in the content type will be used.  If not supplied, UTF-8 is assumed.
    */
   override def toString() = {
-    val charset =  HttpResponseMessage.extractMimeTypeCharset(contentType).getOrElse(CharsetUtil.UTF_8)
+    val charset = HttpResponseMessage.extractMimeTypeCharset(contentType).getOrElse(CharsetUtil.UTF_8)
     if (buffer.isEmpty) {
       ""
     } else {
@@ -244,7 +254,7 @@ class HttpContent(buffer: Option[ChannelBuffer], contentType: String) {
 
   /**
    * Returns a string representation of the content using the specified character set.
-   * 
+   *
    * @param charset Character set to use to decode the string
    */
   def toString(charset: Charset) = {
@@ -267,7 +277,7 @@ class HttpContent(buffer: Option[ChannelBuffer], contentType: String) {
   }
 
   /**
-   * Returns the contents as a Netty native channel buffer 
+   * Returns the contents as a Netty native channel buffer
    */
   def toChannelBuffer() = {
     buffer.getOrElse(ChannelBuffers.EMPTY_BUFFER)

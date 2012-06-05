@@ -27,11 +27,9 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.GZIPOutputStream
 import java.util.Date
-
 import scala.Array.canBuildFrom
 import scala.collection.JavaConversions.asScalaConcurrentMap
 import scala.collection.mutable.ConcurrentMap
-
 import org.jboss.netty.channel.ChannelFuture
 import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.channel.ChannelFutureProgressListener
@@ -45,20 +43,33 @@ import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.HttpResponseMessage
 import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.infrastructure.Logger
-
 import akka.actor.Actor
 import akka.event.Logging
+import org.mashupbots.socko.infrastructure.LocalCache
+import javax.activation.MimetypesFileTypeMap
+import org.mashupbots.socko.infrastructure.MimeTypes
+import java.io.InputStream
+import org.mashupbots.socko.infrastructure.IOUtil
+import org.mashupbots.socko.infrastructure.HashUtil
+import org.mashupbots.socko.infrastructure.DateUtil
+import java.util.GregorianCalendar
+import java.util.Calendar
+import java.io.ByteArrayOutputStream
+import java.io.ByteArrayInputStream
+import org.jboss.netty.buffer.ChannelBuffers
+import java.io.OutputStream
 
 /**
  * Handles downloading of static files and resources.
  *
  * To trigger a download, send a [[org.mashupbots.socko.handlers.StaticFileRequest]] or
- * [[org.mashupbots.socko.handlers.StaticResourceRequest]] message from your routes. 
+ * [[org.mashupbots.socko.handlers.StaticResourceRequest]] message from your routes.
  *
- * [[org.mashupbots.socko.handlers.StaticContentHandler]] performs HTTP compression and also uses the 
+ * [[org.mashupbots.socko.handlers.StaticContentHandler]] performs HTTP compression and also uses the
  * `If-Modified-Since` header for browser side caching.
  *
- * [[org.mashupbots.socko.handlers.StaticContentHandler]] uses lots of disk IO (blocking code). Please run it using a 
+ * ==Configuration==
+ * [[org.mashupbots.socko.handlers.StaticContentHandler]] uses lots of disk IO (blocking code). Please run it using a
  * router with `PinnedDispatcher` (a thread per actor) or `BalancingDispatcher`.
  *
  * For example:
@@ -87,16 +98,119 @@ import akka.event.Logging
  *     }
  *   }
  * }}}
+ *
+ * ==Caching Small Files==
+ * HTTP `ETag` header is used.
+ *
+ * {{{
+ * Request #1 Headers
+ * ------------------
+ * GET /file1.txt HTTP/1.1
+ *
+ * Response #1 Headers
+ * ------------------
+ * HTTP/1.1 200 OK
+ * Date:               Tue, 01 Mar 2011 22:44:26 GMT
+ * ETag: "686897696a7c876b7e"
+ * Expires:            Tue, 01 Mar 2012 22:44:26 GMT
+ * Cache-Control:      private, max-age=31536000
+ *
+ * Request #2 Headers
+ * ------------------
+ * GET /file1.txt HTTP/1.1
+ * If-None-Match: "686897696a7c876b7e"
+ *
+ * Response #2 Headers
+ * ------------------
+ * HTTP/1.1 304 Not Modified
+ * Date:               Tue, 01 Mar 2011 22:44:28 GMT
+ * }}}
+ *
+ * ==Caching Big Files==
+ * HTTP `If-Modified-Since` header is used
+ *
+ * {{{
+ * Request #1 Headers
+ * ------------------
+ * GET /file1.txt HTTP/1.1
+ *
+ * Response #1 Headers
+ * ------------------
+ * HTTP/1.1 200 OK
+ * Date:               Tue, 01 Mar 2011 22:44:26 GMT
+ * Last-Modified:      Wed, 30 Jun 2010 21:36:48 GMT
+ * Expires:            Tue, 01 Mar 2012 22:44:26 GMT
+ * Cache-Control:      private, max-age=31536000
+ *
+ * Request #2 Headers
+ * ------------------
+ * GET /file1.txt HTTP/1.1
+ * If-Modified-Since:  Wed, 30 Jun 2010 21:36:48 GMT
+ *
+ * Response #2 Headers
+ * ------------------
+ * HTTP/1.1 304 Not Modified
+ * Date:               Tue, 01 Mar 2011 22:44:28 GMT
+ * }}}
+ *
+ * ==Compression==
+ * HTTP `Accept-Encoding` header is used by the caller to nominate their supported compression
+ * algorithm. We return the compression format used in the `Content-Encoding` header.
+ *
+ * {{{
+ * Request
+ * -------
+ * GET /encrypted-area HTTP/1.1
+ * Host: www.example.com
+ * Accept-Encoding: gzip, deflate
+ *
+ * Response
+ * --------
+ * HTTP/1.1 200 OK
+ * Content-Encoding: gzip
+ * }}}
+ *
+ * ==Note==
+ * If a response includes both an Expires header and a max-age directive, the max-age directive overrides the Expires
+ * header, even if the Expires header is more restrictive
+ *
+ * See [[http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html HTTP Header Field Definitions]]
+ *
+ * @param rootFilePaths Sequence of paths from which files are permitted to be served. Stops getting relative
+ *  file paths like `../etc/passwd`
+ * @param tempDir Temporary directory where compressed files can be stored
+ * @param serverCache Cache to store files in memory to speed up delivery
+ * @param serverCacheMaxFileSize Maximum size, in bytes, of a file to cache in memory. Defaults to 100K.
+ * @param serverCacheTimeoutSeconds Number of seconds to cache a file in memory on the server before refreshing the
+ *  cache if it has been updated.
+ * @param browserCacheTimeoutSeconds Number of seconds to tell the client to tell the browser to cache a file. This is
+ *  implemented using the `Etag` and `If-Modified-Since` headers.
  */
-class StaticContentHandler extends Actor {
+class StaticContentHandler(
+  rootFilePaths: Seq[String],
+  tempDir: File,
+  cache: LocalCache,
+  serverCacheMaxFileSize: Int = 1024 * 100,
+  serverCacheTimeoutSeconds: Int = 3600,
+  browserCacheTimeoutSeconds: Int = 3600) extends Actor {
+
   private val log = Logging(context.system, this)
 
   /**
-   * Only takes [[org.mashupbots.socko.processors.StaticFileRequest]] messages. 
+   * Simple Date Formatter that will format dates like: `Wed, 02 Oct 2002 13:00:00 GMT`
+   */
+  private val dateFormatter = DateUtil.rfc1123DateFormatter
+
+  /**
+   * Only takes [[org.mashupbots.socko.handlers.StaticFileRequest]] or
+   * messages.
    */
   def receive = {
     case request: StaticFileRequest => {
-      sendFile(request)
+      processStaticFileRequest(request)
+    }
+    case request: StaticResourceRequest => {
+      processStaticResourceRequest(request)
     }
     case _ => {
       log.info("received unknown message of type: ")
@@ -106,332 +220,526 @@ class StaticContentHandler extends Actor {
   /**
    * Downloads the requested file with content compression and caching
    *
-   * ==Caching==
-   * HTTP `If-Modified-Since` header is used
-   *
-   * {{{
-   * Request #1 Headers
-   * ------------------
-   * GET /file1.txt HTTP/1.1
-   *
-   * Response #1 Headers
-   * ------------------
-   * HTTP/1.1 200 OK
-   * Date:               Tue, 01 Mar 2011 22:44:26 GMT
-   * Last-Modified:      Wed, 30 Jun 2010 21:36:48 GMT
-   * Expires:            Tue, 01 Mar 2012 22:44:26 GMT
-   * Cache-Control:      private, max-age=31536000
-   *
-   * Request #2 Headers
-   * ------------------
-   * GET /file1.txt HTTP/1.1
-   * If-Modified-Since:  Wed, 30 Jun 2010 21:36:48 GMT
-   *
-   * Response #2 Headers
-   * ------------------
-   * HTTP/1.1 304 Not Modified
-   * Date:               Tue, 01 Mar 2011 22:44:28 GMT
-   * }}}
-   *
-   * ==Compression==
-   * HTTP `Accept-Encoding` header is used by the caller to nominate their supported compression
-   * algorithm. We return the compression format used in the `Content-Encoding` header.
-   *
-   * {{{
-   * Request
-   * -------
-   * GET /encrypted-area HTTP/1.1
-   * Host: www.example.com
-   * Accept-Encoding: gzip, deflate
-   *
-   * Response
-   * --------
-   * HTTP/1.1 200 OK
-   * Content-Encoding: gzip
-   * }}}
+   * @param resourceRequest Resource request request
    */
-  private def sendFile(request: StaticFileRequest): Unit = {
-    val file = request.file
-    val context = request.context
+  private def processStaticResourceRequest(resourceRequest: StaticResourceRequest): Unit = {
+    val event = resourceRequest.event
+    // Check if it is in the cache
+    val cachedContent = cache.get(resourceRequest.cacheKey)
+    if (cachedContent.isDefined) {
+      cachedContent.get match {
+        case res: CachedResource => sendResource(resourceRequest, res)
+      }
+    } else {
+      cacheAndSendResource(resourceRequest)
+    }
+  }
 
-    // Checks
-    if (!file.getAbsolutePath.startsWith(request.rootFileDir.getAbsolutePath)) {
+  /**
+   * Caches and then sends a resource. Assume that all resources are small and can be stored in memory
+   *
+   * @param resourceRequest Resource request
+   */
+  private def cacheAndSendResource(resourceRequest: StaticResourceRequest): Unit = {
+    val event = resourceRequest.event
+
+    log.debug("Getting Resource {}", resourceRequest.classpath)
+
+    val contentType = MimeTypes.get(resourceRequest.classpath)
+    val cacheTimeout = resourceRequest.serverCacheTimeoutSeconds.getOrElse(this.serverCacheTimeoutSeconds) * 1000L
+
+    val contents = IOUtil.readResource(resourceRequest.classpath)
+    val cachedContent = CachedResource(
+      resourceRequest.classpath,
+      contentType,
+      "\"" + HashUtil.md5(contents) + "\"",
+      contents)
+    cache.set(resourceRequest.cacheKey, cachedContent, cacheTimeout)
+    sendResource(resourceRequest, cachedContent)
+  }
+
+  /**
+   * Download a small file where its contents is stored in the cache
+   *
+   * @param resourceRequest File request
+   * @param cacheEntry Cached entry associated with the resource to send
+   */
+  private def sendResource(resourceRequest: StaticResourceRequest, cacheEntry: CachedResource): Unit = {
+    val event = resourceRequest.event
+
+    val isModified = (event.request.headers.getOrElse(HttpHeaders.Names.ETAG, "") != cacheEntry.etag)
+    if (isModified) {
+      val now = new GregorianCalendar()
+      var content = cacheEntry.content
+      var contentEncoding = ""
+
+      // Check if compression is supported.
+      // if format not supported or there is an error during compression, download uncompressed content
+      val supportedEncoding = event.request.supportedEncoding
+      if (supportedEncoding.isDefined) {
+        val key = "%s[%s][%s]".format(resourceRequest.cacheKey, supportedEncoding.get, cacheEntry.etag)
+        val compressedContents = cache.get(key)
+        if (compressedContents.isDefined) {
+          content = compressedContents.get.asInstanceOf[Array[Byte]]
+          contentEncoding = supportedEncoding.get
+        } else {
+          IOUtil.using(new ByteArrayOutputStream()) { bytesOut =>
+            IOUtil.using(new BufferedInputStream(new ByteArrayInputStream(cacheEntry.content))) { bytesIn =>
+              if (compress(bytesIn, bytesOut, supportedEncoding.get)) {
+                content = bytesOut.toByteArray
+                contentEncoding = supportedEncoding.get
+                val cacheTimeout = resourceRequest.serverCacheTimeoutSeconds.getOrElse(this.serverCacheTimeoutSeconds) * 1000L
+                cache.set(key, content, cacheTimeout)
+              }
+            }
+          }
+        }
+      }
+
+      // Prepare response    
+      val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
+
+      response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
+
+      response.setHeader(HttpHeaders.Names.CONTENT_TYPE, cacheEntry.contentType)
+      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, content.length)
+
+      if (event.request.isKeepAlive) {
+        response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+      }
+
+      val browserCacheSeconds = resourceRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
+      now.add(Calendar.SECOND, browserCacheSeconds)
+
+      response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
+      response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
+      response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
+
+      if (contentEncoding != "") {
+        response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
+      }
+
+      // We have to write our own web log entry since we are not using context.writeResponse
+      event.writeWebLog(HttpResponseStatus.OK.code, content.length)
+
+      // Write the initial HTTP response line and headers
+      val ch = event.channel
+      ch.write(response)
+
+      // Write the content
+      val writeFuture: ChannelFuture = ch.write(ChannelBuffers.copiedBuffer(content))
+
+      // Decide whether to close the connection or not.
+      if (!event.request.isKeepAlive) {
+        writeFuture.addListener(ChannelFutureListener.CLOSE)
+      }
+    } else {
+      event.response.write(HttpResponseStatus.NOT_MODIFIED)
+    }
+  }
+
+  /**
+   * Downloads the requested file with content compression and caching
+   *
+   * @param fileRequest File request
+   */
+  private def processStaticFileRequest(fileRequest: StaticFileRequest): Unit = {
+    val file = fileRequest.file
+    val filePath = file.getAbsolutePath
+    val event = fileRequest.event
+
+    // Check if it is in the cache
+    val cachedContent = cache.get(fileRequest.cacheKey)
+    if (cachedContent.isDefined) {
+      cachedContent.get match {
+        case smallFile: CachedSmallFile => sendSmallFile(fileRequest, smallFile)
+        case bigFile: CachedBigFile => sendBigFile(fileRequest, bigFile)
+      }
+    } else {
+      cacheAndSendFile(fileRequest)
+    }
+  }
+
+  /**
+   * Caches and then sends a file
+   *
+   * @param fileRequest File request
+   */
+  private def cacheAndSendFile(fileRequest: StaticFileRequest): Unit = {
+    val file = fileRequest.file
+    val filePath = file.getAbsolutePath
+    val event = fileRequest.event
+
+    // Not in the cache so cache and send ...
+    if (!rootFilePaths.exists(p => filePath.startsWith(p))) {
       // ".\file.txt" is a path but is not an absolute path nor canonical path.
       // "C:\temp\file.txt" is a path, an absolute path, a canonical path
       // "C:\temp\myapp\bin\..\..\file.txt" is a path, and an absolute path but not a canonical path
-      log.debug("File '{}' not under root directory '{}'", file.getAbsolutePath, request.rootFileDir.getAbsolutePath)
-      context.response.write(HttpResponseStatus.NOT_FOUND)
-      return
-    }
-    if (!file.exists() || file.isHidden()) {
-      log.debug("File '{}' does not exist or is hidden", file.getAbsolutePath)
-      context.response.write(HttpResponseStatus.NOT_FOUND)
-      return
-    }
-    if (file.getName.startsWith(".")) {
-      log.debug("File name '{}' starts with .", file.getAbsolutePath)
-      context.response.write(HttpResponseStatus.NOT_FOUND)
-      return
-    }
-    if (!file.isFile()) {
-      log.debug("File '{}' is not a file", file.getAbsolutePath)
-      context.response.write(HttpResponseStatus.NOT_FOUND)
-      return
-    }
-    log.debug("Getting {}", file)
-
-    // Download file if it has not been modified
-    val lastModified = StaticFileLastModifiedCache.get(file, request.fileLastModifiedCacheTimeoutSeconds)
-    if (hasFileBeenModified(request, lastModified)) {
-      downloadFile(request, file, lastModified, request.browserCacheTimeoutSeconds)
+      log.debug("File '{}' not under permitted root paths", filePath)
+      event.response.write(HttpResponseStatus.NOT_FOUND)
+    } else if (!file.exists() || file.isHidden()) {
+      log.debug("File '{}' does not exist or is hidden", filePath)
+      event.response.write(HttpResponseStatus.NOT_FOUND)
+    } else if (file.getName.startsWith(".")) {
+      log.debug("File name '{}' starts with .", filePath)
+      event.response.write(HttpResponseStatus.NOT_FOUND)
+    } else if (!file.isFile()) {
+      log.debug("File '{}' is not a file", filePath)
+      event.response.write(HttpResponseStatus.NOT_FOUND)
     } else {
-      context.response.write(HttpResponseStatus.NOT_MODIFIED)
-    }
-  }
+      log.debug("Getting File {}", file)
 
-  /**
-   * Check if a file has been modified when compared against the timestamp sent by caller
-   *
-   * @param request Static file request
-   * @param lastModified Last modified timestamp
-   * @returns `true` if and only if the file at the browser has been modified
-   */
-  private def hasFileBeenModified(request: StaticFileRequest, lastModified: Long): Boolean = {
-    val ifModifiedSinceDate = request.context.request.ifModifiedSince
-    if (ifModifiedSinceDate.isDefined) {
-      // When file timestamp is the same as what the browser is sending up
-      // Only compare up to the second because the datetime format we send to the client does not have milliseconds 
-      val ifModifiedSinceDateSeconds = ifModifiedSinceDate.get.getTime() / 1000
-      val fileLastModifiedSeconds = lastModified / 1000
-      (ifModifiedSinceDateSeconds != fileLastModifiedSeconds)
-    } else {
-      // No if-modified-since header set, so we can only assume file has not been downloaded
-      true
-    }
-  }
-
-  /**
-   * Download the specified file
-   *
-   * @param request Static file request
-   * @param file File to download
-   * @param lastModified Last modified timestamp
-   * @param cacheSeconds Number of seconds to set in the cache header
-   */
-  private def downloadFile(request: StaticFileRequest, file: File, lastModified: Long, cacheSeconds: Int): Unit = {
-    var raf: RandomAccessFile = null
-    var fileToDownload = file
-    var contentEncoding = ""
-    val context = request.context
-
-    // Check if compression is supported.
-    // if format not supported or there is an error during compression, download uncompressed file
-    if (context.request.acceptedEncodings.length > 0) {
-      if (context.request.acceptedEncodings.contains("gzip")) {
-        contentEncoding = "gzip"
-      } else if (context.request.acceptedEncodings.contains("deflate")) {
-        contentEncoding = "deflate"
+      val contentType = MimeTypes.get(file)
+      val cacheTimeout = fileRequest.serverCacheTimeoutSeconds.getOrElse(this.serverCacheTimeoutSeconds) * 1000L
+      if (file.length <= serverCacheMaxFileSize) {
+        // Small file so cache contents in memory
+        val contents = IOUtil.readFile(file)
+        val cachedContent = CachedSmallFile(
+          filePath,
+          contentType,
+          "\"" + HashUtil.md5(contents) + "\"",
+          new Date(file.lastModified),
+          contents)
+        cache.set(fileRequest.cacheKey, cachedContent, cacheTimeout)
+        sendSmallFile(fileRequest, cachedContent)
+      } else {
+        // Big file so leave contents on file system
+        val cachedContent = CachedBigFile(
+          filePath,
+          contentType,
+          new Date(file.lastModified))
+        cache.set(fileRequest.cacheKey, cachedContent, cacheTimeout)
+        sendBigFile(fileRequest, cachedContent)
       }
+    }
+  }
 
-      if (contentEncoding.length > 0) {
-        val compressedFile = compressFile(request, contentEncoding, file)
-        if (compressedFile.isDefined) {
-          fileToDownload = compressedFile.get
+  /**
+   * Download a small file where its contents is stored in the cache
+   *
+   * @param fileRequest File request
+   * @param cacheEntry Cached entry associated with the file to send
+   */
+  private def sendSmallFile(fileRequest: StaticFileRequest, cacheEntry: CachedSmallFile): Unit = {
+    val event = fileRequest.event
+
+    val isModified = (event.request.headers.getOrElse(HttpHeaders.Names.ETAG, "") != cacheEntry.etag)
+    if (isModified) {
+      val now = new GregorianCalendar()
+      var content = cacheEntry.content
+      var contentEncoding = ""
+
+      // Check if compression is supported.
+      // if format not supported or there is an error during compression, download uncompressed content
+      val supportedEncoding = event.request.supportedEncoding
+      if (supportedEncoding.isDefined) {
+        val key = "%s[%s][%s]".format(fileRequest.cacheKey, supportedEncoding.get, cacheEntry.etag)
+        val compressedContents = cache.get(key)
+        if (compressedContents.isDefined) {
+          content = compressedContents.get.asInstanceOf[Array[Byte]]
+          contentEncoding = supportedEncoding.get
         } else {
-          contentEncoding = "" // No compression due to error
+          IOUtil.using(new ByteArrayOutputStream()) { bytesOut =>
+            IOUtil.using(new BufferedInputStream(new ByteArrayInputStream(cacheEntry.content))) { bytesIn =>
+              if (compress(bytesIn, bytesOut, supportedEncoding.get)) {
+                content = bytesOut.toByteArray
+                contentEncoding = supportedEncoding.get
+                val cacheTimeout = fileRequest.serverCacheTimeoutSeconds.getOrElse(this.serverCacheTimeoutSeconds) * 1000L
+                cache.set(key, content, cacheTimeout)
+              }
+            }
+          }
         }
       }
-    }
 
-    // Get file
-    try {
-      raf = new RandomAccessFile(fileToDownload, "r")
-    } catch {
-      case e: FileNotFoundException => {
-        context.response.write(HttpResponseStatus.NOT_FOUND)
+      // Prepare response    
+      val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
+
+      response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
+
+      response.setHeader(HttpHeaders.Names.CONTENT_TYPE, cacheEntry.contentType)
+      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, content.length)
+
+      if (event.request.isKeepAlive) {
+        response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
       }
-    }
-    if (raf == null) {
-      return
-    }
-    val fileLength = raf.length()
 
-    // Prepare response
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
-    HttpHeaders.setContentLength(response, fileLength)
-    HttpResponseMessage.setContentTypeHeader(response, file)
-    HttpResponseMessage.setKeepAliveHeader(response, context.request.isKeepAlive)
-    HttpResponseMessage.setDateAndCacheHeaders(response, new Date(lastModified), cacheSeconds)
-    if (contentEncoding != "") {
-      response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
-    }
-    
-    // We have to write our own web log entry since we are not using context.writeResponse
-    context.writeWebLog(HttpResponseStatus.OK.code, fileLength)
+      val browserCacheSeconds = fileRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
+      now.add(Calendar.SECOND, browserCacheSeconds)
 
-    // Write the initial HTTP response line and headers
-    val ch = context.channel
-    ch.write(response)
+      response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
+      response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
+      response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
+      response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
 
-    // Write the content
-    var writeFuture: ChannelFuture = null
+      if (contentEncoding != "") {
+        response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
+      }
 
-    if (ch.getPipeline().get(classOf[SslHandler]) != null) {
-      // Cannot use zero-copy with HTTPS.
-      writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192))
+      // We have to write our own web log entry since we are not using context.writeResponse
+      event.writeWebLog(HttpResponseStatus.OK.code, content.length)
+
+      // Write the initial HTTP response line and headers
+      val ch = event.channel
+      ch.write(response)
+
+      // Write the content
+      val writeFuture: ChannelFuture = ch.write(ChannelBuffers.copiedBuffer(content))
+
+      // Decide whether to close the connection or not.
+      if (!event.request.isKeepAlive) {
+        writeFuture.addListener(ChannelFutureListener.CLOSE)
+      }
     } else {
-      // No encryption - use zero-copy.
-      val region = new DefaultFileRegion(raf.getChannel(), 0, fileLength)
-      writeFuture = ch.write(region)
-      writeFuture.addListener(new ChannelFutureProgressListener() {
-        override def operationComplete(future: ChannelFuture) {
-          region.releaseExternalResources()
-        }
-        override def operationProgressed(
-          future: ChannelFuture, amount: Long, current: Long, total: Long) {
-          log.debug("{}: {} / {} (+{})%n", Array(file.getName, current, total, amount))
-        }
-      })
-    }
-
-    // Decide whether to close the connection or not.
-    if (!context.request.isKeepAlive) {
-      writeFuture.addListener(ChannelFutureListener.CLOSE)
+      event.response.write(HttpResponseStatus.NOT_MODIFIED)
     }
   }
 
   /**
-   * Compress the specified file. If we don't support the specified format, just return the uncompressed file
+   * Download a big file where its contents is located in the file system
    *
-   * @param request Static file request
-   * @param format compression formation: "gzip" or "deflate"
-   * @param file file to compress
-   * @returns Compressed file or None if compression failed
+   * @param fileRequest File request
+   * @param cacheEntry Cached entry associated with the file to send
    */
-  private def compressFile(request: StaticFileRequest, format: String, file: File): Option[File] = {
-    // We put the file timestamp in the hash to make sure that if a file changes,
-    // the latest copy is downloaded 
-    val compressedFileName = md5(file.getAbsolutePath + "_" + file.lastModified) + "." + format
-    val compressedFile = new File(request.tempDir, compressedFileName)
-    var isError = false
+  private def sendBigFile(fileRequest: StaticFileRequest, cacheEntry: CachedBigFile): Unit = {
+    val event = fileRequest.event
 
-    log.debug("Compressed file name: {}", compressedFile.getAbsolutePath)
-
-    if (!compressedFile.exists) {
-      var fileIn: BufferedInputStream = null
-      var compressedOut: DeflaterOutputStream = null
-
+    val ifModifiedSince = event.request.headers.get(HttpHeaders.Names.IF_MODIFIED_SINCE)
+    val isModified = (ifModifiedSince.isEmpty || {
       try {
-        // Create output file
-        val fileOut = new FileOutputStream(compressedFile)
-        format match {
-          case "gzip" => {
-            compressedOut = new GZIPOutputStream(fileOut)
-          }
-          case "deflate" => {
-            compressedOut = new DeflaterOutputStream(fileOut)
-          }
-          case _ => {
-            throw new UnsupportedOperationException("HTTP compression method '" + format + "' not supported")
+        val ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince.get)
+        ifModifiedSinceDate.before(cacheEntry.lastModified)
+      } catch {
+        case _ => true
+      }
+    })
+
+    if (isModified) {
+      val now = new GregorianCalendar()
+
+      var fileToDownload: File = fileRequest.file
+      var contentEncoding = ""
+
+      // Check if compression is supported.
+      val supportedEncoding = event.request.supportedEncoding
+      if (supportedEncoding.isDefined) {
+        // We put the file timestamp in the hash to make sure that if a file changes,
+        // the latest copy is downloaded 
+        val compressedFileName = HashUtil.md5(fileToDownload.getAbsolutePath + "_" + fileToDownload.lastModified) +
+          "." + supportedEncoding.get
+        val compressedFile = new File(tempDir, compressedFileName)
+        if (compressedFile.exists) {
+          fileToDownload = compressedFile
+          contentEncoding = supportedEncoding.get
+        } else {
+          IOUtil.using(new FileOutputStream(compressedFile)) { fileOut =>
+            IOUtil.using(new BufferedInputStream(new FileInputStream(fileToDownload))) { fileIn =>
+              if (compress(fileIn, fileOut, supportedEncoding.get)) {
+                fileToDownload = compressedFile
+                contentEncoding = supportedEncoding.get
+              }
+            }
           }
         }
+      }
 
-        // Create input file
-        fileIn = new BufferedInputStream(new FileInputStream(file))
+      // Download file
+      val raf: RandomAccessFile = try {
+        new RandomAccessFile(fileToDownload, "r")
+      } catch {
+        case e: FileNotFoundException => {
+          event.response.write(HttpResponseStatus.NOT_FOUND)
+          null
+        }
+      }
+      if (raf != null) {
+        val fileLength = raf.length()
 
-        // Pipe input to output in 4K chunks
-        val buf = new Array[Byte](4096)
-        var len = fileIn.read(buf)
+        // Prepare response    
+        val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
+
+        response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
+
+        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, cacheEntry.contentType)
+        response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, fileLength)
+
+        if (event.request.isKeepAlive) {
+          response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+        }
+
+        val browserCacheSeconds = fileRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
+        now.add(Calendar.SECOND, browserCacheSeconds)
+
+        response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
+        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
+        response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
+
+        if (contentEncoding != "") {
+          response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
+        }
+
+        // We have to write our own web log entry since we are not using context.writeResponse
+        event.writeWebLog(HttpResponseStatus.OK.code, fileLength)
+
+        // Write the initial HTTP response line and headers
+        val ch = event.channel
+        ch.write(response)
+
+        // Write the content
+        var writeFuture: ChannelFuture = null
+
+        if (ch.getPipeline().get(classOf[SslHandler]) != null) {
+          // Cannot use zero-copy with HTTPS.
+          writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192))
+        } else {
+          // No encryption - use zero-copy.
+          val region = new DefaultFileRegion(raf.getChannel(), 0, fileLength)
+          writeFuture = ch.write(region)
+          writeFuture.addListener(new ChannelFutureProgressListener() {
+            override def operationComplete(future: ChannelFuture) {
+              region.releaseExternalResources()
+            }
+            override def operationProgressed(
+              future: ChannelFuture, amount: Long, current: Long, total: Long) {
+              log.debug("{}: {} / {} (+{})%n", Array(cacheEntry.path, current, total, amount))
+            }
+          })
+        }
+
+        // Decide whether to close the connection or not.
+        if (!event.request.isKeepAlive) {
+          writeFuture.addListener(ChannelFutureListener.CLOSE)
+        }
+      }
+    } else {
+      event.response.write(HttpResponseStatus.NOT_MODIFIED)
+    }
+  }
+
+  /**
+   * Compress the specified content. If we don't support the specified format, `false` is returned.
+   *
+   * @param bytesIn Stream containing data to compress
+   * @param bytesOut Stream to store compressed output
+   * @param format Compression formation: "gzip" or "deflate"
+   * @returns `true` if content is compressed, `false` if error during compressing or format not suppored
+   */
+  private def compress(bytesIn: InputStream, bytesOut: OutputStream, format: String): Boolean = {
+    try {
+      import IOUtil._
+      using(format match {
+        case "gzip" => new GZIPOutputStream(bytesOut)
+        case "deflate" => new DeflaterOutputStream(bytesOut)
+        case _ => throw new UnsupportedOperationException("HTTP compression method '" + format + "' not supported")
+      }) { compressedOut =>
+
+        // Pipe input to output in 8K chunks
+        val buf = new Array[Byte](8192)
+        var len = bytesIn.read(buf)
         while (len > 0) {
           compressedOut.write(buf, 0, len)
-          len = fileIn.read(buf)
-        }
-      } catch {
-        case ex => {
-          log.error(ex, "Compression error")
-          isError = true
-        }
-      } finally {
-        if (compressedOut != null) {
-          compressedOut.close()
-        }
-        if (fileIn != null) {
-          fileIn.close()
+          len = bytesIn.read(buf)
         }
       }
+      true
+    } catch {
+      case ex => {
+        log.error(ex, "Compression error")
+        false
+      }
     }
-
-    if (isError) None else Some(compressedFile)
   }
 
   /**
-   * Calculate an MD5 has of a string. Used to hashing a file name
+   * Data structure that we use for caching
    *
-   * @param s String to MD5 hash
-   * @returns MD5 hash of specified string
+   * @param path The path to the file or resource
+   * @param contentType MIME content type
    */
-  private def md5(s: String): String = {
-    val md5 = MessageDigest.getInstance("MD5")
-    md5.reset()
-    md5.update(s.getBytes)
-    md5.digest().map(0xFF & _).map { "%02x".format(_) }.foldLeft("") { _ + _ }
+  private[StaticContentHandler] trait CachedContent {
+    def path: String
+    def contentType: String
   }
+
+  /**
+   * Data structure that we use for caching resources
+   *
+   * @param path The path to the file or resource
+   * @param contentType MIME content type
+   * @param etag Hash id of the file or resource content
+   * @param content In memory store of the contents
+   */
+  private[StaticContentHandler] case class CachedResource(
+    path: String,
+    contentType: String,
+    etag: String,
+    content: Array[Byte]) extends CachedContent
+
+  /**
+   * Data structure that we use for caching small files which has content loaded into memory
+   *
+   * @param path The path to the file or resource
+   * @param contentType MIME content type
+   * @param etag Hash id of the file or resource content
+   * @param lastModified Date when this object was last modified
+   * @param content In memory store of the contents
+   */
+  private[StaticContentHandler] case class CachedSmallFile(
+    path: String,
+    contentType: String,
+    etag: String,
+    lastModified: Date,
+    content: Array[Byte]) extends CachedContent
+
+  /**
+   * Data structure that we use for caching information about big file that are stored in the file system
+   *
+   * @param path The path to the file or resource
+   * @param contentType MIME content type
+   * @param lastModified Date when this object was last modified
+   */
+  private[StaticContentHandler] case class CachedBigFile(
+    path: String,
+    contentType: String,
+    lastModified: Date) extends CachedContent
+
 }
 
 /**
  * Message to be sent to [[org.mashupbots.socko.handlers.StaticContentHandler]] for it to download the specified file
  *
- * @param context HTTP Request context
- * @param rootFileDir Root directory from which files will be served. `file` must be present under this directory; if
- *  not a 404 Not Found is returned. This is used to enforce security to make sure that only intended files can be 
- *  downloaded and prevent paths like `http://foo/../../etc/passwd`.
- * @param file File to download
- * @param tempDir Temporary directory where compressed version of files can be stored
- * @param browserCacheTimeoutSeconds Number of seconds to cache the file in the browser. Defaults to 1 hour.
- * @param fileLastModifiedCacheTimeoutSeconds Number of seconds to cache a file's last modified timestamp.
- *  Defaults to 5 minutes.
+ * @param event HTTP Request event
+ * @param file File to download to the client
+ * @param serverCacheTimeoutSeconds Number of seconds to cache this specific in the server cache. If `None`, the
+ *  default value specified on the constructor is used.
+ * @param browserCacheTimeoutSeconds Number of seconds to cache the file in the browser. If `None`, the
+ *  default value specified on the constructor is used.
  */
 case class StaticFileRequest(
-  context: HttpRequestEvent,
-  rootFileDir: File,
+  event: HttpRequestEvent,
   file: File,
-  tempDir: File,
-  browserCacheTimeoutSeconds: Int = 3600,
-  fileLastModifiedCacheTimeoutSeconds: Int = 300)
+  serverCacheTimeoutSeconds: Option[Int] = None,
+  browserCacheTimeoutSeconds: Option[Int] = None) {
 
-/**
- * Cache for the last modified date of files. Caching this value means that we wont have to keep reading the file and
- * hence we reduce blocking IO.
- */
-object StaticFileLastModifiedCache extends Logger {
-  private val cache: ConcurrentMap[String, FileLastModified] = new ConcurrentHashMap[String, FileLastModified]
-
-  /**
-   * Gets a file's last modified date from cache. If not in the cache, the file will be read and its last modified
-   * date will be cached
-   *
-   * @param file File to read last modified date
-   * @param timeoutSeconds Seconds before this cache entry expires
-   * @return the file's last modified time. `0` is returned if file is not found.
-   */
-  def get(file: File, timeoutSeconds: Int): Long = {
-    require(file != null, "file cannot be null")
-
-    val r = cache.get(file.getAbsolutePath)
-    if (r.isDefined && new Date().getTime < r.get.timeout) {
-      //log.debug("Getting from cache")
-      r.get.lastModified
-    } else {
-      //log.debug("Read new value")
-      cache.put(file.getAbsolutePath,
-        FileLastModified(file.getAbsolutePath, file.lastModified, new Date().getTime + (timeoutSeconds * 1000)))
-      file.lastModified
-    }
-  }
-
-  case class FileLastModified(
-    filePath: String,
-    lastModified: Long,
-    timeout: Long)
+  val cacheKey = "FILE::" + file.getAbsolutePath
 }
 
+/**
+ * Message to be sent to [[org.mashupbots.socko.handlers.StaticContentHandler]] for it to download the specified file
+ *
+ * @param event HTTP Request event
+ * @param classpath Classpath of resource to load (without a leading "/"). For example: `META-INF/mime.types`.
+ * @param serverCacheTimeoutSeconds Number of seconds to cache this specific in the server cache. If `None`, the
+ *  default value specified on the constructor is used.
+ * @param browserCacheTimeoutSeconds Number of seconds to cache the file in the browser. If `None`, the
+ *  default value specified on the constructor is used.
+ */
+case class StaticResourceRequest(
+  event: HttpRequestEvent,
+  classpath: String,
+  serverCacheTimeoutSeconds: Option[Int] = None,
+  browserCacheTimeoutSeconds: Option[Int] = None) {
+
+  val cacheKey = "RES::" + classpath
+}
+  
