@@ -44,7 +44,7 @@ object IOUtil {
   }
 
   /**
-   * Returns the contents of a file as bytes
+   * Returns the contents of a file as bytes. Throws `FileNotFoundException` if the file is not found.
    *
    * @param filePath Full path to file to read
    */
@@ -54,7 +54,7 @@ object IOUtil {
   }
 
   /**
-   * Returns the contents of a file as bytes
+   * Returns the contents of a file as bytes.  Throws `FileNotFoundException` if the file is not found.
    *
    * @param file File to read
    */
@@ -63,7 +63,7 @@ object IOUtil {
   }
 
   /**
-   * Returns the contents of a resource as bytes
+   * Returns the contents of a resource as bytes; `null` if the resource was not found.
    *
    * @param classpath Class path of the resource in the classpath.  Do **NOT** put a leading "/".
    *   See [[http://www.javaworld.com/javaworld/javaqa/2003-08/01-qa-0808-property.html?page=2 article]]

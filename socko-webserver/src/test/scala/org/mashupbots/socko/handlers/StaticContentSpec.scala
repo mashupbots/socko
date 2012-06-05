@@ -69,8 +69,6 @@ class StaticContentSpec
   var router: ActorRef = null
   var rootDir: File = null
   var tempDir: File = null
-  val browserCacheTimeoutSeconds = 60
-  val fileLastModifiedCacheTimeoutSeconds = 2
 
   val routes = Routes({
     case event @ GET(PathSegments("files" :: relativePath)) => {
@@ -93,6 +91,10 @@ class StaticContentSpec
     tempDir = File.createTempFile("Temp_", "")
     tempDir.delete()
     tempDir.mkdir()
+
+    StaticContentHandlerConfig.rootFilePaths = Seq(rootDir.getAbsolutePath)
+    StaticContentHandlerConfig.browserCacheTimeoutSeconds = 60
+    StaticContentHandlerConfig.serverCacheTimeoutSeconds = 2
 
     // Start routers
     router = actorSystem.actorOf(Props[StaticContentHandler]
@@ -170,7 +172,7 @@ class StaticContentSpec
       val x = resp.headers("Date")
       val date = fmt.parse(resp.headers("Date"))
       val expires = fmt.parse(resp.headers("Expires"))
-      (expires.getTime - date.getTime) should equal(browserCacheTimeoutSeconds * 1000)
+      (expires.getTime - date.getTime) should equal(StaticContentHandlerConfig.browserCacheTimeoutSeconds * 1000)
     }
 
     "correctly cache a file" in {

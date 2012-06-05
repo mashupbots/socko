@@ -58,6 +58,7 @@ import java.io.ByteArrayOutputStream
 import java.io.ByteArrayInputStream
 import org.jboss.netty.buffer.ChannelBuffers
 import java.io.OutputStream
+import org.mashupbots.socko.infrastructure.LocalCache
 
 /**
  * Handles downloading of static files and resources.
@@ -175,26 +176,16 @@ import java.io.OutputStream
  * header, even if the Expires header is more restrictive
  *
  * See [[http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html HTTP Header Field Definitions]]
- *
- * @param rootFilePaths Sequence of paths from which files are permitted to be served. Stops getting relative
- *  file paths like `../etc/passwd`
- * @param tempDir Temporary directory where compressed files can be stored
- * @param serverCache Cache to store files in memory to speed up delivery
- * @param serverCacheMaxFileSize Maximum size, in bytes, of a file to cache in memory. Defaults to 100K.
- * @param serverCacheTimeoutSeconds Number of seconds to cache a file in memory on the server before refreshing the
- *  cache if it has been updated.
- * @param browserCacheTimeoutSeconds Number of seconds to tell the client to tell the browser to cache a file. This is
- *  implemented using the `Etag` and `If-Modified-Since` headers.
  */
-class StaticContentHandler(
-  rootFilePaths: Seq[String],
-  tempDir: File,
-  cache: LocalCache,
-  serverCacheMaxFileSize: Int = 1024 * 100,
-  serverCacheTimeoutSeconds: Int = 3600,
-  browserCacheTimeoutSeconds: Int = 3600) extends Actor {
+class StaticContentHandler() extends Actor {
 
   private val log = Logging(context.system, this)
+  private val rootFilePaths = StaticContentHandlerConfig.rootFilePaths
+  private val tempDir = StaticContentHandlerConfig.tempDir
+  private val cache = StaticContentHandlerConfig.cache
+  private val serverCacheMaxFileSize = StaticContentHandlerConfig.serverCacheMaxFileSize
+  private val serverCacheTimeoutSeconds = StaticContentHandlerConfig.serverCacheTimeoutSeconds
+  private val browserCacheTimeoutSeconds = StaticContentHandlerConfig.browserCacheTimeoutSeconds
 
   /**
    * Simple Date Formatter that will format dates like: `Wed, 02 Oct 2002 13:00:00 GMT`
@@ -249,13 +240,17 @@ class StaticContentHandler(
     val cacheTimeout = resourceRequest.serverCacheTimeoutSeconds.getOrElse(this.serverCacheTimeoutSeconds) * 1000L
 
     val contents = IOUtil.readResource(resourceRequest.classpath)
-    val cachedContent = CachedResource(
-      resourceRequest.classpath,
-      contentType,
-      "\"" + HashUtil.md5(contents) + "\"",
-      contents)
-    cache.set(resourceRequest.cacheKey, cachedContent, cacheTimeout)
-    sendResource(resourceRequest, cachedContent)
+    if (contents == null) {
+      event.response.write(HttpResponseStatus.NOT_FOUND)
+    } else {
+      val cachedContent = CachedResource(
+        resourceRequest.classpath,
+        contentType,
+        "\"" + HashUtil.md5(contents) + "\"",
+        contents)
+      cache.set(resourceRequest.cacheKey, cachedContent, cacheTimeout)
+      sendResource(resourceRequest, cachedContent)
+    }
   }
 
   /**
@@ -741,5 +736,43 @@ case class StaticResourceRequest(
   browserCacheTimeoutSeconds: Option[Int] = None) {
 
   val cacheKey = "RES::" + classpath
+}
+
+/**
+ * Configuration for [[org.mashupbots.socko.handlers.StaticContentHandler]].
+ *
+ * You **MUST** set these settings before you start [[org.mashupbots.socko.handlers.StaticContentHandler]] as a router
+ */
+object StaticContentHandlerConfig {
+
+  /**
+   * List of root paths from while files can be served
+   */
+  var rootFilePaths: Seq[String] = Nil
+
+  /**
+   * Temp directory where compressed files can be stored
+   */
+  var tempDir: File = new File(System.getProperty("java.io.tmpdir"))
+
+  /**
+   * Local in memory cache
+   */
+  var cache = new LocalCache(1000, 16)
+
+  /**
+   * Maximum size of files to cache in memory. Files larger than this are kept on the file system
+   */
+  var serverCacheMaxFileSize: Int = 1024 * 100
+
+  /**
+   * Number of seconds before files cached in the server memory are removed
+   */
+  var serverCacheTimeoutSeconds: Int = 3600
+
+  /**
+   * Number of seconds before a browser should check back with the server if a file has been updated
+   */
+  var browserCacheTimeoutSeconds: Int = 3600
 }
   
