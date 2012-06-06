@@ -50,7 +50,7 @@ object BenchmarkApp extends Logger {
   // STEP #1 - Define Actors and Start Akka
   //
   // We are going to start StaticContentHandler actor as a router.
-  // There will be 5 instances, each instance having its own thread since there is a lot of blocking IO.
+  // There will be 20 instances, each instance having its own thread since there is a lot of blocking IO.
   //
   val actorConfig = """
 	my-pinned-dispatcher {
@@ -64,7 +64,7 @@ object BenchmarkApp extends Logger {
 	    deployment {
 	      /static-file-router {
 	        router = round-robin
-	        nr-of-instances = 100
+	        nr-of-instances = 20
 	      }
 	    }
 	  }

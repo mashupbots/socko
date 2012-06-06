@@ -121,10 +121,10 @@ object Dependencies {
 }
 
 object Dependency {
-  val akkaActor     = "com.typesafe.akka"   % "akka-actor"         % "2.0"
+  val akkaActor     = "com.typesafe.akka"   % "akka-actor"         % "2.0.2"
   val akkaSlf4j     = "com.typesafe.akka"   % "akka-slf4j"         % "2.0"
   val akkaTestKit   = "com.typesafe.akka"   % "akka-testkit"       % "2.0"
-  val netty         = "io.netty"            % "netty"              % "3.3.0.Final"
+  val netty         = "io.netty"            % "netty"              % "3.4.6.Final"
   val logback       = "ch.qos.logback"      % "logback-classic"    % "1.0.3"         % "runtime"
   val junit         = "junit"               % "junit"              % "4.9"           % "test"
   val scalatest     = "org.scalatest"       %% "scalatest"         % "1.7.1"         % "test"
