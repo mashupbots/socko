@@ -17,13 +17,12 @@ package org.mashupbots.socko.examples.fileupload
 
 import java.io.File
 
-import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.mashupbots.socko.events.HttpResponseStatus
+import org.jboss.netty.handler.codec.http.multipart.Attribute
+import org.jboss.netty.handler.codec.http.multipart.DefaultHttpDataFactory
+import org.jboss.netty.handler.codec.http.multipart.FileUpload
+import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder
 import org.mashupbots.socko.events.HttpRequestEvent
-import org.mashupbots.socko.postdecoder.Attribute
-import org.mashupbots.socko.postdecoder.DefaultHttpDataFactory
-import org.mashupbots.socko.postdecoder.FileUpload
-import org.mashupbots.socko.postdecoder.HttpPostRequestDecoder
+import org.mashupbots.socko.events.HttpResponseStatus
 
 import akka.actor.Actor
 import akka.event.Logging

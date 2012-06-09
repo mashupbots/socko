@@ -95,8 +95,9 @@ class WebServer(
     channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
 
     val bootstrap = new ServerBootstrap(channelFactory)
+    bootstrap.setOption("child.tcpNoDelay", true);
     bootstrap.setPipelineFactory(new PipelineFactory(this))
-
+    
     config.hostname.split(",").foreach(address => {
       address.trim() match {
         case "0.0.0.0" =>

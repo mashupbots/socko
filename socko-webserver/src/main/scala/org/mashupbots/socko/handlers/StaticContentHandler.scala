@@ -17,19 +17,22 @@
 package org.mashupbots.socko.handlers
 
 import java.io.BufferedInputStream
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import java.io.RandomAccessFile
-import java.security.MessageDigest
-import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.GZIPOutputStream
+import java.util.Calendar
 import java.util.Date
-import scala.Array.canBuildFrom
-import scala.collection.JavaConversions.asScalaConcurrentMap
-import scala.collection.mutable.ConcurrentMap
+import java.util.GregorianCalendar
+
+import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.ChannelFuture
 import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.channel.ChannelFutureProgressListener
@@ -40,25 +43,16 @@ import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedFile
 import org.mashupbots.socko.events.HttpRequestEvent
-import org.mashupbots.socko.events.HttpResponseMessage
 import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.infrastructure.IOUtil.using
+import org.mashupbots.socko.infrastructure.DateUtil
+import org.mashupbots.socko.infrastructure.HashUtil
+import org.mashupbots.socko.infrastructure.IOUtil
+import org.mashupbots.socko.infrastructure.LocalCache
+import org.mashupbots.socko.infrastructure.MimeTypes
+
 import akka.actor.Actor
 import akka.event.Logging
-import org.mashupbots.socko.infrastructure.LocalCache
-import javax.activation.MimetypesFileTypeMap
-import org.mashupbots.socko.infrastructure.MimeTypes
-import java.io.InputStream
-import org.mashupbots.socko.infrastructure.IOUtil
-import org.mashupbots.socko.infrastructure.HashUtil
-import org.mashupbots.socko.infrastructure.DateUtil
-import java.util.GregorianCalendar
-import java.util.Calendar
-import java.io.ByteArrayOutputStream
-import java.io.ByteArrayInputStream
-import org.jboss.netty.buffer.ChannelBuffers
-import java.io.OutputStream
-import org.mashupbots.socko.infrastructure.LocalCache
 
 /**
  * Handles downloading of static files and resources.
@@ -201,10 +195,10 @@ class StaticContentHandler() extends Actor {
       processStaticFileRequest(request)
     }
     case request: StaticResourceRequest => {
-      processStaticResourceRequest(request)
+      processStaticResourceRequest(request)      
     }
-    case _ => {
-      log.info("received unknown message of type: ")
+    case msg => {
+      log.info("received unknown message of type: {}", msg.getClass.getName)
     }
   }
 
@@ -293,7 +287,7 @@ class StaticContentHandler() extends Actor {
       }
 
       // Prepare response    
-      val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
+      val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
 
       response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
 
@@ -450,7 +444,7 @@ class StaticContentHandler() extends Actor {
       }
 
       // Prepare response    
-      val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
+      val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
 
       response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
 
@@ -553,7 +547,7 @@ class StaticContentHandler() extends Actor {
         val fileLength = raf.length()
 
         // Prepare response    
-        val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK.toNetty)
+        val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
 
         response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
 

@@ -19,14 +19,14 @@ package org.mashupbots.socko.handlers
 import scala.collection.JavaConversions.asScalaBuffer
 
 import org.jboss.netty.channel.ChannelLocal
+import org.jboss.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
+import org.jboss.netty.handler.codec.http.multipart.Attribute
+import org.jboss.netty.handler.codec.http.multipart.DefaultHttpDataFactory
+import org.jboss.netty.handler.codec.http.multipart.FileUpload
+import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder
 import org.mashupbots.socko.events.HttpChunkEvent
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.WebSocketFrameEvent
-import org.mashupbots.socko.postdecoder.InterfaceHttpData.HttpDataType
-import org.mashupbots.socko.postdecoder.Attribute
-import org.mashupbots.socko.postdecoder.DefaultHttpDataFactory
-import org.mashupbots.socko.postdecoder.FileUpload
-import org.mashupbots.socko.postdecoder.HttpPostRequestDecoder
 
 import akka.actor.Actor
 import akka.event.Logging

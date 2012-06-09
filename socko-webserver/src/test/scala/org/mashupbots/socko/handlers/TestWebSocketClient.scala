@@ -75,7 +75,7 @@ class TestWebSocketClient(url: String) extends Logger {
 
     log.debug("WebSocket Client connecting")
     val future = bootstrap.connect(new InetSocketAddress(uri.getHost, uri.getPort))
-    future.awaitUninterruptibly().rethrowIfFailed()
+    future.awaitUninterruptibly()
 
     ch = future.getChannel()
     handshaker.handshake(ch)
