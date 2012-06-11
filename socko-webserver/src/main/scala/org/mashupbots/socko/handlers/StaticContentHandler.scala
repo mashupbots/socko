@@ -742,32 +742,49 @@ case class StaticResourceRequest(
 object StaticContentHandlerConfig {
 
   /**
-   * List of root paths from while files can be served
+   * List of root paths from while files can be served.
+   * 
+   * This is enforced to stop relative path type attacks; e.g. `../etc/passwd` 
    */
   var rootFilePaths: Seq[String] = Nil
 
   /**
-   * Temp directory where compressed files can be stored
+   * Temporary directory where compressed files can be stored.
+   * 
+   * Defaults to the `java.io.tmpdir` system property.
    */
   var tempDir: File = new File(System.getProperty("java.io.tmpdir"))
 
   /**
-   * Local in memory cache
+   * Local in memory cache to store files.
+   * 
+   * Defaults to storing 1000 files.
    */
   var cache = new LocalCache(1000, 16)
 
   /**
-   * Maximum size of files to cache in memory. Files larger than this are kept on the file system
+   * Maximum size of files to cache in memory; i.e. contents of these files are read and stored in memory in order
+   * to optimize performance.  
+   * 
+   * Files larger than this are kept on the file system.
+   * 
+   * Defaults to 100K.
    */
   var serverCacheMaxFileSize: Int = 1024 * 100
 
   /**
-   * Number of seconds before files cached in the server memory are removed
+   * Number of seconds before files cached in the server memory are removed. 
+   * 
+   * Defaults to 1 hour. 
    */
   var serverCacheTimeoutSeconds: Int = 3600
 
   /**
-   * Number of seconds before a browser should check back with the server if a file has been updated
+   * Number of seconds before a browser should check back with the server if a file has been updated.
+   * 
+   * This setting is used to drive the `Expires` and `Cache-Control` HTTP headers.
+   * 
+   * Defaults to 1 hour.
    */
   var browserCacheTimeoutSeconds: Int = 3600
 }

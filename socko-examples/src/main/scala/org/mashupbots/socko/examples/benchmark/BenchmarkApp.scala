@@ -31,6 +31,7 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.routing.FromConfig
 import org.mashupbots.socko.handlers.StaticContentHandlerConfig
+import org.mashupbots.socko.infrastructure.IOUtil
 
 /**
  * This example is used for benchmarking
@@ -49,15 +50,35 @@ object BenchmarkApp extends Logger {
   //
   // STEP #1 - Define Actors and Start Akka
   //
-  // We are going to start StaticContentHandler actor as a router.
-  // There will be 20 instances, each instance having its own thread since there is a lot of blocking IO.
+  // We are going to start StaticContentHandler actor as a router. There will be 20 instances using a max of 6 threads.
+  // Some basic benchmarking indicates that "thread-pool-executor" is better than "fork-join-executor" for
+  // StaticContentHandler.
   //
   val actorConfig = """
 	my-pinned-dispatcher {
 	  type=PinnedDispatcher
 	  executor=thread-pool-executor
 	}
-	akka {
+	my-dispatcher {
+	  # Dispatcher is the name of the event-based dispatcher
+	  type = Dispatcher
+	  # What kind of ExecutionService to use
+	  executor = "thread-pool-executor"
+	  # Configuration for the fork join pool
+	  thread-pool-executor {
+	    # Min number of threads to cap factor-based parallelism number to
+	    parallelism-min = 25
+	    # Parallelism (threads) ... ceil(available processors * factor)
+	    parallelism-factor = 2.0
+	    # Max number of threads to cap factor-based parallelism number to
+	    parallelism-max = 6
+	  }
+	  # Throughput defines the maximum number of messages to be
+	  # processed per actor before the thread jumps to the next actor.
+	  # Set to 1 for as fair as possible.
+	  throughput = 100
+	} 
+    akka {
 	  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
 	  loglevel=DEBUG
 	  actor {
@@ -72,13 +93,19 @@ object BenchmarkApp extends Logger {
 
   val actorSystem = ActorSystem("BenchmarkActorSystem", ConfigFactory.parseString(actorConfig))  
   val staticContentHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
-    .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
+    .withRouter(FromConfig()).withDispatcher("my-dispatcher"), "static-file-router")
 
   //
   // STEP #2 - Define Routes
   //
   val routes = Routes({
     case HttpRequest(request) => request match {
+      case GET(Path("/foo.html")) => {
+        val staticFileRequest = new StaticFileRequest(
+          request,
+          new File(contentDir, "foo.html"))
+        staticContentHandlerRouter ! staticFileRequest
+      }
       case GET(Path("/test.html")) => {
         val staticFileRequest = new StaticFileRequest(
           request,
@@ -183,5 +210,11 @@ object BenchmarkApp extends Logger {
     val out2 = new FileOutputStream(bigFile)
     out2.write(buf.toString.getBytes(CharsetUtil.UTF_8))
     out2.close()
+    
+    // copy over foo.html
+    val fooFile = new File(dir, "foo.html")
+    val out3 = new FileOutputStream(fooFile)
+    out3.write(IOUtil.readResource("foo.html"))
+    out3.close()    
   }
 }

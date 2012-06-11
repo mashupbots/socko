@@ -12,15 +12,20 @@ WebServerConfigClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebS
 WebLogEventClass: <code><a href="../api/#org.mashupbots.socko.infrastructure.WebLogEvent">WebLogEvent</a></code>
 WebLogWriterClass: <code><a href="../api/#org.mashupbots.socko.infrastructure.WebLogWriter">WebLogWriter</a></code>
 WebSocketBroadcasterClass: <code><a href="../api/#org.mashupbots.socko.handler.WebSocketBroadcaster">WebSocketBroadcaster</a></code>
+StaticContentHandlerClass: <code><a href="../api/#org.mashupbots.socko.handler.StaticContentHandler">StaticContentHandler</a></code>
+StaticContentHandlerConfigClass: <code><a href="../api/#org.mashupbots.socko.handler.StaticContentHandlerConfig">StaticContentHandlerConfig</a></code>
+StaticFileRequestClass: <code><a href="../api/#org.mashupbots.socko.handler.StaticFileRequest">StaticFileRequest</a></code>
+StaticResourceRequestClass: <code><a href="../api/#org.mashupbots.socko.handler.StaticResourceRequest">StaticResourceRequest</a></code>
 ---
 # Socko User Guide
 
 ## Table of Contents
 
- - [Step 1. Define Actors and Start Akka.](#Step1)
- - [Step 2. Define Routes.](#Step2)
- - [Step 3. Start/Stop Web Server.](#Step3)
+ - [Step 1. Define Actors and Start Akka](#Step1)
+ - [Step 2. Define Routes](#Step2)
+ - [Step 3. Start/Stop Web Server](#Step3)
  - [Configuration](#Configuration)
+ - [Serving Static Content](#StaticContent)
  - [Web Sockets](#WebSockets)
  - [Web Logs](#WebLogs)
  - [Code Examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
@@ -116,21 +121,19 @@ All {{ page.SockoEventClass }} must be used by **local actors** only.
 ### Akka Dispatchers and Thread Pools
 
 Akka [dispatchers](http://doc.akka.io/docs/akka/2.0.1/scala/dispatchers.html) controls how your Akka 
-actors processes messages.
+actors process messages.
 
-The default dispatcher is optimized for non blocking code.
+Akka's default dispatcher is optimized for non blocking code.
 
 However, if your actors have blocking operations like database read/write or file system read/write, 
-we recommend that you use a dispatcher driven by the `thread-pool-executor`.  For example, the 
-`PinnedDispatcher` is used in Socko's file upload [example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload).
+we recommend that you run these actors with a different dispatcher.  In this way, while these actors block a thread,
+other actors can continue processing on other threads.
 
-Isolating blocking operations to a thread pool means that other actors can continue processing without
-waiting for your actor's blocking operation to finish.
 
-The following code is taken from our file upload example application. Because `StaticFileHandler`
-and `FileUploadHandler` reads and writes lots of files, we have set them up to use a `PinnedDispatcher`.
-Note that we have only allocated 5 threads to each processor. To scale, you will need to allocate
-more threads.
+The following code is taken from our [file upload example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload).
+Because `StaticContentHandler` and `FileUploadHandler` actors read and write lots of files, we have set them up 
+to use a `PinnedDispatcher`. Note that we have only allocated 5 threads to each processor. To scale, you may wish
+ to allocate more threads.
 
     val actorConfig = """
       my-pinned-dispatcher {
@@ -156,7 +159,7 @@ more threads.
 
     val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
 
-    val staticFileHandlerRouter = actorSystem.actorOf(Props[StaticFileHandler]
+    val staticContentHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
       .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
     
     val fileUploadHandlerRouter = actorSystem.actorOf(Props[FileUploadHandler]
@@ -593,6 +596,71 @@ Lastly, add the following our `application.conf`
     }
 
 A complete example `application.conf` can be found in {{ page.WebServerConfigClass }}.
+
+
+
+
+## Serving Static Content <a class="blank" id="StaticContent">&nbsp;</a>
+
+Socko's {{ page.StaticContentHandlerClass }} is used for serving static files and resources.
+
+It supports HTTP compression, browser cache control and content caching.
+
+### Setup
+
+We recommend that you run {{ page.StaticContentHandlerClass }} with a router and with its own dispatcher.  This
+because {{ page.StaticContentHandlerClass }} contains block IO which must be isolated from other non blocking 
+actors.
+
+You will also need to configure its operation with {{ page.StaticContentHandlerConfigClass }}.
+
+For example:
+
+    val actorConfig = """
+      my-pinned-dispatcher {
+        type=PinnedDispatcher
+        executor=thread-pool-executor
+      }
+      akka {
+        event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+        loglevel=DEBUG
+        actor {
+          deployment {
+            /static-file-router {
+              router = round-robin
+              nr-of-instances = 5
+            }
+          }
+        }
+      }"""
+
+    val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
+
+    StaticContentHandlerConfig.rootFilePaths = Seq(contentDir.getAbsolutePath)
+    StaticContentHandlerConfig.tempDir = tempDir
+
+    val staticContentHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
+      .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
+
+### Requests
+
+To serve a file or resource, send {{ page.StaticFileRequestClass }} or {{ page.StaticResourceRequestClass }} to
+the router.
+
+    val routes = Routes({
+      case HttpRequest(request) => request match {
+        case GET(Path("/foo.html")) => {
+          val staticFileRequest = new StaticFileRequest(
+            request, new File("/path/to/my/files", "foo.html"))
+          staticContentHandlerRouter ! staticFileRequest
+        }
+        case GET(Path("/foo.txt")) => {
+          val staticResourceRequest = new StaticResourceRequest(
+            request, "META-INF/foo.txt")
+          staticContentHandlerRouter ! staticResourceRequest
+        }
+      }
+    })
 
 
 
