@@ -74,16 +74,21 @@ case class WebSocketHandshakeEvent(
 
   private var _isAuthorized: Boolean = false
 
-  private var _authorizedSubprotocols: Option[String] = None
+  private var _authorizedSubprotocols: String = ""
 
+  private var _maxFrameSize: Int = 0
+  
   /**
    * Authorize this web socket handshake to proceed
    *
-   * @param subprotocol Comma separated list of supported protocols. e.g. `chat, stomp`
+   * @param subprotocol Comma separated list of supported protocols. e.g. `chat, stomp`. Specified empty string to
+   *   not support sub protocols (this is the default). 
+   * @param maxFrameSize Maximum size of web socket frames. Defaults to 100K.
    */
-  def authorize(subprotocols: Option[String] = None) {
+  def authorize(subprotocols: String = "", maxFrameSize: Int = 102400) {
     _isAuthorized = true
-    _authorizedSubprotocols = subprotocols
+    _authorizedSubprotocols = if (subprotocols == null) "" else subprotocols
+    _maxFrameSize = maxFrameSize
   }
 
   /**
@@ -96,8 +101,15 @@ case class WebSocketHandshakeEvent(
   /**
    * Comma separated list of supported protocols. e.g. `chat, stomp`
    */
-  def authorizedSubprotocols: Option[String] = {
+  def authorizedSubprotocols: String = {
     _authorizedSubprotocols
+  }
+
+  /**
+   * Maximum size of frames for this web socket connection in bytes.
+   */
+  def maxFrameSize: Int = {
+    _maxFrameSize
   }
 
   /**

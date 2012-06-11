@@ -265,8 +265,9 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
 
     val wsFactory = new WebSocketServerHandshakerFactory(
       createWebSocketLocation(event),
-      if (event.authorizedSubprotocols.isDefined) event.authorizedSubprotocols.get else null,
-      false)
+      if (event.authorizedSubprotocols == "") null else event.authorizedSubprotocols,
+      false,
+      event.maxFrameSize)
     wsHandshaker = wsFactory.newHandshaker(event.nettyHttpRequest)
     if (wsHandshaker == null) {
       wsFactory.sendUnsupportedWebSocketVersionResponse(event.channel)

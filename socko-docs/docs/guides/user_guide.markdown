@@ -705,8 +705,15 @@ The following route from our web socket example app illustrates:
     
     })
 
-Note that for a web socket handshake, you only need to call `wsHandshake.authorize()`.
+Note that for a web socket handshake, you only need to call `wsHandshake.authorize()` in order to approve the connection.
+This is a security measure to make sure that web sockets can only be established at your specified end points.
 Dispatching to an actor is not required and not recommended.
+
+You can also specify subprotocols and maximum frame size with authorization. If not specified, the default is no 
+subprotocol support and a maximum frame size of 100K.
+
+    // Only support chat and superchat subprotocols and max frame size of 1000 bytes
+    wsHandshake.authorize("chat, superchat", 1000)
 
 If you wish to push or broadcast messages to a group of web socket connections, use {{ page.WebSocketBroadcasterClass }}.
 See the example web socket [ChatApp](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket/ChatApp.scala) for usage.
