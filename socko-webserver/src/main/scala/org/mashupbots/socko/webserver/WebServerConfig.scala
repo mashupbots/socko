@@ -46,8 +46,8 @@ import akka.actor.Extension
  *       # web log writer will be created
  *       custom-actor-path = "akka://my-system/user/web-log-writer"
  *
- *       # Optional web log format for the default web log writer: Common, Combined or Extended. 
- *       # If no specified, Common is the default. 
+ *       # Optional web log format for the default web log writer: Common, Combined or Extended.
+ *       # If no specified, Common is the default.
  *       format = Common
  *     }
  *
@@ -100,6 +100,34 @@ import akka.actor.Extension
  *         "application/json", "application/jsonml+json",
  *         "application/javascript", "application/x-javascript"]
  *     }
+ *
+ *     # Optional TCP protocol configuration. If not supplied, defaults are used.
+ *     tcp {
+ *
+ *       # Disable Nagle's algorithm. Defaults to `true` if not supplied.
+ *       no-delay=
+ *
+ *       # Set a hint the size of the underlying buffers for outgoing network I/O.
+ *       send-buffer-size=
+ *
+ *       # Get the size of the buffer actually used by the platform when receiving in data on this socket
+ *       receive-buffer-size=
+ *
+ *       # Turn on socket keep-alive. `true` or `false`.
+ *       keep-alive=
+ *
+ *       # Enable reuse address for a socket and not throw an "already bind exception". `true` or `false`.
+ *       reuse-address=
+ *
+ *       # Specify a linger-on-close timeout.
+ *       so-linger=
+ *
+ *       # Sets the type-of-service or traffic class field in the IP header for a TCP or UDP socket.
+ *       traffic-class=
+ *
+ *       # The number of requests that can be queued.
+ *       accept-backlog=
+ *     }
  *   }
  * }}}
  *
@@ -126,6 +154,8 @@ import akka.actor.Extension
  *  Defaults to `None`.
  * @param http HTTP protocol configuration. Defaults to an instance of
  *  [[org.mashupbots.socko.webserver.HttpConfig]] with default settings.
+ * @param http TCP IP protocol configuration. Defaults to an instance of
+ *  [[org.mashupbots.socko.webserver.TcpConfig]] with default settings.
  */
 case class WebServerConfig(
   serverName: String = "WebServer",
@@ -133,7 +163,8 @@ case class WebServerConfig(
   port: Int = 8888,
   webLog: Option[WebLogConfig] = None,
   ssl: Option[SslConfig] = None,
-  http: HttpConfig = HttpConfig()) extends Extension {
+  http: HttpConfig = HttpConfig(),
+  tcpConfig: TcpConfig = TcpConfig()) extends Extension {
 
   /**
    * Read configuration from AKKA's `application.conf`
@@ -144,7 +175,8 @@ case class WebServerConfig(
     config.getInt(prefix + ".port"),
     WebServerConfig.getOptionalWebLogConfig(config, prefix + ".web-log"),
     WebServerConfig.getOptionalSslConfig(config, prefix + ".ssl"),
-    WebServerConfig.getHttpConfig(config, prefix + ".http"))
+    WebServerConfig.getHttpConfig(config, prefix + ".http"),
+    WebServerConfig.getTcpConfig(config, prefix + ".tcp"))
 
   /**
    * Validate current configuration settings. Throws an exception if configuration has errors.
@@ -241,6 +273,58 @@ case class SslConfig(
 }
 
 /**
+ * TCP IP configuration as per Netty.
+ *
+ * See [[http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html javadoc]] and
+ * [[http://netty.io/docs/stable/api/org/jboss/netty/channel/socket/SocketChannelConfig.html netty doc]] for more
+ * information.
+ *
+ * Netty and JVM defaults are used until overriden here.
+ *
+ * @param noDelay Disable Nagle's algorithm. Defaults to `true` if not supplied.
+ * @param sendBufferSize Set a hint the size of the underlying buffers for outgoing network I/O.
+ * @param receiveBufferSize Get the size of the buffer actually used by the platform when receiving in data on this
+ *   socket.
+ * @param keepAlive Turn on socket keep-alive. Defaults to `false` if not supplied.
+ * @param reuseAddress Enable reuse address for a socket and not throw an "already bind exception"
+ *   The default value is JVM specific.
+ * @param soLinger Specify a linger-on-close timeout.
+ * @param trafficClass Sets the type-of-service or traffic class field in the IP header for a TCP or UDP socket. \
+ *   The default value is JVM specific.
+ * @param acceptBackLog The number of requests that can be queued. Useful in managing sudden bursts in requests.
+ *   If take an example with a socket server invoker that has max pool set to 300, accept threads is 2, and backlog is
+ *   200, will be able to make 502 concurrent client calls. The 503rd client request will get an exception immediately.
+ *   However, this does not mean all 502 requests will be guaranteed to be processed, only the first 300 (as they have
+ *   server threads available to do the processing). If 202 of the server threads finish processing their requests from
+ *   their initial client connections and the connection is released before the timeout for the other 202 that are
+ *   waiting (200 for backlog and 2 for accept thread), then they will be processed (of course this is a request by
+ *   request determination).
+ */
+case class TcpConfig(
+  noDelay: Option[Boolean] = None,
+  sendBufferSize: Option[Int] = None,
+  receiveBufferSize: Option[Int] = None,
+  keepAlive: Option[Boolean] = None,
+  reuseAddress: Option[Boolean] = None,
+  soLinger: Option[Int] = None,
+  trafficClass: Option[Int] = None,
+  acceptBackLog: Option[Int] = None) {
+
+  /**
+   * Read configuration from AKKA's `application.conf`. Supply default values to use if setting not present
+   */
+  def this(config: Config, prefix: String) = this(
+    WebServerConfig.getOptionalBoolean(config, prefix + ".no-delay"),
+    WebServerConfig.getOptionalInt(config, prefix + ".send-buffer-size"),
+    WebServerConfig.getOptionalInt(config, prefix + ".receive-buffer-size"),
+    WebServerConfig.getOptionalBoolean(config, prefix + ".keep-alive"),
+    WebServerConfig.getOptionalBoolean(config, prefix + ".reuse-address"),
+    WebServerConfig.getOptionalInt(config, prefix + ".so-linger"),
+    WebServerConfig.getOptionalInt(config, prefix + ".traffic-class"),
+    WebServerConfig.getOptionalInt(config, prefix + ".accept-backlog"))
+}
+
+/**
  * HTTP protocol handling configuration
  *
  * HTTP compression parameters only applies to HTTP request and responses and not web sockets.
@@ -288,7 +372,7 @@ case class HttpConfig(
  * Configuration for web server activity logs.
  *
  * @param customActorPath Optional path of actor to which [[org.mashupbots.socko.utils.WebLogEvent]] will be sent for writing.
- *   If this path is not present, [[org.mashupbots.socko.utils.WebLogWriter]] will be used.  
+ *   If this path is not present, [[org.mashupbots.socko.utils.WebLogWriter]] will be used.
  * @param format Format of the web log. Defaults to `Common`.
  */
 case class WebLogConfig(
@@ -358,6 +442,22 @@ object WebServerConfig extends Logger {
   }
 
   /**
+   * Returns the specified setting as an integer. If setting not specified, then the default is returned.
+   */
+  def getOptionalInt(config: Config, name: String): Option[Int] = {
+    try {
+      val v = config.getString(name)
+      if (v == null || v == "") {
+        None
+      } else {
+        Some(config.getInt(name))
+      }
+    } catch {
+      case _ => None
+    }
+  }
+
+  /**
    * Returns the specified setting as a boolean. If setting not specified, then the default is returned.
    */
   def getBoolean(config: Config, name: String, defaultValue: Boolean): Boolean = {
@@ -370,6 +470,44 @@ object WebServerConfig extends Logger {
       }
     } catch {
       case _ => defaultValue
+    }
+  }
+
+  /**
+   * Returns the specified setting as a boolean. `None` is returned if setting not specified
+   */
+  def getOptionalBoolean(config: Config, name: String): Option[Boolean] = {
+    try {
+      val v = config.getString(name)
+      if (v == null || v == "") {
+        None
+      } else {
+        Some(config.getBoolean(name))
+      }
+    } catch {
+      case _ => None
+    }
+  }
+
+  /**
+   * Returns the defined `TcpConfig`. If not defined, then the default `TcpConfig` is returned.
+   */
+  def getTcpConfig(config: Config, name: String): TcpConfig = {
+    try {
+      val v = config.getConfig(name)
+      if (v == null) {
+        new TcpConfig()
+      } else {
+        new TcpConfig(config, name)
+      }
+    } catch {
+      case ex: ConfigException.Missing => {
+        new TcpConfig()
+      }
+      case ex => {
+        log.error("Error parsing TcpConfig. Defaults will be used.", ex)
+        new TcpConfig()
+      }
     }
   }
 
@@ -438,7 +576,7 @@ object WebServerConfig extends Logger {
       }
     }
   }
-  
+
   val defaultCompressibleContentTypes: List[String] =
     "text/plain" :: "text/html" :: "text/xml" :: "text/css" ::
       "application/xml" :: "application/xhtml+xml" :: "application/rss+xml" ::

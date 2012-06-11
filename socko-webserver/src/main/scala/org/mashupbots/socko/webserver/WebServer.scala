@@ -16,17 +16,16 @@
 package org.mashupbots.socko.webserver
 
 import java.util.concurrent.Executors
-
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.mashupbots.socko.events.SockoEvent
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.WebLogWriter
-
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
+import org.jboss.netty.channel.FixedReceiveBufferSizePredictor
 
 /**
  * Socko Web Server
@@ -95,9 +94,35 @@ class WebServer(
     channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
 
     val bootstrap = new ServerBootstrap(channelFactory)
-    bootstrap.setOption("child.tcpNoDelay", true);
+
+    bootstrap.setOption("child.tcpNoDelay", config.tcpConfig.noDelay.getOrElse(true))
+    if (config.tcpConfig.sendBufferSize.isDefined) {
+      bootstrap.setOption("child.sendBufferSize", config.tcpConfig.sendBufferSize.get)
+    }
+    if (config.tcpConfig.receiveBufferSize.isDefined) {
+      // Thanks to VertX. We need to set a FixedReceiveBufferSizePredictor, since otherwise Netty will ignore our setting and use an 
+      // adaptive buffer which can get very large
+      bootstrap.setOption("child.receiveBufferSize", config.tcpConfig.receiveBufferSize.get)
+      bootstrap.setOption("child.receiveBufferSizePredictor", new FixedReceiveBufferSizePredictor(1024))
+    }
+    if (config.tcpConfig.keepAlive.isDefined) {
+      bootstrap.setOption("child.keepAlive", config.tcpConfig.keepAlive.get)
+    }    
+    if (config.tcpConfig.soLinger.isDefined) {
+      bootstrap.setOption("child.soLinger", config.tcpConfig.soLinger.get)
+    }
+    if (config.tcpConfig.trafficClass.isDefined) {
+      bootstrap.setOption("child.trafficClass", config.tcpConfig.trafficClass.get);
+    }
+    if (config.tcpConfig.reuseAddress.isDefined) {
+      bootstrap.setOption("child.reuseAddress", config.tcpConfig.reuseAddress.get);
+    }
+    if (config.tcpConfig.trafficClass.isDefined) {
+      bootstrap.setOption("child.backlog", config.tcpConfig.trafficClass.get);
+    }
+
     bootstrap.setPipelineFactory(new PipelineFactory(this))
-    
+
     config.hostname.split(",").foreach(address => {
       address.trim() match {
         case "0.0.0.0" =>

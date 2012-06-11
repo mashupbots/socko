@@ -30,7 +30,7 @@ import akka.actor.ExtensionIdProvider
 import org.mashupbots.socko.infrastructure.WebLogFormat
 
 @RunWith(classOf[JUnitRunner])
-class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll  {
+class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
 
   var aDirectory: File = null
 
@@ -184,7 +184,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     }
 
     "load from Akka Config" in {
-      
+
       // *** If you are changing this, review scaladoc of WebServerConfig ***
       val actorConfig = """
 		barebones-webserver {
@@ -216,6 +216,16 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
             max-compressible-content-size-in-bytes=60
             compressible-content-types=["text/plain", "text/html"]
 		  }
+          tcp {
+            no-delay=true
+            send-buffer-size=1
+            receive-buffer-size=2
+            keep-alive=true
+            reuse-address=true
+            so-linger=3
+            traffic-class=4
+            accept-backlog=5
+          }
 		}"""
       // *** If you are changing this, review scaladoc of WebServerConfig ***
 
@@ -232,6 +242,14 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       barebones.http.minCompressibleContentSizeInBytes should be(1024)
       barebones.http.maxCompressibleContentSizeInBytes should be(1024 * 1024)
       barebones.http.compressibleContentTypes.length should be(11)
+      barebones.tcpConfig.noDelay should be(None)
+      barebones.tcpConfig.sendBufferSize should be(None)
+      barebones.tcpConfig.receiveBufferSize should be(None)
+      barebones.tcpConfig.keepAlive should be(None)
+      barebones.tcpConfig.reuseAddress should be(None)
+      barebones.tcpConfig.soLinger should be(None)
+      barebones.tcpConfig.trafficClass should be(None)
+      barebones.tcpConfig.acceptBackLog should be(None)
 
       val all = AllWebServerConfig(actorSystem)
       all.serverName should equal("allTest")
@@ -255,6 +273,15 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       all.http.minCompressibleContentSizeInBytes should be(50)
       all.http.maxCompressibleContentSizeInBytes should be(60)
       all.http.compressibleContentTypes.length should be(2)
+
+      all.tcpConfig.noDelay should be(Some(true))
+      all.tcpConfig.sendBufferSize should be(Some(1))
+      all.tcpConfig.receiveBufferSize should be(Some(2))
+      all.tcpConfig.keepAlive should be(Some(true))
+      all.tcpConfig.reuseAddress should be(Some(true))
+      all.tcpConfig.soLinger should be(Some(3))
+      all.tcpConfig.trafficClass should be(Some(4))
+      all.tcpConfig.acceptBackLog should be(Some(5))
       
       actorSystem.shutdown()
     }
