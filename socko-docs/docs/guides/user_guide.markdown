@@ -650,14 +650,10 @@ the router.
     val routes = Routes({
       case HttpRequest(request) => request match {
         case GET(Path("/foo.html")) => {
-          val staticFileRequest = new StaticFileRequest(
-            request, new File("/path/to/my/files", "foo.html"))
-          staticContentHandlerRouter ! staticFileRequest
+          staticContentHandlerRouter ! new StaticFileRequest(request, new File("/my/path/", "foo.html"))
         }
         case GET(Path("/foo.txt")) => {
-          val staticResourceRequest = new StaticResourceRequest(
-            request, "META-INF/foo.txt")
-          staticContentHandlerRouter ! staticResourceRequest
+          staticContentHandlerRouter ! new StaticResourceRequest(request, "META-INF/foo.txt")
         }
       }
     })

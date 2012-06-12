@@ -98,10 +98,7 @@ object FileUploadApp extends Logger {
       }
       case GET(PathSegments(fileName :: Nil)) => {
         // Download requested file
-        val staticFileRequest = new StaticFileRequest(
-          request,
-          new File(contentDir, fileName))
-        staticFileHandlerRouter ! staticFileRequest
+        staticFileHandlerRouter ! new StaticFileRequest(request, new File(contentDir, fileName))
       }
       case POST(Path("/upload")) => {
         // Save file to the content directory so it can be downloaded

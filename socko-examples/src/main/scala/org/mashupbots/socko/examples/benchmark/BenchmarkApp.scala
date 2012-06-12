@@ -35,7 +35,7 @@ import org.mashupbots.socko.infrastructure.IOUtil
 
 /**
  * This example is used for benchmarking
- *  - http://localhost:8888/test.html is used for small static file (36 bytes)
+ *  - http://localhost:8888/foo.html is used for small static file (87 bytes)
  *  - http://localhost:8888/data.dat is used for big static file (1MB)
  *  - http://localhost:8888/dynamic is used for dynamic content
  */
@@ -46,6 +46,7 @@ object BenchmarkApp extends Logger {
 
   StaticContentHandlerConfig.rootFilePaths = Seq(contentDir.getAbsolutePath)
   StaticContentHandlerConfig.tempDir = tempDir
+  //StaticContentHandlerConfig.serverCacheMaxFileSize = 0
 
   //
   // STEP #1 - Define Actors and Start Akka
@@ -91,7 +92,7 @@ object BenchmarkApp extends Logger {
 	  }
 	}"""
 
-  val actorSystem = ActorSystem("BenchmarkActorSystem", ConfigFactory.parseString(actorConfig))  
+  val actorSystem = ActorSystem("BenchmarkActorSystem", ConfigFactory.parseString(actorConfig))
   val staticContentHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
     .withRouter(FromConfig()).withDispatcher("my-dispatcher"), "static-file-router")
 
@@ -100,23 +101,14 @@ object BenchmarkApp extends Logger {
   //
   val routes = Routes({
     case HttpRequest(request) => request match {
-      case GET(Path("/foo.html")) => {
-        val staticFileRequest = new StaticFileRequest(
-          request,
-          new File(contentDir, "foo.html"))
-        staticContentHandlerRouter ! staticFileRequest
+      case GET(Path("/small.html")) => {
+        staticContentHandlerRouter ! new StaticFileRequest(request, new File(contentDir, "small.html"))
       }
-      case GET(Path("/test.html")) => {
-        val staticFileRequest = new StaticFileRequest(
-          request,
-          new File(contentDir, "test.html"))
-        staticContentHandlerRouter ! staticFileRequest
+      case GET(Path("/medium.txt")) => {
+        staticContentHandlerRouter ! new StaticFileRequest(request, new File(contentDir, "medium.txt"))
       }
-      case GET(Path("/data.txt")) => {
-        val staticFileRequest = new StaticFileRequest(
-          request,
-          new File(contentDir, "data.txt"))
-        staticContentHandlerRouter ! staticFileRequest
+      case GET(Path("/big.txt")) => {
+        staticContentHandlerRouter ! new StaticFileRequest(request, new File(contentDir, "data.txt"))
       }
       case GET(Path("/dynamic")) => {
         actorSystem.actorOf(Props[DynamicBenchmarkHandler]) ! request
@@ -146,9 +138,10 @@ object BenchmarkApp extends Logger {
     webServer.start()
 
     System.out.println("Content directory is " + contentDir.getCanonicalPath)
-    System.out.println("Small Static File: http://localhost:8888/test.html")
-    System.out.println("Big Static File  : http://localhost:8888/data.txt")
-    System.out.println("Dynamic Content  : http://localhost:8888/dynamic")
+    System.out.println("Small Static File  : http://localhost:8888/small.html")
+    System.out.println("Medium Static File : http://localhost:8888/medium.txt")
+    System.out.println("Big Static File    : http://localhost:8888/bit.txt")
+    System.out.println("Dynamic Content    : http://localhost:8888/dynamic")
   }
 
   /**
@@ -187,34 +180,34 @@ object BenchmarkApp extends Logger {
    * Create files for downloading
    */
   private def createContent(dir: File) {
-    // test.html - 36 byte file
     val buf = new StringBuilder()
-    buf.append("<html>\n")
-    buf.append("<body>\n")
-    buf.append("Hello\n")
-    buf.append("</body>\n")
-    buf.append("</html>\n")
 
-    val smallFile = new File(dir, "test.html")
-    val out = new FileOutputStream(smallFile)
+    // medium.txt - 100K file
+    buf.setLength(0)
+    for (i <- 0 until (1024 * 100)) {
+      buf.append('a')
+    }
+
+    val mediumFile = new File(dir, "medium.txt")
+    val out = new FileOutputStream(mediumFile)
     out.write(buf.toString.getBytes(CharsetUtil.UTF_8))
     out.close()
 
-    // data.dat - 1MB file
+    // big.txt - 1MB file
     buf.setLength(0)
     for (i <- 0 until (1024 * 1024)) {
       buf.append('a')
     }
 
-    val bigFile = new File(dir, "data.txt")
+    val bigFile = new File(dir, "big.txt")
     val out2 = new FileOutputStream(bigFile)
     out2.write(buf.toString.getBytes(CharsetUtil.UTF_8))
     out2.close()
-    
-    // copy over foo.html
-    val fooFile = new File(dir, "foo.html")
+
+    // copy over small foo.html (same file used by vertx)
+    val fooFile = new File(dir, "small.html")
     val out3 = new FileOutputStream(fooFile)
     out3.write(IOUtil.readResource("foo.html"))
-    out3.close()    
+    out3.close()
   }
 }
