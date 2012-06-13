@@ -25,13 +25,8 @@ import java.util.Date
 class DynamicBenchmarkHandler extends Actor {
   def receive = {
     case event: HttpRequestEvent =>
-      val buf = new StringBuilder()
-      buf.append("<html>\n")
-      buf.append("<body>\n")
-      buf.append("Hello\n")
-      buf.append("</body>\n")
-      buf.append("</html>\n")
-      event.response.write(buf.toString, "text/html; charset=UTF-8")
+      val content = "<html>\n<body>\nDate and time is " + new Date().toString + "\n</body>\n</html>\n"
+      event.response.write(content, "text/html; charset=UTF-8")
       context.stop(self)
   }
 }

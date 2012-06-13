@@ -108,10 +108,10 @@ object BenchmarkApp extends Logger {
         staticContentHandlerRouter ! new StaticFileRequest(request, new File(contentDir, "medium.txt"))
       }
       case GET(Path("/big.txt")) => {
-        staticContentHandlerRouter ! new StaticFileRequest(request, new File(contentDir, "data.txt"))
+        staticContentHandlerRouter ! new StaticFileRequest(request, new File(contentDir, "big.txt"))
       }
       case GET(Path("/dynamic")) => {
-        actorSystem.actorOf(Props[DynamicBenchmarkHandler]) ! request
+        actorSystem.actorOf(Props[DynamicBenchmarkHandler].withDispatcher("my-dispatcher")) ! request
       }
       case GET(Path("/favicon.ico")) => {
         request.response.write(HttpResponseStatus.NOT_FOUND)
@@ -137,11 +137,11 @@ object BenchmarkApp extends Logger {
     })
     webServer.start()
 
-    System.out.println("Content directory is " + contentDir.getCanonicalPath)
-    System.out.println("Small Static File  : http://localhost:8888/small.html")
-    System.out.println("Medium Static File : http://localhost:8888/medium.txt")
-    System.out.println("Big Static File    : http://localhost:8888/bit.txt")
-    System.out.println("Dynamic Content    : http://localhost:8888/dynamic")
+    System.out.println("Content directory is " + contentDir.getAbsolutePath)
+    System.out.println("87 bytes File   : http://localhost:8888/small.html")
+    System.out.println("200K File       : http://localhost:8888/medium.txt")
+    System.out.println("1MB File        : http://localhost:8888/big.txt")
+    System.out.println("Dynamic Content : http://localhost:8888/dynamic")
   }
 
   /**

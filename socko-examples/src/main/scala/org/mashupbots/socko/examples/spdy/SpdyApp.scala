@@ -107,10 +107,10 @@ object SpdyApp extends Logger {
         staticContentHandlerRouter ! new StaticFileRequest(request, new File(contentDir, "medium.txt"))
       }
       case GET(Path("/big.txt")) => {
-        staticContentHandlerRouter ! new StaticFileRequest(request, new File(contentDir, "data.txt"))
+        staticContentHandlerRouter ! new StaticFileRequest(request, new File(contentDir, "big.txt"))
       }
       case GET(Path("/dynamic")) => {
-        actorSystem.actorOf(Props[DynamicHandler]) ! request
+        actorSystem.actorOf(Props[DynamicHandler].withDispatcher("my-dispatcher")) ! request
       }
       case GET(Path("/favicon.ico")) => {
         request.response.write(HttpResponseStatus.NOT_FOUND)
@@ -140,11 +140,11 @@ object SpdyApp extends Logger {
     })
     webServer.start()
 
-    System.out.println("Content directory is " + contentDir.getCanonicalPath)
-    System.out.println("Small Static File  : https://localhost:8888/small.html")
-    System.out.println("Medium Static File : https://localhost:8888/medium.txt")
-    System.out.println("Big Static File    : https://localhost:8888/bit.txt")
-    System.out.println("Dynamic Content    : https://localhost:8888/dynamic")
+    System.out.println("Content directory is " + contentDir.getAbsolutePath)
+    System.out.println("87 bytes File   : https://localhost:8888/small.html")
+    System.out.println("200K File       : https://localhost:8888/medium.txt")
+    System.out.println("1MB File        : https://localhost:8888/big.txt")
+    System.out.println("Dynamic Content : https://localhost:8888/dynamic")
   }
 
   /**
@@ -185,9 +185,9 @@ object SpdyApp extends Logger {
   private def createContent(dir: File) {
     val buf = new StringBuilder()
 
-    // medium.txt - 100K file
+    // medium.txt - 200K file
     buf.setLength(0)
-    for (i <- 0 until (1024 * 100)) {
+    for (i <- 0 until (1024 * 200)) {
       buf.append('a')
     }
 
