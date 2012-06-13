@@ -71,10 +71,10 @@ object SecureApp extends Logger {
     val keyStoreFilePassword = "password"
 
     if (!keyStoreFile.exists) {
-      System.out.println("Cannot find keystore file: " + keyStoreFile.getCanonicalPath)
+      System.out.println("Cannot find keystore file: " + keyStoreFile.getAbsolutePath)
       System.out.println("")
       System.out.println("Please create the file using the command:")
-      System.out.println("  keytool -genkey -keystore " + keyStoreFile.getCanonicalPath + " -keyalg RSA")
+      System.out.println("  keytool -genkey -keystore " + keyStoreFile.getAbsolutePath + " -keyalg RSA")
       System.out.println("    Enter keystore password: " + keyStoreFilePassword)
       System.out.println("    What is your first and last name? [press ENTER]")
       System.out.println("    What is the name of your organizational unit? [press ENTER]")

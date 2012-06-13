@@ -31,7 +31,6 @@ import java.util.zip.GZIPOutputStream
 import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
-
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.ChannelFuture
 import org.jboss.netty.channel.ChannelFutureListener
@@ -50,9 +49,10 @@ import org.mashupbots.socko.infrastructure.HashUtil
 import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.LocalCache
 import org.mashupbots.socko.infrastructure.MimeTypes
-
 import akka.actor.Actor
 import akka.event.Logging
+import org.jboss.netty.handler.codec.http.HttpResponse
+import org.jboss.netty.handler.codec.spdy.SpdyHttpHeaders
 
 /**
  * Handles downloading of static files and resources.
@@ -195,7 +195,7 @@ class StaticContentHandler() extends Actor {
       processStaticFileRequest(request)
     }
     case request: StaticResourceRequest => {
-      processStaticResourceRequest(request)      
+      processStaticResourceRequest(request)
     }
     case msg => {
       log.info("received unknown message of type: {}", msg.getClass.getName)
@@ -257,7 +257,7 @@ class StaticContentHandler() extends Actor {
     val event = resourceRequest.event
 
     val etag = event.request.headers.getOrElse(HttpHeaders.Names.IF_NONE_MATCH, "")
-    val isModified = (etag!= cacheEntry.etag)
+    val isModified = (etag != cacheEntry.etag)
     if (isModified) {
       val now = new GregorianCalendar()
       var content = cacheEntry.content
@@ -288,26 +288,13 @@ class StaticContentHandler() extends Actor {
 
       // Prepare response    
       val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
-
-      response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
-
-      response.setHeader(HttpHeaders.Names.CONTENT_TYPE, cacheEntry.contentType)
-      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, content.length)
-
-      if (event.request.isKeepAlive) {
-        response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
-      }
+      setCommonHeaders(event, response, now, cacheEntry.contentType, content.length, contentEncoding)
 
       val browserCacheSeconds = resourceRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
       now.add(Calendar.SECOND, browserCacheSeconds)
-
       response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
       response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
       response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
-
-      if (contentEncoding != "") {
-        response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
-      }
 
       // We have to write our own web log entry since we are not using context.writeResponse
       event.writeWebLog(HttpResponseStatus.OK.code, content.length)
@@ -445,27 +432,14 @@ class StaticContentHandler() extends Actor {
 
       // Prepare response    
       val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
-
-      response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
-
-      response.setHeader(HttpHeaders.Names.CONTENT_TYPE, cacheEntry.contentType)
-      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, content.length)
-
-      if (event.request.isKeepAlive) {
-        response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
-      }
+      setCommonHeaders(event, response, now, cacheEntry.contentType, content.length, contentEncoding)
 
       val browserCacheSeconds = fileRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
       now.add(Calendar.SECOND, browserCacheSeconds)
-
       response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
       response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
       response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
       response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
-
-      if (contentEncoding != "") {
-        response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
-      }
 
       // We have to write our own web log entry since we are not using context.writeResponse
       event.writeWebLog(HttpResponseStatus.OK.code, content.length)
@@ -548,26 +522,13 @@ class StaticContentHandler() extends Actor {
 
         // Prepare response    
         val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
-
-        response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
-
-        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, cacheEntry.contentType)
-        response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, fileLength)
-
-        if (event.request.isKeepAlive) {
-          response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
-        }
+        setCommonHeaders(event, response, now, cacheEntry.contentType, fileLength, contentEncoding)
 
         val browserCacheSeconds = fileRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
         now.add(Calendar.SECOND, browserCacheSeconds)
-
         response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
         response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
         response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
-
-        if (contentEncoding != "") {
-          response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
-        }
 
         // We have to write our own web log entry since we are not using context.writeResponse
         event.writeWebLog(HttpResponseStatus.OK.code, fileLength)
@@ -638,6 +599,37 @@ class StaticContentHandler() extends Actor {
         log.error(ex, "Compression error")
         false
       }
+    }
+  }
+
+  /**
+   * Set common response headers
+   *
+   * @param event Request event
+   * @param response Response to writer header
+   * @param now Timestamp
+   * @param contentType MIME type of content
+   * @param contentLength Length of content
+   * @param contentEncoding Encoding code. e.g. `gzip`
+   */
+  private def setCommonHeaders(event: HttpRequestEvent, response: HttpResponse,
+    now: Calendar, contentType: String, contentLength: Long, contentEncoding: String) {
+    response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
+
+    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
+    response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, contentLength)
+
+    if (event.request.isKeepAlive) {
+      response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+    }
+
+    if (contentEncoding != "") {
+      response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
+    }
+
+    if (event.request.headers.contains(SpdyHttpHeaders.Names.STREAM_ID)) {
+      response.addHeader(SpdyHttpHeaders.Names.STREAM_ID, event.request.headers(SpdyHttpHeaders.Names.STREAM_ID))
+      response.addHeader(SpdyHttpHeaders.Names.PRIORITY, 0);
     }
   }
 
@@ -743,47 +735,47 @@ object StaticContentHandlerConfig {
 
   /**
    * List of root paths from while files can be served.
-   * 
-   * This is enforced to stop relative path type attacks; e.g. `../etc/passwd` 
+   *
+   * This is enforced to stop relative path type attacks; e.g. `../etc/passwd`
    */
   var rootFilePaths: Seq[String] = Nil
 
   /**
    * Temporary directory where compressed files can be stored.
-   * 
+   *
    * Defaults to the `java.io.tmpdir` system property.
    */
   var tempDir: File = new File(System.getProperty("java.io.tmpdir"))
 
   /**
    * Local in memory cache to store files.
-   * 
+   *
    * Defaults to storing 1000 files.
    */
   var cache = new LocalCache(1000, 16)
 
   /**
    * Maximum size of files to cache in memory; i.e. contents of these files are read and stored in memory in order
-   * to optimize performance.  
-   * 
+   * to optimize performance.
+   *
    * Files larger than this are kept on the file system.
-   * 
+   *
    * Defaults to 100K.
    */
   var serverCacheMaxFileSize: Int = 1024 * 100
 
   /**
-   * Number of seconds before files cached in the server memory are removed. 
-   * 
-   * Defaults to 1 hour. 
+   * Number of seconds before files cached in the server memory are removed.
+   *
+   * Defaults to 1 hour.
    */
   var serverCacheTimeoutSeconds: Int = 3600
 
   /**
    * Number of seconds before a browser should check back with the server if a file has been updated.
-   * 
+   *
    * This setting is used to drive the `Expires` and `Cache-Control` HTTP headers.
-   * 
+   *
    * Defaults to 1 hour.
    */
   var browserCacheTimeoutSeconds: Int = 3600

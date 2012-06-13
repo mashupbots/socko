@@ -13,11 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.examples.benchmark
+package org.mashupbots.socko.examples.spdy
 
 import java.io.File
 import java.io.FileOutputStream
-
 import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.handlers.StaticContentHandler
 import org.mashupbots.socko.handlers.StaticContentHandlerConfig
@@ -28,18 +27,18 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes._
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
-
 import com.typesafe.config.ConfigFactory
-
 import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.routing.FromConfig
+import org.mashupbots.socko.webserver.HttpConfig
+import org.mashupbots.socko.webserver.SslConfig
 
 /**
- * This example is used for benchmarking
+ * This example is used for testing SPDY
  */
-object BenchmarkApp extends Logger {
+object SpdyApp extends Logger {
 
   val contentDir = createTempDir("content_")
   val tempDir = createTempDir("temp_")
@@ -111,7 +110,7 @@ object BenchmarkApp extends Logger {
         staticContentHandlerRouter ! new StaticFileRequest(request, new File(contentDir, "data.txt"))
       }
       case GET(Path("/dynamic")) => {
-        actorSystem.actorOf(Props[DynamicBenchmarkHandler]) ! request
+        actorSystem.actorOf(Props[DynamicHandler]) ! request
       }
       case GET(Path("/favicon.ico")) => {
         request.response.write(HttpResponseStatus.NOT_FOUND)
@@ -127,7 +126,11 @@ object BenchmarkApp extends Logger {
     createContent(contentDir)
 
     // Start web server
-    val webServer = new WebServer(WebServerConfig(), routes, actorSystem)
+    val keyStoreFile = new File(contentDir, "testKeyStore")
+    val keyStoreFilePassword = "password"
+    val sslConfig = SslConfig(keyStoreFile, keyStoreFilePassword, None, None)
+    val httpConfig = HttpConfig(spdyEnabled = true)
+    val webServer = new WebServer(WebServerConfig(ssl = Some(sslConfig), http = httpConfig), routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run {
         webServer.stop()
@@ -138,10 +141,10 @@ object BenchmarkApp extends Logger {
     webServer.start()
 
     System.out.println("Content directory is " + contentDir.getCanonicalPath)
-    System.out.println("Small Static File  : http://localhost:8888/small.html")
-    System.out.println("Medium Static File : http://localhost:8888/medium.txt")
-    System.out.println("Big Static File    : http://localhost:8888/bit.txt")
-    System.out.println("Dynamic Content    : http://localhost:8888/dynamic")
+    System.out.println("Small Static File  : https://localhost:8888/small.html")
+    System.out.println("Medium Static File : https://localhost:8888/medium.txt")
+    System.out.println("Big Static File    : https://localhost:8888/bit.txt")
+    System.out.println("Dynamic Content    : https://localhost:8888/dynamic")
   }
 
   /**
@@ -209,5 +212,11 @@ object BenchmarkApp extends Logger {
     val out3 = new FileOutputStream(fooFile)
     out3.write(IOUtil.readResource("foo.html"))
     out3.close()
+    
+    // copy over keystore
+    val ksFile = new File(dir, "testKeyStore")
+    val out4 = new FileOutputStream(ksFile)
+    out4.write(IOUtil.readResource("testKeyStore"))
+    out4.close()
   }
 }

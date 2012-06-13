@@ -99,6 +99,9 @@ import akka.actor.Extension
  *         "application/xml", "application/xhtml+xml", "application/rss+xml",
  *         "application/json", "application/jsonml+json",
  *         "application/javascript", "application/x-javascript"]
+ *         
+ *       # Enable SPDY protocol or not. Defaults to `false`
+ *       spdy=false
  *     }
  *
  *     # Optional TCP protocol configuration. If not supplied, defaults are used.
@@ -341,6 +344,7 @@ case class TcpConfig(
  *   requested by the client. Defaults to 1MB otherwise too much CPU maybe taken up for compression.
  * @param compressibleContentTypes List of MIME types of that can be compressed. If not supplied, defaults to
  *   HTML, CSS, JSON, XML and Javascript files.
+ * @param spdyEnabled Support SPDY protocol or not. Defaults to `false`.
  */
 case class HttpConfig(
   maxLengthInMB: Int = 4,
@@ -350,7 +354,8 @@ case class HttpConfig(
   aggreateChunks: Boolean = true,
   minCompressibleContentSizeInBytes: Int = 1024,
   maxCompressibleContentSizeInBytes: Int = (1 * 1024 * 1024),
-  compressibleContentTypes: List[String] = WebServerConfig.defaultCompressibleContentTypes) {
+  compressibleContentTypes: List[String] = WebServerConfig.defaultCompressibleContentTypes,
+  spdyEnabled: Boolean = false) {
 
   val maxLengthInBytes = maxLengthInMB * 1024 * 1024
 
@@ -365,7 +370,8 @@ case class HttpConfig(
     WebServerConfig.getBoolean(config, prefix + ".aggregate-chunks", true),
     WebServerConfig.getInt(config, prefix + ".min-compressible-content-size-in-bytes", 1024),
     WebServerConfig.getInt(config, prefix + ".max-compressible-content-size-in-bytes", 1 * 1024 * 1024),
-    WebServerConfig.getCompressibleContentTypes(config, prefix + ".compressible-content-types"))
+    WebServerConfig.getCompressibleContentTypes(config, prefix + ".compressible-content-types"),
+    WebServerConfig.getBoolean(config, prefix + ".spdy", false))
 }
 
 /**

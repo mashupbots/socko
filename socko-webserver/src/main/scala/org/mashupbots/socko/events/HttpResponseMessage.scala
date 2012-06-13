@@ -38,6 +38,7 @@ import org.jboss.netty.handler.codec.http.DefaultHttpChunk
 import org.jboss.netty.handler.codec.http.DefaultHttpChunkTrailer
 import org.mashupbots.socko.infrastructure.MimeTypes
 import org.mashupbots.socko.infrastructure.DateUtil
+import org.jboss.netty.handler.codec.spdy.SpdyHttpHeaders
 
 /**
  * Encapsulates the all the data sent to be sent to the client in an HTTP response; i.e. headers and content.
@@ -133,6 +134,7 @@ case class HttpResponseMessage(event: HttpEvent) {
 
     // Headers
     HttpResponseMessage.setDateHeader(response)
+    HttpResponseMessage.setSpdyHeaders(request, response)
     headers.foreach { kv => response.setHeader(kv._1, kv._2) }
 
     if (request.isKeepAlive) {
@@ -383,6 +385,7 @@ case class HttpResponseMessage(event: HttpEvent) {
 
     // Headers
     HttpResponseMessage.setDateHeader(response)
+    HttpResponseMessage.setSpdyHeaders(request, response)
     this.headers.foreach { kv => response.setHeader(kv._1, kv._2) }
     if (request.isKeepAlive) {
       // Add keep alive header as per HTTP 1.1 specifications
@@ -526,6 +529,18 @@ object HttpResponseMessage {
     response.setHeader(HttpHeaders.Names.CONTENT_TYPE, mimeType)
   }
 
+  /**
+   * Copy SPDY headers from request to response
+   * 
+   * @param request HTTP request
+   * @param response HTTP response
+   */
+  def setSpdyHeaders(request: HttpRequestMessage, response: HttpResponse) {
+    if (request.headers.contains(SpdyHttpHeaders.Names.STREAM_ID)) {
+      response.addHeader(SpdyHttpHeaders.Names.STREAM_ID, request.headers(SpdyHttpHeaders.Names.STREAM_ID))
+      response.addHeader(SpdyHttpHeaders.Names.PRIORITY, 0);
+    }
+  }
   /**
    * Sets the connection header for the HTTP Response
    *

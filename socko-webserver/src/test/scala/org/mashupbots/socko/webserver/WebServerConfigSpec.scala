@@ -215,6 +215,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
             min-compressible-content-size-in-bytes=50
             max-compressible-content-size-in-bytes=60
             compressible-content-types=["text/plain", "text/html"]
+            spdy=true
 		  }
           tcp {
             no-delay=true
@@ -242,6 +243,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       barebones.http.minCompressibleContentSizeInBytes should be(1024)
       barebones.http.maxCompressibleContentSizeInBytes should be(1024 * 1024)
       barebones.http.compressibleContentTypes.length should be(11)
+      barebones.http.spdyEnabled should be(false)
       barebones.tcpConfig.noDelay should be(None)
       barebones.tcpConfig.sendBufferSize should be(None)
       barebones.tcpConfig.receiveBufferSize should be(None)
@@ -273,6 +275,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       all.http.minCompressibleContentSizeInBytes should be(50)
       all.http.maxCompressibleContentSizeInBytes should be(60)
       all.http.compressibleContentTypes.length should be(2)
+      all.http.spdyEnabled should be(true)
 
       all.tcpConfig.noDelay should be(Some(true))
       all.tcpConfig.sendBufferSize should be(Some(1))
