@@ -206,7 +206,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
    */
   val isWebSocketUpgrade: Boolean = {
     val upgrade = nettyHttpRequest.getHeader(HttpHeaders.Names.UPGRADE)
-    (upgrade != null && upgrade == "websocket")
+    (upgrade != null && upgrade.toLowerCase == "websocket")
   }
 
   /**
