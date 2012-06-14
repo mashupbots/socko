@@ -25,13 +25,14 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedWriteHandler
+import org.mashupbots.socko.infrastructure.Logger
 
 /**
  * Creates a new channel pipeline for each Netty channel (network connection)
  *
  * @param server The web server instancing the pipeline
  */
-class PipelineFactory(server: WebServer) extends ChannelPipelineFactory {
+class PipelineFactory(server: WebServer) extends ChannelPipelineFactory with Logger {
 
   /**
    * Returns a new channel pipeline instance to handle our channel
@@ -73,7 +74,7 @@ class PipelineFactory(server: WebServer) extends ChannelPipelineFactory {
     newPipeline.addLast("ssl", new SslHandler(sslEngine))
 
     NextProtoNego.put(sslEngine, new SpdyServerProvider())
-    NextProtoNego.debug = true
+    NextProtoNego.debug = log.isDebugEnabled
 
     newPipeline.addLast("pipeLineSelector", new ProtocolNegoitationHandler(server))
 

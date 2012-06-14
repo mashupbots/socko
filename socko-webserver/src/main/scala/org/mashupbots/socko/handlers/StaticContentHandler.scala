@@ -296,15 +296,14 @@ class StaticContentHandler() extends Actor {
       response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
       response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
 
+      response.setContent(ChannelBuffers.copiedBuffer(content))
+      
       // We have to write our own web log entry since we are not using context.writeResponse
       event.writeWebLog(HttpResponseStatus.OK.code, content.length)
 
-      // Write the initial HTTP response line and headers
+      // Write the response
       val ch = event.channel
-      ch.write(response)
-
-      // Write the content
-      val writeFuture: ChannelFuture = ch.write(ChannelBuffers.copiedBuffer(content))
+      val writeFuture: ChannelFuture = ch.write(response)
 
       // Decide whether to close the connection or not.
       if (!event.request.isKeepAlive) {
@@ -441,15 +440,14 @@ class StaticContentHandler() extends Actor {
       response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
       response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
 
+      response.setContent(ChannelBuffers.copiedBuffer(content))
+      
       // We have to write our own web log entry since we are not using context.writeResponse
       event.writeWebLog(HttpResponseStatus.OK.code, content.length)
 
-      // Write the initial HTTP response line and headers
+      // Write response
       val ch = event.channel
-      ch.write(response)
-
-      // Write the content
-      val writeFuture: ChannelFuture = ch.write(ChannelBuffers.copiedBuffer(content))
+      val writeFuture: ChannelFuture = ch.write(response)
 
       // Decide whether to close the connection or not.
       if (!event.request.isKeepAlive) {
@@ -617,9 +615,9 @@ class StaticContentHandler() extends Actor {
     response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
 
     response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
-    response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, contentLength)
 
     if (event.request.isKeepAlive) {
+      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, contentLength)
       response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
     }
 
@@ -627,9 +625,11 @@ class StaticContentHandler() extends Actor {
       response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
     }
 
-    if (event.request.headers.contains(SpdyHttpHeaders.Names.STREAM_ID)) {
-      response.addHeader(SpdyHttpHeaders.Names.STREAM_ID, event.request.headers(SpdyHttpHeaders.Names.STREAM_ID))
-      response.addHeader(SpdyHttpHeaders.Names.PRIORITY, 0);
+    var spdyId = event.request.headers.getOrElse(SpdyHttpHeaders.Names.STREAM_ID, "")
+    if (spdyId != "") {
+      log.debug("spdyId {}", spdyId)
+      response.setHeader(SpdyHttpHeaders.Names.STREAM_ID, spdyId)
+      response.setHeader(SpdyHttpHeaders.Names.PRIORITY, 0);
     }
   }
 

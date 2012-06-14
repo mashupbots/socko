@@ -537,8 +537,8 @@ object HttpResponseMessage {
    */
   def setSpdyHeaders(request: HttpRequestMessage, response: HttpResponse) {
     if (request.headers.contains(SpdyHttpHeaders.Names.STREAM_ID)) {
-      response.addHeader(SpdyHttpHeaders.Names.STREAM_ID, request.headers(SpdyHttpHeaders.Names.STREAM_ID))
-      response.addHeader(SpdyHttpHeaders.Names.PRIORITY, 0);
+      response.setHeader(SpdyHttpHeaders.Names.STREAM_ID, request.headers(SpdyHttpHeaders.Names.STREAM_ID))
+      response.setHeader(SpdyHttpHeaders.Names.PRIORITY, 0);
     }
   }
   /**

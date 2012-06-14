@@ -36,7 +36,14 @@ import org.mashupbots.socko.webserver.HttpConfig
 import org.mashupbots.socko.webserver.SslConfig
 
 /**
- * This example is used for testing SPDY
+ * This example is used for testing SPDY.
+ * 
+ * To run this example you need to:
+ *  - use JDK 7
+ *  - add `-Xbootclasspath/p:/path/to/sbt/npn-boot-8.1.2.v20120308.jar` to your JVM start up parameter
+ *  - browser using Chrome
+ *  
+ * For an example, see `/socko/sbt/sbt` file.
  */
 object SpdyApp extends Logger {
 
@@ -49,10 +56,6 @@ object SpdyApp extends Logger {
 
   //
   // STEP #1 - Define Actors and Start Akka
-  //
-  // We are going to start StaticContentHandler actor as a router. There will be 20 instances using a max of 6 threads.
-  // Some basic benchmarking indicates that "thread-pool-executor" is better than "fork-join-executor" for
-  // StaticContentHandler.
   //
   val actorConfig = """
 	my-pinned-dispatcher {
@@ -145,6 +148,11 @@ object SpdyApp extends Logger {
     System.out.println("200K File       : https://localhost:8888/medium.txt")
     System.out.println("1MB File        : https://localhost:8888/big.txt")
     System.out.println("Dynamic Content : https://localhost:8888/dynamic")
+    System.out.println("")
+    System.out.println("Make sure that you:")
+    System.out.println("1. are using JDK 7")
+    System.out.println("2. have added `-Xbootclasspath/p:/path/to/sbt/npn-boot-8.1.2.v20120308.jar` to your JVM start up parameter")
+    System.out.println("3. Browser using Chrome")
   }
 
   /**
