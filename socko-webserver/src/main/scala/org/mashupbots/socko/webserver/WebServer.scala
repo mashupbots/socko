@@ -26,6 +26,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 import org.jboss.netty.channel.FixedReceiveBufferSizePredictor
+import org.jboss.netty.channel.Channel
 
 /**
  * Socko Web Server

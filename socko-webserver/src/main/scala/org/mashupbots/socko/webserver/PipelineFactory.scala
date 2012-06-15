@@ -16,7 +16,6 @@
 package org.mashupbots.socko.webserver
 
 import org.eclipse.jetty.npn.NextProtoNego
-import org.eclipse.jetty.npn.SpdyServerProvider
 import org.jboss.netty.channel.ChannelPipeline
 import org.jboss.netty.channel.ChannelPipelineFactory
 import org.jboss.netty.channel.Channels
@@ -26,6 +25,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedWriteHandler
 import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.netty.SpdyServerProvider
 
 /**
  * Creates a new channel pipeline for each Netty channel (network connection)

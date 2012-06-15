@@ -17,6 +17,7 @@ package org.mashupbots.socko.examples.spdy
 
 import java.io.File
 import java.io.FileOutputStream
+
 import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.handlers.StaticContentHandler
 import org.mashupbots.socko.handlers.StaticContentHandlerConfig
@@ -24,16 +25,22 @@ import org.mashupbots.socko.handlers.StaticFileRequest
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.Logger
-import org.mashupbots.socko.routes._
+import org.mashupbots.socko.routes.GET
+import org.mashupbots.socko.routes.HttpRequest
+import org.mashupbots.socko.routes.Path
+import org.mashupbots.socko.routes.Routes
+import org.mashupbots.socko.webserver.HttpConfig
+import org.mashupbots.socko.webserver.SslConfig
+import org.mashupbots.socko.webserver.WebLogConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
+
 import com.typesafe.config.ConfigFactory
+
 import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.routing.FromConfig
-import org.mashupbots.socko.webserver.HttpConfig
-import org.mashupbots.socko.webserver.SslConfig
 
 /**
  * This example is used for testing SPDY.
@@ -133,7 +140,8 @@ object SpdyApp extends Logger {
     val keyStoreFilePassword = "password"
     val sslConfig = SslConfig(keyStoreFile, keyStoreFilePassword, None, None)
     val httpConfig = HttpConfig(spdyEnabled = true)
-    val webServer = new WebServer(WebServerConfig(ssl = Some(sslConfig), http = httpConfig), routes, actorSystem)
+    val webServerConfig = WebServerConfig(hostname="0.0.0.0", webLog = Some(WebLogConfig()), ssl = Some(sslConfig), http = httpConfig)
+    val webServer = new WebServer(webServerConfig, routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run {
         webServer.stop()
@@ -150,9 +158,13 @@ object SpdyApp extends Logger {
     System.out.println("Dynamic Content : https://localhost:8888/dynamic")
     System.out.println("")
     System.out.println("Make sure that you:")
-    System.out.println("1. are using JDK 7")
-    System.out.println("2. have added `-Xbootclasspath/p:/path/to/sbt/npn-boot-8.1.2.v20120308.jar` to your JVM start up parameter")
+    System.out.println("1. Are using JDK 7")
+    System.out.println("2. Have added `-Xbootclasspath/p:/path/to/sbt/npn-boot-8.1.2.v20120308.jar` to your JVM start up parameter")
+    System.out.println("   Refer to /socko/sbt/sbt for an example")
     System.out.println("3. Browser using Chrome")
+    System.out.println("")
+    System.out.println("")
+    System.out.println("Check your SPDY session at chrome://net-internals/#spdy")
   }
 
   /**

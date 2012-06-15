@@ -31,6 +31,7 @@ import java.util.zip.GZIPOutputStream
 import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
+
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.ChannelFuture
 import org.jboss.netty.channel.ChannelFutureListener
@@ -38,9 +39,10 @@ import org.jboss.netty.channel.ChannelFutureProgressListener
 import org.jboss.netty.channel.DefaultFileRegion
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse
 import org.jboss.netty.handler.codec.http.HttpHeaders
+import org.jboss.netty.handler.codec.http.HttpResponse
 import org.jboss.netty.handler.codec.http.HttpVersion
+import org.jboss.netty.handler.codec.spdy.SpdyHttpHeaders
 import org.jboss.netty.handler.ssl.SslHandler
-import org.jboss.netty.handler.stream.ChunkedFile
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.infrastructure.IOUtil.using
@@ -49,10 +51,10 @@ import org.mashupbots.socko.infrastructure.HashUtil
 import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.LocalCache
 import org.mashupbots.socko.infrastructure.MimeTypes
+import org.mashupbots.socko.netty.HttpChunkedFile
+
 import akka.actor.Actor
 import akka.event.Logging
-import org.jboss.netty.handler.codec.http.HttpResponse
-import org.jboss.netty.handler.codec.spdy.SpdyHttpHeaders
 
 /**
  * Handles downloading of static files and resources.
@@ -296,8 +298,8 @@ class StaticContentHandler() extends Actor {
       response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
       response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
 
-      response.setContent(ChannelBuffers.copiedBuffer(content))
-      
+      response.setContent(ChannelBuffers.wrappedBuffer(content))
+
       // We have to write our own web log entry since we are not using context.writeResponse
       event.writeWebLog(HttpResponseStatus.OK.code, content.length)
 
@@ -440,8 +442,8 @@ class StaticContentHandler() extends Actor {
       response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
       response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
 
-      response.setContent(ChannelBuffers.copiedBuffer(content))
-      
+      response.setContent(ChannelBuffers.wrappedBuffer(content))
+
       // We have to write our own web log entry since we are not using context.writeResponse
       event.writeWebLog(HttpResponseStatus.OK.code, content.length)
 
@@ -516,6 +518,8 @@ class StaticContentHandler() extends Actor {
         }
       }
       if (raf != null) {
+        val ch = event.channel
+        val sendHttpChunks = (ch.getPipeline().get(classOf[SslHandler]) != null)
         val fileLength = raf.length()
 
         // Prepare response    
@@ -528,19 +532,24 @@ class StaticContentHandler() extends Actor {
         response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
         response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
 
+        if (sendHttpChunks) {
+          // See http://stackoverflow.com/questions/9027322/how-to-use-chunkedstream-properly
+          response.setChunked(true);
+          response.setHeader(HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);
+        }
+
         // We have to write our own web log entry since we are not using context.writeResponse
         event.writeWebLog(HttpResponseStatus.OK.code, fileLength)
 
         // Write the initial HTTP response line and headers
-        val ch = event.channel
         ch.write(response)
 
         // Write the content
         var writeFuture: ChannelFuture = null
 
-        if (ch.getPipeline().get(classOf[SslHandler]) != null) {
+        if (sendHttpChunks) {
           // Cannot use zero-copy with HTTPS.
-          writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192))
+          writeFuture = ch.write(new HttpChunkedFile(raf, 0, fileLength, 8192))
         } else {
           // No encryption - use zero-copy.
           val region = new DefaultFileRegion(raf.getChannel(), 0, fileLength)

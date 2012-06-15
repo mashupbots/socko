@@ -16,7 +16,6 @@
 package org.mashupbots.socko.webserver
 
 import org.eclipse.jetty.npn.NextProtoNego
-import org.eclipse.jetty.npn.SpdyServerProvider
 import org.jboss.netty.channel.ChannelEvent
 import org.jboss.netty.channel.ChannelHandlerContext
 import org.jboss.netty.channel.ChannelPipeline
@@ -31,6 +30,7 @@ import org.jboss.netty.handler.codec.spdy.SpdyHttpEncoder
 import org.jboss.netty.handler.codec.spdy.SpdySessionHandler
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedWriteHandler
+import org.mashupbots.socko.netty.SpdyServerProvider
 
 /**
  * Handler used with SPDY that performs protocol negotiation.
