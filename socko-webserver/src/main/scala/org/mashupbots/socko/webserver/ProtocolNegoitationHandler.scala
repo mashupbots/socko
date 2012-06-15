@@ -31,17 +31,20 @@ import org.jboss.netty.handler.codec.spdy.SpdySessionHandler
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedWriteHandler
 import org.mashupbots.socko.netty.SpdyServerProvider
+import org.mashupbots.socko.infrastructure.Logger
+import org.jboss.netty.channel.ChannelStateEvent
+import org.jboss.netty.channel.ChannelState
 
 /**
  * Handler used with SPDY that performs protocol negotiation.
- * 
+ *
  * Once Jetty's `NextProtoNego` returns the selected protocol, we setup the pipeline accordingly.
- * 
+ *
  * Code ported from post form [[http://www.smartjava.org/content/using-spdy-and-http-transparently-using-netty Jos Dirksen]]
- * 
+ *
  * @param server Web Server
  */
-class ProtocolNegoitationHandler(server: WebServer) extends ChannelUpstreamHandler {
+class ProtocolNegoitationHandler(server: WebServer) extends ChannelUpstreamHandler with Logger {
 
   def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
 
@@ -52,7 +55,16 @@ class ProtocolNegoitationHandler(server: WebServer) extends ChannelUpstreamHandl
     val httpConfig = server.config.http
 
     // Null is returned during the negotiation process so ignore it
-    if (selectedProtocol != null) {
+    if (selectedProtocol == null) {
+      // If channel open event (see SimpleChannelUpstreamHandler for sample), add to all channels
+      // For some reason, there are several channels opened for SPDY for the browser.
+      if (e.isInstanceOf[ChannelStateEvent]) {
+        val evt = e.asInstanceOf[ChannelStateEvent]
+        if (evt.getState() == ChannelState.OPEN) {
+          server.allChannels.add(e.getChannel)
+        }
+      }
+    } else {
       if (selectedProtocol.startsWith("spdy/")) {
         val version = Integer.parseInt(selectedProtocol.substring(5))
 
@@ -85,6 +97,6 @@ class ProtocolNegoitationHandler(server: WebServer) extends ChannelUpstreamHandl
         throw new UnsupportedOperationException("Unsupported protocol: " + selectedProtocol)
       }
     }
-
   }
+
 }
