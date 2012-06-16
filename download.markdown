@@ -5,7 +5,7 @@ layout: article
 
 ## Latest Release
 
-The latest verison of Socko is **`0.2.0`** released on 14th June 2012.
+The latest verison of Socko is **`0.2.0`** released on 16th June 2012.
 
 Download [socko-webserver_2.9.1-0.2.0.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.9.1/0.2.0/socko-webserver_2.9.1-0.2.0.jar).
 
@@ -39,8 +39,8 @@ Download the source code from GitHub
 
 Please install the following:
  - [Java JDK 6](http://www.oracle.com/technetwork/java/javase/downloads/index.html) or higher. 
-   We've noticed that Socko runs faster on JDK 7
- - [Scala 2.9](http://www.scala-lang.org/) or higher
+   We've noticed that Socko runs faster on JDK 7. You will also need JDK 7 if you wish to use SPDY.
+ - [Scala 2.9.1](http://www.scala-lang.org/) or higher
  - [Simple Build Tool](https://github.com/harrah/xsbt/wiki/Getting-Started-Setup)
 
 

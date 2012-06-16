@@ -21,12 +21,13 @@ StaticResourceRequestClass: <code><a href="../api/#org.mashupbots.socko.handler.
 
 ## Table of Contents
 
- - [Step 1. Define Actors and Start Akka.](#Step1)
- - [Step 2. Define Routes.](#Step2)
- - [Step 3. Start/Stop Web Server.](#Step3)
+ - [Step 1. Define Actors and Start Akka](#Step1)
+ - [Step 2. Define Routes](#Step2)
+ - [Step 3. Start/Stop Web Server](#Step3)
  - [Configuration](#Configuration)
  - [Serving Static Content](#StaticContent)
  - [Web Sockets](#WebSockets)
+ - [SPDY](#SPDY)
  - [Web Logs](#WebLogs)
  - [Code Examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
 
@@ -68,7 +69,8 @@ The default dispatcher is optimized for non blocking code. If your code blocks t
 database and/or file system, then it is advisable to configure Akka to use dispatchers based on thread pools.
 
 ### Socko Events
-{{ page.SockoEventClass }} is used to read incoming and write outgoing data.
+
+A {{ page.SockoEventClass }} is used to read incoming and write outgoing data.
 
 Two ways to achieve this are:
 
@@ -121,13 +123,13 @@ All {{ page.SockoEventClass }} must be used by **local actors** only.
 ### Akka Dispatchers and Thread Pools
 
 Akka [dispatchers](http://doc.akka.io/docs/akka/2.0.1/scala/dispatchers.html) controls how your Akka 
-actors processes messages.
+actors process messages.
 
 Akka's default dispatcher is optimized for non blocking code.
 
 However, if your actors have blocking operations like database read/write or file system read/write, 
 we recommend that you run these actors with a different dispatcher.  In this way, while these actors block a thread,
-other actors can continue processing.
+other actors can continue processing on other threads.
 
 
 The following code is taken from our [file upload example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload).
@@ -565,6 +567,10 @@ Common settings are:
  
    Optional HTTP request settings.
 
+ - `tcp`
+ 
+   Optional TCP/IP settings.
+
 Refer to the api documentation of {{ page.WebServerConfigClass }} for all settings.
 
 Configuration can be changed in [code](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/config/CodedConfigApp.scala)
@@ -650,14 +656,10 @@ the router.
     val routes = Routes({
       case HttpRequest(request) => request match {
         case GET(Path("/foo.html")) => {
-          val staticFileRequest = new StaticFileRequest(
-            request, new File("/path/to/my/files", "foo.html"))
-          staticContentHandlerRouter ! staticFileRequest
+          staticContentHandlerRouter ! new StaticFileRequest(request, new File("/my/path/", "foo.html"))
         }
         case GET(Path("/foo.txt")) => {
-          val staticResourceRequest = new StaticResourceRequest(
-            request, "META-INF/foo.txt")
-          staticContentHandlerRouter ! staticResourceRequest
+          staticContentHandlerRouter ! new StaticResourceRequest(request, "META-INF/foo.txt")
         }
       }
     })
@@ -705,11 +707,57 @@ The following route from our web socket example app illustrates:
     
     })
 
-Note that for a web socket handshake, you only need to call `wsHandshake.authorize()`.
+Note that for a web socket handshake, you only need to call `wsHandshake.authorize()` in order to approve the connection.
+This is a security measure to make sure that web sockets can only be established at your specified end points.
 Dispatching to an actor is not required and not recommended.
+
+You can also specify subprotocols and maximum frame size with authorization. If not specified, the default is no 
+subprotocol support and a maximum frame size of 100K.
+
+    // Only support chat and superchat subprotocols and max frame size of 1000 bytes
+    wsHandshake.authorize("chat, superchat", 1000)
 
 If you wish to push or broadcast messages to a group of web socket connections, use {{ page.WebSocketBroadcasterClass }}.
 See the example web socket [ChatApp](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket/ChatApp.scala) for usage.
+
+
+
+
+## SPDY <a class="blank" id="SPDY">&nbsp;</a>
+
+[SPDY](http://en.wikipedia.org/wiki/SPDY) is an experimental networking protocol used in speeding up delivery of web
+content.
+
+It is currently supported in the Chrome and Firefox (v11+) browsers.
+
+Steps to enabling SPDY:
+
+ 1. You will need to run with **JDK 7**
+ 
+ 2. Setup JVM Bootup classes
+    
+    SPDY uses a special extension to TLS/SSL called [Next Protocol Negotiation](http://tools.ietf.org/html/draft-agl-tls-nextprotoneg-00).
+    This is not currently supported by Java JDK. However, the Jetty team has kindly open sourced their implementation. 
+    
+    Refer to [Jetty NPN](http://wiki.eclipse.org/Jetty/Feature/NPN#Versions) for the correct version and download it from
+    the [maven repository](http://repo2.maven.org/maven2/org/mortbay/jetty/npn/npn-boot/).
+    
+    Add the JAR to your JVM boot parameters: `-Xbootclasspath/p:/path/to/npn-boot-1.0.0.v20120402.jar`.
+ 
+ 3. Set Web Server Configuration
+ 
+    You will need to turn on SSL and enable SPDY in your configuration.
+
+        val keyStoreFile = new File(contentDir, "testKeyStore")
+        val keyStoreFilePassword = "password"
+        val sslConfig = SslConfig(keyStoreFile, keyStoreFilePassword, None, None)
+        val httpConfig = HttpConfig(spdyEnabled = true)
+        val webServerConfig = WebServerConfig(hostname="0.0.0.0", webLog = Some(WebLogConfig()), ssl = Some(sslConfig), http = httpConfig)
+        val webServer = new WebServer(webServerConfig, routes, actorSystem)
+        webServer.start()
+    
+
+
 
 
 ## Web Logs <a class="blank" id="WebLogs">&nbsp;</a>

@@ -57,13 +57,15 @@ Socko has no external dependencies (outside Netty and Akka 2)
  * HTTP headers, including browser static file cache headers
  
  * Decoding HTTP POST request body, file uploads and query strings
+ 
+ * SPDY
 
 
 ## Fast-ish
 Socko handles and processes incoming HTTP requests in an asynchronous and event driven manner thanks to
 Netty and Akka.
 
-Here's some [benchmarking](/2012/06/14/benchmark.html) that we've done with v0.2.
+Here's some [benchmarking](/2012/04/22/benchmark.html) that we've done with v0.1.
 
 
 ## Open Source
