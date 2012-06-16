@@ -100,7 +100,7 @@ import akka.actor.Extension
  *         "application/json", "application/jsonml+json",
  *         "application/javascript", "application/x-javascript"]
  *         
- *       # Enable SPDY protocol or not. Defaults to `false`
+ *       # Enable SPDY protocol or not. Defaults to `false`. If `true`, you must also enable SSL.
  *       spdy=false
  *     }
  *
@@ -157,7 +157,7 @@ import akka.actor.Extension
  *  Defaults to `None`.
  * @param http HTTP protocol configuration. Defaults to an instance of
  *  [[org.mashupbots.socko.webserver.HttpConfig]] with default settings.
- * @param http TCP IP protocol configuration. Defaults to an instance of
+ * @param tcp TCP IP protocol configuration. Defaults to an instance of
  *  [[org.mashupbots.socko.webserver.TcpConfig]] with default settings.
  */
 case class WebServerConfig(
@@ -167,7 +167,7 @@ case class WebServerConfig(
   webLog: Option[WebLogConfig] = None,
   ssl: Option[SslConfig] = None,
   http: HttpConfig = HttpConfig(),
-  tcpConfig: TcpConfig = TcpConfig()) extends Extension {
+  tcp: TcpConfig = TcpConfig()) extends Extension {
 
   /**
    * Read configuration from AKKA's `application.conf`

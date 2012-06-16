@@ -32,9 +32,9 @@ package org.mashupbots
  * 
  *  - **infrastructure** - utility classes 
  *  - **events** - events are created by Socko and dispatched by your routes to your handlers
- *  - **routes** - extracts to assist with pattern matching in your routes
+ *  - **routes** - extractors to assist with pattern matching in your routes
  *  - **handlers** - akka actors that executes business logic
- *  - **webserver** - Socko web server and its configuration
+ *  - **webserver** - web server and its configuration
  */
 package object socko {
 }

@@ -16,7 +16,7 @@
 package org.mashupbots.socko
 
 /**
- * Routes define the rules for dispatching requests to its intended Akka actor processors.  
+ * Routes define the rules for dispatching requests to its intended Akka actor handlers.  
  */
 package object routes {
 }

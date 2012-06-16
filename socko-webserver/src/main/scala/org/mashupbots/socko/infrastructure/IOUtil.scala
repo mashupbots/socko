@@ -74,8 +74,7 @@ object IOUtil {
   }
 
   /**
-   * Auto close streams with [[http://stackoverflow.com/questions/2207425/what-automatic-resource-management-alternatives-exists-for-scala
-   * automatic resource management]]
+   * Auto close streams with [[http://stackoverflow.com/questions/2207425/what-automatic-resource-management-alternatives-exists-for-scala automatic resource management]]
    *
    * Example usage
    * {{{

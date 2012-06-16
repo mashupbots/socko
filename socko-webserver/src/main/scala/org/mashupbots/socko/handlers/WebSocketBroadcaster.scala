@@ -54,19 +54,19 @@ class WebSocketBroadcaster extends Actor {
 }
 
 /**
- * Message sent to [[org.mashupbots.socko.processors.WebSocketBroadcaster] during the web socket handshake 
+ * Message sent to [[org.mashupbots.socko.processors.WebSocketBroadcaster]] during the web socket handshake 
  * in order to register the web socket connection to receive broadcast messages
  */
 case class WebSocketBroadcasterRegistration(context: WebSocketHandshakeEvent)
 
 /**
- * Message sent to [[org.mashupbots.socko.processors.WebSocketBroadcaster] to broadcast a web socket text frame
+ * Message sent to [[org.mashupbots.socko.processors.WebSocketBroadcaster]] to broadcast a web socket text frame
  * to all registered web socket connection.
  */
 case class WebSocketBroadcastText(text: String)
 
 /**
- * Message sent to [[org.mashupbots.socko.processors.WebSocketBroadcaster] to broadcast a web socket binary frame
+ * Message sent to [[org.mashupbots.socko.processors.WebSocketBroadcaster]] to broadcast a web socket binary frame
  * to all registered web socket connection.
  */
 case class WebSocketBroadcastBinary(bytes: Array[Byte])

@@ -27,6 +27,7 @@ StaticResourceRequestClass: <code><a href="../api/#org.mashupbots.socko.handler.
  - [Configuration](#Configuration)
  - [Serving Static Content](#StaticContent)
  - [Web Sockets](#WebSockets)
+ - [SPDY](#SPDY)
  - [Web Logs](#WebLogs)
  - [Code Examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
 
@@ -68,7 +69,8 @@ The default dispatcher is optimized for non blocking code. If your code blocks t
 database and/or file system, then it is advisable to configure Akka to use dispatchers based on thread pools.
 
 ### Socko Events
-{{ page.SockoEventClass }} is used to read incoming and write outgoing data.
+
+A {{ page.SockoEventClass }} is used to read incoming and write outgoing data.
 
 Two ways to achieve this are:
 
@@ -565,6 +567,10 @@ Common settings are:
  
    Optional HTTP request settings.
 
+ - `tcp`
+ 
+   Optional TCP/IP settings.
+
 Refer to the api documentation of {{ page.WebServerConfigClass }} for all settings.
 
 Configuration can be changed in [code](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/config/CodedConfigApp.scala)
@@ -713,6 +719,45 @@ subprotocol support and a maximum frame size of 100K.
 
 If you wish to push or broadcast messages to a group of web socket connections, use {{ page.WebSocketBroadcasterClass }}.
 See the example web socket [ChatApp](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket/ChatApp.scala) for usage.
+
+
+
+
+## SPDY <a class="blank" id="SPDY">&nbsp;</a>
+
+[SPDY](http://en.wikipedia.org/wiki/SPDY) is an experimental networking protocol used in speeding up delivery of web
+content.
+
+It is currently supported in the Chrome and Firefox (v11+) browsers.
+
+Steps to enabling SPDY:
+
+ 1. You will need to run with **JDK 7**
+ 
+ 2. Setup JVM Bootup classes
+    
+    SPDY uses a special extension to TLS/SSL called [Next Protocol Negotiation](http://tools.ietf.org/html/draft-agl-tls-nextprotoneg-00).
+    This is not currently supported by Java JDK. However, the Jetty team has kindly open sourced their implementation. 
+    
+    Refer to [Jetty NPN](http://wiki.eclipse.org/Jetty/Feature/NPN#Versions) for the correct version and download it from
+    the [maven repository](http://repo2.maven.org/maven2/org/mortbay/jetty/npn/npn-boot/).
+    
+    Add the JAR to your JVM boot parameters: `-Xbootclasspath/p:/path/to/npn-boot-1.0.0.v20120402.jar`.
+ 
+ 3. Set Web Server Configuration
+ 
+    You will need to turn on SSL and enable SPDY in your configuration.
+
+        val keyStoreFile = new File(contentDir, "testKeyStore")
+        val keyStoreFilePassword = "password"
+        val sslConfig = SslConfig(keyStoreFile, keyStoreFilePassword, None, None)
+        val httpConfig = HttpConfig(spdyEnabled = true)
+        val webServerConfig = WebServerConfig(hostname="0.0.0.0", webLog = Some(WebLogConfig()), ssl = Some(sslConfig), http = httpConfig)
+        val webServer = new WebServer(webServerConfig, routes, actorSystem)
+        webServer.start()
+    
+
+
 
 
 ## Web Logs <a class="blank" id="WebLogs">&nbsp;</a>

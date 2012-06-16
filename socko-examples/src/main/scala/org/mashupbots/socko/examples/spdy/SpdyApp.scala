@@ -47,8 +47,8 @@ import akka.routing.FromConfig
  * 
  * To run this example you need to:
  *  - use JDK 7
- *  - add `-Xbootclasspath/p:/path/to/sbt/npn-boot-8.1.2.v20120308.jar` to your JVM start up parameter
- *  - browser using Chrome
+ *  - add `-Xbootclasspath/p:/path/to/sbt/npn-boot-VERSION.jar` to your JVM start up parameter
+ *  - browse using Chrome
  *  
  * For an example, see `/socko/sbt/sbt` file.
  */
@@ -159,12 +159,12 @@ object SpdyApp extends Logger {
     System.out.println("")
     System.out.println("Make sure that you:")
     System.out.println("1. Are using JDK 7")
-    System.out.println("2. Have added `-Xbootclasspath/p:/path/to/sbt/npn-boot-8.1.2.v20120308.jar` to your JVM start up parameter")
+    System.out.println("2. Have added `-Xbootclasspath/p:/path/to/sbt/npn-boot-VERSION.jar` to your JVM start up parameter")
     System.out.println("   Refer to /socko/sbt/sbt for an example")
-    System.out.println("3. Browser using Chrome")
-    System.out.println("")
+    System.out.println("3. Browse using Chrome")
     System.out.println("")
     System.out.println("Check your SPDY session at chrome://net-internals/#spdy")
+    System.out.println("")
   }
 
   /**

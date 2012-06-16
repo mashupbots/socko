@@ -96,30 +96,30 @@ class WebServer(
 
     val bootstrap = new ServerBootstrap(channelFactory)
 
-    bootstrap.setOption("child.tcpNoDelay", config.tcpConfig.noDelay.getOrElse(true))
-    if (config.tcpConfig.sendBufferSize.isDefined) {
-      bootstrap.setOption("child.sendBufferSize", config.tcpConfig.sendBufferSize.get)
+    bootstrap.setOption("child.tcpNoDelay", config.tcp.noDelay.getOrElse(true))
+    if (config.tcp.sendBufferSize.isDefined) {
+      bootstrap.setOption("child.sendBufferSize", config.tcp.sendBufferSize.get)
     }
-    if (config.tcpConfig.receiveBufferSize.isDefined) {
+    if (config.tcp.receiveBufferSize.isDefined) {
       // Thanks to VertX. We need to set a FixedReceiveBufferSizePredictor, since otherwise Netty will ignore our setting and use an 
       // adaptive buffer which can get very large
-      bootstrap.setOption("child.receiveBufferSize", config.tcpConfig.receiveBufferSize.get)
+      bootstrap.setOption("child.receiveBufferSize", config.tcp.receiveBufferSize.get)
       bootstrap.setOption("child.receiveBufferSizePredictor", new FixedReceiveBufferSizePredictor(1024))
     }
-    if (config.tcpConfig.keepAlive.isDefined) {
-      bootstrap.setOption("child.keepAlive", config.tcpConfig.keepAlive.get)
+    if (config.tcp.keepAlive.isDefined) {
+      bootstrap.setOption("child.keepAlive", config.tcp.keepAlive.get)
     }    
-    if (config.tcpConfig.soLinger.isDefined) {
-      bootstrap.setOption("child.soLinger", config.tcpConfig.soLinger.get)
+    if (config.tcp.soLinger.isDefined) {
+      bootstrap.setOption("child.soLinger", config.tcp.soLinger.get)
     }
-    if (config.tcpConfig.trafficClass.isDefined) {
-      bootstrap.setOption("child.trafficClass", config.tcpConfig.trafficClass.get);
+    if (config.tcp.trafficClass.isDefined) {
+      bootstrap.setOption("child.trafficClass", config.tcp.trafficClass.get);
     }
-    if (config.tcpConfig.reuseAddress.isDefined) {
-      bootstrap.setOption("child.reuseAddress", config.tcpConfig.reuseAddress.get);
+    if (config.tcp.reuseAddress.isDefined) {
+      bootstrap.setOption("child.reuseAddress", config.tcp.reuseAddress.get);
     }
-    if (config.tcpConfig.trafficClass.isDefined) {
-      bootstrap.setOption("child.backlog", config.tcpConfig.trafficClass.get);
+    if (config.tcp.trafficClass.isDefined) {
+      bootstrap.setOption("child.backlog", config.tcp.trafficClass.get);
     }
 
     bootstrap.setPipelineFactory(new PipelineFactory(this))
