@@ -7,6 +7,7 @@ Socko is an embedded [Scala](http://www.scala-lang.org/) web server powered by
 
 ## A quick example
 
+```scala
     object HelloApp extends Logger {
       //
       // STEP #1 - Define Actors and Start Akka
@@ -50,7 +51,7 @@ Socko is an embedded [Scala](http://www.scala-lang.org/) web server powered by
           context.stop(self)
       }
     }
-
+```
 
 ## Editing the Source Code
 
