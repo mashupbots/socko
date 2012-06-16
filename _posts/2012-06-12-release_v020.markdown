@@ -1,0 +1,30 @@
+---
+layout: post
+title: Socko v0.2.0 Released
+summary: Websock Broadcasting, SPDY, Web Logs and more
+author: Vibul
+---
+
+For this release, we have worked on imporving functionality including
+ - Websock Broadcasting. See web socket example [chat app](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket/ChatApp.scala).
+ - SPDY 3
+ - [Web logs](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/weblog/WebLogApp.scala) support.
+ - Conditional [HTTP compression](https://github.com/mashupbots/socko/issues/9).
+ - In memory caching of small static files
+
+Unfortunately, there are breaking [API changes](https://github.com/mashupbots/socko/issues/17).
+
+Download [socko-webserver_2.9.1-0.2.0.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.9.1/0.2.0/socko-webserver_2.9.1-0.2.0.jar).
+
+For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
+
+Documentation
+ - [User Guide](/docs/0.2.0/guides/user_guide.html)
+ - [API](/docs/0.2.0/api/)
+ - [Change logs](https://github.com/mashupbots/socko/issues/milestones?state=closed)
+
+
+ 
+ 
+
+
