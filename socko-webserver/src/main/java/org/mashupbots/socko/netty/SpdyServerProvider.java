@@ -33,12 +33,10 @@ public class SpdyServerProvider implements ServerProvider {
 	}
 
 	public List<String> protocols() {
-		System.out.println("get protocols");
 		return Arrays.asList("spdy/3", "spdy/2", "http/1.1");
 	}
 
 	public void protocolSelected(String protocol) {
-		System.out.println("selected: " + protocol);
 		selectedProtocol = protocol;
 	}
 
