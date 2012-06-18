@@ -45,6 +45,7 @@ In the following `HelloApp` example, we have defined an actor called `HelloHandl
 system called `HelloExampleActorSystem`.  The `HttpRequestEvent` is used by the `HelloHandler`
 to write a response to the client.
 
+{% highlight scala %}
     object HelloApp extends Logger {
       //
       // STEP #1 - Define Actors and Start Akka
@@ -63,6 +64,7 @@ to write a response to the client.
           context.stop(self)
       }
     }
+{% endhighlight %}
     
 For maximum scalability and performance, you will need to carefully choose your Akka dispatchers.
 The default dispatcher is optimized for non blocking code. If your code blocks though reading from and writing to 
