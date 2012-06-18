@@ -45,6 +45,7 @@ In the following `HelloApp` example, we have defined an actor called `HelloHandl
 system called `HelloExampleActorSystem`.  The `HttpRequestEvent` is used by the `HelloHandler`
 to write a response to the client.
 
+{% highlight scala %}
     object HelloApp extends Logger {
       //
       // STEP #1 - Define Actors and Start Akka
@@ -63,6 +64,7 @@ to write a response to the client.
           context.stop(self)
       }
     }
+{% endhighlight %}
     
 For maximum scalability and performance, you will need to carefully choose your Akka dispatchers.
 The default dispatcher is optimized for non blocking code. If your code blocks though reading from and writing to 
@@ -134,9 +136,10 @@ other actors can continue processing on other threads.
 
 The following code is taken from our [file upload example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload).
 Because `StaticContentHandler` and `FileUploadHandler` actors read and write lots of files, we have set them up 
-to use a `PinnedDispatcher`. Note that we have only allocated 5 threads to each processor. To scale, you may wish
- to allocate more threads.
+to use a `PinnedDispatcher`. Note that we have only allocated 5 threads to each processor. To scale, you may wish 
+to allocate more threads.
 
+{% highlight scala %}
     val actorConfig = """
       my-pinned-dispatcher {
         type=PinnedDispatcher
@@ -166,7 +169,7 @@ to use a `PinnedDispatcher`. Note that we have only allocated 5 threads to each 
     
     val fileUploadHandlerRouter = actorSystem.actorOf(Props[FileUploadHandler]
       .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "file-upload-router")
-
+{% endhighlight %}
 
 
 
@@ -193,11 +196,13 @@ To assist with dispatching, we have included pattern matching extractors:
  
 The following example illustrates matching HTTP GET event and dispatching it to a `HelloHandler` actor:
 
+{% highlight scala %}
     val routes = Routes({
       case GET(request) => {
         actorSystem.actorOf(Props[HelloHandler]) ! request
       }
     })
+{% endhighlight %}
 
 For a more detailed example, see our [example route app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/routes).
 
@@ -214,6 +219,7 @@ These extractors allows you to match different types of {{ page.SockoEventClass 
 The following code taken from our [web socket example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket) 
 illustrates usage:
 
+{% highlight scala %}
     val routes = Routes({
     
       case HttpRequest(httpRequest) => httpRequest match {
@@ -241,6 +247,7 @@ illustrates usage:
       }
     
     })
+{% endhighlight %}
 
 
 ### Host Extractors <a class="blank" id="HostExtractors">&nbsp;</a>
@@ -264,11 +271,13 @@ Performs an exact match on the specified host.
 
 The following example will match `www.sockoweb.org` but not: `www1.sockoweb.org`, `sockoweb.com` or `sockoweb.org`.
 
+{% highlight scala %}
     val r = Routes({
       case Host("www.sockoweb.org") => {
         ...
       }
     })
+{% endhighlight %}
 
 
 **[`HostSegments`](../api/#org.mashupbots.socko.routes.HostSegments$)**
@@ -278,12 +287,14 @@ by a period.
 
 For example:
 
+{% highlight scala %}
     val r = Routes({
       // Matches server1.sockoweb.org
       case HostSegments(server :: "sockoweb" :: "org" :: Nil) => {
         ...
       }
     })
+{% endhighlight %}
 
 This will match any hosts that have 3 segments and the last 2 segments being `sockoweb.org`. 
 The first segment will be bound to a variable called `server.` 
@@ -301,6 +312,7 @@ Matches the host based on a regular expression pattern.
 For example, to match `www.anydomainname.com`, first define your regular expression as an object and then use it
 in your route.
 
+{% highlight scala %}
     object MyHostRegex extends HostRegex("""www\.([a-z]+)\.com""".r)
     
     val r = Routes({
@@ -310,6 +322,7 @@ in your route.
         ...
       }
     })
+{% endhighlight %}
 
 
 ### Method Extractors <a class="blank" id="MethodExtractors">&nbsp;</a>
@@ -338,22 +351,26 @@ Socko supports the following methods:
 
 For example, to match every HTTP GET:
 
+{% highlight scala %}
     val r = Routes({
       case GET(_) => {
         ...
       }
     })
+{% endhighlight %}
   
 Method extractors return the {{ page.SockoEventClass }} so it can be used with other extractors
 in the same case statement. 
 
 For example, to match HTTP GET with a path of "/clients"
 
+{% highlight scala %}
     val r = Routes({
       case GET(Path("/clients")) => {
         ...
       }
     })
+{% endhighlight %}
 
 
 
@@ -381,11 +398,13 @@ Performs an exact match on the specified path.
 
 The following example will match `folderX` but not: `/folderx`, `/folderX/` or `/TheFolderX`.
 
+{% highlight scala %}
     val r = Routes({
       case Path("/folderX") => {
         ...
       }
     })
+{% endhighlight %}
 
 
 **[`PathSegments`](../api/#org.mashupbots.socko.routes.PathSegments$)**
@@ -395,12 +414,14 @@ by a slash.
 
 For example:
 
+{% highlight scala %}
     val r = Routes({
       // Matches /record/1
       case PathSegments("record" :: id :: Nil) => {
         ...
       }
     })
+{% endhighlight %}
 
 This will match any paths that have 2 segments and the first segment being `record`. The second 
 segment will be bound to a variable called `id.` 
@@ -418,6 +439,7 @@ Matches the path based on a regular expression pattern.
 For example, to match `/path/to/file`, first define your regular expression as an object and then use it
 in your route.
 
+{% highlight scala %}
     object MyPathRegex extends PathRegex("""/path/([a-z0-9]+)/([a-z0-9]+)""".r)
     
     val r = Routes({
@@ -428,6 +450,7 @@ in your route.
         ...
       }
     })
+{% endhighlight %}
 
 
 ### Query String Extractors <a class="blank" id="QueryStringExtractors">&nbsp;</a>
@@ -450,11 +473,13 @@ Performs an exact match on the query string.
 
 The following example will match `action=save` but not: `action=view` or `action=save&id=1`.
 
+{% highlight scala %}
     val r = Routes({
       case QueryString("action=save") => {
         ...
       }
     })
+{% endhighlight %}
 
 
 **[`QueryStringField`](../api/#org.mashupbots.socko.routes.QueryStringField)**
@@ -464,6 +489,7 @@ Performs matching and variable binding a query string value for a specified quer
 For example, to match whenever the `action` field is present and bind its value to a variable called
 `actionValue`:
 
+{% highlight scala %}
     object ActionQueryStringField extends QueryStringName("action")
     
     val r = Routes({
@@ -472,13 +498,15 @@ For example, to match whenever the `action` field is present and bind its value 
         ...
       }
     })
- 
+{% endhighlight %}
+
 **[`QueryStringRegex`](../api/#org.mashupbots.socko.routes.QueryStringRegex)**
 
 Matches the query string based on a regular expression pattern.
 
 For example, to match `?name1=value1`:
 
+{% highlight scala %}
     object MyQueryStringRegex extends QueryStringRegex("""name1=([a-z0-9]+)""".r)
     
     val r = Routes({
@@ -488,6 +516,7 @@ For example, to match `?name1=value1`:
         ...
       }
     })
+{% endhighlight %}
 
 
 ### Concatenation Extractors <a class="blank" id="ConcatenatingExtractors">&nbsp;</a>
@@ -498,6 +527,7 @@ use an ampersand ([`&`](../api/#org.mashupbots.socko.routes.$amp$)).
 For example, if you wish to match a path of `/record/1` and a query string of `action=save`,
 you can use 
 
+{% highlight scala %}
     object ActionQueryStringField extends QueryStringName("action")
     
     val r = Routes({
@@ -505,7 +535,7 @@ you can use
         ...
       }
     })
-
+{% endhighlight %}
 
 
 
@@ -516,6 +546,7 @@ To start you web server, you only need to instance the {{ page.WebServerClass }}
 call `start()` passing in your configuration and routes.  When you wish to stop the web 
 server, call `stop()`.
 
+{% highlight scala %}
     def main(args: Array[String]) {
       val webServer = new WebServer(WebServerConfig(), routes)
       webServer.start()
@@ -526,7 +557,8 @@ server, call `stop()`.
     
       System.out.println("Open your browser and navigate to http://localhost:8888")
     }
-  
+{% endhighlight %}
+
 This example uses the default configuration which starts the web server at `localhost` bound on
 port `8888`.  To customise, refer to [Configuration](#Configuration).
 
@@ -578,22 +610,27 @@ or in the project's [Akka configuration file](https://github.com/mashupbots/sock
 
 For example, to change the port to `7777` in code:
 
+{% highlight scala %}
     val webServer = new WebServer(WebServerConfig(port=7777), routes)
-
+{% endhighlight %}
 
 To change the port to `9999` in your Akka configuration file, first define an object to load the settings
 from `application.conf`. Note the setting will be named `akka-config-example`.
 
+{% highlight scala %}
     object MyWebServerConfig extends ExtensionId[WebServerConfig] with ExtensionIdProvider {
       override def lookup = MyWebServerConfig
       override def createExtension(system: ExtendedActorSystem) =
         new WebServerConfig(system.settings.config, "akka-config-example")
     }
+{% endhighlight %}
 
 Then, start the actor system and load the configuration from that system.
 
+{% highlight scala %}
     val actorSystem = ActorSystem("AkkaConfigActorSystem")
     val myWebServerConfig = MyWebServerConfig(actorSystem)
+{% endhighlight %}
     
 Lastly, add the following our `application.conf`
 
@@ -622,6 +659,7 @@ You will also need to configure its operation with {{ page.StaticContentHandlerC
 
 For example:
 
+{% highlight scala %}
     val actorConfig = """
       my-pinned-dispatcher {
         type=PinnedDispatcher
@@ -647,12 +685,14 @@ For example:
 
     val staticContentHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
       .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
+{% endhighlight %}
 
 ### Requests
 
 To serve a file or resource, send {{ page.StaticFileRequestClass }} or {{ page.StaticResourceRequestClass }} to
 the router.
 
+{% highlight scala %}
     val routes = Routes({
       case HttpRequest(request) => request match {
         case GET(Path("/foo.html")) => {
@@ -663,6 +703,7 @@ the router.
         }
       }
     })
+{% endhighlight %}
 
 
 
@@ -679,6 +720,7 @@ frame is received.
 
 The following route from our web socket example app illustrates:
 
+{% highlight scala %}
     val routes = Routes({
     
       case HttpRequest(httpRequest) => httpRequest match {
@@ -706,6 +748,7 @@ The following route from our web socket example app illustrates:
       }
     
     })
+{% endhighlight %}
 
 Note that for a web socket handshake, you only need to call `wsHandshake.authorize()` in order to approve the connection.
 This is a security measure to make sure that web sockets can only be established at your specified end points.
@@ -748,6 +791,7 @@ Steps to enabling SPDY:
  
     You will need to turn on SSL and enable SPDY in your configuration.
 
+    {% highlight scala %}
         val keyStoreFile = new File(contentDir, "testKeyStore")
         val keyStoreFilePassword = "password"
         val sslConfig = SslConfig(keyStoreFile, keyStoreFilePassword, None, None)
@@ -755,6 +799,7 @@ Steps to enabling SPDY:
         val webServerConfig = WebServerConfig(hostname="0.0.0.0", webLog = Some(WebLogConfig()), ssl = Some(sslConfig), http = httpConfig)
         val webServer = new WebServer(webServerConfig, routes, actorSystem)
         webServer.start()
+    {% endhighlight %}
     
 
 
@@ -808,10 +853,12 @@ To turn web logs on, add the following `web-log` section to your `application.co
     
 You can also turn it on programmatically as illustrated in the [web log example app](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/weblog/WebLogApp.scala).
 
+{% highlight scala %}
     // Turn on web logs
     // Web logs will be written to the logger. You can control output via logback.xml.
     val config = WebServerConfig(webLog = Some(WebLogConfig()))
     val webServer = new WebServer(config, routes, actorSystem)
+{% endhighlight %}
     
 When turned on, the default behaviour is to write web logs to your installed [akka logger](http://doc.akka.io/docs/akka/2.0.1/scala/logging.html) 
 using {{ page.WebLogWriterClass }}. The akka logger asynchronously writes to the log so it will not slow down 
@@ -827,6 +874,7 @@ To activate akka logging, add the following to `application.conf`:
 You can configure where web logs are written by configuring your installed logger. For example, if you are using 
 [Logback](http://logback.qos.ch/), you can write to a daily rolling file by changing `logback.xml` to include:
 
+{% highlight xml %}
     <configuration>
       <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -857,6 +905,7 @@ You can configure where web logs are written by configuring your installed logge
         <appender-ref ref="STDOUT" />
       </root>
     </configuration>
+{% endhighlight %}
 
 ### Recording Web Logs Events
 
