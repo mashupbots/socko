@@ -16,8 +16,8 @@ Also, most of the code examples are is in Scala because that is what we are usin
 
 ## Step 1 - Add Support for Next Protocol Negotiation (NPN)
  
-When you type `https://www.mywebsite.com/mypage` into the Chrome browser address bar, Chrome is able to ask if the
-server supports SPDY and if so, which version.
+When you type `https://www.mywebsite.com/mypage` into the Chrome browser address bar, Chrome asks the server if it supports 
+SPDY and if so, which version.
 
 To achieve this, a special TLS/SSL extension called [Next Protocol Negotiation](http://tools.ietf.org/html/draft-agl-tls-nextprotoneg-00)
 is used.
@@ -46,7 +46,7 @@ To use NPN from our app, we first have to add the Jetty NPN-API JAR.
 {% endhighlight %}
 
 For Socko, we just added the source file `NextProtoNego.java` into our project to save our users having to add another
-dependancy. 
+dependency. 
 
 Next, we need use the NPN API to specify our supported protocols and receive notification of the selected protocol. This is 
 through implementing the NPN `ServerProvider` interface.
@@ -74,7 +74,7 @@ through implementing the NPN `ServerProvider` interface.
     }
 {% endhighlight %}
     
-As you can see, we will be supported SPDY version 3, SPDY version 2 and HTTP 1.1.
+As you can see, we will support SPDY version 3, SPDY version 2 and HTTP 1.1.
 
 
 ## Step 3 - Setup Netty Pipeline
@@ -117,7 +117,7 @@ In Socko, we setup a standard HTTP pipeline unless SPDY is enabled.
 
 ## Step 4 - Implementing ProtocolNegoitationHandler
 
-The protocol negotiation handler receives numerous events during the protocol negoitation process.
+The protocol negotiation handler receives numerous events during the protocol negotiation process.
 
 {% highlight scala %}
     class ProtocolNegoitationHandler(server: WebServer) extends ChannelUpstreamHandler with Logger {
@@ -178,7 +178,7 @@ The protocol negotiation handler receives numerous events during the protocol ne
 {% endhighlight %}
 
 
-### Checking for the Selected 
+### Checking for the Selected Protocol
 
 To check if a protocol has been selected, we check the `selectedProtocol` property of the `SpdyServerProvider` object
 associated with the `SSLEngine` for this instance of the pipeline.
@@ -187,12 +187,12 @@ If it is `null`, a protocol is yet to be selected.
 
 ### Storing Opened Channels
 
-We also check for the open channel event so that we can add the channel to a netty channel group. This is important 
-becasue we found that several channels are created during NPN negotiation process with a single Chrome tab even if
+We also check for the open channel event so that we can add the channel to a Netty channel group. This is important 
+because we found that several channels are created during NPN negotiation process by a single Chrome tab - even if
 a single resource was requested.
 
-Adding the channel to our `server.allChannels` group means that upon web server exit, we can close these channels
-correctly. If you do not close these channels, Netty will hang on `channelFactory.releaseExternalResources()` when shutting down.
+Adding the channel to our `server.allChannels` group means that upon web server exit, we can close these channels. If 
+you do not close these channels, Netty will hang on `channelFactory.releaseExternalResources()` when shutting down.
 
 ### Post Negotiation
 
@@ -204,11 +204,11 @@ way, you can use your normal HTTP handlers.
 
 
 
-## Step 5 - Writing Http Responses
+## Step 5 - Writing HTTP Responses
 
 ### SPDY Headers
 
-You will need to copy the following SPDY headers from the request
+You will need to copy the following SPDY headers from the request to the response.
 
 {% highlight scala %}
     var spdyId = event.request.headers.getOrElse(SpdyHttpHeaders.Names.STREAM_ID, "")
@@ -225,8 +225,8 @@ You will need to set the content of the response within `DefaultHttpResponse`.
     response.setContent(ChannelBuffers.wrappedBuffer(content))
 {% endhighlight %}
 
-Writing the body to the channel after writing the response is not supported. I guess this is because the SPDY 
-handlers do not have the context to correctly encode/decode binary data.
+Writing the body to the channel after writing the response is **not supported**. I guess this is because the SPDY 
+encoder does not have the context to correctly encode arbitrary binary data.
 
 {% highlight scala %}
     // Not Supported
@@ -237,22 +237,14 @@ handlers do not have the context to correctly encode/decode binary data.
 
 ### Chunk Response Content
 
-For large files and/or streaming content, setting the response content is not feasible.
+For large files and/or streaming content, setting the response content is not feasible.  You don't want all that data
+in memory.
 
 We found using `HttpChunks` to be the best solution.
 
-First, we set the response type to be chunked.
-
-{% highlight scala %}
-    val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
-    response.setChunked(true);
-    response.setHeader(HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);
-    ch.write(response)
-{% endhighlight %}
-
-Next, we copy and modify `ChunkedFile` so that instead of writing binary chunks, it writes a `HttpChunk` message containing
-the chunked content.  One small complication is that we need to keep track of and send the trailer chunk to notify the
-client of the end of stream.
+First we need to modify Netty's `ChunkedFile` so that instead of writing binary chunks, it writes a `HttpChunk` message 
+containing the chunked content.  One small complication is that we need to keep track of and send the trailer chunk to 
+notify the client of the end of stream.
 
 {% highlight java %}
     public class HttpChunkedFile implements ChunkedInput {
@@ -389,6 +381,29 @@ client of the end of stream.
         }
     }
 {% endhighlight %}
+
+Then, make sure you add Netty's `ChunkedWriteHandler` to your pipeline:
+
+{% highlight scala %}
+    pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
+{% endhighlight %}
+
+Finally, write the chunked response as follows:
+
+{% highlight scala %}
+    val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
+    response.setChunked(true);
+    response.setHeader(HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);
+    ch.write(response)
+    
+    val writeFuture = ch.write(new HttpChunkedFile(raf, 0, fileLength, 8192))
+    if (!event.request.isKeepAlive) {
+      writeFuture.addListener(ChannelFutureListener.CLOSE)
+    }
+{% endhighlight %}
+
+If you wish to write a stream, you need only to convert Netty's `ChunkedStream` to `HttpChunkStream` in the same way
+we converted `ChunkedFile`.
 
 
 
