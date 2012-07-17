@@ -1,1 +1,5 @@
 _site
+project/
+socko-examples/
+socko-webserver/
+target/
