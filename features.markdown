@@ -40,10 +40,9 @@ private administraion/monitoring API.
 
 ## Lightweight (assuming you are already using Akka)
 
-V0.1 has approximately 1,300 lines of Scala code (and ~2,600 lines of Java code which will be removed once Akka 
-moves to the upcoming Netty 4.0).
+V0.2 has less than 4000 lines of Scala and Java code.
     
-Socko has no external dependencies outside Akka 2.0 Remote (which includes Netty).
+Socko has no external dependencies (outside Netty and Akka 2)
 
 
 ## Supportive of HTTP and HTML5 Standards
@@ -58,16 +57,15 @@ Socko has no external dependencies outside Akka 2.0 Remote (which includes Netty
  * HTTP headers, including browser static file cache headers
  
  * Decoding HTTP POST request body, file uploads and query strings
+ 
+ * SPDY
 
 
 ## Fast-ish
 Socko handles and processes incoming HTTP requests in an asynchronous and event driven manner thanks to
 Netty and Akka.
 
-Our initial [benchmarking](/2012/04/22/benchmark.html) shows Socko is a little faster than Apache Tomcat 7 for static and dynamic content.
-
-However, Socko is a little slower than Apache Web Server 2.2.20 for static content.
-
+Here's some [benchmarking](/2012/04/22/benchmark.html) that we've done with v0.1.
 
 
 ## Open Source

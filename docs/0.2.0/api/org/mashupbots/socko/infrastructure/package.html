@@ -1,0 +1,194 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>org.mashupbots.socko.infrastructure</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a name="org" class="extype" href="../../../package.html">org</a>.<a name="org.mashupbots" class="extype" href="../../package.html">mashupbots</a>.<a name="org.mashupbots.socko" class="extype" href="../package.html">socko</a></p>
+        <h1>infrastructure</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol"> 
+        <span class="name">infrastructure</span>
+        
+        
+      </span>
+      </h4>
+      
+          <div class="fullcommenttop" id="comment"></div>
+        
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="org.mashupbots.socko.infrastructure.LocalCache" data-isabs="false">
+      <a id="LocalCache:LocalCache"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="LocalCache.html"><span class="name">LocalCache</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Local in-memory cache based on Google's <a href="http://code.google.com/p/concurrentlinkedhashmap">ConcurrentLinkedHashMap</a>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.infrastructure.Logger" data-isabs="true">
+      <a id="Logger:Logger"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="Logger.html"><span class="name">Logger</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Adds logging functionality to our classes.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.infrastructure.WebLogEvent" data-isabs="false">
+      <a id="WebLogEvent:WebLogEvent"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="WebLogEvent.html"><span class="name">WebLogEvent</span></a>
+        
+        <span class="params">(<span name="timestamp">timestamp: Date</span>, <span name="serverName">serverName: String</span>, <span name="channelId">channelId: Int</span>, <span name="clientAddress">clientAddress: SocketAddress</span>, <span name="serverAddress">serverAddress: SocketAddress</span>, <span name="username">username: Option[String]</span>, <span name="method">method: String</span>, <span name="uri">uri: String</span>, <span name="requestSize">requestSize: Long</span>, <span name="responseStatusCode">responseStatusCode: Int</span>, <span name="responseSize">responseSize: Long</span>, <span name="timeTaken">timeTaken: Long</span>, <span name="protocolVersion">protocolVersion: String</span>, <span name="userAgent">userAgent: Option[String]</span>, <span name="referrer">referrer: Option[String]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A web log event to record
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.infrastructure.WebLogWriter" data-isabs="false">
+      <a id="WebLogWriter:WebLogWriter"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="WebLogWriter.html"><span class="name">WebLogWriter</span></a>
+        
+        <span class="result"> extends Actor</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Default log writer that writes web log events to the AKKA logger.</p>
+    </li></ol>
+            </div>
+        
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="org.mashupbots.socko.infrastructure.CharsetUtil" data-isabs="false">
+      <a id="CharsetUtil:CharsetUtil"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="CharsetUtil$.html"><span class="name">CharsetUtil</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A utility class that provides various constants related with character sets.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.infrastructure.DateUtil" data-isabs="false">
+      <a id="DateUtil:DateUtil"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="DateUtil$.html"><span class="name">DateUtil</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Utility methods associated with dates
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.infrastructure.HashUtil" data-isabs="false">
+      <a id="HashUtil:HashUtil"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="HashUtil$.html"><span class="name">HashUtil</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.mashupbots.socko.infrastructure.IOUtil" data-isabs="false">
+      <a id="IOUtil:IOUtil"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="IOUtil$.html"><span class="name">IOUtil</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Utility IO methods
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.infrastructure.MimeTypes" data-isabs="false">
+      <a id="MimeTypes:MimeTypes"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="MimeTypes$.html"><span class="name">MimeTypes</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">MIME types lookup</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.infrastructure.WebLogEvent" data-isabs="false">
+      <a id="WebLogEvent:WebLogEvent"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="WebLogEvent$.html"><span class="name">WebLogEvent</span></a>
+        
+        <span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.mashupbots.socko.infrastructure.WebLogFormat" data-isabs="false">
+      <a id="WebLogFormat:WebLogFormat"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="WebLogFormat$.html"><span class="name">WebLogFormat</span></a>
+        
+        <span class="result"> extends Enumeration</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Web Server Activity Log setting
+</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>
