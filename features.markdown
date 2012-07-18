@@ -14,7 +14,7 @@ Socko includes a StaticFileProcessor Akka actor that serves static files.  We us
 our HTML5 application files.
 
 We did consider using an existing Scala web servers. Here's why they did not suit our needs:
- * [Play2](http://www.playframework.org/), [Lift](http://liftweb.net/), [Xitrum](https://github.com/ngocdaothanh/xitrum), [Sweet](http://code.google.com/p/sweetscala/) - we do not need server based web application framework.
+ * [Play2](http://www.playframework.org/), [Lift](http://liftweb.net/), [Xitrum](https://github.com/ngocdaothanh/xitrum), [Sweet](http://code.google.com/p/sweetscala/) - we do not need a server based web application framework.
  * [Play2-mini](https://github.com/typesafehub/play2-mini) - a bit too heavyweight as of version 1 because it pulls in all of Play.
  * [Spray](https://github.com/spray/spray/wiki), [Unfiltered](http://unfiltered.databinder.net/Unfiltered.html) - we want WebSocket support; would like future support for SPDY and perhaps STOMP.
  * [Scalatra](http://www.scalatra.org/) - we do not want to have to use a servlet container.
