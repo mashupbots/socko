@@ -6,7 +6,7 @@ layout: article
 ## Intended for Scala and Akka developers
 Socko enables you to expose your Akka actors as HTTP or WebSocket endpoints.
 
-It uses a routing DSL like [Unfilted](http://unfiltered.databinder.net/Unfiltered.html) and 
+It uses a routing DSL like [Unfiltered](http://unfiltered.databinder.net/Unfiltered.html) and 
 [Play2 Mini](https://github.com/typesafehub/play2-mini). Route by HTTP method, host, path and querystring.
 Here's an [example](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/routes/RouteApp.scala).
 
