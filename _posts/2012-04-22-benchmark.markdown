@@ -6,7 +6,7 @@ author: Vibul
 ---
 
 ## Setup
- - These tests were performed on my VM Ware workstation 8 guest VM running
+ - These tests were performed on my VMWare workstation 8 guest VM running:
    - Ubuntu 11.10 64 bit
    - Intel Core i7 CPU @ 2.67GHz x 2
    - 2.9 GiB RAM
@@ -95,13 +95,10 @@ author: Vibul
 
 These are very early tests.
 
-It seems Socko is a little faster than tomcat for static and dynamic content.
+It seems Socko is a little faster than Tomcat for static and dynamic content.
 
 However, Socko is a little slower than Apache for static content.
 
 I have noticed that Tomcat caches small files so that is something we will do for Socko v0.2.
 Once in memory caching has been implemented, we will re-test for smaller static files of size.
-
-
-
 
