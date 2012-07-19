@@ -14,7 +14,7 @@ My benchmarking is not very rigorous
 ## Setup
  - These tests were performed on my VMWare workstation 8 8.0.4 guest VM running:
    - Ubuntu 12.04 64 bit
-   - Intel® Core™ i7 CPU 920 @ 2.67GHz × 8 
+   - Intel® Core™ i7 CPU 920 @ 2.67GHz × 8
    - 2.9 GiB RAM
 
  - VM was rebooted prior to the first test for each web server.
@@ -36,7 +36,7 @@ My benchmarking is not very rigorous
    - OpenJDK 64-Bit Server VM (build 22.0-b10, mixed mode)
  
  
-## Test 1. 87 bytes static file, 100 concurrent users, 500,000 requests
+## Test #1 - 87 bytes static file, 100 concurrent users, 500,000 requests
 
 *Benchmark*
 
@@ -72,7 +72,7 @@ My benchmarking is not very rigorous
 </table>
 
 
-## Test 2. 200K static file, 100 concurrent users, 100,000 requests
+## Test #2 - 200K static file, 100 concurrent users, 100,000 requests
 
 *Benchmark*
 
@@ -108,7 +108,7 @@ My benchmarking is not very rigorous
 </table>
 
 
-## Test 3. 1MB static file, 100 concurrent users, 20,000 requests
+## Test #3 - 1MB static file, 100 concurrent users, 20,000 requests
 
 *Benchmark*
 
