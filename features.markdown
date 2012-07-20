@@ -65,7 +65,7 @@ Socko has no external dependencies (outside Netty and Akka 2)
 Socko handles and processes incoming HTTP requests in an asynchronous and event driven manner thanks to
 Netty and Akka.
 
-Here's some [benchmarking](/2012/04/22/benchmark.html) that we've done with v0.1.
+Here's some [benchmarking](/2012/07/19/benchmark.html) that we've done with v0.2.
 
 
 ## Open Source
