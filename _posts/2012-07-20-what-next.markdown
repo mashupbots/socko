@@ -1,0 +1,18 @@
+---
+layout: post
+title: What's next for Socko?
+summary: Next steps
+author: Vibul
+---
+
+The biggest functionality for the next release of Socko is a REST endpoint handler that also supports swagger.
+
+For this, we would like to use Scala reflection available in 2.10.
+
+Scala 2.10 is currently at milestone 5 and will not be released until Aug/Sept. Because of the release date 
+and the fact that we have to learn how to use the new APIs, the next release of Socko may not be until Oct.
+
+If you have any burning issues, let us know and we'll try to put out an interim release.
+
+Thanks
+

@@ -14,7 +14,7 @@ My benchmarking is not very rigorous
 ## Setup
  - These tests were performed on my VMWare workstation 8 8.0.4 guest VM running:
    - Ubuntu 12.04 64 bit
-   - Intel® Core™ i7 CPU 920 @ 2.67GHz × 8
+   - Intel Core i7 CPU 920 @ 2.67GHz × 8 (i.e. 8 cores)
    - 2.9 GiB RAM
 
  - VM was rebooted prior to the first test for each web server.
@@ -144,6 +144,15 @@ My benchmarking is not very rigorous
 </table>
 
 
+
+## Conclusions
+
+With further optimizations of other web servers, I'm sure they will give better results.
+
+Hence, I'm **NOT** going to claim that Socko is the fastest server ever. 
+
+However, I think we can conclude that Socko is doing OK on the HTTP file download front. Thanks to Netty, 
+I think the throughput is acceptable.
 
 
 
