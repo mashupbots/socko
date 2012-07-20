@@ -1,11 +1,13 @@
 ---
 layout: post
 title: What's next for Socko?
-summary: Next steps
+summary: Towards Socko 0.3
 author: Vibul
 ---
 
-The biggest functionality for the next release of Socko is a REST endpoint handler that also supports swagger.
+The next release of Socko is [v0.3](https://github.com/mashupbots/socko/issues?milestone=3&page=1&state=open).
+
+The biggest task is the implementation of a REST handler that also supports [swagger](http://swagger.wordnik.com/).
 
 For this, we would like to use Scala reflection available in 2.10.
 
