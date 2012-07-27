@@ -24,7 +24,6 @@ import org.mashupbots.socko.webserver.WebServerConfig
 
 import akka.actor.ActorSystem
 import akka.actor.Props
-import akka.actor.actorRef2Scala
 
 /**
  * This example shows how use route extractors.

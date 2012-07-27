@@ -16,23 +16,23 @@
 package org.mashupbots.socko.examples.websocket
 
 import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.routes._
+import org.mashupbots.socko.handlers.WebSocketBroadcaster
+import org.mashupbots.socko.handlers.WebSocketBroadcasterRegistration
 import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.routes._
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
+
 import akka.actor.ActorSystem
 import akka.actor.Props
-import akka.actor.actorRef2Scala
-import org.mashupbots.socko.handlers.WebSocketBroadcasterRegistration
-import org.mashupbots.socko.handlers.WebSocketBroadcaster
 
 /**
  * This example shows how to use web sockets, specifically [[org.mashupbots.socko.processors.WebSocketBroadcaster]],
  * for chatting.
- * 
+ *
  * With [[org.mashupbots.socko.processors.WebSocketBroadcaster]], you can broadcast messages to all registered web
  * socket connections
- * 
+ *
  *  - Open a few browsers and navigate to `http://localhost:8888/html`.
  *  - A HTML page will be displayed
  *  - It will make a web socket connection to `ws://localhost:8888/websocket/`
@@ -69,7 +69,7 @@ object ChatApp extends Logger {
         // To start Web Socket processing, we first have to authorize the handshake.
         // This is a security measure to make sure that web sockets can only be established at your specified end points.
         wsHandshake.authorize()
-        
+
         // Register this connection with the broadcaster
         webSocketBroadcaster ! new WebSocketBroadcasterRegistration(wsHandshake)
       }

@@ -31,7 +31,6 @@ import org.mashupbots.socko.webserver.WebServerConfig
 
 import com.typesafe.config.ConfigFactory
 
-import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.routing.FromConfig
