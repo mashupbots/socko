@@ -20,8 +20,6 @@ import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.handler.codec.http.HttpRequest
 import org.mashupbots.socko.infrastructure.WebLogEvent
 
-import akka.actor.actorRef2Scala
-
 /**
  * Event fired when a HTTP request has been received
  *

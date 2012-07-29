@@ -15,16 +15,14 @@
 //
 package org.mashupbots.socko.events
 
-import java.nio.charset.Charset
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.Channel
+import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
+import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
 import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import org.jboss.netty.handler.codec.http.websocketx.WebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
 import org.mashupbots.socko.infrastructure.WebLogEvent
-import java.util.Date
-import org.jboss.netty.handler.codec.http.HttpHeaders
 
 /**
  * Event fired when a web socket text or binary frame is received.

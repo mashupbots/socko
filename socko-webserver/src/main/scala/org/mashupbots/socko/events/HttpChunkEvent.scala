@@ -15,15 +15,10 @@
 //
 package org.mashupbots.socko.events
 
-import java.nio.charset.Charset
-import scala.collection.JavaConversions.asScalaBuffer
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.HttpChunk
-import org.jboss.netty.handler.codec.http.HttpChunkTrailer
-import org.jboss.netty.util.CharsetUtil
-import org.mashupbots.socko.infrastructure.WebLogEvent
-import java.util.Date
 import org.jboss.netty.handler.codec.http.HttpHeaders
+import org.mashupbots.socko.infrastructure.WebLogEvent
 
 /**
  * Event fired when a HTTP chunks is received

@@ -16,8 +16,6 @@
 package org.mashupbots.socko.webserver
 
 import java.io.File
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.GivenWhenThen
@@ -29,7 +27,6 @@ import akka.actor.ExtensionId
 import akka.actor.ExtensionIdProvider
 import org.mashupbots.socko.infrastructure.WebLogFormat
 
-@RunWith(classOf[JUnitRunner])
 class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
 
   var aDirectory: File = null

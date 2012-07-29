@@ -15,13 +15,10 @@
 //
 package org.mashupbots.socko.routes
 
-import org.junit.runner.RunWith
 import org.mashupbots.socko.events.EndPoint
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.WordSpec
 
-@RunWith(classOf[JUnitRunner])
 class MethodRouteSpec extends WordSpec with ShouldMatchers {
 
   "Method route extractor" should {

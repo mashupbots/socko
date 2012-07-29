@@ -15,8 +15,6 @@
 //
 package org.mashupbots.socko.infrastructure
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.WordSpec
 import java.util.Date
@@ -28,7 +26,6 @@ import java.util.TimeZone
 import java.util.Calendar
 import java.text.ParseException
 
-@RunWith(classOf[JUnitRunner])
 class UtilSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
 
   "DateUtil" should {

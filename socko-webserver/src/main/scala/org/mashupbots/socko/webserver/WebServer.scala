@@ -16,17 +16,18 @@
 package org.mashupbots.socko.webserver
 
 import java.util.concurrent.Executors
+
 import org.jboss.netty.bootstrap.ServerBootstrap
+import org.jboss.netty.channel.FixedReceiveBufferSizePredictor
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.mashupbots.socko.events.SockoEvent
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.WebLogWriter
+
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
-import org.jboss.netty.channel.FixedReceiveBufferSizePredictor
-import org.jboss.netty.channel.Channel
 
 /**
  * Socko Web Server

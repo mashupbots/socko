@@ -111,7 +111,7 @@ object Dependencies {
 
   val webserver = Seq(
     Dependency.akkaActor, Dependency.akkaSlf4j, Dependency.akkaTestKit,
-    Dependency.netty, Dependency.logback, Dependency.junit, Dependency.scalatest
+    Dependency.netty, Dependency.logback, Dependency.scalatest
   )
   
   val examples = Seq(
@@ -125,8 +125,7 @@ object Dependency {
   val akkaTestKit   = "com.typesafe.akka"   % "akka-testkit"       % "2.0"
   val netty         = "io.netty"            % "netty"              % "3.5.0.Final"
   val logback       = "ch.qos.logback"      % "logback-classic"    % "1.0.3"         % "runtime"
-  val junit         = "junit"               % "junit"              % "4.9"           % "test"
-  val scalatest     = "org.scalatest"       %% "scalatest"         % "1.7.1"         % "test"
+  val scalatest     = "org.scalatest"       %% "scalatest"         % "2.0.M2"        % "test"
 }
 
 

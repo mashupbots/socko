@@ -15,8 +15,6 @@
 //
 package org.mashupbots.socko.infrastructure
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.WordSpec
 import java.util.Date
@@ -25,7 +23,6 @@ import java.net.InetSocketAddress
 import org.scalatest.GivenWhenThen
 import akka.util.duration._
 
-@RunWith(classOf[JUnitRunner])
 class LocalCacheSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
 
   "LocalCacheSpec" should {

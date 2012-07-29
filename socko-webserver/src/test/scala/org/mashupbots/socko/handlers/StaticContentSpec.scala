@@ -22,12 +22,10 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
-import org.junit.runner.RunWith
 import org.mashupbots.socko.routes._
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.GivenWhenThen
@@ -40,7 +38,6 @@ import akka.actor.Props
 import akka.routing.FromConfig
 import org.mashupbots.socko.events.HttpRequestEvent
 
-@RunWith(classOf[JUnitRunner])
 class StaticContentSpec
   extends WordSpec with ShouldMatchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient with Logger {
 

@@ -15,14 +15,11 @@
 //
 package org.mashupbots.socko.routes
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.WordSpec
 import org.mashupbots.socko.events.EndPoint
 import org.scalatest.GivenWhenThen
 
-@RunWith(classOf[JUnitRunner])
 class QueryStringRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
 
   "Querystring route extractors" should {

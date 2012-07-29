@@ -16,17 +16,16 @@
 package org.mashupbots.socko.events
 
 import java.nio.charset.Charset
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
-import scala.collection.JavaConversions._
+
+import scala.collection.JavaConversions.asScalaBuffer
+
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.HttpChunk
 import org.jboss.netty.handler.codec.http.HttpChunkTrailer
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.handler.codec.http.HttpRequest
-import org.jboss.netty.handler.codec.http.HttpVersion
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.DateUtil
 

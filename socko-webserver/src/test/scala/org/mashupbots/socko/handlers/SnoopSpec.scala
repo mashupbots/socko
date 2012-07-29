@@ -20,7 +20,6 @@ import java.net.URL
 import java.util.Hashtable
 
 import org.jboss.netty.util.CharsetUtil
-import org.junit.runner.RunWith
 import org.mashupbots.socko.infrastructure.WebLogFormat
 import org.mashupbots.socko.routes.HttpRequest
 import org.mashupbots.socko.routes.Path
@@ -31,7 +30,6 @@ import org.mashupbots.socko.webserver.HttpConfig
 import org.mashupbots.socko.webserver.WebLogConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.GivenWhenThen
@@ -43,7 +41,6 @@ import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RunWith(classOf[JUnitRunner])
 class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient {
 
   val akkaConfig =

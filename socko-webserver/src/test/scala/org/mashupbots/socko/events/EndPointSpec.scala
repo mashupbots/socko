@@ -15,12 +15,9 @@
 //
 package org.mashupbots.socko.events
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.WordSpec
 
-@RunWith(classOf[JUnitRunner])
 class EndPointSpec extends WordSpec with ShouldMatchers {
 
   "EndPoint" should {
