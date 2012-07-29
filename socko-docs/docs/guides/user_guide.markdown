@@ -252,7 +252,7 @@ illustrates usage:
 
 ### Host Extractors <a class="blank" id="HostExtractors">&nbsp;</a>
 
-Host extractors matches the host name received in the request.
+Host extractors matches the host name received in the HTTP request that triggered the {{ page.SockoEventClass }}.
 
 For {{ page.HttpRequestEventClass }}, the host is the value specified in the `HOST` header variable. 
 For {{ page.HttpChunkEventClass }}, {{ page.WebSocketFrameEventClass }} and 
@@ -327,7 +327,7 @@ in your route.
 
 ### Method Extractors <a class="blank" id="MethodExtractors">&nbsp;</a>
 
-Method extractors matches the method received in the request.
+Method extractors matches the method received in the HTTP request that triggered the {{ page.SockoEventClass }}.
 
 For {{ page.HttpRequestEventClass }}, the method is the extracted from the 1st line. 
 For {{ page.HttpChunkEventClass }}, {{ page.WebSocketFrameEventClass }} and 
@@ -376,7 +376,7 @@ For example, to match HTTP GET with a path of "/clients"
 
 ### Path Extractors <a class="blank" id="PathExtractors">&nbsp;</a>
 
-Path extractors matches the path received in the request.
+Path extractors matches the path received in the HTTP request that triggered the {{ page.SockoEventClass }}.
 
 For {{ page.HttpRequestEventClass }}, the path is the extracted from the 1st line without any query string. 
 For {{ page.HttpChunkEventClass }}, {{ page.WebSocketFrameEventClass }} and 
@@ -455,7 +455,7 @@ in your route.
 
 ### Query String Extractors <a class="blank" id="QueryStringExtractors">&nbsp;</a>
 
-Query string extractors matches the query string received in the request.
+Query string extractors matches the query string received in the HTTP request that triggered the {{ page.SockoEventClass }}.
 
 For {{ page.HttpRequestEventClass }}, the query string is the extracted from the 1st line. 
 For {{ page.HttpChunkEventClass }}, {{ page.WebSocketFrameEventClass }} and 

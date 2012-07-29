@@ -85,7 +85,7 @@ object Routes {
 }
 
 /**
- * Used to help match an HTTP Request event.
+ * Matches a Socko [[org.mashupbots.socko.events.HttpRequestEvent]].
  *
  * For example:
  * {{{
@@ -97,13 +97,13 @@ object Routes {
  * }}}
  */
 object HttpRequest {
-  def unapply(ctx: SockoEvent) =
+  def unapply(ctx: HttpRequestEvent): Option[HttpRequestEvent] =
     if (ctx.isInstanceOf[HttpRequestEvent]) Some(ctx.asInstanceOf[HttpRequestEvent])
     else None
 }
 
 /**
- * Used to help match an WebSocket Handshake event.
+ * Matches a Socko [[org.mashupbots.socko.events.WebSocketHandshakeEvent]] event.
  *
  * For example:
  * {{{
@@ -115,13 +115,13 @@ object HttpRequest {
  * }}}
  */
 object WebSocketHandshake {
-  def unapply(ctx: SockoEvent) =
+  def unapply(ctx: WebSocketHandshakeEvent): Option[WebSocketHandshakeEvent] =
     if (ctx.isInstanceOf[WebSocketHandshakeEvent]) Some(ctx.asInstanceOf[WebSocketHandshakeEvent])
     else None
 }
 
 /**
- * Used to help match an WebSocket Frame event.
+ * Matches a Socko [[org.mashupbots.socko.events.WebSocketFrameEvent]] event.
  *
  * For example:
  * {{{
@@ -133,13 +133,13 @@ object WebSocketHandshake {
  * }}}
  */
 object WebSocketFrame {
-  def unapply(ctx: SockoEvent) =
+  def unapply(ctx: WebSocketFrameEvent): Option[WebSocketFrameEvent] =
     if (ctx.isInstanceOf[WebSocketFrameEvent]) Some(ctx.asInstanceOf[WebSocketFrameEvent])
     else None
 }
 
 /**
- * Used to help match an HTTP Chunk event.
+ * Matches a Socko [[org.mashupbots.socko.events.HttpChunkEvent]] event.
  *
  * For example:
  * {{{
@@ -151,13 +151,13 @@ object WebSocketFrame {
  * }}}
  */
 object HttpChunk {
-  def unapply(ctx: SockoEvent) =
+  def unapply(ctx: HttpChunkEvent): Option[HttpChunkEvent] =
     if (ctx.isInstanceOf[HttpChunkEvent]) Some(ctx.asInstanceOf[HttpChunkEvent])
     else None
 }
 
 /**
- * Used to help match the "method" of the HTTP end point 
+ * Matches the "method" of HTTP [[org.mashupbots.socko.events.EndPoint]]
  *
  * You should not need to use this class. Rather use the objects that extends from this class. For example:
  * [[org.mashupbots.socko.routes.GET]].
@@ -171,7 +171,8 @@ class Method(method: String) {
 }
 
 /**
- * Matches HTTP requests with a method set to `GET`.
+ * Matches [[org.mashupbots.socko.events.EndPoint]]s of [[org.mashupbots.socko.events.SockoEvent]]s
+ * where the method is set to `GET`.
  *
  * For example:
  * {{{
@@ -185,7 +186,8 @@ class Method(method: String) {
 object GET extends Method("GET")
 
 /**
- * Matches HTTP requests with a method set to `POST`.
+ * Matches [[org.mashupbots.socko.events.EndPoint]]s of [[org.mashupbots.socko.events.SockoEvent]]s
+ * where the method is set to `POST`.
  *
  * For example:
  * {{{
@@ -199,7 +201,8 @@ object GET extends Method("GET")
 object POST extends Method("POST")
 
 /**
- * Matches HTTP requests with a method set to `PUT`.
+ * Matches [[org.mashupbots.socko.events.EndPoint]]s of [[org.mashupbots.socko.events.SockoEvent]]s
+ * where the method is set to `PUT`.
  *
  * For example:
  * {{{
@@ -213,7 +216,8 @@ object POST extends Method("POST")
 object PUT extends Method("PUT")
 
 /**
- * Matches HTTP requests with a method set to `DELETE`.
+ * Matches [[org.mashupbots.socko.events.EndPoint]]s of [[org.mashupbots.socko.events.SockoEvent]]s
+ * where the method is set to `DELETE`.
  *
  * For example:
  * {{{
@@ -227,7 +231,8 @@ object PUT extends Method("PUT")
 object DELETE extends Method("DELETE")
 
 /**
- * Matches HTTP requests with a method set to `HEAD`.
+ * Matches [[org.mashupbots.socko.events.EndPoint]]s of [[org.mashupbots.socko.events.SockoEvent]]s
+ * where the method is set to `HEAD`.
  *
  * For example:
  * {{{
@@ -241,7 +246,8 @@ object DELETE extends Method("DELETE")
 object HEAD extends Method("HEAD")
 
 /**
- * Matches HTTP requests with a method set to `CONNECT`.
+ * Matches [[org.mashupbots.socko.events.EndPoint]]s of [[org.mashupbots.socko.events.SockoEvent]]s
+ * where the method is set to `CONNECT`.
  *
  * For example:
  * {{{
@@ -255,7 +261,8 @@ object HEAD extends Method("HEAD")
 object CONNECT extends Method("CONNECT")
 
 /**
- * Matches HTTP requests with a method set to `OPTIONS`.
+ * Matches [[org.mashupbots.socko.events.EndPoint]]s of [[org.mashupbots.socko.events.SockoEvent]]s
+ * where the method is set to `OPTIONS`.
  *
  * For example:
  * {{{
@@ -269,7 +276,8 @@ object CONNECT extends Method("CONNECT")
 object OPTIONS extends Method("OPTIONS")
 
 /**
- * Matches HTTP requests with a method set to `TRACE`.
+ * Matches [[org.mashupbots.socko.events.EndPoint]]s of [[org.mashupbots.socko.events.SockoEvent]]s
+ * where the method is set to `TRACE`.
  *
  * For example:
  * {{{
@@ -283,7 +291,8 @@ object OPTIONS extends Method("OPTIONS")
 object TRACE extends Method("TRACE")
 
 /**
- * Matches HTTP requests with the same case-sensitive path.
+ * Matches the case-sensitive path of [[org.mashupbots.socko.events.EndPoint]]s in
+ * [[org.mashupbots.socko.events.SockoEvent]]s.
  *
  * For example, to match `/folderX` use:
  * {{{
@@ -302,7 +311,8 @@ object Path {
 }
 
 /**
- * Matches HTTP requests with the same path segment pattern.
+ * Matches the path of [[org.mashupbots.socko.events.EndPoint]]s in
+ * [[org.mashupbots.socko.events.SockoEvent]]s using segment patterns.
  *
  * For example, to match `/record/1`, use:
  * {{{
@@ -322,7 +332,8 @@ object PathSegments {
 }
 
 /**
- * Matches HTTP requests that have paths matching the specified regular expression.
+ * Matches the path of [[org.mashupbots.socko.events.EndPoint]]s in
+ * [[org.mashupbots.socko.events.SockoEvent]]s using regular expressions.
  *
  * For example, to match `/path/to/file`, first define your regular expression as an object:
  * {{{
@@ -345,7 +356,8 @@ class PathRegex(regex: Regex) {
 }
 
 /**
- * Matches HTTP requests with the same case-sensitive host.
+ * Matches the host of [[org.mashupbots.socko.events.EndPoint]]s in
+ * [[org.mashupbots.socko.events.SockoEvent]]s.
  *
  * For example, to match `www.sockoweb.com`, use:
  * {{{
@@ -364,7 +376,8 @@ object Host {
 }
 
 /**
- * Matches HTTP requests with the same host segment pattern.
+ * Matches the host of [[org.mashupbots.socko.events.EndPoint]]s in
+ * [[org.mashupbots.socko.events.SockoEvent]]s using segment patterns.
  *
  * For example, to match `server1.sockoweb.com`, use:
  * {{{
@@ -381,7 +394,8 @@ object HostSegments {
 }
 
 /**
- * Matches HTTP requests that have hosts matching the specified regular expression.
+ * Matches the host of [[org.mashupbots.socko.events.EndPoint]]s in
+ * [[org.mashupbots.socko.events.SockoEvent]]s using regular expression.
  *
  * For example, to match `www.sockoweb.com`, first define your regex as an object:
  * {{{
@@ -405,7 +419,8 @@ class HostRegex(regex: Regex) {
 }
 
 /**
- * Matches HTTP requests that have identical query string
+ * Matches the query string of [[org.mashupbots.socko.events.EndPoint]]s in
+ * [[org.mashupbots.socko.events.SockoEvent]]s.
  *
  * For example, to match `http://www.sockoweb.org/do?action=save`:
  * {{{
@@ -422,7 +437,8 @@ object QueryString {
 }
 
 /**
- * Matches HTTP requests that have a query string matching the specified regular expression.
+ * Matches the query string of [[org.mashupbots.socko.events.EndPoint]]s in
+ * [[org.mashupbots.socko.events.SockoEvent]]s using regular expressions
  *
  * For example, to match `?name1=value1`, first define your regular expression as an object:
  * {{{
@@ -446,7 +462,8 @@ class QueryStringRegex(regex: Regex) {
 }
 
 /**
- * Matches HTTP requests that have a query string field with the specified name.
+ * Matches the query string of [[org.mashupbots.socko.events.EndPoint]]s in
+ * [[org.mashupbots.socko.events.SockoEvent]]s using field names.
  *
  * If a match is found, the value is returned. If there are more than one value, on the first value is returned.
  *
