@@ -192,7 +192,10 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
     }
 
     "support HTTP file upload" in {
-      val text = "hello from the text file"
+      val buf = new StringBuilder()
+      for (i <- 0 until (1024 * 3)) {
+        buf.append('a')
+      }
       val url = new URL(path + "snoop/")
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
 
@@ -201,7 +204,7 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
       params.put("custom_param2", "param_value2")
 
       val req = sendPostFileUpload(conn, params,
-        "file_upload_field", "original_filename.txt", "text/plain", text.getBytes(CharsetUtil.UTF_8))
+        "file_upload_field", "original_filename.txt", "text/plain", buf.toString.getBytes(CharsetUtil.UTF_8))
 
       val resp = getResponseContent(conn)
 
@@ -214,7 +217,7 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
       resp.content should include("  File Field=file_upload_field")
       resp.content should include("  File Name=original_filename.txt")
       resp.content should include("  File MIME Type=text/plain")
-      resp.content should include("  File Content=" + text)
+      resp.content should include("  File Content=" + buf.toString)
     }
 
     "support Web Sockets" in {

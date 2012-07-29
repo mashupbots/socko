@@ -24,6 +24,7 @@ import java.nio.charset.Charset
 import java.util.zip.GZIPInputStream
 import java.util.zip.InflaterInputStream
 import java.util.Hashtable
+import org.mashupbots.socko.infrastructure.CharsetUtil
 
 /**
  * Contains common methods used to call our web server
@@ -91,15 +92,16 @@ trait TestHttpClient {
     val endBoundary = "\r\n--" + BOUNDARY + "--\r\n"
 
     val bos = new ByteArrayOutputStream()
-    bos.write(boundaryMessage.getBytes)
+    bos.write(boundaryMessage.getBytes(CharsetUtil.UTF_8))
     bos.write(content)
-    bos.write(endBoundary.getBytes())
+    bos.write(endBoundary.getBytes(CharsetUtil.UTF_8))
     val postBytes = bos.toByteArray()
     bos.close();
 
     conn.setRequestMethod(POST)
     conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY)
     conn.setDoOutput(true)
+    //conn.setChunkedStreamingMode(1024)
     val os = conn.getOutputStream()
     os.write(postBytes)
     os.flush()

@@ -100,7 +100,11 @@ class SnoopHandler extends Actor {
       buf.append("FORM DATA\r\n")
       val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, event.nettyHttpRequest)
       val dataList = decoder.getBodyHttpDatas().toList
+      
+      val content = event.request.content.toString()
+      
       dataList.foreach(data => {
+        log.debug(data.toString)
         if (data.getHttpDataType() == HttpDataType.Attribute) {
           // Normal post data
           val attribute = data.asInstanceOf[Attribute]
