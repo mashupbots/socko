@@ -87,6 +87,10 @@ object BenchmarkApp extends Logger {
 	        router = round-robin
 	        nr-of-instances = 20
 	      }
+	      /dynamic-file-router {
+	        router = round-robin
+	        nr-of-instances = 20
+	      }
 	    }
 	  }
 	}"""
@@ -94,6 +98,8 @@ object BenchmarkApp extends Logger {
   val actorSystem = ActorSystem("BenchmarkActorSystem", ConfigFactory.parseString(actorConfig))
   val staticContentHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
     .withRouter(FromConfig()).withDispatcher("my-dispatcher"), "static-file-router")
+  val dynamicContentHandlerRouter = actorSystem.actorOf(Props[DynamicBenchmarkHandler]
+    .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "dynamic-file-router")
 
   //
   // STEP #2 - Define Routes
@@ -110,7 +116,8 @@ object BenchmarkApp extends Logger {
         staticContentHandlerRouter ! new StaticFileRequest(request, new File(contentDir, "big.txt"))
       }
       case GET(Path("/dynamic")) => {
-        actorSystem.actorOf(Props[DynamicBenchmarkHandler].withDispatcher("my-dispatcher")) ! request
+        dynamicContentHandlerRouter ! request
+        //actorSystem.actorOf(Props[DynamicBenchmarkHandler].withDispatcher("my-dispatcher")) ! request
       }
       case GET(Path("/favicon.ico")) => {
         request.response.write(HttpResponseStatus.NOT_FOUND)
