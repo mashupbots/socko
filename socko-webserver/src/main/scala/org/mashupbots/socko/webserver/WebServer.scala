@@ -119,10 +119,10 @@ class WebServer(
     if (config.tcp.reuseAddress.isDefined) {
       bootstrap.setOption("child.reuseAddress", config.tcp.reuseAddress.get);
     }
-    if (config.tcp.trafficClass.isDefined) {
-      bootstrap.setOption("child.backlog", config.tcp.trafficClass.get);
+    if (config.tcp.acceptBackLog.isDefined) {
+      bootstrap.setOption("child.backlog", config.tcp.acceptBackLog.get);
     }
-
+    
     bootstrap.setPipelineFactory(new PipelineFactory(this))
 
     config.hostname.split(",").foreach(address => {
