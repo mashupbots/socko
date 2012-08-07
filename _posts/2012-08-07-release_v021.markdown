@@ -1,0 +1,23 @@
+---
+layout: post
+title: Socko v0.2.1 Released
+summary: Bug Fix release
+author: Vibul
+---
+
+Small bug fixes.
+
+Download [socko-webserver_2.9.1-0.2.1.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.9.1/0.2.1/socko-webserver_2.9.1-0.2.1.jar).
+
+For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
+
+Documentation
+ - [User Guide](/docs/0.2.1/guides/user_guide.html)
+ - [API](/docs/0.2.1/api/)
+ - [Change logs](https://github.com/mashupbots/socko/issues?milestone=4&state=closed)
+
+
+ 
+ 
+
+

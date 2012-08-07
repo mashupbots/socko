@@ -3,10 +3,10 @@ layout: article
 ---
 #Socko Documentation
 
-## Socko v0.2.0
+## Socko v0.2.1
 
- - [User Guide](/docs/0.2.0/guides/user_guide.html)
- - [API](/docs/0.2.0/api/)
+ - [User Guide](/docs/0.2.1/guides/user_guide.html)
+ - [API](/docs/0.2.1/api/)
  
 [Previous Releases](previous_docs.html)
 
