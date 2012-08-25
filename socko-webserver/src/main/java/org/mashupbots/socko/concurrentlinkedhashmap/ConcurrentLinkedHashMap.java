@@ -15,13 +15,6 @@
  */
 package org.mashupbots.socko.concurrentlinkedhashmap;
 
-import static org.mashupbots.socko.concurrentlinkedhashmap.ConcurrentLinkedHashMap.DrainStatus.IDLE;
-import static org.mashupbots.socko.concurrentlinkedhashmap.ConcurrentLinkedHashMap.DrainStatus.PROCESSING;
-import static org.mashupbots.socko.concurrentlinkedhashmap.ConcurrentLinkedHashMap.DrainStatus.REQUIRED;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.unmodifiableMap;
-import static java.util.Collections.unmodifiableSet;
-
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -35,7 +28,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +37,13 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static org.mashupbots.socko.concurrentlinkedhashmap.ConcurrentLinkedHashMap.DrainStatus.IDLE;
+import static org.mashupbots.socko.concurrentlinkedhashmap.ConcurrentLinkedHashMap.DrainStatus.PROCESSING;
+import static org.mashupbots.socko.concurrentlinkedhashmap.ConcurrentLinkedHashMap.DrainStatus.REQUIRED;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
 
 /**
  * A hash table supporting full concurrency of retrievals, adjustable expected
@@ -97,7 +96,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * @see <a href="http://code.google.com/p/concurrentlinkedhashmap/">
  *      http://code.google.com/p/concurrentlinkedhashmap/</a>
  */
-@SuppressWarnings("unused")
 @ThreadSafe
 public final class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
     implements ConcurrentMap<K, V>, Serializable {
@@ -740,6 +738,22 @@ public final class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
     return node.getValue();
   }
 
+  /**
+   * Returns the value to which the specified key is mapped, or {@code null}
+   * if this map contains no mapping for the key. This method differs from
+   * {@link #get(Object)} in that it does not record the operation with the
+   * page replacement policy.
+   *
+   * @param key the key whose associated value is to be returned
+   * @return the value to which the specified key is mapped, or
+   *     {@code null} if this map contains no mapping for the key
+   * @throws NullPointerException if the specified key is null
+   */
+  public V getQuietly(Object key) {
+    final Node node = data.get(key);
+    return (node == null) ? null : node.getValue();
+  }
+
   @Override
   public V put(K key, V value) {
     return put(key, value, false);
@@ -761,6 +775,7 @@ public final class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
    * @return the prior value in the data store or null if no mapping was found
    */
   V put(K key, V value, boolean onlyIfAbsent) {
+    checkNotNull(key);
     checkNotNull(value);
 
     final int weight = weigher.weightOf(key, value);
@@ -808,7 +823,7 @@ public final class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
 
   @Override
   public boolean remove(Object key, Object value) {
-    Node node = data.get(key);
+    final Node node = data.get(key);
     if ((node == null) || (value == null)) {
       return false;
     }
@@ -836,6 +851,7 @@ public final class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
 
   @Override
   public V replace(K key, V value) {
+    checkNotNull(key);
     checkNotNull(value);
 
     final int weight = weigher.weightOf(key, value);
@@ -863,6 +879,7 @@ public final class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
 
   @Override
   public boolean replace(K key, V oldValue, V newValue) {
+    checkNotNull(key);
     checkNotNull(oldValue);
     checkNotNull(newValue);
 
@@ -973,7 +990,7 @@ public final class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
     try {
       drainBuffers(AMORTIZED_DRAIN_THRESHOLD);
 
-      int initialCapacity = (weigher == Weighers.singleton())
+      int initialCapacity = (weigher == Weighers.entrySingleton())
           ? Math.min(limit, (int) weightedSize())
           : 16;
       Set<K> keys = new LinkedHashSet<K>(initialCapacity);
@@ -1083,7 +1100,7 @@ public final class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
     try {
       drainBuffers(AMORTIZED_DRAIN_THRESHOLD);
 
-      int initialCapacity = (weigher == Weighers.singleton())
+      int initialCapacity = (weigher == Weighers.entrySingleton())
           ? Math.min(limit, (int) weightedSize())
           : 16;
       Map<K, V> map = new LinkedHashMap<K, V>(initialCapacity);
@@ -1654,11 +1671,11 @@ public final class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
     }
 
     /**
-     * Specifies an algorithm to determine how many the units of capacity an
-     * entry consumes. The default algorithm bounds the map by the number of
+     * Specifies an algorithm to determine how many the units of capacity a
+     * value consumes. The default algorithm bounds the map by the number of
      * key-value pairs by giving each entry a weight of <tt>1</tt>.
      *
-     * @param weigher the algorithm to determine a entry's weight
+     * @param weigher the algorithm to determine a value's weight
      * @throws NullPointerException if the weigher is null
      */
     public Builder<K, V> weigher(Weigher<? super V> weigher) {
@@ -1669,11 +1686,11 @@ public final class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
     }
 
     /**
-     * Specifies an algorithm to determine how many the units of capacity a
-     * value consumes. The default algorithm bounds the map by the number of
+     * Specifies an algorithm to determine how many the units of capacity an
+     * entry consumes. The default algorithm bounds the map by the number of
      * key-value pairs by giving each entry a weight of <tt>1</tt>.
      *
-     * @param weigher the algorithm to determine a value's weight
+     * @param weigher the algorithm to determine a entry's weight
      * @throws NullPointerException if the weigher is null
      */
     public Builder<K, V> weigher(EntryWeigher<? super K, ? super V> weigher) {
