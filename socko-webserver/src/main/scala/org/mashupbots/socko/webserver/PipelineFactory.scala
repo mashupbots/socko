@@ -47,7 +47,9 @@ class PipelineFactory(server: WebServer) extends ChannelPipelineFactory with Log
 
     if (server.sslManager.isDefined) {
       val sslEngine = server.sslManager.get.createSSLEngine()
-      newPipeline.addLast("ssl", new SslHandler(sslEngine))
+      val ssl = new SslHandler(sslEngine);
+      ssl.setCloseOnSSLException(true);
+      newPipeline.addLast("ssl", ssl)
     }
 
     newPipeline.addLast("decoder", new HttpRequestDecoder(
@@ -71,7 +73,9 @@ class PipelineFactory(server: WebServer) extends ChannelPipelineFactory with Log
     val newPipeline = Channels.pipeline()
 
     val sslEngine = server.sslManager.get.createSSLEngine()
-    newPipeline.addLast("ssl", new SslHandler(sslEngine))
+    val ssl = new SslHandler(sslEngine);
+    ssl.setCloseOnSSLException(true);
+    newPipeline.addLast("ssl", ssl)
 
     NextProtoNego.put(sslEngine, new SpdyServerProvider())
     NextProtoNego.debug = log.isDebugEnabled

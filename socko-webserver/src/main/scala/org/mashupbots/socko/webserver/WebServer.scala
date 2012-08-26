@@ -102,8 +102,8 @@ class WebServer(
       bootstrap.setOption("child.sendBufferSize", config.tcp.sendBufferSize.get)
     }
     if (config.tcp.receiveBufferSize.isDefined) {
-      // Thanks to VertX. We need to set a FixedReceiveBufferSizePredictor, since otherwise Netty will ignore our setting and use an 
-      // adaptive buffer which can get very large
+      // Thanks to VertX. We need to set a FixedReceiveBufferSizePredictor, since otherwise Netty will ignore our 
+      // setting and use an adaptive buffer which can get very large
       bootstrap.setOption("child.receiveBufferSize", config.tcp.receiveBufferSize.get)
       bootstrap.setOption("child.receiveBufferSizePredictor", new FixedReceiveBufferSizePredictor(1024))
     }
