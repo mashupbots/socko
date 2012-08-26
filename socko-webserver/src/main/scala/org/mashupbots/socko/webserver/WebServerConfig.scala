@@ -511,7 +511,8 @@ object WebServerConfig extends Logger {
         new TcpConfig()
       }
       case ex => {
-        log.error("Error parsing TcpConfig. Defaults will be used.", ex)
+        log.info("Error parsing TcpConfig. Defaults will be used.")
+        log.debug("Exception", ex)
         new TcpConfig()
       }
     }
@@ -533,7 +534,8 @@ object WebServerConfig extends Logger {
         new HttpConfig()
       }
       case ex => {
-        log.error("Error parsing HTTPConfig. Defaults will be used.", ex)
+        log.info("Error parsing HTTPConfig. Defaults will be used.")
+        log.debug("Exception", ex)
         new HttpConfig()
       }
     }
@@ -555,7 +557,8 @@ object WebServerConfig extends Logger {
         None
       }
       case ex => {
-        log.error("Error parsing SSL config. SSL is turned off.", ex)
+        log.info("Error parsing SSL config. SSL is turned off.")
+        log.debug("Exception", ex)
         None
       }
     }
@@ -577,7 +580,8 @@ object WebServerConfig extends Logger {
         None
       }
       case ex => {
-        log.error("Error parsing WebLogConfig config. Web server activity logging is turned off.", ex)
+        log.info("Error parsing WebLogConfig config. Web server activity logging is turned off.")
+        log.debug("Exception", ex)
         None
       }
     }
