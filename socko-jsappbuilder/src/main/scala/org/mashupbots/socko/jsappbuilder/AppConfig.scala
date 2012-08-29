@@ -15,15 +15,21 @@
 //
 package org.mashupbots.socko.jsappbuilder
 
-import org.mashupbots.socko.webserver.WebServerConfig
 import java.io.File
+
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.mutable.ListBuffer
+
+import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.webserver.WebServerConfig
+
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigException
+
+import akka.actor.ExtendedActorSystem
 import akka.actor.Extension
 import akka.actor.ExtensionId
 import akka.actor.ExtensionIdProvider
-import akka.actor.ExtendedActorSystem
-import org.mashupbots.socko.infrastructure.Logger
 
 /**
  * Configuration settings for our app
@@ -36,19 +42,42 @@ object AppConfig extends ExtensionId[AppConfigImpl] with ExtensionIdProvider {
 
 /**
  * Implementation class for our app configuration
+ *
+ * @param src Path to source folder. Maybe full path or relative to the directory of the configuration file
+ * @param target Path to target folder when output files will be stored. Maybe full path or relative to the directory 
+ *   of the configuration file
+ * @param webserver Configuration of webserver for serving files from the target directory
+ * @param tasks List of build tasks
  */
 case class AppConfigImpl(
   src: File = new File("src"),
   target: File = new File("target"),
-  server: WebServerConfig = new WebServerConfig()) extends Extension {
+  webserver: WebServerConfig = new WebServerConfig(),
+  tasks: List[TaskConfig]) extends Extension {
 
   /**
    * Read configuration from AKKA's `application.conf`
    */
   def this(config: Config, prefix: String) = this(
     AppConfigImpl.getFile(config, prefix + ".src", "src"),
-    AppConfigImpl.getFile(config, ".target", "target"),
-    AppConfigImpl.getWebServerConfig(config, ".webserver"))
+    AppConfigImpl.getFile(config, prefix + ".target", "target"),
+    AppConfigImpl.getWebServerConfig(config, prefix + ".webserver"),
+    AppConfigImpl.getTasksConfig(config, prefix + ".tasks"))
+}
+
+/**
+ * Configuration for a build task
+ * 
+ * @param id Unique identifier for the task
+ */
+case class TaskConfig(
+  id: String) extends Extension {
+
+  /**
+   * Read configuration from AKKA's `application.conf`
+   */
+  def this(config: Config) = this(
+    config.getString("id"))
 }
 
 /**
@@ -93,4 +122,18 @@ object AppConfigImpl extends Logger {
       }
     }
   }
+
+  /**
+   * Returns the list of `TaskConfig`. If not defined, an error is returned
+   */
+  def getTasksConfig(config: Config, name: String): List[TaskConfig] = {
+    val l = config.getConfigList(name)
+    val lb = new ListBuffer[TaskConfig]
+    
+    // Each config in the list returned from getConfigList() contains the definition of a task.
+    // l.toString: [Config(SimpleConfigObject({"id" : "1"})), Config(SimpleConfigObject({"id" : "2"}))]
+    l.foreach(cfg => lb.append(new TaskConfig(cfg)))    
+    lb.toList
+  }
+
 }

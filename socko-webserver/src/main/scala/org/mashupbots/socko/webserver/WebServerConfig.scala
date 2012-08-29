@@ -173,9 +173,9 @@ case class WebServerConfig(
    * Read configuration from AKKA's `application.conf`
    */
   def this(config: Config, prefix: String) = this(
-    config.getString(prefix + ".server-name"),
-    config.getString(prefix + ".hostname"),
-    config.getInt(prefix + ".port"),
+    WebServerConfig.getString(config, prefix + ".server-name", "WebServer"),
+    WebServerConfig.getString(config, prefix + ".hostname", "localhost"),
+    WebServerConfig.getInt(config, prefix + ".port", 8888),
     WebServerConfig.getOptionalWebLogConfig(config, prefix + ".web-log"),
     WebServerConfig.getOptionalSslConfig(config, prefix + ".ssl"),
     WebServerConfig.getHttpConfig(config, prefix + ".http"),
@@ -415,6 +415,22 @@ object WebServerConfig extends Logger {
     }
   }
 
+  /**
+   * Returns the specified setting as an string. If setting not specified, then the default is returned.
+   */
+  def getString(config: Config, name: String, defaultValue: String): String = {
+    try {
+      val v = config.getString(name)
+      if (v == null || v == "") {
+        defaultValue
+      } else {
+        v
+      }
+    } catch {
+      case _ => defaultValue
+    }
+  }
+  
   /**
    * Returns an optional string configuration value
    */

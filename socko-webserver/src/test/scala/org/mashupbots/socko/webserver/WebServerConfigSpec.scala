@@ -185,9 +185,6 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       // *** If you are changing this, review scaladoc of WebServerConfig ***
       val actorConfig = """
 		barebones-webserver {
-		  server-name=BareBonesTest
-		  hostname="192.168.0.1"
-		  port=9999
 		}
 		all-config-webserver {
 		  server-name = allTest
@@ -230,9 +227,9 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       val actorSystem = ActorSystem("WebServerConfigSpec", ConfigFactory.parseString(actorConfig))
 
       val barebones = BareBonesWebServerConfig(actorSystem)
-      barebones.serverName should equal("BareBonesTest")
-      barebones.hostname should equal("192.168.0.1")
-      barebones.port should equal(9999)
+      barebones.serverName should equal("WebServer")
+      barebones.hostname should equal("localhost")
+      barebones.port should equal(8888)
       barebones.webLog should be(None)
       barebones.ssl should equal(None)
       barebones.http.maxLengthInMB should be(4)

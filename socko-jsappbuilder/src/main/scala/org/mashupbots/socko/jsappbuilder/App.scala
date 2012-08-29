@@ -70,7 +70,7 @@ object Main extends Logger {
     log.info("Source Folder '{}'", myAppConfig.src.getAbsolutePath)
     log.info("Target Folder '{}'", myAppConfig.target.getAbsolutePath)
 
-    val webServer = new WebServer(myAppConfig.server, routes, actorSystem)
+    val webServer = new WebServer(myAppConfig.webserver, routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run { webServer.stop() }
     })
