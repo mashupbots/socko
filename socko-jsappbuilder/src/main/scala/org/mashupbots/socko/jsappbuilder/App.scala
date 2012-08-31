@@ -67,9 +67,6 @@ object Main extends Logger {
       ActorSystem("jsappbuilder", ConfigFactory.parseFile(configFile))
     val myAppConfig = AppConfig(actorSystem)
 
-    log.info("Source Folder '{}'", myAppConfig.src.getAbsolutePath)
-    log.info("Target Folder '{}'", myAppConfig.target.getAbsolutePath)
-
     val webServer = new WebServer(myAppConfig.webserver, routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run { webServer.stop() }

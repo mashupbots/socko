@@ -16,16 +16,13 @@
 package org.mashupbots.socko.webserver
 
 import java.io.File
-
 import scala.collection.JavaConversions.asScalaBuffer
-
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.WebLogFormat
-
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigException
-
 import akka.actor.Extension
+import org.mashupbots.socko.infrastructure.ConfigUtil
 
 /**
  * Web server configuration
@@ -173,9 +170,9 @@ case class WebServerConfig(
    * Read configuration from AKKA's `application.conf`
    */
   def this(config: Config, prefix: String) = this(
-    WebServerConfig.getString(config, prefix + ".server-name", "WebServer"),
-    WebServerConfig.getString(config, prefix + ".hostname", "localhost"),
-    WebServerConfig.getInt(config, prefix + ".port", 8888),
+    ConfigUtil.getString(config, prefix + ".server-name", "WebServer"),
+    ConfigUtil.getString(config, prefix + ".hostname", "localhost"),
+    ConfigUtil.getInt(config, prefix + ".port", 8888),
     WebServerConfig.getOptionalWebLogConfig(config, prefix + ".web-log"),
     WebServerConfig.getOptionalSslConfig(config, prefix + ".ssl"),
     WebServerConfig.getHttpConfig(config, prefix + ".http"),
@@ -270,8 +267,8 @@ case class SslConfig(
   def this(config: Config, prefix: String) = this(
     new File(config.getString(prefix + ".key-store-file")),
     config.getString(prefix + ".key-store-password"),
-    WebServerConfig.getOptionalFile(config, prefix + ".trust-store-file"),
-    WebServerConfig.getOptionalString(config, prefix + ".trust-store-password"))
+    ConfigUtil.getOptionalFile(config, prefix + ".trust-store-file"),
+    ConfigUtil.getOptionalString(config, prefix + ".trust-store-password"))
 
 }
 
@@ -317,14 +314,14 @@ case class TcpConfig(
    * Read configuration from AKKA's `application.conf`. Supply default values to use if setting not present
    */
   def this(config: Config, prefix: String) = this(
-    WebServerConfig.getOptionalBoolean(config, prefix + ".no-delay"),
-    WebServerConfig.getOptionalInt(config, prefix + ".send-buffer-size"),
-    WebServerConfig.getOptionalInt(config, prefix + ".receive-buffer-size"),
-    WebServerConfig.getOptionalBoolean(config, prefix + ".keep-alive"),
-    WebServerConfig.getOptionalBoolean(config, prefix + ".reuse-address"),
-    WebServerConfig.getOptionalInt(config, prefix + ".so-linger"),
-    WebServerConfig.getOptionalInt(config, prefix + ".traffic-class"),
-    WebServerConfig.getOptionalInt(config, prefix + ".accept-backlog"))
+    ConfigUtil.getOptionalBoolean(config, prefix + ".no-delay"),
+    ConfigUtil.getOptionalInt(config, prefix + ".send-buffer-size"),
+    ConfigUtil.getOptionalInt(config, prefix + ".receive-buffer-size"),
+    ConfigUtil.getOptionalBoolean(config, prefix + ".keep-alive"),
+    ConfigUtil.getOptionalBoolean(config, prefix + ".reuse-address"),
+    ConfigUtil.getOptionalInt(config, prefix + ".so-linger"),
+    ConfigUtil.getOptionalInt(config, prefix + ".traffic-class"),
+    ConfigUtil.getOptionalInt(config, prefix + ".accept-backlog"))
 }
 
 /**
@@ -363,15 +360,15 @@ case class HttpConfig(
    * Read configuration from AKKA's `application.conf`. Supply default values to use if setting not present
    */
   def this(config: Config, prefix: String) = this(
-    WebServerConfig.getInt(config, prefix + ".max-length-in-mb", 4),
-    WebServerConfig.getInt(config, prefix + ".max-initial-line-length", 4096),
-    WebServerConfig.getInt(config, prefix + ".max-header-size-in-bytes", 8192),
-    WebServerConfig.getInt(config, prefix + ".max-chunk-size-in-bytes", 8192),
-    WebServerConfig.getBoolean(config, prefix + ".aggregate-chunks", true),
-    WebServerConfig.getInt(config, prefix + ".min-compressible-content-size-in-bytes", 1024),
-    WebServerConfig.getInt(config, prefix + ".max-compressible-content-size-in-bytes", 1 * 1024 * 1024),
+    ConfigUtil.getInt(config, prefix + ".max-length-in-mb", 4),
+    ConfigUtil.getInt(config, prefix + ".max-initial-line-length", 4096),
+    ConfigUtil.getInt(config, prefix + ".max-header-size-in-bytes", 8192),
+    ConfigUtil.getInt(config, prefix + ".max-chunk-size-in-bytes", 8192),
+    ConfigUtil.getBoolean(config, prefix + ".aggregate-chunks", true),
+    ConfigUtil.getInt(config, prefix + ".min-compressible-content-size-in-bytes", 1024),
+    ConfigUtil.getInt(config, prefix + ".max-compressible-content-size-in-bytes", 1 * 1024 * 1024),
     WebServerConfig.getCompressibleContentTypes(config, prefix + ".compressible-content-types"),
-    WebServerConfig.getBoolean(config, prefix + ".spdy", false))
+    ConfigUtil.getBoolean(config, prefix + ".spdy", false))
 }
 
 /**
@@ -389,7 +386,7 @@ case class WebLogConfig(
    * Read configuration from AKKA's `application.conf`
    */
   def this(config: Config, prefix: String) = this(
-    WebServerConfig.getOptionalString(config, prefix + ".custom-actor-path"),
+    ConfigUtil.getOptionalString(config, prefix + ".custom-actor-path"),
     WebLogFormat.withName(config.getString(prefix + ".format")))
 }
 
@@ -397,120 +394,7 @@ case class WebLogConfig(
  * Methods for reading configuration from Akka.
  */
 object WebServerConfig extends Logger {
-
-  /**
-   * Returns an optional file configuration value. It is assumed that the value of the configuration name is the full
-   * path to a file or directory.
-   */
-  def getOptionalFile(config: Config, name: String): Option[File] = {
-    try {
-      val v = config.getString(name)
-      if (v == null || v == "") {
-        None
-      } else {
-        Some(new File(v))
-      }
-    } catch {
-      case _ => None
-    }
-  }
-
-  /**
-   * Returns the specified setting as an string. If setting not specified, then the default is returned.
-   */
-  def getString(config: Config, name: String, defaultValue: String): String = {
-    try {
-      val v = config.getString(name)
-      if (v == null || v == "") {
-        defaultValue
-      } else {
-        v
-      }
-    } catch {
-      case _ => defaultValue
-    }
-  }
   
-  /**
-   * Returns an optional string configuration value
-   */
-  def getOptionalString(config: Config, name: String): Option[String] = {
-    try {
-      val v = config.getString(name)
-      if (v == null || v == "") {
-        None
-      } else {
-        Some(v)
-      }
-    } catch {
-      case _ => None
-    }
-  }
-
-  /**
-   * Returns the specified setting as an integer. If setting not specified, then the default is returned.
-   */
-  def getInt(config: Config, name: String, defaultValue: Int): Int = {
-    try {
-      val v = config.getString(name)
-      if (v == null || v == "") {
-        defaultValue
-      } else {
-        config.getInt(name)
-      }
-    } catch {
-      case _ => defaultValue
-    }
-  }
-
-  /**
-   * Returns the specified setting as an integer. If setting not specified, then the default is returned.
-   */
-  def getOptionalInt(config: Config, name: String): Option[Int] = {
-    try {
-      val v = config.getString(name)
-      if (v == null || v == "") {
-        None
-      } else {
-        Some(config.getInt(name))
-      }
-    } catch {
-      case _ => None
-    }
-  }
-
-  /**
-   * Returns the specified setting as a boolean. If setting not specified, then the default is returned.
-   */
-  def getBoolean(config: Config, name: String, defaultValue: Boolean): Boolean = {
-    try {
-      val v = config.getString(name)
-      if (v == null || v == "") {
-        defaultValue
-      } else {
-        config.getBoolean(name)
-      }
-    } catch {
-      case _ => defaultValue
-    }
-  }
-
-  /**
-   * Returns the specified setting as a boolean. `None` is returned if setting not specified
-   */
-  def getOptionalBoolean(config: Config, name: String): Option[Boolean] = {
-    try {
-      val v = config.getString(name)
-      if (v == null || v == "") {
-        None
-      } else {
-        Some(config.getBoolean(name))
-      }
-    } catch {
-      case _ => None
-    }
-  }
-
   /**
    * Returns the defined `TcpConfig`. If not defined, then the default `TcpConfig` is returned.
    */
