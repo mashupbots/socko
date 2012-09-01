@@ -40,31 +40,85 @@ object AppConfig extends ExtensionId[AppConfigImpl] with ExtensionIdProvider {
 /**
  * Implementation class for our app configuration
  *
- * @param source Path to source folder. Maybe full path or relative to the directory of the configuration file
- * @param target Path to target folder when output files will be stored. Maybe full path or relative to the directory
- *   of the configuration file
+ * @param rootSourceDirectory Path to source folder. Maybe full path or relative to the directory of the configuration
+ *   file
+ * @param rootTargetDirectory Path to target folder when output files will be stored. Maybe full path or relative to
+ *   the directory of the configuration file
+ * @param rootTempDirectory Path to directory to store temporary files. If `None`, then one will be created using
+ *   JDK settings.
  * @param webserver Configuration of webserver for serving files from the target directory
  * @param fields List of fields for placeholder substitutions
+ * @param tools List of custom tools created by the user
  * @param tasks List of build tasks
  */
 case class AppConfigImpl(
-  source: String = "source",
-  target: String = "target",
+  rootSourceDirectory: String = "src",
+  rootTargetDirectory: String = "target",
+  rootTempDirectory: Option[String] = None,
   webserver: WebServerConfig = WebServerConfig(),
   fields: List[NameValueConfig] = Nil,
-  actions: List[ActionConfig] = Nil,
-  tasks: List[TaskConfig]) extends Extension {
+  tools: List[ToolConfig] = AppConfigImpl.StandardTools,
+  tasks: List[TaskConfig] = Nil) extends Extension {
 
   /**
    * Read configuration from AKKA's `application.conf`
    */
   def this(config: Config, prefix: String) = this(
-    ConfigUtil.getString(config, prefix + ".source", "source"),
-    ConfigUtil.getString(config, prefix + ".target", "target"),
+    ConfigUtil.getString(config, prefix + ".rootSourceDirectory", "src"),
+    ConfigUtil.getString(config, prefix + ".rootTargetDirectory", "target"),
+    ConfigUtil.getOptionalString(config, prefix + ".rootTempDirectory"),
     AppConfigImpl.getWebServerConfig(config, prefix + ".webserver"),
     AppConfigImpl.getNameValueConfig(config, prefix + ".fields"),
-    AppConfigImpl.getActionsConfig(config, prefix + ".actions"),
+    AppConfigImpl.getToolsConfig(config, prefix + ".tools") ::: AppConfigImpl.StandardTools,
     AppConfigImpl.getTasksConfig(config, prefix + ".tasks"))
+
+  /**
+   * Validate the configuration
+   */
+  def validate() {
+    if (rootSourceDirectory.isEmpty) {
+      throw new IllegalArgumentException("'rootSourceDirectory' property not set")
+    }
+    if (rootTargetDirectory.isEmpty) {
+      throw new IllegalArgumentException("'rootTargetDirectory' property not set")
+    } 
+    if (tasks.isEmpty) {
+      throw new IllegalArgumentException("'tasks' property not set")
+    } 
+    
+    webserver.validate()
+    tools.foreach(t => t.validate())
+    tasks.foreach(t => t.validate())
+
+    // GroupBy transforms our list into Map[ToolName, List[ToolConfig]]
+    // Filter removes entries where number of entries is the List[ToolConfig] is less than 2
+    // Map returns a List[ToolName]
+    val duplicateTools = tools.groupBy(a => a.name).filter(mapEntry => mapEntry._2.length > 1).map(_._1)
+    if (duplicateTools.size > 0) {
+      throw new IllegalArgumentException("Tool name(s) '%s' not unique".format(duplicateTools.mkString(",")))
+    }
+
+    // Check for unique task names
+    val duplicateTasks = tasks.groupBy(t => t.name).filter(mapEntry => mapEntry._2.length > 1).map(_._1)
+    if (duplicateTasks.size > 0) {
+      throw new IllegalArgumentException("Task name(s) '%s' not unique".format(duplicateTasks.mkString(",")))
+    }
+    
+    // Check for unique field names
+    val duplicateFields = fields.groupBy(f => f.name).filter(mapEntry => mapEntry._2.length > 1).map(_._1)
+    if (duplicateFields.size > 0) {
+      throw new IllegalArgumentException("Field name(s) '%s' not unique".format(duplicateFields.mkString(",")))
+    }
+
+    // Check task tool names are valid
+    val toolNames = tools.map(_.name)
+    tasks.foreach(t => {
+      if (!toolNames.exists(name => name == t.tool)) {
+        throw new IllegalArgumentException("Unrecognised tool '%s' in task '%s'".format(t.tool, t.name))
+      }
+    })
+
+  }
 }
 
 /**
@@ -112,13 +166,20 @@ object AppConfigImpl extends Logger {
   }
 
   /**
-   * Returns the list of `ActionConfig`. If not defined, an error is returned
+   * List of standard tools
    */
-  def getActionsConfig(config: Config, name: String): List[ActionConfig] = {
+  val StandardTools: List[ToolConfig] = ToolConfig("ClosureCompiler", "abc") ::
+    ToolConfig("FileCopier", "abc") ::
+    Nil
+
+  /**
+   * Returns the list of `ToolConfig`. If not defined, an error is returned
+   */
+  def getToolsConfig(config: Config, name: String): List[ToolConfig] = {
     try {
       val l = config.getConfigList(name)
-      val lb = new ListBuffer[ActionConfig]
-      l.foreach(cfg => lb.append(new ActionConfig(cfg)))
+      val lb = new ListBuffer[ToolConfig]
+      l.foreach(cfg => lb.append(new ToolConfig(cfg)))
       lb.toList
     } catch {
       case ex => {
@@ -162,24 +223,33 @@ case class NameValueConfig(
 }
 
 /**
- * Configuration for an action
+ * Configuration for a tool
  *
- * @param name Unique identifier for the action
- * @param actorName Name of actor in actor system to call to process this task
- * @param defaults Default settings that can be override by a specific task
+ * @param name Unique identifier for the tool
+ * @param actorName Name of AKKA actor in to call to invoke the tool
  */
-case class ActionConfig(
+case class ToolConfig(
   name: String,
-  actorName: String,
-  defaults: List[NameValueConfig] = Nil) extends Extension {
+  actorName: String) extends Extension {
 
   /**
    * Read configuration from AKKA's `application.conf`
    */
   def this(config: Config) = this(
-    config.getString("name"),
-    config.getString("actorName"),
-    AppConfigImpl.getNameValueConfig(config, "defaults"))
+    ConfigUtil.getString(config, "name", ""),
+    ConfigUtil.getString(config, "actorName", ""))
+
+  /**
+   * Validate the configuration
+   */
+  def validate() {
+    if (name.isEmpty) {
+      throw new IllegalArgumentException("Tool 'name' property not set")
+    }
+    if (actorName.isEmpty) {
+      throw new IllegalArgumentException("Tool 'actorName' property not set for '%s'".format(name))
+    }
+  }
 }
 
 /**
@@ -193,8 +263,8 @@ case class ActionConfig(
  * @param exclude List of patterns to match files in the source directory to exclude from process.  For example,
  *   `.txt` will exclude all files containing `.txt` like `readme.txt` and `some.txt.file.dat`
  * @param watch Flag to indicate if we need to watch the source file for changes. Applicable in `server` mode.
- * @param action Name of action to perform. For example `javascript`
- * @param parameters Parameters for the action. Overrides the defaults for the action
+ * @param tool Name of tool to use to execute this task. For example `ClosureCompiler`
+ * @param parameters Parameters for the tool.
  */
 case class TaskConfig(
   name: String,
@@ -203,21 +273,39 @@ case class TaskConfig(
   target: String,
   exclude: List[String] = Nil,
   watch: Boolean = true,
-  action: String,
+  tool: String,
   parameters: List[NameValueConfig] = Nil) extends Extension {
 
   /**
    * Read configuration from AKKA's `application.conf`
    */
   def this(config: Config) = this(
-    config.getString("name"),
+    ConfigUtil.getString(config, "name", ""),
     ConfigUtil.getListString(config, "profile"),
-    config.getString("source"),
-    config.getString("target"),
+    ConfigUtil.getString(config, "source", ""),
+    ConfigUtil.getString(config, "target", ""),
     ConfigUtil.getListString(config, "exclude"),
     ConfigUtil.getBoolean(config, "watch", true),
-    config.getString("action"),
+    ConfigUtil.getString(config, "tool", ""),
     AppConfigImpl.getNameValueConfig(config, "parameters"))
+
+  /**
+   * Validate the configuration
+   */
+  def validate() {
+    if (name.isEmpty) {
+      throw new IllegalArgumentException("Task 'name' property not set")
+    }
+    if (source.isEmpty) {
+      throw new IllegalArgumentException("'source' property of task '%s' not set".format(name))
+    }
+    if (target.isEmpty) {
+      throw new IllegalArgumentException("'target' property of task '%s' not set".format(name))
+    }
+    if (tool.isEmpty) {
+      throw new IllegalArgumentException("'tool' property of task '%s' not set".format(name))
+    }
+  }
 }
 
 
