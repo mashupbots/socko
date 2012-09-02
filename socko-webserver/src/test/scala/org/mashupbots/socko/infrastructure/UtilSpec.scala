@@ -63,6 +63,13 @@ class UtilSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
     "return null resource not found" in {
       IOUtil.readResource("not/found") should be (null)
     }
+    
+    "test for absolute paths" in {
+      IOUtil.isAbsolutePath("/tmp") should be (true)
+      IOUtil.isAbsolutePath("relative/1/2/3") should be (false)
+      IOUtil.isAbsolutePath("c:\\") should be (true)
+      IOUtil.isAbsolutePath("c:\\test") should be (true)
+    } 
   }
   
   "HashUtil" should {

@@ -29,16 +29,7 @@ import akka.actor.ExtensionIdProvider
 import org.mashupbots.socko.infrastructure.ConfigUtil
 
 /**
- * Configuration settings for our app
- */
-object AppConfig extends ExtensionId[AppConfigImpl] with ExtensionIdProvider {
-  override def lookup = AppConfig
-  override def createExtension(system: ExtendedActorSystem) =
-    new AppConfigImpl(system.settings.config, "jsappbuilder")
-}
-
-/**
- * Implementation class for our app configuration
+ * Configuration for JsAppBuilder
  *
  * @param rootSourceDirectory Path to source folder. Maybe full path or relative to the directory of the configuration
  *   file
@@ -51,13 +42,13 @@ object AppConfig extends ExtensionId[AppConfigImpl] with ExtensionIdProvider {
  * @param tools List of custom tools created by the user
  * @param tasks List of build tasks
  */
-case class AppConfigImpl(
+case class JsAppBuilderConfig(
   rootSourceDirectory: String = "src",
   rootTargetDirectory: String = "target",
   rootTempDirectory: Option[String] = None,
   webserver: WebServerConfig = WebServerConfig(),
   fields: List[NameValueConfig] = Nil,
-  tools: List[ToolConfig] = AppConfigImpl.StandardTools,
+  tools: List[ToolConfig] = JsAppBuilderConfig.StandardTools,
   tasks: List[TaskConfig] = Nil) extends Extension {
 
   /**
@@ -67,10 +58,10 @@ case class AppConfigImpl(
     ConfigUtil.getString(config, prefix + ".rootSourceDirectory", "src"),
     ConfigUtil.getString(config, prefix + ".rootTargetDirectory", "target"),
     ConfigUtil.getOptionalString(config, prefix + ".rootTempDirectory"),
-    AppConfigImpl.getWebServerConfig(config, prefix + ".webserver"),
-    AppConfigImpl.getNameValueConfig(config, prefix + ".fields"),
-    AppConfigImpl.getToolsConfig(config, prefix + ".tools") ::: AppConfigImpl.StandardTools,
-    AppConfigImpl.getTasksConfig(config, prefix + ".tasks"))
+    JsAppBuilderConfig.getWebServerConfig(config, prefix + ".webserver"),
+    JsAppBuilderConfig.getNameValueConfig(config, prefix + ".fields"),
+    JsAppBuilderConfig.getToolsConfig(config, prefix + ".tools") ::: JsAppBuilderConfig.StandardTools,
+    JsAppBuilderConfig.getTasksConfig(config, prefix + ".tasks"))
 
   /**
    * Validate the configuration
@@ -122,9 +113,9 @@ case class AppConfigImpl(
 }
 
 /**
- * Statics for AppConfigImpl
+ * Statics for JsAppBuilderConfig
  */
-object AppConfigImpl extends Logger {
+object JsAppBuilderConfig extends Logger {
 
   /**
    * Returns the defined `WebServerConfig`. If not defined, then the default `WebServerConfig` is returned.
@@ -287,7 +278,7 @@ case class TaskConfig(
     ConfigUtil.getListString(config, "exclude"),
     ConfigUtil.getBoolean(config, "watch", true),
     ConfigUtil.getString(config, "tool", ""),
-    AppConfigImpl.getNameValueConfig(config, "parameters"))
+    JsAppBuilderConfig.getNameValueConfig(config, "parameters"))
 
   /**
    * Validate the configuration

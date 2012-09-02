@@ -22,7 +22,7 @@ import org.scalatest.WordSpec
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
 
-class AppConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
+class JsAppBuilderConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
 
   "Load from Akka Config" in {
     val actorConfig = """
@@ -85,7 +85,7 @@ class AppConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with
     field1.name should equal("name1")
     field1.value should equal("value1")
 
-    cfg.tools.length should equal(1 + AppConfigImpl.StandardTools.length)
+    cfg.tools.length should equal(1 + JsAppBuilderConfig.StandardTools.length)
     val tool1 = cfg.tools(0)
     tool1.name should equal("tool1")
     tool1.actorName should equal("actor1")
@@ -136,9 +136,7 @@ class AppConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with
           ]
 		}"""
 
-    val actorSystem = ActorSystem("AppConfigSpecEmpty", ConfigFactory.parseString(actorConfig))
-
-    val cfg = AppConfig(actorSystem)
+    val cfg = new JsAppBuilderConfig(ConfigFactory.parseString(actorConfig), "jsappbuilder")
 
     cfg.rootSourceDirectory should equal("source")
     cfg.rootTargetDirectory should equal("target")
@@ -147,16 +145,15 @@ class AppConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with
     cfg.webserver.port should equal(8888)
 
     cfg.fields.length should equal(0)
-    cfg.tools.length should equal(AppConfigImpl.StandardTools.length)
+    cfg.tools.length should equal(JsAppBuilderConfig.StandardTools.length)
     cfg.tasks.length should equal(1)
 
-    actorSystem.shutdown()
   }
 
   "Check for unique field names" in {
-    val cfg = AppConfigImpl(
+    val cfg = JsAppBuilderConfig(
       fields = NameValueConfig("a", "1") :: NameValueConfig("a", "2") :: NameValueConfig("b", "3") :: Nil,
-      tools = AppConfigImpl.StandardTools,
+      tools = JsAppBuilderConfig.StandardTools,
       tasks = TaskConfig("task1", Nil, "src", "target", Nil, true, "tool1", Nil) :: Nil)
 
     val ex = intercept[IllegalArgumentException] {
@@ -168,9 +165,9 @@ class AppConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with
   }
   
   "Check for unique tasks names" in {
-    val cfg = AppConfigImpl(
+    val cfg = JsAppBuilderConfig(
       fields = Nil,
-      tools = AppConfigImpl.StandardTools,
+      tools = JsAppBuilderConfig.StandardTools,
       tasks = TaskConfig("task1", Nil, "src", "target", Nil, true, "tool1", Nil) :: 
         TaskConfig("task1", Nil, "src", "target", Nil, true, "tool1", Nil) ::
         TaskConfig("task2", Nil, "src", "target", Nil, true, "tool1", Nil) ::
@@ -186,9 +183,9 @@ class AppConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with
   }
   
   "Check for unique tool names" in {
-    val cfg = AppConfigImpl(
+    val cfg = JsAppBuilderConfig(
       fields = Nil,
-      tools = ToolConfig("FileCopier", "abc") :: AppConfigImpl.StandardTools,
+      tools = ToolConfig("FileCopier", "abc") :: JsAppBuilderConfig.StandardTools,
       tasks = TaskConfig("task1", Nil, "src", "target", Nil, true, "tool1", Nil) :: Nil)
 
     val ex = intercept[IllegalArgumentException] {
@@ -199,9 +196,9 @@ class AppConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with
   }
   
   "Check for empty tasks" in {
-    val cfg = AppConfigImpl(
+    val cfg = JsAppBuilderConfig(
       fields = Nil,
-      tools = AppConfigImpl.StandardTools,
+      tools = JsAppBuilderConfig.StandardTools,
       tasks = Nil)
 
     val ex = intercept[IllegalArgumentException] {
@@ -211,9 +208,9 @@ class AppConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with
   }
   
   "Check for valid tool names" in {
-    val cfg = AppConfigImpl(
+    val cfg = JsAppBuilderConfig(
       fields = Nil,
-      tools = ToolConfig("MyTool", "abc") :: AppConfigImpl.StandardTools,
+      tools = ToolConfig("MyTool", "abc") :: JsAppBuilderConfig.StandardTools,
       tasks = TaskConfig("task1", Nil, "src", "target", Nil, true, "MyTool", Nil) :: 
         TaskConfig("task2", Nil, "src", "target", Nil, true, "ClosureCompiler", Nil) ::
         TaskConfig("task3", Nil, "src", "target", Nil, true, "xxx", Nil) ::

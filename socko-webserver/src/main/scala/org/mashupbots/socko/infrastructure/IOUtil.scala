@@ -19,6 +19,8 @@ import java.io.InputStream
 import java.io.BufferedInputStream
 import java.io.FileInputStream
 import java.io.File
+import java.io.FileOutputStream
+import java.nio.charset.Charset
 
 /**
  * Utility IO methods
@@ -74,6 +76,21 @@ object IOUtil {
   }
 
   /**
+   * Write a text file
+   *
+   * @param file File to write to. If the file exists, it will be overwritten
+   * @param text Text to write to the file
+   * @param charset Character set. Defaults to UTF-8.
+   * @returns file
+   */
+  def writeTextFile(file: File, text: String, charset: Charset = CharsetUtil.UTF_8): File = {
+    using(new FileOutputStream(file)) { out =>
+      out.write(text.getBytes(charset))
+    }
+    file
+  }
+
+  /**
    * Auto close streams with [[http://stackoverflow.com/questions/2207425/what-automatic-resource-management-alternatives-exists-for-scala automatic resource management]]
    *
    * Example usage
@@ -93,4 +110,45 @@ object IOUtil {
     }
   }
 
+  /**
+   * Returns a newly created temporary directory in the system defined temporary directory
+   *
+   * @param namePrefix Prefix to use on the directory name
+   * @returns Newly created directory
+   */
+  def createTempDir(namePrefix: String): File = {
+    val d = File.createTempFile(namePrefix, "")
+    d.delete()
+    d.mkdir()
+    d
+  }
+
+  /**
+   * Delete the specified directory and all sub directories
+   *
+   * @param dir Directory to delete
+   */
+  def deleteDir(dir: File) {
+    if (dir.exists()) {
+      val files = dir.listFiles()
+      files.foreach(f => {
+        if (f.isFile) {
+          f.delete()
+        } else {
+          deleteDir(dir)
+        }
+      })
+    }
+    dir.delete()
+  }
+
+  /**
+   * Tests if a path string is an absolute path or not
+   *
+   * Assumes that an absolute path starts with the file separator of if on windows, it starts
+   * with a drive letter.
+   */
+  def isAbsolutePath(path: String): Boolean = {
+    path.startsWith(File.separator) || path.matches("[A-Za-z]:\\\\.*")
+  }
 }

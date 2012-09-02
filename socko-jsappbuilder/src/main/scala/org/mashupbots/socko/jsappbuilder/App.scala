@@ -31,7 +31,7 @@ import com.typesafe.config.ConfigFactory
  *
  * Expects to find configuration options in a file called `jsappbuilder.conf`.
  */
-object Main extends Logger {
+object App extends Logger {
 
   /**
    * Routes
@@ -43,7 +43,7 @@ object Main extends Logger {
   })
 
   /**
-   *
+   * Command line startup
    */
   def main(args: Array[String]) {
     // Parse command line
@@ -78,4 +78,14 @@ object Main extends Logger {
   }
 
 }
+
+/**
+ * Configuration settings for our application
+ */
+object AppConfig extends ExtensionId[JsAppBuilderConfig] with ExtensionIdProvider {
+  override def lookup = AppConfig
+  override def createExtension(system: ExtendedActorSystem) =
+    new JsAppBuilderConfig(system.settings.config, "jsappbuilder")
+}
+
 
