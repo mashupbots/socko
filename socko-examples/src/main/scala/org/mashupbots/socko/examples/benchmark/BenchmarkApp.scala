@@ -164,25 +164,6 @@ object BenchmarkApp extends Logger {
   }
 
   /**
-   * Delete the specified directory and all sub directories
-   *
-   * @param dir Directory to delete
-   */
-  private def deleteTempDir(dir: File) {
-    if (dir.exists()) {
-      val files = dir.listFiles()
-      files.foreach(f => {
-        if (f.isFile) {
-          f.delete()
-        } else {
-          deleteTempDir(dir)
-        }
-      })
-    }
-    dir.delete()
-  }
-
-  /**
    * Create files for downloading
    */
   private def createContent(dir: File) {

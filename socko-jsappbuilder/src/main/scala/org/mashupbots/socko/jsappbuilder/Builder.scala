@@ -83,10 +83,10 @@ class Builder(
         listener ! InfoStatusReport("Cleaning ...")
         
         listener ! VerboseStatusReport("Deleting " + rootTargetDirectory.getAbsolutePath)
-        IOUtil.deleteDir(rootTargetDirectory)
+        IOUtil.deleteDirContents(rootTargetDirectory)
         
         listener ! VerboseStatusReport("Deleting " + rootTempDirectory.getAbsolutePath)
-        IOUtil.deleteDir(rootTempDirectory)
+        IOUtil.deleteDirContents(rootTempDirectory)
         
         listener ! CleanResponse(None)
       } catch {

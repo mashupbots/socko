@@ -48,29 +48,39 @@ class BuilderSpec extends WordSpec with ShouldMatchers with GivenWhenThen with B
 
     val actorSystem = ActorSystem("BuilderSpecClean", ConfigFactory.parseString(actorConfig))
     val cfg = AppConfig(actorSystem)
-    
+
     val listenerMessages = new ListBuffer[BuilderMessage]
     val listener = actorSystem.actorOf(Props(new TestBuilderListener(listenerMessages)), name = "listener")
 
+    // /source/index.html
+    // /source/js/app.js
+    // /source/css/app.css
     val root = IOUtil.createTempDir("BuilderSpec")
     val source = new File(root, "source")
     source.mkdir()
+    IOUtil.writeTextFile(new File(source, "index.html"), "<html><body>Hello</body></html>")
+    val sourceJs = new File(source, "js")
+    sourceJs.mkdir()
+    IOUtil.writeTextFile(new File(sourceJs, "app.js"), "function() { alert('Hello'); }")
+    val sourceCss = new File(source, "css")
+    sourceCss.mkdir()
+    IOUtil.writeTextFile(new File(sourceCss, "app.css"), "body { font-weight: normal; }")
 
     val target = new File(root, "target")
     target.mkdir()
-    IOUtil.writeTextFile(new File(target, "text1.txt"), "stuff1")
-    IOUtil.writeTextFile(new File(target, "text2.txt"), "stuff2")
-    IOUtil.writeTextFile(new File(target, "text3.txt"), "stuff3")
 
     val builder = actorSystem.actorOf(Props(new Builder(root, cfg, listener)), name = "builder")
+
+    // File Copy
+    
     
     // Clean
     builder ! CleanRequest
-    //Waiter.wait(() => { target.list().length == 0 }, 1000, 100, "Waiting for clean request")
-    Thread.sleep(1000)
-    
-    listenerMessages.length should be (4)
-    val x = target.listFiles()
+    Waiter.wait(() => { target.list().length == 0 }, 2000, 100, "Waiting for clean request")
+
+    target.list().length should be(0)
+
+    // File Copy Again
 
     // Finish
     actorSystem.shutdown()
@@ -88,9 +98,15 @@ class TestBuilderListener(listenerMessages: ListBuffer[BuilderMessage]) extends 
 object Waiter {
   def wait(test: () => Boolean, timeout: Int, sleep: Int, message: String) {
     val start = System.currentTimeMillis()
-    while ((System.currentTimeMillis - start < timeout) && !test()) {
-      if (sleep > 0) Thread.sleep(sleep)
+    var result = test()
+    while ((System.currentTimeMillis - start < timeout) && !result) {
+      if (sleep > 0) {
+        Thread.sleep(sleep)
+      }
+      result = test()
     }
-    throw new TimeoutException(message)
+    if (!result) {
+      throw new TimeoutException(message)
+    }
   }
 }

@@ -129,17 +129,35 @@ object IOUtil {
    * @param dir Directory to delete
    */
   def deleteDir(dir: File) {
-    if (dir.exists()) {
+    if (dir.exists) {
       val files = dir.listFiles()
       files.foreach(f => {
         if (f.isFile) {
           f.delete()
         } else {
-          deleteDir(dir)
+          deleteDir(f)
         }
       })
     }
     dir.delete()
+  }
+
+  /**
+   * Delete all the contents (files and sub-directories) of the specified directory
+   *
+   * @param dir Directory
+   */
+  def deleteDirContents(dir: File) {
+    if (dir.exists && dir.isDirectory) {
+      val files = dir.listFiles()
+      files.foreach(f => {
+        if (f.isFile) {
+          f.delete()
+        } else {
+          deleteDir(f)
+        }
+      })
+    }
   }
 
   /**
