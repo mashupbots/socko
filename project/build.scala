@@ -98,22 +98,6 @@ object SockoBuild extends Build {
                            pomIncludeRepository := { x => false },
                            pomExtra := sockoPomExtra
                          ))
-
-  lazy val jsappbuilder = Project(id = "socko-jsappbuilder",
-                         base = file("socko-jsappbuilder"),
-                         dependencies = Seq(webserver),
-                         settings = defaultSettings ++ assemblySettings ++ Seq(
-                           libraryDependencies ++= Dependencies.jsappbuilder,
-                           publishTo <<= sockoPublishTo,
-                           publishMavenStyle := true,
-                           publishArtifact in Test := false,
-                           pomIncludeRepository := { x => false },
-                           pomExtra := sockoPomExtra,
-                           
-                           test in assembly := {},
-                           jarName in assembly := "socko-jsappbuilder-assembly.jar",
-                           mainClass in assembly := Some("org.mashupbots.socko.jsappbuilder.Main")                           
-                         ))
                          
   lazy val examples = Project(id = "socko-examples",
                          base = file("socko-examples"),
@@ -134,10 +118,6 @@ object Dependencies {
     Dependency.netty, Dependency.logback, Dependency.scalatest
   )
   
-  val jsappbuilder = Seq(
-    Dependency.closure, Dependency.scalatest, Dependency.logback
-  )  
-
   val examples = Seq(
     Dependency.logback
   )  
@@ -147,7 +127,6 @@ object Dependency {
   val akkaActor     = "com.typesafe.akka"      % "akka-actor"         % "2.0.2"
   val akkaSlf4j     = "com.typesafe.akka"      % "akka-slf4j"         % "2.0"
   val akkaTestKit   = "com.typesafe.akka"      % "akka-testkit"       % "2.0"
-  val closure       = "com.google.javascript"  % "closure-compiler"   % "r2079"
   val netty         = "io.netty"               % "netty"              % "3.5.5.Final"
   val logback       = "ch.qos.logback"         % "logback-classic"    % "1.0.3"         % "runtime"
   val scalatest     = "org.scalatest"          %% "scalatest"         % "2.0.M2"        % "test"
