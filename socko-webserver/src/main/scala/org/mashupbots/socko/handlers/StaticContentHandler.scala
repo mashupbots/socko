@@ -339,7 +339,7 @@ class StaticContentHandler() extends Actor {
   }
 
   /**
-   * Caches and then sends a file
+   * Caches (if specified) and then sends a file
    *
    * @param fileRequest File request
    */
@@ -378,7 +378,9 @@ class StaticContentHandler() extends Actor {
           "\"" + HashUtil.md5(contents) + "\"",
           new Date(file.lastModified),
           contents)
-        cache.set(fileRequest.cacheKey, cachedContent, cacheTimeout)
+        if (cacheTimeout > 0) {
+          cache.set(fileRequest.cacheKey, cachedContent, cacheTimeout)
+        }
         sendSmallFile(fileRequest, cachedContent)
       } else {
         // Big file so leave contents on file system
@@ -386,7 +388,9 @@ class StaticContentHandler() extends Actor {
           filePath,
           contentType,
           new Date(file.lastModified))
-        cache.set(fileRequest.cacheKey, cachedContent, cacheTimeout)
+        if (cacheTimeout > 0) {
+          cache.set(fileRequest.cacheKey, cachedContent, cacheTimeout)
+        }
         sendBigFile(fileRequest, cachedContent)
       }
     }
@@ -721,10 +725,10 @@ case class StaticFileRequest(
  *
  * @param event HTTP Request event
  * @param classpath Classpath of resource to load (without a leading "/"). For example: `META-INF/mime.types`.
- * @param serverCacheTimeoutSeconds Number of seconds to cache this specific in the server cache. If `None`, the
- *  default value specified on the constructor is used.
- * @param browserCacheTimeoutSeconds Number of seconds to cache the file in the browser. If `None`, the
- *  default value specified on the constructor is used.
+ * @param serverCacheTimeoutSeconds Number of seconds to cache file meta data and contents. If `None`, the
+ *  default value specified in [[org.mashupbots.socko.handlers.StaticContentHandlerConfig]] will be used.
+ * @param browserCacheTimeoutSeconds Number of seconds the file is to be cached by the browser. If `None`, the
+ *  default value specified in [[org.mashupbots.socko.handlers.StaticContentHandlerConfig]] will be used.
  */
 case class StaticResourceRequest(
   event: HttpRequestEvent,
@@ -736,8 +740,8 @@ case class StaticResourceRequest(
 }
 
 /**
- * Configuration for [[org.mashupbots.socko.handlers.StaticContentHandler]].
- *
+ * Default configuration for [[org.mashupbots.socko.handlers.StaticContentHandler]].
+ * 
  * You **MUST** set these settings before you start [[org.mashupbots.socko.handlers.StaticContentHandler]] as a router
  */
 object StaticContentHandlerConfig {
@@ -764,19 +768,28 @@ object StaticContentHandlerConfig {
   var cache = new LocalCache(1000, 16)
 
   /**
-   * Maximum size of files to cache in memory; i.e. contents of these files are read and stored in memory in order
-   * to optimize performance.
+   * Maximum size of file contents to cache in memory
+   * 
+   * The contents of files under this limit is cached in memory for `serverCacheTimeoutSeconds`. Requests for this file  
+   * will be served by the contents stored in memory rather than the file system.
+   * 
+   * Files larger than this limit are served by reading from the file system for every request.
    *
-   * Files larger than this are kept on the file system.
-   *
-   * Defaults to 100K.
+   * Defaults to 100K. `0` indicates that files will not be cached in memory.
    */
   var serverCacheMaxFileSize: Int = 1024 * 100
 
   /**
-   * Number of seconds before files cached in the server memory are removed.
+   * Number of seconds file meta data (such as file name, size, timestamp and hash) and file contents will be cached 
+   * in memory.  After this time, cache data will be removed and file meta data will and contents will have to be 
+   * read from the file system.
+   * 
+   * Note that if `serverCacheMaxFileSize` is 0 and `serverCacheTimeoutSeconds` is > 0, then only file meta data
+   * will be cached in memory.
    *
-   * Defaults to 1 hour.
+   * Defaults to 1 hour. `0` means files will NOT be cached.
+   * 
+   * This setting can be overriden in specific [[org.mashupbots.socko.handlers.StaticResourceRequest]].
    */
   var serverCacheTimeoutSeconds: Int = 3600
 
@@ -785,7 +798,9 @@ object StaticContentHandlerConfig {
    *
    * This setting is used to drive the `Expires` and `Cache-Control` HTTP headers.
    *
-   * Defaults to 1 hour.
+   * Defaults to 1 hour. `0` means cache headers will not be sent to the browser.
+   * 
+   * This setting can be overriden in specific [[org.mashupbots.socko.handlers.StaticResourceRequest]].
    */
   var browserCacheTimeoutSeconds: Int = 3600
 }
