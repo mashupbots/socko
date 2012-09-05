@@ -293,10 +293,12 @@ class StaticContentHandler() extends Actor {
       setCommonHeaders(event, response, now, cacheEntry.contentType, content.length, contentEncoding)
 
       val browserCacheSeconds = resourceRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
-      now.add(Calendar.SECOND, browserCacheSeconds)
-      response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
-      response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
-      response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
+      if (browserCacheSeconds > 0) {
+        now.add(Calendar.SECOND, browserCacheSeconds)
+        response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
+        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
+        response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
+      }
 
       response.setContent(ChannelBuffers.wrappedBuffer(content))
 
@@ -440,11 +442,13 @@ class StaticContentHandler() extends Actor {
       setCommonHeaders(event, response, now, cacheEntry.contentType, content.length, contentEncoding)
 
       val browserCacheSeconds = fileRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
-      now.add(Calendar.SECOND, browserCacheSeconds)
-      response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
-      response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
-      response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
-      response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
+      if (browserCacheSeconds > 0) {
+        now.add(Calendar.SECOND, browserCacheSeconds)
+        response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
+        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
+        response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
+        response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
+      }
 
       response.setContent(ChannelBuffers.wrappedBuffer(content))
 
@@ -531,10 +535,13 @@ class StaticContentHandler() extends Actor {
         setCommonHeaders(event, response, now, cacheEntry.contentType, fileLength, contentEncoding)
 
         val browserCacheSeconds = fileRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
-        now.add(Calendar.SECOND, browserCacheSeconds)
-        response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
-        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
-        response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
+        if (browserCacheSeconds > 0) {
+          // Don't use ETAG because big files takes a long time to hash. Just use last modified.
+          now.add(Calendar.SECOND, browserCacheSeconds)
+          response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
+          response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
+          response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
+        }
 
         if (sendHttpChunks) {
           // See http://stackoverflow.com/questions/9027322/how-to-use-chunkedstream-properly
@@ -706,10 +713,10 @@ class StaticContentHandler() extends Actor {
  *
  * @param event HTTP Request event
  * @param file File to download to the client
- * @param serverCacheTimeoutSeconds Number of seconds to cache this specific in the server cache. If `None`, the
- *  default value specified on the constructor is used.
- * @param browserCacheTimeoutSeconds Number of seconds to cache the file in the browser. If `None`, the
- *  default value specified on the constructor is used.
+ * @param serverCacheTimeoutSeconds Number of seconds to cache file meta data and contents. If `None`, the
+ *  default value specified in [[org.mashupbots.socko.handlers.StaticContentHandlerConfig]] will be used.
+ * @param browserCacheTimeoutSeconds Number of seconds the file is to be cached by the browser. If `None`, the
+ *  default value specified in [[org.mashupbots.socko.handlers.StaticContentHandlerConfig]] will be used.
  */
 case class StaticFileRequest(
   event: HttpRequestEvent,
@@ -741,7 +748,7 @@ case class StaticResourceRequest(
 
 /**
  * Default configuration for [[org.mashupbots.socko.handlers.StaticContentHandler]].
- * 
+ *
  * You **MUST** set these settings before you start [[org.mashupbots.socko.handlers.StaticContentHandler]] as a router
  */
 object StaticContentHandlerConfig {
@@ -769,10 +776,10 @@ object StaticContentHandlerConfig {
 
   /**
    * Maximum size of file contents to cache in memory
-   * 
-   * The contents of files under this limit is cached in memory for `serverCacheTimeoutSeconds`. Requests for this file  
+   *
+   * The contents of files under this limit is cached in memory for `serverCacheTimeoutSeconds`. Requests for this file
    * will be served by the contents stored in memory rather than the file system.
-   * 
+   *
    * Files larger than this limit are served by reading from the file system for every request.
    *
    * Defaults to 100K. `0` indicates that files will not be cached in memory.
@@ -780,15 +787,15 @@ object StaticContentHandlerConfig {
   var serverCacheMaxFileSize: Int = 1024 * 100
 
   /**
-   * Number of seconds file meta data (such as file name, size, timestamp and hash) and file contents will be cached 
-   * in memory.  After this time, cache data will be removed and file meta data will and contents will have to be 
+   * Number of seconds file meta data (such as file name, size, timestamp and hash) and file contents will be cached
+   * in memory.  After this time, cache data will be removed and file meta data will and contents will have to be
    * read from the file system.
-   * 
+   *
    * Note that if `serverCacheMaxFileSize` is 0 and `serverCacheTimeoutSeconds` is > 0, then only file meta data
    * will be cached in memory.
    *
    * Defaults to 1 hour. `0` means files will NOT be cached.
-   * 
+   *
    * This setting can be overriden in specific [[org.mashupbots.socko.handlers.StaticResourceRequest]].
    */
   var serverCacheTimeoutSeconds: Int = 3600
@@ -799,7 +806,7 @@ object StaticContentHandlerConfig {
    * This setting is used to drive the `Expires` and `Cache-Control` HTTP headers.
    *
    * Defaults to 1 hour. `0` means cache headers will not be sent to the browser.
-   * 
+   *
    * This setting can be overriden in specific [[org.mashupbots.socko.handlers.StaticResourceRequest]].
    */
   var browserCacheTimeoutSeconds: Int = 3600
