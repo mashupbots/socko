@@ -55,10 +55,9 @@ object SpdyApp extends Logger {
 
   val contentDir = createTempDir("content_")
   val tempDir = createTempDir("temp_")
-
-  StaticContentHandlerConfig.rootFilePaths = Seq(contentDir.getAbsolutePath)
-  StaticContentHandlerConfig.tempDir = tempDir
-  //StaticContentHandlerConfig.serverCacheMaxFileSize = 0
+  val staticContentHandlerConfig = StaticContentHandlerConfig(
+    rootFilePaths = Seq(contentDir.getAbsolutePath),
+    tempDir = tempDir)
 
   //
   // STEP #1 - Define Actors and Start Akka
@@ -101,7 +100,7 @@ object SpdyApp extends Logger {
 	}"""
 
   val actorSystem = ActorSystem("BenchmarkActorSystem", ConfigFactory.parseString(actorConfig))
-  val staticContentHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
+  val staticContentHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(staticContentHandlerConfig))
     .withRouter(FromConfig()).withDispatcher("my-dispatcher"), "static-file-router")
 
   //

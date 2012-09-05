@@ -173,15 +173,15 @@ import akka.event.Logging
  *
  * See [[http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html HTTP Header Field Definitions]]
  */
-class StaticContentHandler() extends Actor {
+class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Actor {
 
   private val log = Logging(context.system, this)
-  private val rootFilePaths = StaticContentHandlerConfig.rootFilePaths
-  private val tempDir = StaticContentHandlerConfig.tempDir
-  private val cache = StaticContentHandlerConfig.cache
-  private val serverCacheMaxFileSize = StaticContentHandlerConfig.serverCacheMaxFileSize
-  private val serverCacheTimeoutSeconds = StaticContentHandlerConfig.serverCacheTimeoutSeconds
-  private val browserCacheTimeoutSeconds = StaticContentHandlerConfig.browserCacheTimeoutSeconds
+  private val rootFilePaths = defaultConfig.rootFilePaths
+  private val tempDir = defaultConfig.tempDir
+  private val cache = defaultConfig.cache
+  private val serverCacheMaxFileSize = defaultConfig.serverCacheMaxFileSize
+  private val serverCacheTimeoutSeconds = defaultConfig.serverCacheTimeoutSeconds
+  private val browserCacheTimeoutSeconds = defaultConfig.browserCacheTimeoutSeconds
 
   /**
    * Simple Date Formatter that will format dates like: `Wed, 02 Oct 2002 13:00:00 GMT`
@@ -747,68 +747,47 @@ case class StaticResourceRequest(
 }
 
 /**
- * Default configuration for [[org.mashupbots.socko.handlers.StaticContentHandler]].
+ * Configuration for [[org.mashupbots.socko.handlers.StaticContentHandler]].
  *
- * You **MUST** set these settings before you start [[org.mashupbots.socko.handlers.StaticContentHandler]] as a router
+ * @param rootFilePaths List of root paths from while files can be served.
+ *   This is enforced to stop relative path type attacks; e.g. `../etc/passwd`
+ *
+ * @param tempDir Temporary directory where compressed files can be stored.
+ *   Defaults to the `java.io.tmpdir` system property.
+ *
+ * @param cache Local in memory cache to store file meta and content.
+ *   Defaults to storing 1000 items.
+ *
+ * @param serverCacheMaxFileSize Maximum size of file contents to cache in memory
+ *   The contents of files under this limit is cached in memory for `serverCacheTimeoutSeconds`. Requests for this file
+ *   will be served by the contents stored in memory rather than the file system.
+ *
+ *   Files larger than this limit are served by reading from the file system for every request.
+ *
+ *   Defaults to 100K. `0` indicates that files will not be cached in memory.
+ *
+ * @param serverCacheTimeoutSeconds Number of seconds file meta data (such as file name, size, timestamp and hash)
+ *   and file contents will be cached in memory.  After this time, cache data will be removed and file meta data will
+ *   and contents will have to be read from the file system.
+ *
+ *   Note that if `serverCacheMaxFileSize` is 0 and `serverCacheTimeoutSeconds` is > 0, then only file meta data
+ *   will be cached in memory.
+ *
+ *   Defaults to 1 hour. `0` means files will NOT be cached.
+ *
+ * @param browserCacheTimeoutSeconds Number of seconds before a browser should check back with the server if a file has
+ *   been updated.
+ *   
+ *   This setting is used to drive the `Expires` and `Cache-Control` HTTP headers.
+ *   
+ *   Defaults to 1 hour. `0` means cache headers will not be sent to the browser.
  */
-object StaticContentHandlerConfig {
-
-  /**
-   * List of root paths from while files can be served.
-   *
-   * This is enforced to stop relative path type attacks; e.g. `../etc/passwd`
-   */
-  var rootFilePaths: Seq[String] = Nil
-
-  /**
-   * Temporary directory where compressed files can be stored.
-   *
-   * Defaults to the `java.io.tmpdir` system property.
-   */
-  var tempDir: File = new File(System.getProperty("java.io.tmpdir"))
-
-  /**
-   * Local in memory cache to store files.
-   *
-   * Defaults to storing 1000 files.
-   */
-  var cache = new LocalCache(1000, 16)
-
-  /**
-   * Maximum size of file contents to cache in memory
-   *
-   * The contents of files under this limit is cached in memory for `serverCacheTimeoutSeconds`. Requests for this file
-   * will be served by the contents stored in memory rather than the file system.
-   *
-   * Files larger than this limit are served by reading from the file system for every request.
-   *
-   * Defaults to 100K. `0` indicates that files will not be cached in memory.
-   */
-  var serverCacheMaxFileSize: Int = 1024 * 100
-
-  /**
-   * Number of seconds file meta data (such as file name, size, timestamp and hash) and file contents will be cached
-   * in memory.  After this time, cache data will be removed and file meta data will and contents will have to be
-   * read from the file system.
-   *
-   * Note that if `serverCacheMaxFileSize` is 0 and `serverCacheTimeoutSeconds` is > 0, then only file meta data
-   * will be cached in memory.
-   *
-   * Defaults to 1 hour. `0` means files will NOT be cached.
-   *
-   * This setting can be overriden in specific [[org.mashupbots.socko.handlers.StaticResourceRequest]].
-   */
-  var serverCacheTimeoutSeconds: Int = 3600
-
-  /**
-   * Number of seconds before a browser should check back with the server if a file has been updated.
-   *
-   * This setting is used to drive the `Expires` and `Cache-Control` HTTP headers.
-   *
-   * Defaults to 1 hour. `0` means cache headers will not be sent to the browser.
-   *
-   * This setting can be overriden in specific [[org.mashupbots.socko.handlers.StaticResourceRequest]].
-   */
-  var browserCacheTimeoutSeconds: Int = 3600
+case class StaticContentHandlerConfig(
+  rootFilePaths: Seq[String] = Nil,
+  tempDir: File = new File(System.getProperty("java.io.tmpdir")),
+  cache: LocalCache = new LocalCache(1000, 16),
+  serverCacheMaxFileSize: Int = 1024 * 100,
+  serverCacheTimeoutSeconds: Int = 3600,
+  browserCacheTimeoutSeconds: Int = 3600) {
 }
-  
+

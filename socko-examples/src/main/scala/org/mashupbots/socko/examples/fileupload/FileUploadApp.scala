@@ -43,9 +43,9 @@ object FileUploadApp extends Logger {
 
   val contentDir = createTempDir("content_")
   val tempDir = createTempDir("temp_")
-
-  StaticContentHandlerConfig.rootFilePaths = Seq(contentDir.getAbsolutePath)
-  StaticContentHandlerConfig.tempDir = tempDir
+  val staticContentHandlerConfig = StaticContentHandlerConfig(
+    rootFilePaths = Seq(contentDir.getAbsolutePath),
+    tempDir = tempDir)
   
   //
   // STEP #1 - Define Actors and Start Akka
@@ -79,7 +79,7 @@ object FileUploadApp extends Logger {
 
   val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
 
-  val staticFileHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
+  val staticFileHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(staticContentHandlerConfig))
     .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
 
   val fileUploadHandlerRouter = actorSystem.actorOf(Props[FileUploadHandler]

@@ -17,7 +17,6 @@ package org.mashupbots.socko.examples.benchmark
 
 import java.io.File
 import java.io.FileOutputStream
-
 import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.handlers.StaticContentHandler
 import org.mashupbots.socko.handlers.StaticContentHandlerConfig
@@ -28,12 +27,11 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes._
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
-
 import com.typesafe.config.ConfigFactory
-
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.routing.FromConfig
+import org.mashupbots.socko.handlers.StaticContentHandlerConfig
 
 /**
  * This example is used for benchmarking
@@ -42,9 +40,9 @@ object BenchmarkApp extends Logger {
 
   val contentDir = createTempDir("content_")
   val tempDir = createTempDir("temp_")
-
-  StaticContentHandlerConfig.rootFilePaths = Seq(contentDir.getAbsolutePath)
-  StaticContentHandlerConfig.tempDir = tempDir
+  val staticContentHandlerConfig = StaticContentHandlerConfig(
+    rootFilePaths = Seq(contentDir.getAbsolutePath),
+    tempDir = tempDir)
   //StaticContentHandlerConfig.serverCacheMaxFileSize = 0
 
   //
@@ -96,7 +94,7 @@ object BenchmarkApp extends Logger {
 	}"""
 
   val actorSystem = ActorSystem("BenchmarkActorSystem", ConfigFactory.parseString(actorConfig))
-  val staticContentHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
+  val staticContentHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(staticContentHandlerConfig))
     .withRouter(FromConfig()).withDispatcher("my-dispatcher"), "static-file-router")
   val dynamicContentHandlerRouter = actorSystem.actorOf(Props[DynamicBenchmarkHandler]
     .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "dynamic-file-router")

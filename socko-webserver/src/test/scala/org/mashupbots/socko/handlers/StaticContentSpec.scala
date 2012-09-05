@@ -66,6 +66,7 @@ class StaticContentSpec
   var rootDir: File = null
   var tempDir: File = null
   var router: ActorRef = null
+  val browserCacheTimeoutSeconds = 60
 
   val routes = Routes({
     case event @ GET(PathSegments("files" :: relativePath)) => {
@@ -92,13 +93,14 @@ class StaticContentSpec
     tempDir.delete()
     tempDir.mkdir()
 
-    StaticContentHandlerConfig.rootFilePaths = Seq(rootDir.getAbsolutePath)
-    StaticContentHandlerConfig.tempDir = tempDir
-    StaticContentHandlerConfig.browserCacheTimeoutSeconds = 60
-    StaticContentHandlerConfig.serverCacheTimeoutSeconds = 2
-
+  val handlerConfig = StaticContentHandlerConfig(
+    rootFilePaths = Seq(rootDir.getAbsolutePath),
+    tempDir = tempDir,
+    browserCacheTimeoutSeconds = browserCacheTimeoutSeconds,
+    serverCacheTimeoutSeconds = 2)
+    
     // Start routers
-    router = actorSystem.actorOf(Props[StaticContentHandler]
+    router = actorSystem.actorOf(Props(new StaticContentHandler(handlerConfig))
       .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "my-router")
 
     // Start web server
@@ -172,7 +174,7 @@ class StaticContentSpec
       val x = resp.headers("Date")
       val date = fmt.parse(resp.headers("Date"))
       val expires = fmt.parse(resp.headers("Expires"))
-      (expires.getTime - date.getTime) should equal(StaticContentHandlerConfig.browserCacheTimeoutSeconds * 1000)
+      (expires.getTime - date.getTime) should equal(browserCacheTimeoutSeconds * 1000)
     }
 
     "correctly get and cache a resource" in {
@@ -383,7 +385,7 @@ class StaticContentSpec
       resp.status should equal("404")
       resp.headers("Date").length should be > 0
     }
-    
+
     "correctly GZIP encode resource content" in {
       val url = new URL(path + "resource/META-INF/mime.types")
       val conn = url.openConnection().asInstanceOf[HttpURLConnection];
@@ -429,7 +431,7 @@ class StaticContentSpec
       resp2.status should equal("304")
       resp2.headers("Date").length should be > 0
     }
-    
+
     "correctly GZIP encode small file content" in {
       val sb = new StringBuilder
       for (i <- 1 to 10000) sb.append("b")
