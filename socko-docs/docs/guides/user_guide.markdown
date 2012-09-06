@@ -680,10 +680,11 @@ For example:
 
     val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
 
-    StaticContentHandlerConfig.rootFilePaths = Seq(contentDir.getAbsolutePath)
-    StaticContentHandlerConfig.tempDir = tempDir
+    val handlerConfig = StaticContentHandlerConfig(
+      rootFilePaths = Seq(contentDir.getAbsolutePath),
+      tempDir = tempDir)
 
-    val staticContentHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
+    val staticContentHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(handlerConfig))
       .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
 {% endhighlight %}
 

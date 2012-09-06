@@ -71,7 +71,7 @@ import akka.event.Logging
  *
  * For example:
  * {{{
- *   router = actorSystem.actorOf(Props[StaticContentHandler]
+ *   router = actorSystem.actorOf(Props(new StaticContentHandler(StaticContentHandlerConfig()))
  *            .withRouter(FromConfig()).withDispatcher("myDispatcher"), "myRouter")
  * }}}
  *
