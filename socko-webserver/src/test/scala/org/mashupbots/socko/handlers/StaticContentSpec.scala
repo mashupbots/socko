@@ -75,10 +75,25 @@ class StaticContentSpec
         new File(rootDir, relativePath.mkString("/", "/", "")))
       router ! request
     }
+    case event @ GET(PathSegments("nocache_files" :: relativePath)) => {
+      // Used for testing caching
+      val request = new StaticFileRequest(
+        event.asInstanceOf[HttpRequestEvent],
+        new File(rootDir, relativePath.mkString("/", "/", "")),
+        Some(0), Some(0))
+      router ! request
+    }
     case event @ GET(PathSegments("resource" :: relativePath)) => {
       val request = new StaticResourceRequest(
         event.asInstanceOf[HttpRequestEvent],
         relativePath.mkString("", "/", ""))
+      router ! request
+    }
+    case event @ GET(PathSegments("nocache_resource" :: relativePath)) => {
+      val request = new StaticResourceRequest(
+        event.asInstanceOf[HttpRequestEvent],
+        relativePath.mkString("", "/", ""),
+        Some(0), Some(0))
       router ! request
     }
   })
@@ -93,12 +108,12 @@ class StaticContentSpec
     tempDir.delete()
     tempDir.mkdir()
 
-  val handlerConfig = StaticContentHandlerConfig(
-    rootFilePaths = Seq(rootDir.getAbsolutePath),
-    tempDir = tempDir,
-    browserCacheTimeoutSeconds = browserCacheTimeoutSeconds,
-    serverCacheTimeoutSeconds = 2)
-    
+    val handlerConfig = StaticContentHandlerConfig(
+      rootFilePaths = Seq(rootDir.getAbsolutePath),
+      tempDir = tempDir,
+      browserCacheTimeoutSeconds = browserCacheTimeoutSeconds,
+      serverCacheTimeoutSeconds = 2)
+
     // Start routers
     router = actorSystem.actorOf(Props(new StaticContentHandler(handlerConfig))
       .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "my-router")
@@ -203,6 +218,24 @@ class StaticContentSpec
       resp2.status should equal("304")
       resp2.headers("Date").length should be > 0
     }
+    
+    "correctly NOT cache a resource" in {
+      // Initial get
+      val url = new URL(path + "nocache_resource/META-INF/mime.types")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection];
+      val resp = getResponseContent(conn)
+      //log.debug(resp.toString)
+
+      resp.status should equal("200")
+      resp.content.length should be > 0
+      resp.headers("Date").length should be > 0
+      resp.headers("Content-Type") should equal("application/octet-stream")
+      
+      // No cache headers
+      resp.headers.getOrElse("Cache-Control", "") should equal("")
+      resp.headers.getOrElse("ETag", "") should equal("")
+      resp.headers.getOrElse("Last-Modified", "") should be("")
+    }    
 
     "correctly get and cache a small file" in {
       val sb = new StringBuilder
@@ -267,6 +300,48 @@ class StaticContentSpec
       resp4.headers("ETag") should not equal (etag)
     }
 
+    "correctly NOT cache a small file" in {
+      val sb = new StringBuilder
+      for (i <- 1 to 1000) sb.append("a")
+      val contentA = sb.toString
+      
+      sb.length = 0
+      for (i <- 1 to 1000) sb.append("b")
+      val contentB = sb.toString      
+
+      // Initial get of content A
+      val file = new File(rootDir, "smallNoCacheFile.txt")
+      writeTextFile(file, contentA)
+
+      val url = new URL(path + "nocache_files/smallNoCacheFile.txt")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection];
+      val resp = getResponseContent(conn)
+
+      resp.status should equal("200")
+      resp.content should equal(contentA)
+      resp.headers("Date").length should be > 0
+      resp.headers("Content-Type") should equal("text/plain")
+      
+      // No cache headers
+      resp.headers.getOrElse("Cache-Control", "") should equal("")
+      resp.headers.getOrElse("ETag", "") should equal("")
+      resp.headers.getOrElse("Last-Modified", "") should be("")
+      
+      // Update file and get again - should be new content because there should not be any caching
+      writeTextFile(file, contentB)
+     
+      val connB = url.openConnection().asInstanceOf[HttpURLConnection];
+      val respB = getResponseContent(connB)
+
+      respB.status should equal("200")
+      respB.content should equal(contentB)
+      respB.headers("Date").length should be > 0
+      respB.headers("Content-Type") should equal("text/plain")
+      respB.headers.getOrElse("Cache-Control", "") should equal("")
+      respB.headers.getOrElse("ETag", "") should equal("")
+      respB.headers.getOrElse("Last-Modified", "") should be("")      
+    }
+    
     "correctly get and cache a big file" in {
       val sb = new StringBuilder
       for (i <- 1 to ((1024 * 100) + 1)) sb.append("a")
@@ -329,6 +404,48 @@ class StaticContentSpec
       resp4.headers("Cache-Control") should equal("private, max-age=60")
       resp4.headers("Last-Modified") should not equal (lastModified)
     }
+    
+    "correctly NOT cache a big file" in {
+      val sb = new StringBuilder
+      for (i <- 1 to ((1024 * 100) + 1)) sb.append("a")
+      val contentA = sb.toString
+      
+      sb.length = 0
+      for (i <- 1 to ((1024 * 100) + 1)) sb.append("b")
+      val contentB = sb.toString      
+
+      // Initial get of content A
+      val file = new File(rootDir, "bigNoCacheFile.txt")
+      writeTextFile(file, contentA)
+
+      val url = new URL(path + "nocache_files/bigNoCacheFile.txt")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection];
+      val resp = getResponseContent(conn)
+
+      resp.status should equal("200")
+      resp.content should equal(contentA)
+      resp.headers("Date").length should be > 0
+      resp.headers("Content-Type") should equal("text/plain")
+      
+      // No cache headers
+      resp.headers.getOrElse("Cache-Control", "") should equal("")
+      resp.headers.getOrElse("ETag", "") should equal("")
+      resp.headers.getOrElse("Last-Modified", "") should be("")
+      
+      // Update file and get again - should be new content because there should not be any caching
+      writeTextFile(file, contentB)
+     
+      val connB = url.openConnection().asInstanceOf[HttpURLConnection];
+      val respB = getResponseContent(connB)
+
+      respB.status should equal("200")
+      respB.content should equal(contentB)
+      respB.headers("Date").length should be > 0
+      respB.headers("Content-Type") should equal("text/plain")
+      respB.headers.getOrElse("Cache-Control", "") should equal("")
+      respB.headers.getOrElse("ETag", "") should equal("")
+      respB.headers.getOrElse("Last-Modified", "") should be("")      
+    }    
 
     "return '404 Not Found' if requested file is outside specified root directory" in {
       val url = new URL(path + "files/../file.txt")
