@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Socko v0.2.1 Released
+title: Socko v0.2.2 Released
 summary: Bug Fix release
 author: Vibul
 ---
