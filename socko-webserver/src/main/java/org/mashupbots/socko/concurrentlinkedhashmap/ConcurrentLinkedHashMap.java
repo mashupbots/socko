@@ -213,7 +213,7 @@ public final class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
 
   transient Set<K> keySet;
   transient Collection<V> values;
-  transient Set<Entry<K, V>> entrySet;
+  transient Set<Map.Entry<K, V>> entrySet;
 
   /**
    * Creates an instance based on the builder's configuration.
@@ -1013,7 +1013,7 @@ public final class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
   }
 
   @Override
-  public Set<Entry<K, V>> entrySet() {
+  public Set<Map.Entry<K, V>> entrySet() {
     Set<Entry<K, V>> es = entrySet;
     return (es == null) ? (entrySet = new EntrySet()) : es;
   }

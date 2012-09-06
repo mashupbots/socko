@@ -81,7 +81,7 @@ object IOUtil {
    * @param file File to write to. If the file exists, it will be overwritten
    * @param text Text to write to the file
    * @param charset Character set. Defaults to UTF-8.
-   * @returns file
+   * @return file
    */
   def writeTextFile(file: File, text: String, charset: Charset = CharsetUtil.UTF_8): File = {
     using(new FileOutputStream(file)) { out =>
@@ -114,7 +114,7 @@ object IOUtil {
    * Returns a newly created temporary directory in the system defined temporary directory
    *
    * @param namePrefix Prefix to use on the directory name
-   * @returns Newly created directory
+   * @return Newly created directory
    */
   def createTempDir(namePrefix: String): File = {
     val d = File.createTempFile(namePrefix, "")
