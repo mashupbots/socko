@@ -1,0 +1,26 @@
+---
+layout: post
+title: Socko v0.2.1 Released
+summary: Bug Fix release
+author: Vibul
+---
+
+This [release](https://github.com/mashupbots/socko/issues?milestone=6&state=closed) includes:
+ - Update to Scala 2.9.2 and Netty 3.5.6.
+ - Changes `StaticContentHandlerConfig` to make it immutable
+ - Small bug fixes
+
+Download [socko-webserver_2.9.2-0.2.2.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.9.2/0.2.2/socko-webserver_2.9.2-0.2.2.jar).
+
+For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
+
+Documentation
+ - [User Guide](/docs/0.2.2/guides/user_guide.html)
+ - [API](/docs/0.2.2/api/)
+ - [Change logs](https://github.com/mashupbots/socko/issues?milestone=6&state=closed)
+
+
+ 
+ 
+
+

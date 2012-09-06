@@ -1,0 +1,215 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>org.mashupbots.socko.handlers</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a name="org" class="extype" href="../../../package.html">org</a>.<a name="org.mashupbots" class="extype" href="../../package.html">mashupbots</a>.<a name="org.mashupbots.socko" class="extype" href="../package.html">socko</a></p>
+        <h1>handlers</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">handlers</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="org.mashupbots.socko.handlers.SnoopHandler" data-isabs="false">
+      <a id="SnoopHandler:SnoopHandler"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SnoopHandler.html"><span class="name">SnoopHandler</span></a><span class="result"> extends Actor</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Sends a response containing information about the received event.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.handlers.StaticContentHandler" data-isabs="false">
+      <a id="StaticContentHandler:StaticContentHandler"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="StaticContentHandler.html"><span class="name">StaticContentHandler</span></a><span class="result"> extends Actor</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Handles downloading of static files and resources.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.handlers.StaticContentHandlerConfig" data-isabs="false">
+      <a id="StaticContentHandlerConfig:StaticContentHandlerConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="StaticContentHandlerConfig.html"><span class="name">StaticContentHandlerConfig</span></a><span class="params">(<span name="rootFilePaths">rootFilePaths: Seq[String]</span>, <span name="tempDir">tempDir: File</span>, <span name="cache">cache: LocalCache</span>, <span name="serverCacheMaxFileSize">serverCacheMaxFileSize: Int</span>, <span name="serverCacheTimeoutSeconds">serverCacheTimeoutSeconds: Int</span>, <span name="browserCacheTimeoutSeconds">browserCacheTimeoutSeconds: Int</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Configuration for <a name="org.mashupbots.socko.handlers.StaticContentHandler" class="extype" href="StaticContentHandler.html">StaticContentHandler</a>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.handlers.StaticFileRequest" data-isabs="false">
+      <a id="StaticFileRequest:StaticFileRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="StaticFileRequest.html"><span class="name">StaticFileRequest</span></a><span class="params">(<span name="event">event: HttpRequestEvent</span>, <span name="file">file: File</span>, <span name="serverCacheTimeoutSeconds">serverCacheTimeoutSeconds: Option[Int]</span>, <span name="browserCacheTimeoutSeconds">browserCacheTimeoutSeconds: Option[Int]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Message to be sent to <a name="org.mashupbots.socko.handlers.StaticContentHandler" class="extype" href="StaticContentHandler.html">StaticContentHandler</a> for it to download the specified file
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.handlers.StaticResourceRequest" data-isabs="false">
+      <a id="StaticResourceRequest:StaticResourceRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="StaticResourceRequest.html"><span class="name">StaticResourceRequest</span></a><span class="params">(<span name="event">event: HttpRequestEvent</span>, <span name="classpath">classpath: String</span>, <span name="serverCacheTimeoutSeconds">serverCacheTimeoutSeconds: Option[Int]</span>, <span name="browserCacheTimeoutSeconds">browserCacheTimeoutSeconds: Option[Int]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Message to be sent to <a name="org.mashupbots.socko.handlers.StaticContentHandler" class="extype" href="StaticContentHandler.html">StaticContentHandler</a> for it to download the specified file
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.handlers.WebSocketBroadcastBinary" data-isabs="false">
+      <a id="WebSocketBroadcastBinary:WebSocketBroadcastBinary"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketBroadcastBinary.html"><span class="name">WebSocketBroadcastBinary</span></a><span class="params">(<span name="bytes">bytes: Array[Byte]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Message sent to org.mashupbots.socko.processors.WebSocketBroadcaster to broadcast a web socket binary frame
+to all registered web socket connection.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.handlers.WebSocketBroadcastText" data-isabs="false">
+      <a id="WebSocketBroadcastText:WebSocketBroadcastText"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketBroadcastText.html"><span class="name">WebSocketBroadcastText</span></a><span class="params">(<span name="text">text: String</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Message sent to org.mashupbots.socko.processors.WebSocketBroadcaster to broadcast a web socket text frame
+to all registered web socket connection.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.handlers.WebSocketBroadcaster" data-isabs="false">
+      <a id="WebSocketBroadcaster:WebSocketBroadcaster"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketBroadcaster.html"><span class="name">WebSocketBroadcaster</span></a><span class="result"> extends Actor</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Broadcasts a message to registered web socket connections.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.handlers.WebSocketBroadcasterRegistration" data-isabs="false">
+      <a id="WebSocketBroadcasterRegistration:WebSocketBroadcasterRegistration"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketBroadcasterRegistration.html"><span class="name">WebSocketBroadcasterRegistration</span></a><span class="params">(<span name="context">context: WebSocketHandshakeEvent</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Message sent to org.mashupbots.socko.processors.WebSocketBroadcaster during the web socket handshake
+in order to register the web socket connection to receive broadcast messages
+</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="org.mashupbots.socko.handlers.ChunkDataStore" data-isabs="false">
+      <a id="ChunkDataStore:ChunkDataStore"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ChunkDataStore$.html"><span class="name">ChunkDataStore</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Store of channel specific data
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.handlers.HttpDataFactory" data-isabs="false">
+      <a id="HttpDataFactory:HttpDataFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpDataFactory$.html"><span class="name">HttpDataFactory</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

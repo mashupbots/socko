@@ -5,9 +5,9 @@ layout: article
 
 ## Latest Release
 
-The latest verison of Socko is **`0.2.1`** released on 7th August 2012.
+The latest verison of Socko is **`0.2.2`** released on 6th September 2012.
 
-Download [socko-webserver_2.9.1-0.2.1.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.9.1/0.2.1/socko-webserver_2.9.1-0.2.1.jar).
+Download [socko-webserver_2.9.2-0.2.2.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.9.2/0.2.2/socko-webserver_2.9.2-0.2.2.jar).
 
 [Change logs](https://github.com/mashupbots/socko/issues/milestones?state=closed) and 
 [road maps](https://github.com/mashupbots/socko/issues/milestones?state=open) are available on our issue tracker.
@@ -16,14 +16,14 @@ If you have a question or need help, just create a ticket in our [issue register
 
 ## Simple Build Tool 
 
-If you are using Scala 2.9.1, add the following to your `build.sbt`.  Replace `X.Y.Z` with the
+If you are using Scala 2.9.2, add the following to your `build.sbt`.  Replace `X.Y.Z` with the
 version number.
 
     libraryDependencies += "org.mashupbots.socko" %% "socko-webserver" % "X.Y.Z"
 
 If you are not using the above scala version(s), use the following instead
    
-    libraryDependencies += "org.mashupbots.socko" % "socko-webserver_2.9.1" % "X.Y.Z"
+    libraryDependencies += "org.mashupbots.socko" % "socko-webserver_2.9.2" % "X.Y.Z"
 
 
 ## Build from Source
@@ -40,7 +40,7 @@ Download the source code from GitHub
 Please install the following:
  - [Java JDK 6](http://www.oracle.com/technetwork/java/javase/downloads/index.html) or higher. 
    We've noticed that Socko runs faster on JDK 7. You will also need JDK 7 if you wish to use SPDY.
- - [Scala 2.9.1](http://www.scala-lang.org/) or higher
+ - [Scala 2.9.2](http://www.scala-lang.org/) or higher
  - [Simple Build Tool](https://github.com/harrah/xsbt/wiki/Getting-Started-Setup)
 
 
@@ -53,7 +53,7 @@ Run Simpble Build Tool to compile and test
     $ test
     $ package
 
-The resultant .jar file can be found in `socko-webserver/target/scala-2.9.1/socko-webserver_2.9.1-X.X.X.jar`.
+The resultant .jar file can be found in `socko-webserver/target/scala-2.9.2/socko-webserver_2.9.2-X.X.X.jar`.
 
 ### 4. Run Examples
 
