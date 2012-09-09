@@ -17,7 +17,6 @@ package org.mashupbots.socko.webserver
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
-
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.channel.ChannelFutureListener
@@ -50,6 +49,8 @@ import org.mashupbots.socko.events.WebSocketEventConfig
 import org.mashupbots.socko.events.WebSocketFrameEvent
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import org.mashupbots.socko.infrastructure.Logger
+import org.jboss.netty.channel.ChannelFutureListener
+import org.jboss.netty.channel.ChannelFuture
 
 /**
  * Handles incoming HTTP messages from Netty
@@ -142,7 +143,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
 
   /**
    * Check if it is valid to process chunks and store state information.
-   * 
+   *
    * An exception is thrown if invalid.
    *
    * @param event HTTP request event that is chunked
@@ -273,8 +274,19 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
       wsFactory.sendUnsupportedWebSocketVersionResponse(event.channel)
       event.writeWebLog(HttpResponseStatus.UPGRADE_REQUIRED.getCode, 0)
     } else {
-      wsHandshaker.handshake(event.channel, event.nettyHttpRequest)
+      val future = wsHandshaker.handshake(event.channel, event.nettyHttpRequest)
       event.writeWebLog(HttpResponseStatus.SWITCHING_PROTOCOLS.getCode, 0)
+
+      // Callback on complete AFTER data sent to the client
+      if (event.onComplete.isDefined) {
+        class OnCompleteListender extends ChannelFutureListener {
+          def operationComplete(future: ChannelFuture) {
+            event.onComplete.get(event)
+          }
+        }
+        future.addListener(new OnCompleteListender())
+      }
+
     }
   }
 

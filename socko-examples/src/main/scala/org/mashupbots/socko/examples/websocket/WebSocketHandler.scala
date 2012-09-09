@@ -100,14 +100,14 @@ class WebSocketHandler extends Actor {
   /**
    * Echo the details of the web socket frame that we just received; but in upper case.
    */
-  private def writeWebSocketResponse(ctx: WebSocketFrameEvent) {
-    log.info("TextWebSocketFrame: " + ctx.readText)
+  private def writeWebSocketResponse(frame: WebSocketFrameEvent) {
+    log.info("TextWebSocketFrame: " + frame.readText)
 
     val dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     val time = new GregorianCalendar()
     val ts = dateFormatter.format(time.getTime())
 
-    ctx.writeText(ts + " " + ctx.readText.toUpperCase())
+    frame.writeText(ts + " " + frame.readText.toUpperCase())
   }
 
 }

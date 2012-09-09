@@ -16,6 +16,8 @@
 package org.mashupbots.socko.examples.websocket
 
 import org.mashupbots.socko.events.HttpResponseStatus
+import org.mashupbots.socko.events.WebSocketHandshakeEvent
+import org.mashupbots.socko.handlers.WebSocketBroadcastText
 import org.mashupbots.socko.handlers.WebSocketBroadcaster
 import org.mashupbots.socko.handlers.WebSocketBroadcasterRegistration
 import org.mashupbots.socko.infrastructure.Logger
@@ -25,6 +27,7 @@ import org.mashupbots.socko.webserver.WebServerConfig
 
 import akka.actor.ActorSystem
 import akka.actor.Props
+import akka.actor.actorRef2Scala
 
 /**
  * This example shows how to use web sockets, specifically [[org.mashupbots.socko.processors.WebSocketBroadcaster]],
@@ -68,10 +71,13 @@ object ChatApp extends Logger {
       case Path("/websocket/") => {
         // To start Web Socket processing, we first have to authorize the handshake.
         // This is a security measure to make sure that web sockets can only be established at your specified end points.
-        wsHandshake.authorize()
+        wsHandshake.authorize(onComplete = Some((event: WebSocketHandshakeEvent) => {
+          // Register this connection with the broadcaster
+          // We do this AFTER handshake has been completed so that the server does not send data to client until
+          // after the client gets a handshake response
+          webSocketBroadcaster ! new WebSocketBroadcasterRegistration(event)
+        }))
 
-        // Register this connection with the broadcaster
-        webSocketBroadcaster ! new WebSocketBroadcasterRegistration(wsHandshake)
       }
     }
 

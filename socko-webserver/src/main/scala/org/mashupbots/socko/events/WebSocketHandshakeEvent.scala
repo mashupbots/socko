@@ -66,7 +66,7 @@ case class WebSocketHandshakeEvent(
    * Always s set to `null` because no response is available for handshakes. Let the handshaker do the work for you.
    */
   val response = null
-  
+
   /**
    * HTTP end point
    */
@@ -77,18 +77,24 @@ case class WebSocketHandshakeEvent(
   private var _authorizedSubprotocols: String = ""
 
   private var _maxFrameSize: Int = 0
-  
+
+  private var _onComplete: Option[(WebSocketHandshakeEvent) => Unit] = None
+
   /**
    * Authorize this web socket handshake to proceed
    *
    * @param subprotocol Comma separated list of supported protocols. e.g. `chat, stomp`. Specified empty string to
-   *   not support sub protocols (this is the default). 
+   *   not support sub protocols (this is the default).
    * @param maxFrameSize Maximum size of web socket frames. Defaults to 100K.
+   * @param onComplete Optional callback executed when the handshake is successfully completed. You can use this 
+   *   callback to register the web socket client as being ready to receive data. 
    */
-  def authorize(subprotocols: String = "", maxFrameSize: Int = 102400) {
+  def authorize(subprotocols: String = "", maxFrameSize: Int = 102400,
+    onComplete: Option[(WebSocketHandshakeEvent) => Unit] = None) {
     _isAuthorized = true
     _authorizedSubprotocols = if (subprotocols == null) "" else subprotocols
     _maxFrameSize = maxFrameSize
+    _onComplete = onComplete
   }
 
   /**
@@ -110,6 +116,13 @@ case class WebSocketHandshakeEvent(
    */
   def maxFrameSize: Int = {
     _maxFrameSize
+  }
+  
+  /**
+   * Callback for when the handshake as completed
+   */
+  def onComplete: Option[(WebSocketHandshakeEvent) => Unit] = {
+    _onComplete
   }
 
   /**

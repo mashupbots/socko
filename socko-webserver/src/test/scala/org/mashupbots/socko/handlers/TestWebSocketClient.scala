@@ -44,7 +44,7 @@ import org.mashupbots.socko.infrastructure.Logger
 /**
  * Encapsulates a web socket client for use in testing
  */
-class TestWebSocketClient(url: String) extends Logger {
+class TestWebSocketClient(url: String, subprotocols: String = null) extends Logger {
 
   val bootstrap = new ClientBootstrap(
     new NioClientSocketChannelFactory(
@@ -54,7 +54,7 @@ class TestWebSocketClient(url: String) extends Logger {
   val uri = new URI(url)
 
   val handshaker = new WebSocketClientHandshakerFactory().newHandshaker(
-    new URI(url), WebSocketVersion.V13, null, false, null)
+    new URI(url), WebSocketVersion.V13, subprotocols, false, null)
 
   var ch: Channel = null
   val channelData = new ChannelData()
@@ -157,6 +157,11 @@ class TestWebSocketClient(url: String) extends Logger {
     override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
       log.debug("WebSocket Client disconnected!");
       channelData.isConnected = Some(false)
+      
+      // Notify monitor that we have disconnected
+      connectionMonitor.synchronized {
+        connectionMonitor.notifyAll()
+      }      
     }
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
