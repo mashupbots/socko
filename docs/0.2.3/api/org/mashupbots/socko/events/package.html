@@ -1,0 +1,299 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>org.mashupbots.socko.events</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a name="org" class="extype" href="../../../package.html">org</a>.<a name="org.mashupbots" class="extype" href="../../package.html">mashupbots</a>.<a name="org.mashupbots.socko" class="extype" href="../package.html">socko</a></p>
+        <h1>events</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">events</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="org.mashupbots.socko.events.CurrentHttpRequestMessage" data-isabs="false">
+      <a id="CurrentHttpRequestMessage:CurrentHttpRequestMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="CurrentHttpRequestMessage.html"><span class="name">CurrentHttpRequestMessage</span></a><span class="params">(<span name="nettyHttpRequest">nettyHttpRequest: HttpRequest</span>)</span><span class="result"> extends HttpRequestMessage with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">HTTP request message for the current event (as opposed to an initial HTTP required to triggered a HTTP Chunk or
+web socket event).</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.EndPoint" data-isabs="false">
+      <a id="EndPoint:EndPoint"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="EndPoint.html"><span class="name">EndPoint</span></a><span class="params">(<span name="method">method: String</span>, <span name="host">host: String</span>, <span name="uri">uri: String</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Identifies the end point associated with the firing of an event.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.HttpChunkEvent" data-isabs="false">
+      <a id="HttpChunkEvent:HttpChunkEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpChunkEvent.html"><span class="name">HttpChunkEvent</span></a><span class="params">(<span name="channel">channel: Channel</span>, <span name="initialHttpRequest">initialHttpRequest: InitialHttpRequestMessage</span>, <span name="nettyHttpChunk">nettyHttpChunk: HttpChunk</span>, <span name="config">config: HttpEventConfig</span>)</span><span class="result"> extends HttpEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Event fired when a HTTP chunks is received</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.HttpChunkMessage" data-isabs="false">
+      <a id="HttpChunkMessage:HttpChunkMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpChunkMessage.html"><span class="name">HttpChunkMessage</span></a><span class="params">(<span name="nettyHttpChunk">nettyHttpChunk: HttpChunk</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">HTTP chunk sent from client to sever
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.HttpContent" data-isabs="false">
+      <a id="HttpContent:HttpContent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpContent.html"><span class="name">HttpContent</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents the contents or body of the HTTP request
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.HttpEvent" data-isabs="true">
+      <a id="HttpEvent:HttpEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpEvent.html"><span class="name">HttpEvent</span></a><span class="result"> extends SockoEvent</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Abstract event triggered on HTTP related activity
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.HttpEventConfig" data-isabs="false">
+      <a id="HttpEventConfig:HttpEventConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpEventConfig.html"><span class="name">HttpEventConfig</span></a><span class="params">(<span name="serverName">serverName: String</span>, <span name="minCompressibleContentSizeInBytes">minCompressibleContentSizeInBytes: Int</span>, <span name="maxCompressibleContentSizeInBytes">maxCompressibleContentSizeInBytes: Int</span>, <span name="compressibleContentTypes">compressibleContentTypes: List[String]</span>, <span name="webLogWriter">webLogWriter: Option[ActorRef]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">HTTP event configuration used in the processing of <a name="org.mashupbots.socko.events.HttpEvent" class="extype" href="HttpEvent.html">HttpEvent</a>s.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.HttpRequestEvent" data-isabs="false">
+      <a id="HttpRequestEvent:HttpRequestEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpRequestEvent.html"><span class="name">HttpRequestEvent</span></a><span class="params">(<span name="channel">channel: Channel</span>, <span name="nettyHttpRequest">nettyHttpRequest: HttpRequest</span>, <span name="config">config: HttpEventConfig</span>)</span><span class="result"> extends HttpEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Event fired when a HTTP request has been received
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.HttpRequestMessage" data-isabs="true">
+      <a id="HttpRequestMessage:HttpRequestMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpRequestMessage.html"><span class="name">HttpRequestMessage</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Encapsulates the all the data sent in a HTTP request; i.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.HttpResponseMessage" data-isabs="false">
+      <a id="HttpResponseMessage:HttpResponseMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpResponseMessage.html"><span class="name">HttpResponseMessage</span></a><span class="params">(<span name="event">event: HttpEvent</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Encapsulates the all the data sent to be sent to the client in an HTTP response; i.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.HttpResponseStatus" data-isabs="false">
+      <a id="HttpResponseStatus:HttpResponseStatus"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpResponseStatus.html"><span class="name">HttpResponseStatus</span></a><span class="params">(<span name="code">code: Int</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Port of Netty's HttpResponseStatus class for convenience.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.InitialHttpRequestMessage" data-isabs="false">
+      <a id="InitialHttpRequestMessage:InitialHttpRequestMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="InitialHttpRequestMessage.html"><span class="name">InitialHttpRequestMessage</span></a><span class="params">(<span name="headers">headers: Map[String, String]</span>, <span name="endPoint">endPoint: EndPoint</span>, <span name="isKeepAlive">isKeepAlive: Boolean</span>, <span name="acceptedEncodings">acceptedEncodings: Array[String]</span>, <span name="httpVersion">httpVersion: String</span>, <span name="is100ContinueExpected">is100ContinueExpected: Boolean</span>, <span name="ifModifiedSince">ifModifiedSince: Option[Date]</span>, <span name="isChunked">isChunked: Boolean</span>, <span name="isWebSocketUpgrade">isWebSocketUpgrade: Boolean</span>, <span name="contentType">contentType: String</span>, <span name="contentLength">contentLength: Long</span>, <span name="createdOn">createdOn: Date</span>)</span><span class="result"> extends HttpRequestMessage with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Details of the HTTP request that initiated the web socket connection or chunk transfer.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.SockoEvent" data-isabs="true">
+      <a id="SockoEvent:SockoEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SockoEvent.html"><span class="name">SockoEvent</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Socko Events are fired by Socko and passed to your routes for dispatching to your handlers.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.WebSocketEventConfig" data-isabs="false">
+      <a id="WebSocketEventConfig:WebSocketEventConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketEventConfig.html"><span class="name">WebSocketEventConfig</span></a><span class="params">(<span name="serverName">serverName: String</span>, <span name="webLogWriter">webLogWriter: Option[ActorRef]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Web Socket configuration used by <a name="org.mashupbots.socko.events.WebSocketFrameEvent" class="extype" href="WebSocketFrameEvent.html">WebSocketFrameEvent</a>
+</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.WebSocketFrameEvent" data-isabs="false">
+      <a id="WebSocketFrameEvent:WebSocketFrameEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketFrameEvent.html"><span class="name">WebSocketFrameEvent</span></a><span class="params">(<span name="channel">channel: Channel</span>, <span name="initialHttpRequest">initialHttpRequest: InitialHttpRequestMessage</span>, <span name="wsFrame">wsFrame: WebSocketFrame</span>, <span name="config">config: WebSocketEventConfig</span>)</span><span class="result"> extends SockoEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Event fired when a web socket text or binary frame is received.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.events.WebSocketHandshakeEvent" data-isabs="false">
+      <a id="WebSocketHandshakeEvent:WebSocketHandshakeEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketHandshakeEvent.html"><span class="name">WebSocketHandshakeEvent</span></a><span class="params">(<span name="channel">channel: Channel</span>, <span name="nettyHttpRequest">nettyHttpRequest: HttpRequest</span>, <span name="config">config: HttpEventConfig</span>)</span><span class="result"> extends HttpEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Event fired when performing a web socket handshake to upgrade a HTTP connection to a web socket connection.</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="org.mashupbots.socko.events.HttpResponseMessage" data-isabs="false">
+      <a id="HttpResponseMessage:HttpResponseMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpResponseMessage$.html"><span class="name">HttpResponseMessage</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.mashupbots.socko.events.HttpResponseStatus" data-isabs="false">
+      <a id="HttpResponseStatus:HttpResponseStatus"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpResponseStatus$.html"><span class="name">HttpResponseStatus</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Standard HTTP response status codes
+</p>
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

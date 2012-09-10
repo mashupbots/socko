@@ -1,0 +1,382 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>org.mashupbots.socko.routes</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a name="org" class="extype" href="../../../package.html">org</a>.<a name="org.mashupbots" class="extype" href="../../package.html">mashupbots</a>.<a name="org.mashupbots.socko" class="extype" href="../package.html">socko</a></p>
+        <h1>routes</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">routes</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Routes define the rules for dispatching requests to its intended Akka actor handlers.
+</p></div></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="org.mashupbots.socko.routes.HostRegex" data-isabs="false">
+      <a id="HostRegex:HostRegex"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="HostRegex.html"><span class="name">HostRegex</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches the host of <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s in
+<a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s using regular expression.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.Method" data-isabs="false">
+      <a id="Method:Method"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Method.html"><span class="name">Method</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches the &quot;method&quot; of HTTP <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a></p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.PathRegex" data-isabs="false">
+      <a id="PathRegex:PathRegex"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="PathRegex.html"><span class="name">PathRegex</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches the path of <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s in
+<a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s using regular expressions.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.QueryStringField" data-isabs="false">
+      <a id="QueryStringField:QueryStringField"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="QueryStringField.html"><span class="name">QueryStringField</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches the query string of <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s in
+<a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s using field names.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.QueryStringRegex" data-isabs="false">
+      <a id="QueryStringRegex:QueryStringRegex"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="QueryStringRegex.html"><span class="name">QueryStringRegex</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches the query string of <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s in
+<a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s using regular expressions</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="org.mashupbots.socko.routes.&amp;" data-isabs="false">
+      <a id="&amp;:&amp;"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="$amp$.html"><span class="name" title="gt4s: $amp">&amp;</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Concatenates 2 extractors in a case statement</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.CONNECT" data-isabs="false">
+      <a id="CONNECT:CONNECT"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CONNECT$.html"><span class="name">CONNECT</span></a><span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s of <a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s
+where the method is set to <code>CONNECT</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.DELETE" data-isabs="false">
+      <a id="DELETE:DELETE"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DELETE$.html"><span class="name">DELETE</span></a><span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s of <a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s
+where the method is set to <code>DELETE</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.GET" data-isabs="false">
+      <a id="GET:GET"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="GET$.html"><span class="name">GET</span></a><span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s of <a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s
+where the method is set to <code>GET</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.HEAD" data-isabs="false">
+      <a id="HEAD:HEAD"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HEAD$.html"><span class="name">HEAD</span></a><span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s of <a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s
+where the method is set to <code>HEAD</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.Host" data-isabs="false">
+      <a id="Host:Host"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Host$.html"><span class="name">Host</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches the host of <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s in
+<a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.HostSegments" data-isabs="false">
+      <a id="HostSegments:HostSegments"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HostSegments$.html"><span class="name">HostSegments</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches the host of <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s in
+<a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s using segment patterns.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.HttpChunk" data-isabs="false">
+      <a id="HttpChunk:HttpChunk"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpChunk$.html"><span class="name">HttpChunk</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches a Socko <a name="org.mashupbots.socko.events.HttpChunkEvent" class="extype" href="../events/HttpChunkEvent.html">HttpChunkEvent</a> event.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.HttpRequest" data-isabs="false">
+      <a id="HttpRequest:HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpRequest$.html"><span class="name">HttpRequest</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches a Socko <a name="org.mashupbots.socko.events.HttpRequestEvent" class="extype" href="../events/HttpRequestEvent.html">HttpRequestEvent</a>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.OPTIONS" data-isabs="false">
+      <a id="OPTIONS:OPTIONS"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="OPTIONS$.html"><span class="name">OPTIONS</span></a><span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s of <a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s
+where the method is set to <code>OPTIONS</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.POST" data-isabs="false">
+      <a id="POST:POST"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="POST$.html"><span class="name">POST</span></a><span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s of <a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s
+where the method is set to <code>POST</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.PUT" data-isabs="false">
+      <a id="PUT:PUT"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PUT$.html"><span class="name">PUT</span></a><span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s of <a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s
+where the method is set to <code>PUT</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.Path" data-isabs="false">
+      <a id="Path:Path"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Path$.html"><span class="name">Path</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches the case-sensitive path of <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s in
+<a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.PathSegments" data-isabs="false">
+      <a id="PathSegments:PathSegments"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PathSegments$.html"><span class="name">PathSegments</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches the path of <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s in
+<a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s using segment patterns.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.QueryString" data-isabs="false">
+      <a id="QueryString:QueryString"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="QueryString$.html"><span class="name">QueryString</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches the query string of <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s in
+<a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.Routes" data-isabs="false">
+      <a id="Routes:Routes"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Routes$.html"><span class="name">Routes</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Routes define the rules for dispatching events to its intended Akka handlers.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.TRACE" data-isabs="false">
+      <a id="TRACE:TRACE"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TRACE$.html"><span class="name">TRACE</span></a><span class="result"> extends Method</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches <a name="org.mashupbots.socko.events.EndPoint" class="extype" href="../events/EndPoint.html">EndPoint</a>s of <a name="org.mashupbots.socko.events.SockoEvent" class="extype" href="../events/SockoEvent.html">SockoEvent</a>s
+where the method is set to <code>TRACE</code>.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.WebSocketFrame" data-isabs="false">
+      <a id="WebSocketFrame:WebSocketFrame"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketFrame$.html"><span class="name">WebSocketFrame</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches a Socko <a name="org.mashupbots.socko.events.WebSocketFrameEvent" class="extype" href="../events/WebSocketFrameEvent.html">WebSocketFrameEvent</a> event.</p>
+    </li><li visbl="pub" name="org.mashupbots.socko.routes.WebSocketHandshake" data-isabs="false">
+      <a id="WebSocketHandshake:WebSocketHandshake"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketHandshake$.html"><span class="name">WebSocketHandshake</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Matches a Socko <a name="org.mashupbots.socko.events.WebSocketHandshakeEvent" class="extype" href="../events/WebSocketHandshakeEvent.html">WebSocketHandshakeEvent</a> event.</p>
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

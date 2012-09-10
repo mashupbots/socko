@@ -1,0 +1,22 @@
+---
+layout: post
+title: Socko v0.2.3 Released
+summary: Support for a callback after websocket handshake
+author: Vibul
+---
+
+This [release](https://github.com/mashupbots/socko/issues?milestone=7&state=closed) includes:
+ - Update to Netty 3.5.7 to fix an important bug.
+ - Support for a callback after websocket handshake
+
+Download [socko-webserver_2.9.2-0.2.3.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.9.2/0.2.3/socko-webserver_2.9.2-0.2.3.jar).
+
+For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
+
+Documentation
+ - [User Guide](/docs/0.2.3/guides/user_guide.html)
+ - [API](/docs/0.2.3/api/)
+ - [Change logs](https://github.com/mashupbots/socko/issues?milestone=7&state=closed)
+
+
+
