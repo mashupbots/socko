@@ -17,8 +17,10 @@ package org.mashupbots.socko.webserver
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
+
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.Channel
+import org.jboss.netty.channel.ChannelFuture
 import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.channel.ChannelHandlerContext
 import org.jboss.netty.channel.ChannelStateEvent
@@ -26,19 +28,20 @@ import org.jboss.netty.channel.ExceptionEvent
 import org.jboss.netty.channel.MessageEvent
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler
 import org.jboss.netty.handler.codec.frame.TooLongFrameException
-import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.PingWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.PongWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshaker
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
-import org.jboss.netty.handler.codec.http.HttpChunkAggregator
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse
 import org.jboss.netty.handler.codec.http.HttpChunk
+import org.jboss.netty.handler.codec.http.HttpChunkAggregator
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.handler.codec.http.HttpRequest
 import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.jboss.netty.handler.codec.http.HttpVersion
+import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
+import org.jboss.netty.handler.codec.http.websocketx.PingWebSocketFrame
+import org.jboss.netty.handler.codec.http.websocketx.PongWebSocketFrame
+import org.jboss.netty.handler.codec.http.websocketx.WebSocketFrame
+import org.jboss.netty.handler.codec.http.websocketx.WebSocketHandshakeException
+import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshaker
+import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.util.CharsetUtil
 import org.mashupbots.socko.events.HttpChunkEvent
@@ -49,8 +52,6 @@ import org.mashupbots.socko.events.WebSocketEventConfig
 import org.mashupbots.socko.events.WebSocketFrameEvent
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import org.mashupbots.socko.infrastructure.Logger
-import org.jboss.netty.channel.ChannelFutureListener
-import org.jboss.netty.channel.ChannelFuture
 
 /**
  * Handles incoming HTTP messages from Netty
@@ -189,6 +190,8 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
       case ex: TooLongFrameException => writeErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, ex)
       // Websockets not supported at this route
       case ex: UnsupportedOperationException => writeErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, ex)
+      // Websockets handshake error
+      case ex: WebSocketHandshakeException => writeErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, ex)
       // Catch all
       case ex => {
         try {
