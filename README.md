@@ -85,6 +85,4 @@ If you have a question or need help, please open a ticket in our [Issues Registe
 * [Road Map](https://github.com/mashupbots/socko/issues/milestones)
 * [Examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
 
-
-
   
