@@ -94,7 +94,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     e.getMessage match {
       case httpRequest: HttpRequest =>
-        var event = HttpRequestEvent(e.getChannel, httpRequest, httpConfig)
+        val event = HttpRequestEvent(e.getChannel, httpRequest, httpConfig)
 
         log.debug("HTTP {} CHANNEL={}", event.endPoint, e.getChannel.getId)
 
@@ -103,7 +103,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
           server.routes(event)
           initialHttpRequest = Some(new InitialHttpRequestMessage(event.request, event.createdOn))
         } else if (event.request.isWebSocketUpgrade) {
-          var wsctx = WebSocketHandshakeEvent(e.getChannel, httpRequest, httpConfig)
+          val wsctx = WebSocketHandshakeEvent(e.getChannel, httpRequest, httpConfig)
           server.routes(wsctx)
           doWebSocketHandshake(wsctx)
           initialHttpRequest = Some(new InitialHttpRequestMessage(event.request, event.createdOn))
@@ -112,7 +112,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
         }
 
       case httpChunk: HttpChunk =>
-        var event = HttpChunkEvent(e.getChannel, initialHttpRequest.get, httpChunk, httpConfig)
+        val event = HttpChunkEvent(e.getChannel, initialHttpRequest.get, httpChunk, httpConfig)
         initialHttpRequest.get.totalChunkContentLength += httpChunk.getContent.readableBytes
 
         log.debug("CHUNK {} CHANNEL={}", event.endPoint, e.getChannel.getId)
@@ -124,7 +124,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
         }
 
       case wsFrame: WebSocketFrame =>
-        var event = WebSocketFrameEvent(e.getChannel, initialHttpRequest.get, wsFrame, wsConfig)
+        val event = WebSocketFrameEvent(e.getChannel, initialHttpRequest.get, wsFrame, wsConfig)
 
         log.debug("WS {} CHANNEL={}", event.endPoint, e.getChannel.getId)
 

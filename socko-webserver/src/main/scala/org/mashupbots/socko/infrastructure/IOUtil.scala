@@ -21,6 +21,8 @@ import java.io.FileInputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.charset.Charset
+import java.io.ByteArrayOutputStream
+import java.io.OutputStream
 
 /**
  * Utility IO methods
@@ -35,14 +37,36 @@ object IOUtil {
   def readInputStream(is: InputStream): Array[Byte] = {
     if (is == null) return null
 
-    var ret = Array[Byte]()
-    var buffer = new Array[Byte](4096)
-    while (is.available > 0) { // "available" is not always the exact size
-      val bytesRead = is.read(buffer)
-      ret = ret ++ buffer.take(bytesRead)
+    val baos = new ByteArrayOutputStream()
+    try {
+      val buffer = new Array[Byte](4096)
+      while (is.available > 0) { // "available" is not always the exact size
+        val bytesRead = is.read(buffer)
+        baos.write(buffer, 0, bytesRead)
+      }
+      is.close()
+      baos.toByteArray()
+    } finally {
+      baos.close()
     }
-    is.close()
-    ret
+  }
+
+  /**
+   * Pipe input to output stream using 8K blocks
+   *
+   * @param bytesIn Input stream
+   * @param bytesOut Output stream
+   */
+  def pipe(bytesIn: InputStream, bytesOut: OutputStream): Unit = {
+    val buf = new Array[Byte](8192)
+    def doPipe(): Unit = {
+      val len = bytesIn.read(buf)
+      if (len > 0) {
+        bytesOut.write(buf, 0, len)
+        doPipe()
+      }
+    }
+    doPipe()
   }
 
   /**
@@ -93,6 +117,8 @@ object IOUtil {
   /**
    * Auto close streams with [[http://stackoverflow.com/questions/2207425/what-automatic-resource-management-alternatives-exists-for-scala automatic resource management]]
    *
+   * Also see Programming in Scala Second Edition Chapter 20.8.
+   * 
    * Example usage
    * {{{
    * using(new BufferedReader(new FileReader("file"))) { r =>
@@ -102,7 +128,7 @@ object IOUtil {
    * }
    * }}}
    */
-  def using[T <: { def close() }](resource: T)(block: T => Unit) {
+  def using[T <: { def close() }, A](resource: T)(block: T => A) = {
     try {
       block(resource)
     } finally {

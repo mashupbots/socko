@@ -35,7 +35,7 @@ class SslManager(server: WebServer) {
    * Create context for SSLEngine
    */
   val context: SSLContext = {
-    var sslConfig = server.config.ssl.get
+    val sslConfig = server.config.ssl.get
 
     // Set up key manager factory to use our key store (server certificates)
     val ks = KeyStore.getInstance("JKS")

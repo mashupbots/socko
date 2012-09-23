@@ -20,7 +20,6 @@ import java.nio.charset.Charset
 import java.util.GregorianCalendar
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.GZIPOutputStream
-
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.handler.codec.http.DefaultHttpChunk
@@ -32,6 +31,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion
 import org.jboss.netty.handler.codec.spdy.SpdyHttpHeaders
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.DateUtil
+import org.mashupbots.socko.infrastructure.IOUtil
 
 /**
  * Encapsulates the all the data sent to be sent to the client in an HTTP response; i.e. headers and content.
@@ -308,26 +308,24 @@ case class HttpResponseMessage(event: HttpEvent) {
       content.size <= event.config.maxCompressibleContentSizeInBytes &&
       event.config.compressibleContentTypes.exists(s => contentType.startsWith(s)))
 
-    var compressedOut: DeflaterOutputStream = null
     try {
       if (compressible && request.acceptedEncodings.contains("gzip")) {
-        val compressBytes = new ByteArrayOutputStream
-        compressedOut = new GZIPOutputStream(compressBytes)
-        compressedOut.write(content, 0, content.length)
-        compressedOut.close()
-        compressedOut = null
-        response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
-        response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "gzip")
-
+        IOUtil.using(new ByteArrayOutputStream()) { compressBytes =>
+          IOUtil.using(new GZIPOutputStream(compressBytes)) { compressedOut =>
+            compressedOut.write(content, 0, content.length)
+          }
+          response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
+          response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "gzip")
+        }
       } else if (compressible && request.acceptedEncodings.contains("deflate")) {
-        val compressBytes = new ByteArrayOutputStream
-        compressedOut = new DeflaterOutputStream(compressBytes)
-        compressedOut.write(content, 0, content.length)
-        compressedOut.close()
-        compressedOut = null
-        response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
-        response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "deflate")
 
+        IOUtil.using(new ByteArrayOutputStream()) { compressBytes =>
+          IOUtil.using(new DeflaterOutputStream(compressBytes)) { compressedOut =>
+            compressedOut.write(content, 0, content.length)
+          }
+          response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
+          response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "deflate")
+        }
       } else if (content.size > 0) {
         // No compression
         response.setContent(ChannelBuffers.copiedBuffer(content))
@@ -335,10 +333,6 @@ case class HttpResponseMessage(event: HttpEvent) {
     } catch {
       // If error, then just write without compression
       case ex => response.setContent(ChannelBuffers.copiedBuffer(content))
-    } finally {
-      if (compressedOut != null) {
-        compressedOut.close()
-      }
     }
   }
 
@@ -524,7 +518,7 @@ object HttpResponseMessage {
 
   /**
    * Copy SPDY headers from request to response
-   * 
+   *
    * @param request HTTP request
    * @param response HTTP response
    */

@@ -33,7 +33,7 @@ import akka.event.Logging
 
 /**
  * Sends a response containing information about the received event.
- * 
+ *
  * We use this in our testing of Socko
  */
 class SnoopHandler extends Actor {
@@ -100,9 +100,9 @@ class SnoopHandler extends Actor {
       buf.append("FORM DATA\r\n")
       val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, event.nettyHttpRequest)
       val dataList = decoder.getBodyHttpDatas().toList
-      
+
       val content = event.request.content.toString()
-      
+
       dataList.foreach(data => {
         log.debug(data.toString)
         if (data.getHttpDataType() == HttpDataType.Attribute) {
@@ -127,7 +127,7 @@ class SnoopHandler extends Actor {
 
     val x = event.response
     val y = event.response
-    
+
     log.info("HttpRequest: " + buf.toString)
     event.response.write(buf.toString)
   }
@@ -140,10 +140,15 @@ class SnoopHandler extends Actor {
   private def snoopHttpChunk(event: HttpChunkEvent) {
     // Accumulate chunk info in a string buffer stored in the channel
     val channel = event.channel
-    var buf = ChunkDataStore.data.get(channel)
-    if (buf == null) {
-      buf = new StringBuilder()
-      ChunkDataStore.data.set(channel, buf)
+    val buf = {
+      val storedBuf = ChunkDataStore.data.get(channel)
+      if (storedBuf == null) {
+        val newBuf = new StringBuilder()
+        ChunkDataStore.data.set(channel, newBuf)
+        newBuf
+      } else {
+        storedBuf
+      }
     }
 
     if (event.chunk.isLastChunk) {
