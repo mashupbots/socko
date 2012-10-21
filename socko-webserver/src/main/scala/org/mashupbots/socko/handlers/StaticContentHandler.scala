@@ -265,14 +265,13 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
 
       // Check if compression is supported.
       // if format not supported or there is an error during compression, download uncompressed content
-      case class Content(data: Array[Byte], encoding: String)
-      def content: Content = {
+      val (data: Array[Byte], encoding: String) = {
         val supportedEncoding = event.request.supportedEncoding
         if (supportedEncoding.isDefined) {
           val key = "%s[%s][%s]".format(resourceRequest.cacheKey, supportedEncoding.get, cacheEntry.etag)
           val compressedContents = cache.get(key)
           if (compressedContents.isDefined) {
-            Content(compressedContents.get.asInstanceOf[Array[Byte]], supportedEncoding.get)
+            (compressedContents.get.asInstanceOf[Array[Byte]], supportedEncoding.get)
           } else {
             IOUtil.using(new ByteArrayOutputStream()) { bytesOut =>
               IOUtil.using(new BufferedInputStream(new ByteArrayInputStream(cacheEntry.content))) { bytesIn =>
@@ -280,21 +279,21 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
                   val content = bytesOut.toByteArray
                   val cacheTimeout = resourceRequest.serverCacheTimeoutSeconds.getOrElse(this.serverCacheTimeoutSeconds) * 1000L
                   cache.set(key, content, cacheTimeout)
-                  Content(content, supportedEncoding.get)
+                  (content, supportedEncoding.get)
                 } else {
-                  Content(cacheEntry.content, "")
+                  (cacheEntry.content, "")
                 }
               }
             }
           }
         } else {
-          Content(cacheEntry.content, "")
+          (cacheEntry.content, "")
         }
       }
 
       // Prepare response    
       val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
-      setCommonHeaders(event, response, now, cacheEntry.contentType, content.data.length, content.encoding)
+      setCommonHeaders(event, response, now, cacheEntry.contentType, data.length, encoding)
 
       val browserCacheSeconds = resourceRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
       if (browserCacheSeconds > 0) {
@@ -304,10 +303,10 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
         response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
       }
 
-      response.setContent(ChannelBuffers.wrappedBuffer(content.data))
+      response.setContent(ChannelBuffers.wrappedBuffer(data))
 
       // We have to write our own web log entry since we are not using context.writeResponse
-      event.writeWebLog(HttpResponseStatus.OK.code, content.data.length)
+      event.writeWebLog(HttpResponseStatus.OK.code, data.length)
 
       // Write the response
       val ch = event.channel
@@ -418,14 +417,13 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
 
       // Check if compression is supported.
       // if format not supported or there is an error during compression, download uncompressed content
-      case class Content(data: Array[Byte], encoding: String)
-      def content: Content = {
+      val (data: Array[Byte], encoding: String) = {
         val supportedEncoding = event.request.supportedEncoding
         if (supportedEncoding.isDefined) {
           val key = "%s[%s][%s]".format(fileRequest.cacheKey, supportedEncoding.get, cacheEntry.etag)
           val compressedContents = cache.get(key)
           if (compressedContents.isDefined) {
-            Content(compressedContents.get.asInstanceOf[Array[Byte]], supportedEncoding.get)
+            (compressedContents.get.asInstanceOf[Array[Byte]], supportedEncoding.get)
           } else {
             IOUtil.using(new ByteArrayOutputStream()) { bytesOut =>
               IOUtil.using(new BufferedInputStream(new ByteArrayInputStream(cacheEntry.content))) { bytesIn =>
@@ -433,21 +431,21 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
                   val data = bytesOut.toByteArray
                   val cacheTimeout = fileRequest.serverCacheTimeoutSeconds.getOrElse(this.serverCacheTimeoutSeconds) * 1000L
                   cache.set(key, data, cacheTimeout)
-                  Content(data, supportedEncoding.get)
+                  (data, supportedEncoding.get)
                 } else {
-                  Content(cacheEntry.content, "")
+                  (cacheEntry.content, "")
                 }
               }
             }
           }
         } else {
-          Content(cacheEntry.content, "")
+          (cacheEntry.content, "")
         }
       }
 
       // Prepare response    
       val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
-      setCommonHeaders(event, response, now, cacheEntry.contentType, content.data.length, content.encoding)
+      setCommonHeaders(event, response, now, cacheEntry.contentType, data.length, encoding)
 
       val browserCacheSeconds = fileRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
       if (browserCacheSeconds > 0) {
@@ -458,10 +456,10 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
         response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
       }
 
-      response.setContent(ChannelBuffers.wrappedBuffer(content.data))
+      response.setContent(ChannelBuffers.wrappedBuffer(data))
 
       // We have to write our own web log entry since we are not using context.writeResponse
-      event.writeWebLog(HttpResponseStatus.OK.code, content.data.length)
+      event.writeWebLog(HttpResponseStatus.OK.code, data.length)
 
       // Write response
       val ch = event.channel
@@ -499,8 +497,7 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
       val now = new GregorianCalendar()
 
       // Check if compression is supported.
-      case class Content(fileToDownload: File, encoding: String)
-      def content: Content = {
+      val (fileToDownload: File, encoding: String) = {
         val supportedEncoding = event.request.supportedEncoding
         if (supportedEncoding.isDefined) {
           // We put the file timestamp in the hash to make sure that if a file changes,
@@ -509,26 +506,26 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
             "." + supportedEncoding.get
           val compressedFile = new File(tempDir, compressedFileName)
           if (compressedFile.exists) {
-            Content(compressedFile, supportedEncoding.get)
+            (compressedFile, supportedEncoding.get)
           } else {
             IOUtil.using(new FileOutputStream(compressedFile)) { fileOut =>
               IOUtil.using(new BufferedInputStream(new FileInputStream(fileRequest.file))) { fileIn =>
                 if (compress(fileIn, fileOut, supportedEncoding.get)) {
-                  Content(compressedFile, supportedEncoding.get)
+                  (compressedFile, supportedEncoding.get)
                 } else {
-                  Content(fileRequest.file, "")
+                  (fileRequest.file, "")
                 }
               }
             }
           }
         } else {
-          Content(fileRequest.file, "")
+          (fileRequest.file, "")
         }
       }
 
       // Download file
       val raf: RandomAccessFile = try {
-        new RandomAccessFile(content.fileToDownload, "r")
+        new RandomAccessFile(fileToDownload, "r")
       } catch {
         case e: FileNotFoundException => {
           event.response.write(HttpResponseStatus.NOT_FOUND)
@@ -542,7 +539,7 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
 
         // Prepare response    
         val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
-        setCommonHeaders(event, response, now, cacheEntry.contentType, fileLength, content.encoding)
+        setCommonHeaders(event, response, now, cacheEntry.contentType, fileLength, encoding)
 
         val browserCacheSeconds = fileRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
         if (browserCacheSeconds > 0) {
