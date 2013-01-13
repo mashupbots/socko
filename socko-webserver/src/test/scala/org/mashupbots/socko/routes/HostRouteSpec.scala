@@ -30,11 +30,11 @@ class HostRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
         case Host("www.abc.com") => result = "2"
       })
 
-      when("mixing method and host extractors")
+      When("mixing method and host extractors")
       r(TestContext(EndPoint("GET", "www.abc.com", "/testpath")))
       result should equal("2")
 
-      when("there is an exact host match")
+      When("there is an exact host match")
       r(TestContext(EndPoint("PUT", "www.abc.com", "/testpath")))
       result should equal("1")
     }
@@ -57,17 +57,17 @@ class HostRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
         }
       })
 
-      when("there is an exact match with a method")
+      When("there is an exact match with a method")
       r(TestContext(EndPoint("GET", "site1.abc.com", "/record/1")))
       result should equal("1")
 
-      when("there is an exact match without a method")
+      When("there is an exact match without a method")
       var ctx = TestContext(EndPoint("PUT", "site2.abc.com", "/record/100"))
       r(ctx)
       result should equal("2")
       ctx.items.get("site") should equal(Some("site2"))
 
-      when("the matching patern has a fixed root and variable suffix")
+      When("the matching patern has a fixed root and variable suffix")
       r(TestContext(EndPoint("PUT", "server100.def.com", "/html/a/b/c/abc.html")))
       result should equal("3")
       hostSuffix should equal("def.com")
@@ -96,17 +96,17 @@ class HostRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
         case ctx @ HostSegments(site :: "abc" :: "com" :: Nil) => result = "3"
       })
 
-      when("no exact match")
+      When("no exact match")
       intercept[MatchError] {
         r(TestContext(EndPoint("GET", "localhost", "/xxx")))
       }
 
-      when("no case sensitive match")
+      When("no case sensitive match")
       intercept[MatchError] {
         r(TestContext(EndPoint("GET", "www.ABC.com", "/xxx")))
       }
 
-      when("no matching of parts of host not found")
+      When("no matching of parts of host not found")
       intercept[MatchError] {
         r(TestContext(EndPoint("GET", "server1.www.abc.com.au", "/xxx")))
       }

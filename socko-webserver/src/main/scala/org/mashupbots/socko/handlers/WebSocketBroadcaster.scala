@@ -42,7 +42,7 @@ import akka.actor.Actor
 class WebSocketBroadcaster extends Actor {
   private val socketConnections = new DefaultChannelGroup()
 
-  protected def receive = {
+  def receive = {
     case WebSocketBroadcastText(text) =>
       socketConnections.write(new TextWebSocketFrame(text))
     case WebSocketBroadcastBinary(bytes) =>

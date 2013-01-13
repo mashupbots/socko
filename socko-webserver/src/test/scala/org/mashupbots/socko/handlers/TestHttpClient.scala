@@ -162,7 +162,7 @@ trait TestHttpClient {
 
       HttpResponseData(statusLine, content.toString, headers)
     } catch {
-      case ex =>
+      case ex: Throwable =>
         System.out.println(ex.toString)
         getResponseErrorContent(conn)
     }

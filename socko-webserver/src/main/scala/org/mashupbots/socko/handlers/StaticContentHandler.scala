@@ -613,7 +613,7 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
       }
       true
     } catch {
-      case ex => {
+      case ex: Throwable => {
         log.error(ex, "Compression error")
         false
       }

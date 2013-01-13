@@ -39,7 +39,7 @@ object ConfigUtil {
         Some(new File(v))
       }
     } catch {
-      case _ => None
+      case _: Throwable => None
     }
   }
 
@@ -55,7 +55,7 @@ object ConfigUtil {
         v
       }
     } catch {
-      case _ => defaultValue
+      case _: Throwable => defaultValue
     }
   }
 
@@ -71,7 +71,7 @@ object ConfigUtil {
         Some(v)
       }
     } catch {
-      case _ => None
+      case _: Throwable => None
     }
   }
 
@@ -87,7 +87,7 @@ object ConfigUtil {
         config.getInt(name)
       }
     } catch {
-      case _ => defaultValue
+      case _: Throwable => defaultValue
     }
   }
 
@@ -103,7 +103,7 @@ object ConfigUtil {
         Some(config.getInt(name))
       }
     } catch {
-      case _ => None
+      case _: Throwable => None
     }
   }
 
@@ -119,7 +119,7 @@ object ConfigUtil {
         config.getBoolean(name)
       }
     } catch {
-      case _ => defaultValue
+      case _: Throwable => defaultValue
     }
   }
 
@@ -135,7 +135,7 @@ object ConfigUtil {
         Some(config.getBoolean(name))
       }
     } catch {
-      case _ => None
+      case _: Throwable => None
     }
   }
 
@@ -151,7 +151,7 @@ object ConfigUtil {
         v.toList
       }
     } catch {
-      case _ => Nil
+      case _: Throwable => Nil
     }
   }
 }

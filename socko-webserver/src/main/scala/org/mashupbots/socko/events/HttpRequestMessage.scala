@@ -188,7 +188,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
         None
       }
     } catch {
-      case _ => None
+      case _: Throwable => None
     }
   }
 

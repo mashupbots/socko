@@ -63,19 +63,19 @@ class QueryStringRouteSpec extends WordSpec with ShouldMatchers with GivenWhenTh
         }
       })
 
-      when("there is only 1 name-value pair")
+      When("there is only 1 name-value pair")
       r(TestContext(EndPoint("GET", "www.def.com", "/path/to/file?name1=value1")))
       result should equal("1")      
 
-      when("there are 2 values for the same name")
+      When("there are 2 values for the same name")
       r(TestContext(EndPoint("GET", "www.def.com", "/path/to/file?name1=value1&name1=value2")))
       result should equal("1")      
 
-      when("there are 2 name-value pairs")
+      When("there are 2 name-value pairs")
       r(TestContext(EndPoint("PUT", "www.def.com", "/path/to/file?name1=value1&name2=value2")))
       result should equal("1")
       
-      when("there are 2 name-value pairs is different order")
+      When("there are 2 name-value pairs is different order")
       r(TestContext(EndPoint("GET", "www.def.com", "/path/to/file?name2=value2&name1=value1")))
       result should equal("1")      
     }
@@ -87,17 +87,17 @@ class QueryStringRouteSpec extends WordSpec with ShouldMatchers with GivenWhenTh
         case QueryString("name2=value2") => result = "2"
       })
 
-      when("there is no exact match")
+      When("there is no exact match")
       intercept[MatchError] {
         r(TestContext(EndPoint("GET", "localhost", "/file.html?name3=value3")))
       }
 
-      when("there is no case sensitive match")
+      When("there is no case sensitive match")
       intercept[MatchError] {
         r(TestContext(EndPoint("GET", "localhost", "/TestPath?Name1=value1")))
       }
       
-      when("there are mulitple paramters")
+      When("there are mulitple paramters")
       intercept[MatchError] {
         r(TestContext(EndPoint("GET", "localhost", "/TestPath?name1=value1&name2=value2")))
       }      

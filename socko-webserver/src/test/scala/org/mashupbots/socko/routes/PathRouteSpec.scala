@@ -55,17 +55,17 @@ class PathRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
         }
       })
 
-      when("there is an exact match with a method")
+      When("there is an exact match with a method")
       r(TestContext(EndPoint("GET", "localhost", "/record/1")))
       result should equal("1")
 
-      when("there is an exact match without a method")
+      When("there is an exact match without a method")
       var ctx = TestContext(EndPoint("PUT", "localhost", "/record/100"))
       r(ctx)
       result should equal("2")
       ctx.items.get("id") should equal(Some("100"))
 
-      when("the matching patern has a fixed root and variable subfolders")
+      When("the matching patern has a fixed root and variable subfolders")
       r(TestContext(EndPoint("PUT", "localhost", "/html/a/b/c/abc.html")))
       result should equal("3")
       relativePath should equal("/a/b/c/abc.html")
@@ -96,17 +96,17 @@ class PathRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
         case PathSegments("html" :: x) => result = "4"
       })
 
-      when("no exact match")
+      When("no exact match")
       intercept[MatchError] {
         r(TestContext(EndPoint("GET", "localhost", "/nopathmatch")))
       }
 
-      when("no case sensitive match")
+      When("no case sensitive match")
       intercept[MatchError] {
         r(TestContext(EndPoint("GET", "localhost", "/TestPath")))
       }
 
-      when("no matching of deeper path not found")
+      When("no matching of deeper path not found")
       intercept[MatchError] {
         r(TestContext(EndPoint("GET", "localhost", "/testpath/folder1/file.html")))
       }

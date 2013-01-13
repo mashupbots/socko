@@ -21,7 +21,6 @@ import java.util.Date
 import java.util.GregorianCalendar
 import java.net.InetSocketAddress
 import org.scalatest.GivenWhenThen
-import akka.util.duration._
 
 class LocalCacheSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
 

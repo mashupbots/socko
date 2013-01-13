@@ -25,7 +25,6 @@ import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.GivenWhenThen
-import org.scalatest.Style
 import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
 

@@ -410,7 +410,7 @@ object WebServerConfig extends Logger {
       case ex: ConfigException.Missing => {
         new TcpConfig()
       }
-      case ex => {
+      case ex: Throwable => {
         log.info("Error parsing TcpConfig. Defaults will be used.")
         log.debug("Exception", ex)
         new TcpConfig()
@@ -433,7 +433,7 @@ object WebServerConfig extends Logger {
       case ex: ConfigException.Missing => {
         new HttpConfig()
       }
-      case ex => {
+      case ex: Throwable => {
         log.info("Error parsing HTTPConfig. Defaults will be used.")
         log.debug("Exception", ex)
         new HttpConfig()
@@ -456,7 +456,7 @@ object WebServerConfig extends Logger {
       case ex: ConfigException.Missing => {
         None
       }
-      case ex => {
+      case ex: Throwable => {
         log.info("Error parsing SSL config. SSL is turned off.")
         log.debug("Exception", ex)
         None
@@ -479,7 +479,7 @@ object WebServerConfig extends Logger {
       case ex: ConfigException.Missing => {
         None
       }
-      case ex => {
+      case ex: Throwable => {
         log.info("Error parsing WebLogConfig config. Web server activity logging is turned off.")
         log.debug("Exception", ex)
         None
@@ -507,7 +507,7 @@ object WebServerConfig extends Logger {
         v
       }
     } catch {
-      case _ => defaultCompressibleContentTypes
+      case _: Throwable => defaultCompressibleContentTypes
     }
   }
 }

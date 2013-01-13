@@ -172,7 +172,7 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
           log.debug("WebSocket Client connected!")
           channelData.isConnected = Some(true)
         } catch {
-          case ex => {
+          case ex: Throwable => {
             log.debug("Error connecting to Web Socket Server", ex)
             channelData.isConnected = Some(false)
           }

@@ -110,23 +110,23 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     "throw Exception if port is invalid" in {
       WebServerConfig(port = 100)
 
-      when("port is 0")
+      When("port is 0")
       checkForIllegalArgumentException(WebServerConfig(port = 0), "port")
 
-      when("port is negative")
+      When("port is negative")
       checkForIllegalArgumentException(WebServerConfig(port = -100), "port")
     }
 
     "throw Exception if keystore file is invalid" in {
-      when("keystore file not specified")
+      When("keystore file not specified")
       checkForIllegalArgumentException(
         WebServerConfig(ssl = Some(SslConfig(null, null, null, null))), "key store file")
 
-      when("keystore file a directory and not a file")
+      When("keystore file a directory and not a file")
       checkForIllegalArgumentException(
         WebServerConfig(ssl = Some(SslConfig(aDirectory, null, null, null))), "key store file")
 
-      when("keystore file does not exist")
+      When("keystore file does not exist")
       checkForIllegalArgumentException(
         WebServerConfig(ssl = Some(SslConfig(aFileNotFound, null, null, null))), "key store file")
     }
@@ -139,15 +139,15 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     }
 
     "throw Exception if truststore file is invalid" in {
-      when("truststore file not specified")
+      When("truststore file not specified")
       checkForIllegalArgumentException(
         WebServerConfig(ssl = Some(SslConfig(aFile, "pw", Some(null), null))), "trust store file")
 
-      when("truststore file a directory and not a file")
+      When("truststore file a directory and not a file")
       checkForIllegalArgumentException(
         WebServerConfig(ssl = Some(SslConfig(aFile, "pw", Some(aDirectory), null))), "trust store file")
 
-      when("truststore file does not exist")
+      When("truststore file does not exist")
       checkForIllegalArgumentException(
         WebServerConfig(ssl = Some(SslConfig(aFile, "pw", Some(aFileNotFound), null))), "trust store file")
     }

@@ -20,7 +20,9 @@ object SockoBuild extends Build {
   lazy val defaultSettings = Defaults.defaultSettings ++ Seq(
     // Info
     organization := "org.mashupbots.socko",
-    version      := "0.2.3",
+    version      := "0.3.0",
+    scalaVersion := "2.10.0",
+    organizationHomepage := Some(url("http://www.sockoweb.org")),
 
     // Repositories
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
@@ -124,12 +126,16 @@ object Dependencies {
 }
 
 object Dependency {
-  val akkaActor     = "com.typesafe.akka"      % "akka-actor"         % "2.0.2"
-  val akkaSlf4j     = "com.typesafe.akka"      % "akka-slf4j"         % "2.0"
-  val akkaTestKit   = "com.typesafe.akka"      % "akka-testkit"       % "2.0"           % "test"
-  val netty         = "io.netty"               % "netty"              % "3.5.7.Final"
-  val logback       = "ch.qos.logback"         % "logback-classic"    % "1.0.3"         % "runtime"
-  val scalatest     = "org.scalatest"          %% "scalatest"         % "2.0.M2"        % "test"
+  object V {
+    val Akka        = "2.1.0"
+  }
+
+  val akkaActor     = "com.typesafe.akka"      %% "akka-actor"        % V.Akka
+  val akkaSlf4j     = "com.typesafe.akka"      %% "akka-slf4j"        % V.Akka
+  val akkaTestKit   = "com.typesafe.akka"      %% "akka-testkit"      % V.Akka    % "test"
+  val netty         = "io.netty"               % "netty"              % "3.6.1.Final"
+  val logback       = "ch.qos.logback"         % "logback-classic"    % "1.0.9"   % "runtime"
+  val scalatest     = "org.scalatest"          % "scalatest_2.10"     % "2.0.M5b" % "test"
 }
 
 
