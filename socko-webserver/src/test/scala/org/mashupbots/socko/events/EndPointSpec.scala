@@ -88,9 +88,9 @@ class EndPointSpec extends WordSpec with ShouldMatchers {
 
       ep.queryStringMap should not be ('empty)
       ep.queryStringMap should have size (2)
-      ep.queryStringMap("p1").get(0) should be("v1")
-      ep.queryStringMap("p2").get(0) should be("v21")
-      ep.queryStringMap("p2").get(1) should be("v22")
+      ep.queryStringMap("p1")(0) should be("v1")
+      ep.queryStringMap("p2")(0) should be("v21")
+      ep.queryStringMap("p2")(1) should be("v22")
 
       ep.getQueryString("p1") should be(Some("v1"))
       ep.getQueryString("p2") should be(Some("v21")) // getQueryString returns only the 1st value

@@ -16,10 +16,10 @@
 package org.mashupbots.socko.examples
 
 /**
- * Illustrates how to perform file uploads (HTTP `multipart/form-data` POST) and download (HTTP GET).
+ * Example of how to parse query string data and POST `application/x-www-form-urlencoded` post data.
  * 
- * If you do not need to handle file upload and only wish to parse `application/x-www-form-urlencoded` data,
- * see the [[org.mashupbots.socko.examples.querystring_post.QueryStringPostApp]] example. 
+ * If you need to handle `multipart/form-data file` uploads, see the [[org.mashupbots.socko.examples.querystring_post.QueryStringPostApp]]
+ * example.
  */
-package org.mashupbots.socko.examples.fileupload {
+package org.mashupbots.socko.examples.examples.querystring_post {
 }

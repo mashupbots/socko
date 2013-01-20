@@ -26,6 +26,7 @@ StaticResourceRequestClass: <code><a href="../api/#org.mashupbots.socko.handler.
  - [Step 3. Start/Stop Web Server](#Step3)
  - [Configuration](#Configuration)
  - [Serving Static Content](#StaticContent)
+ - [Parsing Query String and Post Data](#ParseQueryStringAndPostData)
  - [Web Sockets](#WebSockets)
  - [SPDY](#SPDY)
  - [Web Logs](#WebLogs)
@@ -705,6 +706,70 @@ the router.
       }
     })
 {% endhighlight %}
+
+
+
+
+## Parse Query String and Post Data <a class="blank" id="ParseQueryStringAndPostData">&nbsp;</a>
+
+### Query String
+
+You can access query string parameters using {{ page.HttpRequestEventClass }}.
+
+{% highlight scala %}
+  // For mypath?a=1&b=2
+  val qsMap = event.endPoint.queryStringMap
+  assert (qsMap("a") == "1")
+{% endhighlight %}
+
+See the [query string and post data example](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/querystring_post)
+for more details.
+
+### Form Data
+
+If you do not have to support file uploads and your post form data content type is `application/x-www-form-urlencoded data`,
+you can als access form data using {{ page.HttpRequestEventClass }}.
+
+{% highlight scala %}
+  // For firstName=jim&lastName=low
+  val formDataMap = event.request.content.toFormDataMap
+  assert (formDataMap("firstName") == "jim")
+{% endhighlight %}
+
+See the [query string and post data example](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/querystring_post)
+for more details.
+
+### File Upload
+
+If you intend to support file uploads, you need to use Netty's [HttpPostRequestDecoder](http://static.netty.io/3.6/api/org/jboss/netty/handler/codec/http/multipart/HttpPostRequestDecoder.html).
+
+The following example extracts the `description` field as well as a file that was posted.
+
+{% highlight scala %}
+  //
+  // The following form has a file upload input named "fileUpload" and a description
+  // field named "fileDescription".
+  //
+  // ------WebKitFormBoundaryThBHDfQBdTlMy3sK
+  // Content-Disposition: form-data; name="fileUpload"; filename="myfile.txt"
+  // Content-Type: text/plain
+  // 
+  // file contents
+  // ------WebKitFormBoundaryThBHDfQBdTlMy3sK
+  // Content-Disposition: form-data; name="fileDescription"
+  // 
+  // this is my file upload
+  // ------WebKitFormBoundaryThBHDfQBdTlMy3sK--
+  //
+
+  val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, event.nettyHttpRequest)
+  val descriptionField = decoder.getBodyHttpData("fileDescription").asInstanceOf[Attribute]
+  val fileField = decoder.getBodyHttpData("fileUpload").asInstanceOf[FileUpload]
+  val destFile = new File(msg.saveDir, fileField.getFilename)
+{% endhighlight %}
+
+See the [file upload example](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload)
+for more details.
 
 
 

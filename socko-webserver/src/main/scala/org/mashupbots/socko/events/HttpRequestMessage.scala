@@ -18,7 +18,7 @@ package org.mashupbots.socko.events
 import java.nio.charset.Charset
 import java.util.Date
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions._
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers
@@ -26,6 +26,7 @@ import org.jboss.netty.handler.codec.http.HttpChunk
 import org.jboss.netty.handler.codec.http.HttpChunkTrailer
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.handler.codec.http.HttpRequest
+import org.jboss.netty.handler.codec.http.QueryStringDecoder
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.DateUtil
 
@@ -154,7 +155,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
   }
 
   /**
-   * Our supported encoding; `None` if `acceptedEncodings` does not contain an encoding that we support  
+   * Our supported encoding; `None` if `acceptedEncodings` does not contain an encoding that we support
    */
   val supportedEncoding: Option[String] = if (acceptedEncodings.contains("gzip")) {
     Some("gzip")
@@ -238,12 +239,36 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
 class HttpContent(buffer: Option[ChannelBuffer], contentType: String) {
 
   /**
+   * Returns a map of the form data fields
+   *
+   * Empty map is returned if the content type is not `application/x-www-form-urlencoded` or if
+   * there is no content.
+   * 
+   * The form data field name is the map's key.  The value corresponding to a key are a list values
+   * for that field. Typically, there is is only 1 value for a field.
+   */
+  def toFormDataMap(): Map[String, List[String]] = {
+    if (buffer.isEmpty) Map.empty
+    else if (contentType != "application/x-www-form-urlencoded") Map.empty
+    else {
+      val encodedString = this.toString
+      val m = new QueryStringDecoder(encodedString, false).getParameters.toMap
+      // Map the Java list values to Scala list
+      for ((key, values) <- m) yield {
+        (key, values.toList)
+      }
+    }
+  }
+
+  /**
    * Returns a string representation of the content.
    *
-   * The character set in the content type will be used.  If not supplied, UTF-8 is assumed.
+   * The character set in the content type will be used.
+   * 
+   * If not supplied, ISO-8859-1 is assumed (see http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html section 3.7.1)
    */
   override def toString() = {
-    val charset = HttpResponseMessage.extractMimeTypeCharset(contentType).getOrElse(CharsetUtil.UTF_8)
+    val charset = HttpResponseMessage.extractMimeTypeCharset(contentType).getOrElse(CharsetUtil.ISO_8859_1)
     if (buffer.isEmpty) {
       ""
     } else {

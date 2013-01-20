@@ -15,7 +15,7 @@
 //
 package org.mashupbots.socko.events
 
-import scala.collection.JavaConversions.mapAsScalaMap
+import scala.collection.JavaConversions._
 
 import org.jboss.netty.handler.codec.http.QueryStringDecoder
 
@@ -50,7 +50,13 @@ case class EndPoint(
   /**
    * Provides Map access to query string parameters
    */
-  lazy val queryStringMap = new QueryStringDecoder(uri).getParameters.toMap
+  lazy val queryStringMap: Map[String, List[String]] = {
+    val m = new QueryStringDecoder(uri).getParameters.toMap
+    // Map the Java list values to Scala list
+    for ((key, values) <- m) yield {
+      (key, values.toList)
+    }
+  }
 
   /**
    * Returns the query string value with the specified name.  If there are
@@ -66,7 +72,7 @@ case class EndPoint(
       else
         Some(v.get(0))
     } catch {
-      case ex:NoSuchElementException => None
+      case ex: NoSuchElementException => None
     }
   }
 

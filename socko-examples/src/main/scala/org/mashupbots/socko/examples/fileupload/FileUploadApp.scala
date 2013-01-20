@@ -35,7 +35,7 @@ import akka.routing.FromConfig
 
 /**
  * This example shows how use [[org.mashupbots.socko.handler.StaticContentHandler]] to download files and
- * [[org.mashupbots.socko.postdecoder.HttpPostRequestDecoder]] to process file uploads.
+ * [[org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder]] to process file uploads.
  *  - Run this class as a Scala Application
  *  - Open your browser and navigate to `http://localhost:8888`.
  */
@@ -79,7 +79,7 @@ object FileUploadApp extends Logger {
 
   val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
 
-  val staticFileHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(staticContentHandlerConfig))
+  val staticContentHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(staticContentHandlerConfig))
     .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
 
   val fileUploadHandlerRouter = actorSystem.actorOf(Props[FileUploadHandler]
@@ -97,7 +97,7 @@ object FileUploadApp extends Logger {
       }
       case GET(PathSegments(fileName :: Nil)) => {
         // Download requested file
-        staticFileHandlerRouter ! new StaticFileRequest(request, new File(contentDir, fileName))
+        staticContentHandlerRouter ! new StaticFileRequest(request, new File(contentDir, fileName))
       }
       case POST(Path("/upload")) => {
         // Save file to the content directory so it can be downloaded

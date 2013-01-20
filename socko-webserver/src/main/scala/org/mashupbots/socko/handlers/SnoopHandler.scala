@@ -94,10 +94,8 @@ class SnoopHandler extends Actor {
 
     // If post, then try to parse the data
     val contentType = event.request.contentType
-    if (contentType != "" &&
-      (contentType.startsWith("multipart/form-data") ||
-        contentType.startsWith("application/x-www-form-urlencoded"))) {
-      buf.append("FORM DATA\r\n")
+    if (contentType.startsWith("multipart/form-data")) {
+      buf.append("MULTIPART FORM DATA\r\n")
       val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, event.nettyHttpRequest)
       val dataList = decoder.getBodyHttpDatas().toList
 
@@ -118,6 +116,9 @@ class SnoopHandler extends Actor {
           buf.append("  File Content=" + fileUpload.getString(fileUpload.getCharset) + "\r\n")
         }
       })
+    } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
+      buf.append("URLENCODED FORM DATA\r\n")
+      event.request.content.toFormDataMap.foreach(entry => buf.append(s"  ${entry._1}=${entry._2(0)}\r\n"))
     } else {
       val content = event.request.content.toString()
       if (content.length > 0) {

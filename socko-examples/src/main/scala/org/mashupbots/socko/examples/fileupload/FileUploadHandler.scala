@@ -36,14 +36,14 @@ class FileUploadHandler extends Actor {
 
   def receive = {
     case msg: FileUploadRequest => {
-      val ctx = msg.event
+      val event = msg.event
       try {
-        val contentType = ctx.request.contentType
+        val contentType = event.request.contentType
         if (contentType != "" &&
           (contentType.startsWith("multipart/form-data") ||
             contentType.startsWith("application/x-www-form-urlencoded"))) {
 
-          val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, ctx.nettyHttpRequest)
+          val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, event.nettyHttpRequest)
 
           val descriptionField = decoder.getBodyHttpData("fileDescription").asInstanceOf[Attribute]
 
@@ -52,13 +52,13 @@ class FileUploadHandler extends Actor {
           uploadField.renameTo(destFile)
 
           val html = buildResponseHtml(descriptionField.getValue, destFile)
-          ctx.response.write(html, "text/html")
+          event.response.write(html, "text/html")
         } else {
-          ctx.response.write(HttpResponseStatus.BAD_REQUEST)
+          event.response.write(HttpResponseStatus.BAD_REQUEST)
         }
       } catch {
         case ex: Throwable => {
-          ctx.response.write(HttpResponseStatus.INTERNAL_SERVER_ERROR, ex.toString)
+          event.response.write(HttpResponseStatus.INTERNAL_SERVER_ERROR, ex.toString)
         }
       }
     }

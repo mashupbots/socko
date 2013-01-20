@@ -34,7 +34,7 @@ import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.IOUtil
 
 /**
- * Encapsulates the all the data sent to be sent to the client in an HTTP response; i.e. headers and content.
+ * Encapsulates all the data to be sent to the client in an HTTP response; i.e. headers and content.
  *
  * @param event Event associated with this response
  */
