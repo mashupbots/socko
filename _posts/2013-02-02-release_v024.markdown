@@ -1,0 +1,22 @@
+---
+layout: post
+title: Release v0.2.4
+summary: Upgrade to dependancies
+author: Vibul
+---
+
+This [release](https://github.com/mashupbots/socko/issues?milestone=8&page=1&state=closed) includes:
+ - Update to Scala 2.10, Akka 2.1.0 and Netty 3.6.2
+ - Query String, Post Data and File Upload handing
+
+Download [socko-webserver_2.10-0.2.4.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.10/0.2.4/socko-webserver_2.10-0.2.4.jar).
+
+For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
+
+Documentation
+ - [User Guide](/docs/0.2.4/guides/user_guide.html)
+ - [API](/docs/0.2.4/api/)
+ - [Change logs](https://github.com/mashupbots/socko/issues?milestone=8&page=1&state=closed)
+
+
+
