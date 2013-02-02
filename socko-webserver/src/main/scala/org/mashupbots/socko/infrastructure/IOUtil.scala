@@ -23,6 +23,7 @@ import java.io.FileOutputStream
 import java.nio.charset.Charset
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
+import scala.language.reflectiveCalls
 
 /**
  * Utility IO methods

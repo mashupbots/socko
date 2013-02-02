@@ -30,10 +30,10 @@ import akka.actor.Actor
  * 
  * Usage:
  *  1. Create WebSocketBroadcaster
- *  2. During web socket handshake, send [[org.mashupbots.socko.processors.WebSocketBroadcasterRegistration]] message
+ *  2. During web socket handshake, send [[org.mashupbots.socko.handlers.WebSocketBroadcasterRegistration]] message
  *     to the actor created in step #1.
- *  3. To broadcast, send [[org.mashupbots.socko.processors.WebSocketBroadcastText]] or 
- *     [[org.mashupbots.socko.processors.WebSocketBroadcastBinary]] to the actor created in step #1.
+ *  3. To broadcast, send [[org.mashupbots.socko.handlers.WebSocketBroadcastText]] or 
+ *     [[org.mashupbots.socko.handlers.WebSocketBroadcastBinary]] to the actor created in step #1.
  * 
  * There is no need to de-register a web socket upon disconnection.  Netty does this for us automatically. 
  * 
@@ -54,19 +54,19 @@ class WebSocketBroadcaster extends Actor {
 }
 
 /**
- * Message sent to [[org.mashupbots.socko.processors.WebSocketBroadcaster]] during the web socket handshake 
+ * Message sent to [[org.mashupbots.socko.handlers.WebSocketBroadcaster]] during the web socket handshake 
  * in order to register the web socket connection to receive broadcast messages
  */
 case class WebSocketBroadcasterRegistration(context: WebSocketHandshakeEvent)
 
 /**
- * Message sent to [[org.mashupbots.socko.processors.WebSocketBroadcaster]] to broadcast a web socket text frame
+ * Message sent to [[org.mashupbots.socko.handlers.WebSocketBroadcaster]] to broadcast a web socket text frame
  * to all registered web socket connection.
  */
 case class WebSocketBroadcastText(text: String)
 
 /**
- * Message sent to [[org.mashupbots.socko.processors.WebSocketBroadcaster]] to broadcast a web socket binary frame
+ * Message sent to [[org.mashupbots.socko.handlers.WebSocketBroadcaster]] to broadcast a web socket binary frame
  * to all registered web socket connection.
  */
 case class WebSocketBroadcastBinary(bytes: Array[Byte])

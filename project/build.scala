@@ -20,7 +20,7 @@ object SockoBuild extends Build {
   lazy val defaultSettings = Defaults.defaultSettings ++ Seq(
     // Info
     organization := "org.mashupbots.socko",
-    version      := "0.3.0",
+    version      := "0.2.4",
     scalaVersion := "2.10.0",
     organizationHomepage := Some(url("http://www.sockoweb.org")),
 
@@ -28,7 +28,7 @@ object SockoBuild extends Build {
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
     
     // Compile options
-    scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-optimize"),
+    scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-optimize", "-feature"),
     javacOptions  ++= Seq("-Xlint:unchecked", "-Xlint:deprecation"),
     
     // sbtEclipse - see examples https://github.com/typesafehub/sbteclipse/blob/master/sbteclipse-plugin/src/sbt-test/sbteclipse/02-contents/project/Build.scala

@@ -28,7 +28,7 @@ import org.mashupbots.socko.infrastructure.WebLogEvent
  * Event fired when a web socket text or binary frame is received.
  *
  * A [[org.mashupbots.socko.events.WebSocketFrameEvent]] will only be fired after an initial
- * [[org.mashupbots.socko.events.WebSocketFrameHandshakeEvent]] has been successfully processed.
+ * [[org.mashupbots.socko.events.WebSocketHandshakeEvent]] has been successfully processed.
  *
  * @param channel Channel by which the request entered and response will be written
  * @param initialHttpRequest The initial HTTP request

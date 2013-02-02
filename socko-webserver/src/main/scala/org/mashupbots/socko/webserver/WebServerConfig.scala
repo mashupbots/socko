@@ -374,8 +374,8 @@ case class HttpConfig(
 /**
  * Configuration for web server activity logs.
  *
- * @param customActorPath Optional path of actor to which [[org.mashupbots.socko.utils.WebLogEvent]] will be sent for writing.
- *   If this path is not present, [[org.mashupbots.socko.utils.WebLogWriter]] will be used.
+ * @param customActorPath Optional path of actor to which [[org.mashupbots.socko.infrastructure.WebLogEvent]] will be sent for writing.
+ *   If this path is not present, [[org.mashupbots.socko.infrastructure.WebLogWriter]] will be used.
  * @param format Format of the web log. Defaults to `Common`.
  */
 case class WebLogConfig(
