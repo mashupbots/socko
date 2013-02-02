@@ -26,6 +26,7 @@ object SockoBuild extends Build {
 
     // Repositories
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+    credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
     
     // Compile options
     scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-optimize", "-feature"),
@@ -74,7 +75,7 @@ object SockoBuild extends Build {
 
   def sockoPublishTo: Initialize[Option[Resolver]] = {
     (version) { version: String =>
-      val nexus = " https://oss.sonatype.org/"
+      val nexus = "https://oss.sonatype.org/"
       if (version.trim.endsWith("SNAPSHOT")) {
         Some("snapshots" at nexus + "content/repositories/snapshots/")
       } else {
