@@ -1,3 +1,0 @@
-Revision r783.
-
-svn update -rXXX

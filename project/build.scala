@@ -118,7 +118,8 @@ object Dependencies {
 
   val webserver = Seq(
     Dependency.akkaActor, Dependency.akkaSlf4j, Dependency.akkaTestKit,
-    Dependency.netty, Dependency.logback, Dependency.scalatest
+    Dependency.netty, Dependency.concurrentmap, Dependency.nextProtoNeg,
+    Dependency.logback, Dependency.scalatest
   )
   
   val examples = Seq(
@@ -131,12 +132,14 @@ object Dependency {
     val Akka        = "2.1.0"
   }
 
-  val akkaActor     = "com.typesafe.akka"      %% "akka-actor"        % V.Akka
-  val akkaSlf4j     = "com.typesafe.akka"      %% "akka-slf4j"        % V.Akka
-  val akkaTestKit   = "com.typesafe.akka"      %% "akka-testkit"      % V.Akka    % "test"
-  val netty         = "io.netty"               % "netty"              % "3.6.2.Final"
-  val logback       = "ch.qos.logback"         % "logback-classic"    % "1.0.9"   % "runtime"
-  val scalatest     = "org.scalatest"          % "scalatest_2.10"     % "2.0.M5b" % "test"
+  val akkaActor     = "com.typesafe.akka"                       %% "akka-actor"                  % V.Akka
+  val akkaSlf4j     = "com.typesafe.akka"                       %% "akka-slf4j"                  % V.Akka
+  val akkaTestKit   = "com.typesafe.akka"                       %% "akka-testkit"                % V.Akka % "test"
+  val netty         = "io.netty"                                % "netty"                        % "3.6.2.Final"
+  val concurrentmap = "com.googlecode.concurrentlinkedhashmap"  % "concurrentlinkedhashmap-lru"  % "1.3.2"
+  val nextProtoNeg  = "org.eclipse.jetty.npn"                   % "npn-api"                      % "1.1.0.v20120525"
+  val logback       = "ch.qos.logback"                          % "logback-classic"              % "1.0.9" % "runtime"
+  val scalatest     = "org.scalatest"                           % "scalatest_2.10"               % "2.0.M5b" % "test"
 }
 
 

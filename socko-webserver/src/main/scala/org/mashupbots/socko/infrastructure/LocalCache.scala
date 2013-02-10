@@ -16,7 +16,7 @@
 package org.mashupbots.socko.infrastructure
 
 import java.util.Date
-import org.mashupbots.socko.concurrentlinkedhashmap.ConcurrentLinkedHashMap
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap
 
 /**
  * Local in-memory cache based on Google's [[http://code.google.com/p/concurrentlinkedhashmap ConcurrentLinkedHashMap]].
