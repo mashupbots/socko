@@ -136,8 +136,7 @@ class WebServer(
       }
     })
 
-    log.info("Socko server '{}' started on {}:{}",
-      Array[AnyRef](config.serverName, config.hostname, config.port.toString).toArray)
+    log.info("Socko server '{}' started on {}:{}", config.serverName, config.hostname, config.port.toString)
   }
 
   /**
