@@ -89,7 +89,7 @@ object SockoBuild extends Build {
   //
   lazy val root = Project(id = "socko",
                           base = file("."),
-                          settings = defaultSettings) aggregate(webserver, examples)
+                          settings = defaultSettings) aggregate(webserver, buildtools, examples)
 
   lazy val webserver = Project(id = "socko-webserver",
                          base = file("socko-webserver"),
@@ -102,9 +102,16 @@ object SockoBuild extends Build {
                            pomExtra := sockoPomExtra
                          ))
                          
+  lazy val buildtools = Project(id = "socko-buildtools",
+                         base = file("socko-buildtools"),
+                         dependencies = Seq(webserver),
+                         settings = defaultSettings ++ Seq(
+                           libraryDependencies ++= Dependencies.buildtools
+                         ))  
+
   lazy val examples = Project(id = "socko-examples",
                          base = file("socko-examples"),
-                         dependencies = Seq(webserver),
+                         dependencies = Seq(webserver, buildtools),
                          settings = defaultSettings ++ doNotPublishSettings ++ Seq(
                            libraryDependencies ++= Dependencies.examples
                          ))  
@@ -122,6 +129,10 @@ object Dependencies {
     Dependency.logback, Dependency.scalatest
   )
   
+  val buildtools = Seq(
+    Dependency.ant, Dependency.logback, Dependency.scalatest
+  )  
+
   val examples = Seq(
     Dependency.logback
   )  
@@ -135,10 +146,11 @@ object Dependency {
   val akkaActor     = "com.typesafe.akka"                       %% "akka-actor"                  % V.Akka
   val akkaSlf4j     = "com.typesafe.akka"                       %% "akka-slf4j"                  % V.Akka
   val akkaTestKit   = "com.typesafe.akka"                       %% "akka-testkit"                % V.Akka % "test"
-  val netty         = "io.netty"                                % "netty"                        % "3.6.2.Final"
+  val ant           = "org.apache.ant"                          % "ant"                          % "1.8.4"
   val concurrentmap = "com.googlecode.concurrentlinkedhashmap"  % "concurrentlinkedhashmap-lru"  % "1.3.2"
-  val nextProtoNeg  = "org.eclipse.jetty.npn"                   % "npn-api"                      % "1.1.0.v20120525"
   val logback       = "ch.qos.logback"                          % "logback-classic"              % "1.0.9" % "runtime"
+  val netty         = "io.netty"                                % "netty"                        % "3.6.2.Final"
+  val nextProtoNeg  = "org.eclipse.jetty.npn"                   % "npn-api"                      % "1.1.0.v20120525"
   val scalatest     = "org.scalatest"                           % "scalatest_2.10"               % "2.0.M5b" % "test"
 }
 
