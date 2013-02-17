@@ -109,6 +109,13 @@ object SockoBuild extends Build {
                            libraryDependencies ++= Dependencies.buildtools
                          ))  
 
+  lazy val rest = Project(id = "socko-rest",
+                         base = file("socko-rest"),
+                         dependencies = Seq(webserver),
+                         settings = defaultSettings ++ Seq(
+                           libraryDependencies ++= Dependencies.rest
+                         ))  
+
   lazy val examples = Project(id = "socko-examples",
                          base = file("socko-examples"),
                          dependencies = Seq(webserver, buildtools),
@@ -133,6 +140,10 @@ object Dependencies {
     Dependency.ant, Dependency.logback, Dependency.scalatest
   )  
 
+  val rest = Seq(
+    Dependency.swagger, Dependency.logback, Dependency.scalatest
+  )  
+
   val examples = Seq(
     Dependency.logback
   )  
@@ -152,6 +163,7 @@ object Dependency {
   val netty         = "io.netty"                                % "netty"                        % "3.6.2.Final"
   val nextProtoNeg  = "org.eclipse.jetty.npn"                   % "npn-api"                      % "1.1.0.v20120525"
   val scalatest     = "org.scalatest"                           % "scalatest_2.10"               % "2.0.M5b" % "test"
+  val swagger       = "com.wordnik"                             % "swagger-project_2.10.0"       % "1.2.0"
 }
 
 
