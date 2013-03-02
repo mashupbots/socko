@@ -17,6 +17,37 @@ package org.mashupbots.socko
 
 /**
  * REST API processor for Socko
+ * 
+ * 
+ * All HTTP operations for a particular path should be grouped in a single api object. There should be no duplicate HTTP methods for a single path.
+ * @Get
+ * @Post
+ * @Put
+ * @Delete
+ * 
+ * @QueryString
+ * @Path
+ * @Header
+ * @Body
+ * 
+ * @RestGet(
+ * 	Name="",		//Nickname
+ * 	UriTemplate="/user/{id}",
+ * 	Description="",
+ * 	Notes="",
+ * 	Actor="",
+ * 	Deprecated = "",
+ * 	ResponseClass="",  // Default to GetUserResponse by convention, void, primitive, complex
+ * 	ErrorResponses="Code=Reason,Code=Reason"
+ * )
+ * case class GetUserRequest(ctx:RequestContext, 
+ * 	@Path(Name="default to val name", Description="", Required="", AllowableValues="") id:String
+ * )
+ * 
+ * case class GetUserResponse(ctx:ResponseContext,
+ * 	User user
+ * )
+ * 
  */
 package org.mashupbots.socko.rest {
   

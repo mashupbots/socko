@@ -21,12 +21,34 @@ import java.util.UUID
 /**
  * Context of the rest request
  *
- * @param request The request to which this is a response
+ * @param requestContext The request context to which this is a response
  * @param status HTTP status
  * @param headers HTTP response headers
  */
 case class RestResponseContext(
-  request: RestRequest,
-  status: Int = 200,
-  headers: Map[String, String] = Map.empty) {
+  requestContext: RestRequestContext,
+  status: Int,
+  headers: Map[String, String]) {
+
+  /**
+   * Alternative constructor where you need only specify the request
+   * 
+   * @param request The request to which this is a response
+   * @param status HTTP status
+   * @param headers HTTP response headers
+   */
+  def this(request: RestRequest,
+    status: Int,
+    headers: Map[String, String]) =
+    this(request.context, status, headers)
+
+  /**
+   * Alternative constructor where you need only specify the request.
+   * The status is set to 200 and no custom response headers are set.
+   * 
+   * @param request The request to which this is a response
+   */
+  def this(request: RestRequest) =
+    this(request.context, 200, Map.empty[String, String])
+
 }

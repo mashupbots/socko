@@ -163,7 +163,7 @@ object Dependency {
   val netty         = "io.netty"                                % "netty"                        % "3.6.2.Final"
   val nextProtoNeg  = "org.eclipse.jetty.npn"                   % "npn-api"                      % "1.1.0.v20120525"
   val scalatest     = "org.scalatest"                           % "scalatest_2.10"               % "2.0.M5b" % "test"
-  val swagger       = "com.wordnik"                             % "swagger-project_2.10.0"       % "1.2.0"
+  val swagger       = "com.wordnik"                             % "swagger-core_2.10.0"          % "1.2.0"
 }
 
 
