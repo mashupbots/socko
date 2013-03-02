@@ -189,8 +189,10 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
   private val dateFormatter = DateUtil.rfc1123DateFormatter
 
   /**
+   * Process the request.
+   *
    * Only takes [[org.mashupbots.socko.handlers.StaticFileRequest]] or
-   * messages.
+   * [[org.mashupbots.socko.handlers.StaticResourceRequest]] messages.
    */
   def receive = {
     case request: StaticFileRequest => {
@@ -211,15 +213,23 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
    */
   private def processStaticResourceRequest(resourceRequest: StaticResourceRequest): Unit = {
     val event = resourceRequest.event
-    // Check if it is in the cache
-    val cachedContent = cache.get(resourceRequest.cacheKey)
-    if (cachedContent.isDefined) {
-      cachedContent.get match {
-        case res: CachedResource => sendResource(resourceRequest, res)
+    try {
+      // Check if it is in the cache
+      val cachedContent = cache.get(resourceRequest.cacheKey)
+      if (cachedContent.isDefined) {
+        cachedContent.get match {
+          case res: CachedResource => sendResource(resourceRequest, res)
+        }
+      } else {
+        cacheAndSendResource(resourceRequest)
       }
-    } else {
-      cacheAndSendResource(resourceRequest)
+    } catch {
+      case e: Exception => {
+        log.error(e, "Error processing static resource request")
+        event.response.write(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+      }
     }
+
   }
 
   /**
@@ -331,15 +341,22 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
     val filePath = file.getAbsolutePath
     val event = fileRequest.event
 
-    // Check if it is in the cache
-    val cachedContent = cache.get(fileRequest.cacheKey)
-    if (cachedContent.isDefined) {
-      cachedContent.get match {
-        case smallFile: CachedSmallFile => sendSmallFile(fileRequest, smallFile)
-        case bigFile: CachedBigFile => sendBigFile(fileRequest, bigFile)
+    try {
+      // Check if it is in the cache
+      val cachedContent = cache.get(fileRequest.cacheKey)
+      if (cachedContent.isDefined) {
+        cachedContent.get match {
+          case smallFile: CachedSmallFile => sendSmallFile(fileRequest, smallFile)
+          case bigFile: CachedBigFile => sendBigFile(fileRequest, bigFile)
+        }
+      } else {
+        cacheAndSendFile(fileRequest)
       }
-    } else {
-      cacheAndSendFile(fileRequest)
+    } catch {
+      case e: Exception => {
+        log.error(e, "Error processing static file request")
+        event.response.write(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+      }
     }
   }
 
