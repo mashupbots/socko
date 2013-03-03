@@ -19,13 +19,33 @@ import akka.event.Logging
 import org.mashupbots.socko.events.HttpRequestEvent
 
 /**
+ * Collection of meta data about REST endpoints
+ *
+ * @param endpoints Array of endpoints
+ */
+case class RestRegistry(
+  endPoints: Array[RestEndPoint]) {
+
+}
+
+/**
+ * Support HTTP methods
+ */
+object RestMethod extends Enumeration {
+  type RestMethod = Value
+  val GET = Value
+  val POST = Value
+  val PUT = Value
+  val DELETE = Value
+}
+
+/**
  * Encapsulates a REST endpoint that we can use to match incoming requests
  */
 case class RestEndPoint(
-  method: String,
+  method: RestMethod.Value,
   pathSegements: Array[PathSegment],
   actorPath: String) {
-
 }
 
 /**
@@ -35,12 +55,12 @@ case class RestEndPoint(
  * {{{
  * // '{Id}'
  * PathSegment("Id", true)
- * 
+ *
  * // 'user'
  * PathSegment("user", false)
  * }}}
- * 
- * @param name Name of the variable or static segment 
+ *
+ * @param name Name of the variable or static segment
  * @param isVariable Flag to denote if this segment is variable and is intended to be bound to a variable or not.
  *   If not, it is a static segment
  */

@@ -21,6 +21,20 @@ import java.util.Date
 //*********************************************************************************************************************
 
 /**
+ * Standard definitions for our operations
+ */
+trait RestOperation {
+  
+  /**
+   * HTTP method
+   */
+  def method: String
+  
+  
+}
+
+
+/**
  * HTTP GET REST end point annotation
  *
  * ==Example Usage==
@@ -75,11 +89,15 @@ case class RestGet(
   uriTemplate: String,
   actorPath: String,
   responseClass: String = "",
-  name: String = "getPets",
+  name: String = "",
   description: String = "",
   notes: String = "",
   depreciated: Boolean = false,
-  errorResponses: Map[String, String] = Map.empty) extends scala.annotation.StaticAnnotation
+  errorResponses: Map[String, String] = Map.empty) extends scala.annotation.StaticAnnotation with RestOperation {
+  
+  val method: String = "GET"
+    
+}
 
 //*********************************************************************************************************************
 // Parameters

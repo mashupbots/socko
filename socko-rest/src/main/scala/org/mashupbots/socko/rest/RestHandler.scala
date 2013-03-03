@@ -58,5 +58,5 @@ case class RestHandlerConfig(
  */
 object SwaggerVersion extends Enumeration {
   type SwaggerVersion = Value
-  val V1_1 = Value
+  val V1_1 = Value("1.1")
 }

@@ -24,8 +24,9 @@ import org.scalatest.GivenWhenThen
 import java.util.TimeZone
 import java.util.Calendar
 import java.text.ParseException
+import scala.reflect.runtime.{universe => ru}
 
-class UtilSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
+class UtilSpec extends WordSpec with ShouldMatchers with GivenWhenThen with Logger {
 
   "DateUtil" should {
     "format dates" in {
@@ -60,30 +61,51 @@ class UtilSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
     }
 
     "return null resource not found" in {
-      IOUtil.readResource("not/found") should be (null)
+      IOUtil.readResource("not/found") should be(null)
     }
-    
+
     "test for absolute paths" in {
-      IOUtil.isAbsolutePath("/tmp") should be (true)
-      IOUtil.isAbsolutePath("relative/1/2/3") should be (false)
-      IOUtil.isAbsolutePath("c:\\") should be (true)
-      IOUtil.isAbsolutePath("c:\\test") should be (true)
-    } 
+      IOUtil.isAbsolutePath("/tmp") should be(true)
+      IOUtil.isAbsolutePath("relative/1/2/3") should be(false)
+      IOUtil.isAbsolutePath("c:\\") should be(true)
+      IOUtil.isAbsolutePath("c:\\test") should be(true)
+    }
   }
-  
+
   "HashUtil" should {
     "md5 hash some bytes" in {
       val s = HashUtil.md5("some random text")
-      s should be ("07671a038c0eb43723d421693b073c3b")
+      s should be("07671a038c0eb43723d421693b073c3b")
     }
   }
-  
+
   "MimeTypes" should {
     "identify common file type" in {
-      MimeTypes.get("test.html") should be ("text/html")
-      MimeTypes.get("test.js") should be ("application/javascript")
-      MimeTypes.get("test.txt") should be ("text/plain")
-      MimeTypes.get("test.css") should be ("text/css")
+      MimeTypes.get("test.html") should be("text/html")
+      MimeTypes.get("test.js") should be("application/javascript")
+      MimeTypes.get("test.txt") should be("text/plain")
+      MimeTypes.get("test.css") should be("text/css")
     }
+  }
+
+  "ReflectUtils" should {
+    "find classes in a JAR" in {
+      val annotations = ReflectUtil.getClasses(getClass().getClassLoader(), "scala.annotation")
+      annotations.length should be > 0
+      annotations.foreach(c => log.debug("Reflected class in JAR {}", c.getName()))
+      
+      val mirror = ru.runtimeMirror(getClass.getClassLoader)
+      annotations.foreach(c => {
+        val cc = mirror.classSymbol(c)
+        log.debug("Mirror class {}. Annotations: {} {}", c.getName(), cc.annotations)
+      })
+    }
+    
+    "find classes in a directory" in {
+      val clz = ReflectUtil.getClasses(getClass().getClassLoader(), "org.mashupbots.socko.infrastructure")
+      clz.length should be > 0
+      clz.foreach(c => log.debug("Reflected class in directory {}", c.getName()))
+    }
+    
   }
 }

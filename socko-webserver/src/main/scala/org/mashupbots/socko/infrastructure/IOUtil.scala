@@ -24,6 +24,7 @@ import java.nio.charset.Charset
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import scala.language.reflectiveCalls
+import scala.util.matching.Regex
 
 /**
  * Utility IO methods
@@ -119,7 +120,7 @@ object IOUtil {
    * Auto close streams with [[http://stackoverflow.com/questions/2207425/what-automatic-resource-management-alternatives-exists-for-scala automatic resource management]]
    *
    * Also see Programming in Scala Second Edition Chapter 20.8.
-   * 
+   *
    * Example usage
    * {{{
    * using(new BufferedReader(new FileReader("file"))) { r =>
@@ -195,5 +196,34 @@ object IOUtil {
    */
   def isAbsolutePath(path: String): Boolean = {
     path.startsWith(File.separator) || path.matches("[A-Za-z]:\\\\.*")
+  }
+
+  /**
+   * Returns a list of all files in a directory and its sub-directories
+   *
+   * @param f Directory to look under
+   */
+  def recursiveListFiles(f: File): Array[File] = {
+    if (f == null) Array.empty
+    else {
+      val these = f.listFiles
+      these ++ these.filter(_.isDirectory).flatMap(recursiveListFiles(_))
+    }
+  }
+
+  /**
+   * Returns a list of all files in a directory and its sub-directories matching the specified regular expression
+   *
+   * @param f Directory to look under
+   * @param r Regular expression to match file names
+   * @see http://stackoverflow.com/questions/2637643/how-do-i-list-all-files-in-a-subdirectory-in-scala
+   */
+  def recursiveListFiles(f: File, r: Regex): Array[File] = {
+    if (f == null) Array.empty
+    else {
+      val these = f.listFiles
+      val good = these.filter(f => r.findFirstIn(f.getName).isDefined)
+      good ++ these.filter(_.isDirectory).flatMap(recursiveListFiles(_, r))
+    }
   }
 }
