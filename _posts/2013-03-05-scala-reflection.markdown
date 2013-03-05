@@ -39,7 +39,7 @@ Now, if we want to use annotations, then we will need to use reflection.
 It has taken me a while to get up to speed with reflection and here are a couple of links illustrating
 what I've learnt so far.
 
-  - [Scala 2.10 Runtime Reflection from a Class Name](http://www.veebsbraindump.com/2013/03/scala-2-10-runtime-reflection-from-a-class-name/)
-  - [Reflecting Annotations in Scala 2.10](http://www.veebsbraindump.com/2013/01/reflecting-annotations-in-scala-2-10/)
+ - [Scala 2.10 Runtime Reflection from a Class Name](http://www.veebsbraindump.com/2013/03/scala-2-10-runtime-reflection-from-a-class-name/)
+ - [Reflecting Annotations in Scala 2.10](http://www.veebsbraindump.com/2013/01/reflecting-annotations-in-scala-2-10/)
 
 
