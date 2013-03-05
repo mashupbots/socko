@@ -40,7 +40,7 @@ private administraion/monitoring API.
 
 ## Lightweight (assuming you are already using Akka)
 
-The core socko-webserver module in V0.3 has less than 2562 lines of code.
+The core socko-webserver module in the upcoming V0.3 has less than 2562 lines of code.
     
 
 ## Supportive of HTTP and HTML5 Standards
