@@ -5,8 +5,7 @@ summary: What's been happening?
 author: Vibul
 ---
 
-Finally my day job is returning to a normal day job. Since November last year up until last week, it has been a
-a day/night/weekend job.
+Finally my day job is returning to a normal day job. Since November last year up until last week, it has been a day/night/weekend job.
 
 I have started playing around with Scala 2.10 reflection and planning to use it in the Socko REST handler implementation.
 
