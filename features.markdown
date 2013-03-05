@@ -40,10 +40,8 @@ private administraion/monitoring API.
 
 ## Lightweight (assuming you are already using Akka)
 
-V0.2 has less than 4000 lines of Scala and Java code.
+The core socko-webserver module in V0.3 has less than 2562 lines of code.
     
-Socko has no external dependencies (outside Netty and Akka 2)
-
 
 ## Supportive of HTTP and HTML5 Standards
  * HTTP/S and WebSockets
