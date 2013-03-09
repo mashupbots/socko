@@ -15,12 +15,13 @@
 //
 package org.mashupbots.socko.rest
 
-trait RestRequest {
+import scala.reflect.runtime.{ universe => ru }
+import org.mashupbots.socko.infrastructure.Logger
 
-  /**
-   * Context of this request. Contains information like endpoints and headers
-   */
-  def context: RestRequestContext
-  
+case class RestOperation(
+    declaration: RestDeclaration,
+    requestClass: ru.ClassSymbol,
+    responseClass: ru.ClassSymbol) {
+
 }
 

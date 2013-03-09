@@ -15,16 +15,16 @@
 //
 package org.mashupbots.socko.infrastructure
 
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.WordSpec
-import java.util.Date
-import java.util.GregorianCalendar
-import java.net.InetSocketAddress
-import org.scalatest.GivenWhenThen
-import java.util.TimeZone
-import java.util.Calendar
 import java.text.ParseException
+import java.util.Calendar
+import java.util.GregorianCalendar
+import java.util.TimeZone
+
 import scala.reflect.runtime.{universe => ru}
+
+import org.scalatest.GivenWhenThen
+import org.scalatest.WordSpec
+import org.scalatest.matchers.ShouldMatchers
 
 class UtilSpec extends WordSpec with ShouldMatchers with GivenWhenThen with Logger {
 

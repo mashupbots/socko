@@ -17,108 +17,180 @@ package org.mashupbots.socko.rest
 import akka.actor.Actor
 import akka.event.Logging
 import org.mashupbots.socko.events.HttpRequestEvent
+import org.mashupbots.socko.infrastructure.ReflectUtil
+import scala.reflect.runtime.{ universe => ru }
+import org.mashupbots.socko.infrastructure.Logger
 
 /**
  * Collection of meta data about REST endpoints
  *
- * @param endpoints Array of endpoints
+ * @param operations REST operations that will be used for dispatching requests
+ * @param actorLookup Map of key as defined in the RestEndPoint annotation and the
+ *   corresponding actor paths
  */
 case class RestRegistry(
-  endPoints: Array[RestEndPoint]) {
+  operations: Seq[RestOperation],
+  actorLookup: Map[String, String]) {
 
 }
 
 /**
- * Support HTTP methods
+ * Factory to instance a registry
  */
-object RestMethod extends Enumeration {
-  type RestMethod = Value
-  val GET = Value
-  val POST = Value
-  val PUT = Value
-  val DELETE = Value
-}
-
-/**
- * Encapsulates a REST endpoint that we can use to match incoming requests
- */
-case class RestEndPoint(
-  method: RestMethod.Value,
-  pathSegements: Array[PathSegment],
-  actorPath: String) {
-}
-
-/**
- * Encapsulates a path segment
- *
- * ==Example Usage==
- * {{{
- * // '{Id}'
- * PathSegment("Id", true)
- *
- * // 'user'
- * PathSegment("user", false)
- * }}}
- *
- * @param name Name of the variable or static segment
- * @param isVariable Flag to denote if this segment is variable and is intended to be bound to a variable or not.
- *   If not, it is a static segment
- */
-case class PathSegment(
-  name: String,
-  isVariable: Boolean) {
+object RestRegistry extends Logger {
 
   /**
-   * A path segment matches if either path segments are variable, or if
-   * both path segments are not variable, then the names must match
+   * Instance registry using the classes under the specified package name and
+   * the class loader of this class
+   *
+   * @param pkg Name of package where your annotated REST request and response classes
+   *   are defined
    */
-  def pathMatch(obj: Any): Boolean = {
-    obj match {
-      case p: PathSegment => {
-        if (!isVariable && !p.isVariable) name == name
-        else true
+  def apply(pkg: String): RestRegistry = {
+    apply(getClass().getClassLoader(), List(pkg), Map.empty[String, String])
+  }
+
+  /**
+   * Instance a new registry using the classes under the specified package name and
+   * discoverable by the specified class loader
+   *
+   * @param classLoader Class loader use to discover the classes in the specified package
+   * @param pkg Name of package where your annotated REST request and response classes
+   *   are defined
+   * @param actorLookup Map of key as defined in the RestEndPoint annotation and the
+   *   corresponding actor paths
+   */
+  def apply(classLoader: ClassLoader, pkg: String, actorLookup: Map[String, String]): RestRegistry = {
+    apply(classLoader, List(pkg), actorLookup)
+  }
+
+  /**
+   * Instance a new registry using the classes under the specified package names and
+   * discoverable by the specified class loader
+   *
+   * @param classLoader Class loader use to discover the classes in the specified package
+   * @param pkg List of package names under which your annotated REST request and response
+   *   classes are defined
+   * @param actorLookup Map of key as defined in the RestEndPoint annotation and the
+   *   corresponding actor paths
+   */
+  def apply(classLoader: ClassLoader, pkg: Seq[String], actorLookup: Map[String, String]): RestRegistry = {
+    val rm = ru.runtimeMirror(classLoader)
+    val classes = pkg.flatMap(packageName => ReflectUtil.getClasses(classLoader, packageName))
+    val classSymbols = classes.map(clz => rm.classSymbol(clz))
+
+    val restOperations = for (
+      cs <- classSymbols;
+      op = findRestOperation(rm, cs);
+      resp = findRestResponse(op, cs, classSymbols);
+      if (op.isDefined && resp.isDefined)
+    ) yield {
+      log.debug("Registering ")
+      RestOperation(op.get, cs, cs)
+    }
+
+    RestRegistry(restOperations, actorLookup)
+  }
+
+  private val typeRestRequest = ru.typeOf[RestRequest]
+  private val typeRestResponse = ru.typeOf[RestResponse]
+  private val typeRestOperation = ru.typeOf[RestDeclaration]
+
+  /**
+   * Finds a [[org.mashupbots.socko.rest.RestOperation]] annotation in a
+   * [[org.mashupbots.socko.rest.RestRequest]].
+   *
+   * @param rm Runtime mirror
+   * @param cs class symbol of class to check
+   * @returns An instance of the annotation class or `None` if annotation not found
+   */
+  def findRestOperation(rm: ru.RuntimeMirror, cs: ru.ClassSymbol): Option[RestDeclaration] = {
+    val isRestRequest = cs.toType <:< typeRestRequest;
+    val annotationType = cs.annotations.find(a => a.tpe <:< typeRestOperation);
+    if (!isRestRequest && annotationType.isEmpty) {
+      None
+    } else if (isRestRequest && annotationType.isEmpty) {
+      log.warn("{} extends RestRequest but is not annotated with a RestOperation ", cs.fullName)
+      None
+    } else if (!isRestRequest && annotationType.isDefined) {
+      log.warn("{} does not extend RestRequest but is annotated with a RestOperation ", cs.fullName)
+      None
+    } else {
+      val a = annotationType.get
+      val aa = a.scalaArgs
+      val bb = a.scalaArgs(0)
+      val xx = a.scalaArgs(2)
+      val args = a.scalaArgs.map(a => a.productElement(0).asInstanceOf[ru.Constant].value)
+
+      val classMirror = rm.reflectClass(a.tpe.typeSymbol.asClass)
+      val constructorMethodSymbol = a.tpe.declaration(ru.nme.CONSTRUCTOR).asMethod
+      val constructorMethodMirror = classMirror.reflectConstructor(constructorMethodSymbol)
+
+      val restOperation = constructorMethodMirror(args: _*).asInstanceOf[RestDeclaration]
+      Some(restOperation)
+    }
+  }
+
+  /**
+   * Finds a corresponding response class given the operation and the request
+   *
+   * If operation `responseClass` is empty, the assumed response class is the same class path
+   * and name as the request class; but with `Request` suffix replaced with `Response`.
+   *
+   * If not empty, we will try to find the specified response class
+   *
+   * @param op RestOperation
+   * @param requestClassSymbol Class Symbol for the request class
+   * @param classSymbols Sequence of class symbols to check for the response class
+   * @returns the response class symbol or `None` if not found
+   */
+  def findRestResponse(
+    op: Option[RestDeclaration],
+    requestClassSymbol: ru.ClassSymbol,
+    classSymbols: Seq[ru.ClassSymbol]): Option[ru.ClassSymbol] = {
+
+    val requestClassName = requestClassSymbol.fullName;
+
+    if (op.isEmpty) {
+      None
+    } else if (op.get.responseClass == "") {
+      // Not specified so trying finding by replacing Request in the class name
+      // with Response
+      val responseClassName = if (requestClassName.endsWith("Request")) {
+        requestClassName.substring(0, requestClassName.length - 7) + "Response"
+      } else {
+        requestClassName + "Response"
       }
-      case _ => false
+
+      val responseClassSymbol = classSymbols.find(cs => cs.fullName == requestClassName)
+      if (responseClassSymbol.isEmpty) {
+        log.warn("Cannot find corresponding RestResponse {} for RestRequest {}{}",
+          responseClassName, requestClassName, "")
+      }
+      responseClassSymbol
+    } else {
+      // Specified so let's try to find it
+      if (op.get.responseClass.contains(".")) {
+        // Full path specified because we have detected a . in the name
+        val responseClassSymbol = classSymbols.find(cs => cs.fullName == op.get.responseClass)
+        if (responseClassSymbol.isEmpty) {
+          log.warn("Cannot find corresponding RestResponse {} for RestRequest {}{}",
+            op.get.responseClass, requestClassName, "")
+        }
+        responseClassSymbol
+      } else {
+        // Only class name specified
+        val pkgName = requestClassSymbol.fullName.substring(0, requestClassSymbol.fullName.lastIndexOf('.'))
+        val fullClassName = pkgName + op.get.responseClass
+        val responseClassSymbol = classSymbols.find(cs => cs.fullName == fullClassName)
+        if (responseClassSymbol.isEmpty) {
+          log.warn("Cannot find corresponding RestResponse {} for RestRequest {}{}",
+            fullClassName, requestClassName, "")
+        }
+        responseClassSymbol
+      }
     }
   }
 }
 
-/**
- * Factory to parse a string into a path segment
- */
-object PathSegment {
 
-  /**
-   * Parses a string into a path segment
-   *
-   * A string is a variable if it is in the format: `{name}`.  The `name` part will be put in the
-   * name field of the path segment
-   *
-   * @param s string to parse
-   */
-  def apply(s: String): PathSegment =
-    if (s == null || s.length == 0) throw new IllegalArgumentException("Path segment cannot be null or empty")
-    else if (s.startsWith("{") && s.endsWith("}")) PathSegment(s.substring(1, s.length - 2), true)
-    else PathSegment(s, false)
-}
-
-/**
- * Factory to parse a URI into its path segments
- */
-object PathSegments {
-
-  /**
-   * Parses a URI into its path segments
-   *
-   * @param uri URI to parse
-   */
-  def apply(uri: String): Array[PathSegment] = {
-    if (uri == null || uri.length == 0)
-      throw new IllegalArgumentException("URI cannot be null or empty")
-
-    val s = if (uri.startsWith("/")) uri.substring(1) else uri
-    val ss = s.split("/")
-    val segments = ss.map(s => PathSegment(s))
-    segments
-  }
-}

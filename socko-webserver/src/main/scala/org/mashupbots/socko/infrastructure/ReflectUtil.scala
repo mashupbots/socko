@@ -35,7 +35,7 @@ object ReflectUtil extends Logger {
    * @param packageName Name of package. For example, `org.mypackage`.
    * @see http://stackoverflow.com/questions/176527/how-can-i-enumerate-all-classes-in-a-package-and-add-them-to-a-list
    */
-  def getClasses(classLoader: ClassLoader, packageName: String): Array[Class[_]] = {
+  def getClasses(classLoader: ClassLoader, packageName: String): List[Class[_]] = {
 
     val relPath = packageName.replace('.', '/')
     val resource = classLoader.getResource(relPath)
@@ -54,9 +54,9 @@ object ReflectUtil extends Logger {
         null
     }
 
-    val classNames = if (directory != null && directory.exists()) {
+    val classNames: List[String] = if (directory != null && directory.exists()) {
       // If the classes are in a directory (as opposed to a JAR file)
-      val classFiles = IOUtil.recursiveListFiles(directory, """^[\d\w]+\.class$""".r)
+      val classFiles = IOUtil.recursiveListFiles(directory, """^[\d\w]+\.class$""".r).toList
       classFiles.map(f => {
         val fileName = f.getName()
         val className = packageName + "." + fileName.substring(0, fileName.length() - 6)
@@ -77,9 +77,10 @@ object ReflectUtil extends Logger {
         log.debug("Found class in JAR {}", className)
         className
       }
-      i.toArray
+      i.toList
     }
 
+    // Convert 
     def getClass(className: String): Option[Class[_]] = {
       try {
         Some(Class.forName(className))
@@ -90,12 +91,13 @@ object ReflectUtil extends Logger {
       }
     }
 
+    // Convert class names to classes
     val classes = for (
       className <- classNames;
       clz = getClass(className);
       if (clz.isDefined)
     ) yield clz.get
-    classes.toArray
+    classes.toList
   }
 
 } 

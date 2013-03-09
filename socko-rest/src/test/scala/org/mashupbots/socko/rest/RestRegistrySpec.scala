@@ -15,12 +15,19 @@
 //
 package org.mashupbots.socko.rest
 
-trait RestRequest {
+import org.mashupbots.socko.infrastructure.Logger
+import org.scalatest.GivenWhenThen
+import org.scalatest.WordSpec
+import org.scalatest.matchers.ShouldMatchers
 
-  /**
-   * Context of this request. Contains information like endpoints and headers
-   */
-  def context: RestRequestContext
-  
+class RestRegistrySpec extends WordSpec with ShouldMatchers with GivenWhenThen with Logger {
+
+  "RestRegistrySpec" should {
+    
+    "correctly find operations" in  {
+      val r = RestRegistry("org.mashupbots.socko.rest.test1")
+      r.operations.length should be (3)
+    }
+    
+  }
 }
-

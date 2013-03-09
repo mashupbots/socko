@@ -15,25 +15,11 @@
 package org.mashupbots.socko.rest
 
 import java.util.Date
+import scala.annotation.Annotation
 
 //*********************************************************************************************************************
-// Operations
+// Declarations
 //*********************************************************************************************************************
-
-/**
- * Standard definitions for our operations
- */
-trait RestOperation {
-  
-  /**
-   * HTTP method
-   */
-  def method: String
-  
-  
-}
-
-
 /**
  * HTTP GET REST end point annotation
  *
@@ -46,7 +32,7 @@ trait RestOperation {
  * )
  * case class GetPetRequest()
  * }}}
- * 
+ *
  * Simple GET with lookup of actor path at bootup time
  * {{{
  * @RestGet(
@@ -55,7 +41,7 @@ trait RestOperation {
  * )
  * case class GetPetRequest()
  * }}}
- * 
+ *
  * Get with a path parameter.
  * {{{
  * @RestGet(
@@ -69,15 +55,15 @@ trait RestOperation {
  *   )
  *   petId: String
  * )
- * }}} 
- *  
+ * }}}
+ *
  * @param uriTemplate Template URI.
  * @param actorPath Path to actor to which this request will be sent for processing.
  *   You can also bind your request to an actor at bootup time using the `lookup:{key}` prefix.
  *   The `key` is the key to a map of actor names passed into the request processor.
- * @param responseClass Optional class path of the response class. Defaults to the same class path and name
- *   as the request class; but with `Request` suffix replaced with `Response`. For `MyRestRequest`, the default
- *   response class would be `MyRestResponse`.
+ * @param responseClass Optional class path of the response class. If empty, the assumed respoinse class
+ *   is the same class path and name as the request class; but with `Request` suffix replaced with `Response`.
+ *   For `MyRestRequest`, the default response class would be `MyRestResponse`.
  * @param name Optional field provided by the server for the convenience of the UI and client code generator.
  *   Defaults to the name of the request class without the `Request` suffix.
  * @param description Optional short description. Less than 60 characters is recommended.
@@ -93,10 +79,10 @@ case class RestGet(
   description: String = "",
   notes: String = "",
   depreciated: Boolean = false,
-  errorResponses: Map[String, String] = Map.empty) extends scala.annotation.StaticAnnotation with RestOperation {
-  
+  errorResponses: Map[String, String] = Map.empty) extends scala.annotation.StaticAnnotation with RestDeclaration {
+
   val method: String = "GET"
-    
+
 }
 
 //*********************************************************************************************************************
@@ -136,7 +122,7 @@ case class AllowableFloatValues(
   min: Option[Float] = None,
   max: Option[Float] = None,
   values: List[Float] = List.empty) extends AllowableValues
-  
+
 /**
  * Allowable double floating point values
  */
@@ -154,7 +140,7 @@ case class AllowableDateValues(
   values: List[Date] = List.empty) extends AllowableValues
 
 /**
- * Path parameter annotation. Binds this parameter a value specified on the URI template. 
+ * Path parameter annotation. Binds this parameter a value specified on the URI template.
  *
  * ==Example Usage==
  * {{{
@@ -170,7 +156,7 @@ case class AllowableDateValues(
  *   petId: String
  * )
  * }}}
- * 
+ *
  * @param name Optional name of the parameter. Defaults to the bound variable name.  Must match a variable
  *   specified in the URI template of the operation.
  * @param description Optional description of this parameter
@@ -180,9 +166,9 @@ case class PathParam(
   name: String = "",
   description: String = "",
   allowableValues: Option[AllowableValues] = None) extends scala.annotation.StaticAnnotation
-  
+
 /**
- * Query string parameter annotation. Binds this parameter a value specified in the HTTP request query string. 
+ * Query string parameter annotation. Binds this parameter a value specified in the HTTP request query string.
  *
  * ==Example Usage==
  * {{{
@@ -196,23 +182,23 @@ case class PathParam(
  *     description = "Name of the owner of the pet"
  *   )
  *   owner: Option[String],
- * 
+ *
  *   @QueryParam(
  *     name = "r",
  *     description = "Maximum number of rows to return"
  *   )
  *   rows: Option[Int]
- * 
+ *
  * )
  * }}}
- * 
+ *
  * The following URI requests will be valid:
  * {{{
  * http://mydomain.com/pets
  * http://mydomain.com/pets?owner=Jim
  * http://mydomain.com/pets?owner=Jack&r=50
  * }}}
- * 
+ *
  * @param name Optional name of the query string field. Defaults to the bound variable name.  This must match
  *   the query string field name to which you wish to bind.
  * @param description Optional description of this parameter
@@ -225,7 +211,7 @@ case class QueryParam(
   description: String = "",
   required: Boolean = false,
   allowableValues: Option[AllowableValues] = None) extends scala.annotation.StaticAnnotation
-  
+
 /**
  * Request header parameter annotation. Binds this parameter a value specified in the HTTP request message header
  *
@@ -243,7 +229,7 @@ case class QueryParam(
  *   sessionId: String
  * )
  * }}}
- * 
+ *
  * @param name Optional name of the header field. Defaults to the bound variable name. This must match
  *   the HTTP header name to which you wish to bind.
  * @param description Optional description of this parameter
@@ -256,7 +242,7 @@ case class HeaderParam(
   description: String = "",
   required: Boolean = false,
   allowableValues: Option[AllowableValues] = None) extends scala.annotation.StaticAnnotation
-  
+
 /**
  * Request body annotation. Binds this parameter to the data posted in the HTTP request message body
  *

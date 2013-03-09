@@ -506,7 +506,7 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
         val ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince.get)
         ifModifiedSinceDate.before(cacheEntry.lastModified)
       } catch {
-        case _ => true
+        case _: Throwable => true
       }
     })
 
