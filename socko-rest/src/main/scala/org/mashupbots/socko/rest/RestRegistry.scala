@@ -18,8 +18,8 @@ import akka.actor.Actor
 import akka.event.Logging
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.infrastructure.ReflectUtil
-import scala.reflect.runtime.{ universe => ru }
 import org.mashupbots.socko.infrastructure.Logger
+import scala.reflect.runtime.{ universe => ru }
 
 /**
  * Collection of meta data about REST endpoints
@@ -81,12 +81,12 @@ object RestRegistry extends Logger {
 
     val restOperations = for (
       cs <- classSymbols;
-      op = findRestOperation(rm, cs);
-      resp = findRestResponse(op, cs, classSymbols);
-      if (op.isDefined && resp.isDefined)
+      declaration = findRestDeclaration(rm, cs);
+      resp = findRestResponse(declaration, cs, classSymbols);
+      if (declaration.isDefined && resp.isDefined)
     ) yield {
       log.debug("Registering ")
-      RestOperation(op.get, cs, cs)
+      RestOperation(declaration.get, cs, cs)
     }
 
     RestRegistry(restOperations, actorLookup)
@@ -94,19 +94,18 @@ object RestRegistry extends Logger {
 
   private val typeRestRequest = ru.typeOf[RestRequest]
   private val typeRestResponse = ru.typeOf[RestResponse]
-  private val typeRestOperation = ru.typeOf[RestDeclaration]
 
   /**
-   * Finds a [[org.mashupbots.socko.rest.RestOperation]] annotation in a
-   * [[org.mashupbots.socko.rest.RestRequest]].
+   * Finds a [[org.mashupbots.socko.rest.RestDeclaration]] annotation in a
+   * [[org.mashupbots.socko.rest.RestRequest]] class.
    *
    * @param rm Runtime mirror
    * @param cs class symbol of class to check
    * @returns An instance of the annotation class or `None` if annotation not found
    */
-  def findRestOperation(rm: ru.RuntimeMirror, cs: ru.ClassSymbol): Option[RestDeclaration] = {
+  def findRestDeclaration(rm: ru.RuntimeMirror, cs: ru.ClassSymbol): Option[RestDeclaration] = {
     val isRestRequest = cs.toType <:< typeRestRequest;
-    val annotationType = cs.annotations.find(a => a.tpe <:< typeRestOperation);
+    val annotationType = RestDeclaration.findAnnotation(cs.annotations);
     if (!isRestRequest && annotationType.isEmpty) {
       None
     } else if (isRestRequest && annotationType.isEmpty) {
@@ -116,18 +115,7 @@ object RestRegistry extends Logger {
       log.warn("{} does not extend RestRequest but is annotated with a RestOperation ", cs.fullName)
       None
     } else {
-      val a = annotationType.get
-      val aa = a.scalaArgs
-      val bb = a.scalaArgs(0)
-      val xx = a.scalaArgs(2)
-      val args = a.scalaArgs.map(a => a.productElement(0).asInstanceOf[ru.Constant].value)
-
-      val classMirror = rm.reflectClass(a.tpe.typeSymbol.asClass)
-      val constructorMethodSymbol = a.tpe.declaration(ru.nme.CONSTRUCTOR).asMethod
-      val constructorMethodMirror = classMirror.reflectConstructor(constructorMethodSymbol)
-
-      val restOperation = constructorMethodMirror(args: _*).asInstanceOf[RestDeclaration]
-      Some(restOperation)
+      Some(RestDeclaration(annotationType.get))
     }
   }
 
@@ -145,15 +133,15 @@ object RestRegistry extends Logger {
    * @returns the response class symbol or `None` if not found
    */
   def findRestResponse(
-    op: Option[RestDeclaration],
+    declaration: Option[RestDeclaration],
     requestClassSymbol: ru.ClassSymbol,
     classSymbols: Seq[ru.ClassSymbol]): Option[ru.ClassSymbol] = {
 
     val requestClassName = requestClassSymbol.fullName;
 
-    if (op.isEmpty) {
+    if (declaration.isEmpty) {
       None
-    } else if (op.get.responseClass == "") {
+    } else if (declaration.get.responseClass == "") {
       // Not specified so trying finding by replacing Request in the class name
       // with Response
       val responseClassName = if (requestClassName.endsWith("Request")) {
@@ -170,18 +158,18 @@ object RestRegistry extends Logger {
       responseClassSymbol
     } else {
       // Specified so let's try to find it
-      if (op.get.responseClass.contains(".")) {
+      if (declaration.get.responseClass.contains(".")) {
         // Full path specified because we have detected a . in the name
-        val responseClassSymbol = classSymbols.find(cs => cs.fullName == op.get.responseClass)
+        val responseClassSymbol = classSymbols.find(cs => cs.fullName == declaration.get.responseClass)
         if (responseClassSymbol.isEmpty) {
           log.warn("Cannot find corresponding RestResponse {} for RestRequest {}{}",
-            op.get.responseClass, requestClassName, "")
+            declaration.get.responseClass, requestClassName, "")
         }
         responseClassSymbol
       } else {
         // Only class name specified
         val pkgName = requestClassSymbol.fullName.substring(0, requestClassSymbol.fullName.lastIndexOf('.'))
-        val fullClassName = pkgName + op.get.responseClass
+        val fullClassName = pkgName + declaration.get.responseClass
         val responseClassSymbol = classSymbols.find(cs => cs.fullName == fullClassName)
         if (responseClassSymbol.isEmpty) {
           log.warn("Cannot find corresponding RestResponse {} for RestRequest {}{}",

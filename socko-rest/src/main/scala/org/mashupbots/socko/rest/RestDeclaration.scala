@@ -15,77 +15,43 @@
 package org.mashupbots.socko.rest
 
 import scala.collection.JavaConversions._
+import scala.reflect.runtime.{ universe => ru }
 
 /**
  * Declaration for a REST operation
+ *
+ * @param method HTTP method
+ * @param uriTemplate URI template used for matching incoming REST requests
+ *  - The template can be an exact match like `/pets`.
+ *  - The template can have a path variable like `/pets/{petId}`. In this case, the template
+ *    will match all paths with 2 segments and the first segment being `pets`. The second
+ *    segment will be bound to a variable called `petId` using [[org.mashupbots.socko.rest.PathParam]].
+ *  - The URI template does NOT support query string.  This is defined using
+ *    [[org.mashupbots.socko.rest.QueryParam]].
+ * @param actorPath Path to actor to which this request will be sent for processing.
+ *  - You can also bind your request to an actor at bootup time using an actor path of `lookup:{key}`.
+ *  - The `key` is the key to a map of actor names passed into [[org.mashupbots.socko.rest.RestRegistry]].
+ * @param responseClass Class path of the response class.
+ *  - If empty, the assumed response class is the same class path and name as the request class;
+ *    but with `Request` suffix replaced with `Response`. For `MyRestRequest`, the default response class
+ *    that will be used in is `MyRestResponse`.
+ * @param name Name provided for the convenience of the UI and client code generator
+ *    If empty, the name of the request class will be used without the `Request` prefix.
+ * @param description Optional short description. Less than 60 characters is recommended.
+ * @param notes Optional long description
+ * @param depreciated Flag to indicate if this endpoint is depreciated or not. Defaults to `false`.
+ * @param errorResponses Map of HTTP error status codes and reasons
  */
-trait RestDeclaration {
-
-  /**
-   * HTTP method
-   */
-  def method: String
-
-  /**
-   * URI template used for matching incoming REST requests
-   *
-   * ==Exact Match==
-   * The template can be an exact match like `/pets`.
-   *
-   * ==Variable Match==
-   * The template can have a path variable like `/pets/{petId}`. In this case, the template
-   * will match all paths with 2 segments and the first segment being `pets`. The second
-   * segment will be bound to a variable called `petId` using [[org.mashupbots.socko.rest.PathParam]].
-   *
-   * ==No Query String==
-   * The URI template does NOT support query string.
-   * That is defined using [[org.mashupbots.socko.rest.QueryParam]].
-   *
-   */
-  def uriTemplate: String
-
-  /**
-   * Path to actor to which this request will be sent for processing.
-   *
-   * You can also bind your request to an actor at bootup time using an actor path of `lookup:{key}`.
-   * The `key` is the key to a map of actor names passed into [[org.mashupbots.socko.rest.RestRegistry]].
-   */
-  def actorPath: String
-
-  /**
-   * Class path of the response class.
-   *
-   * If empty, the assumed response class is the same class path and name as the request class;
-   * but with `Request` suffix replaced with `Response`.
-   *
-   * For `MyRestRequest`, the default response class would be `MyRestResponse`.
-   */
-  def responseClass: String
-
-  /**
-   * Short name provided for the convenience of the UI and client code generator
-   */
-  def name: String
-
-  /**
-   * Short description. Less than 60 characters is recommended.
-   */
-  def description: String
-
-  /**
-   * Optional long description
-   */
-  def notes: String
-
-  /**
-   * Flag to indicate if this endpoint is depreciated or not. Defaults to `false`.
-   */
-  def depreciated: Boolean
-
-  /**
-   * map of error codes and descriptions
-   */
-  def errorResponses: Map[String, String]
+case class RestDeclaration(
+  method: String,
+  uriTemplate: String,
+  actorPath: String,
+  responseClass: String,
+  name: String,
+  description: String,
+  notes: String,
+  depreciated: Boolean,
+  errorResponses: Map[Int, String]) {
 
   /**
    * The `uriTemplate` split into path segments for ease of matching
@@ -98,6 +64,72 @@ trait RestDeclaration {
     val ss = s.split("/").toList
     val segments = ss.map(s => PathSegment(s))
     segments
+  }
+}
+
+/**
+ * Companion object
+ */
+object RestDeclaration {
+
+  val restGetType = ru.typeOf[RestGet]
+
+  val uriTemplateName = ru.newTermName("uriTemplate")
+  val actorPathName = ru.newTermName("actorPath")
+  val responseClassName = ru.newTermName("responseClass")
+  val nameName = ru.newTermName("name")
+  val descriptionName = ru.newTermName("description")
+  val notesName = ru.newTermName("notes")
+  val depreciatedName = ru.newTermName("depreciated")
+  val errorResponsesName = ru.newTermName("errorResponses")
+
+  /**
+   * Instance a `RestDeclaration` using information of an annotation
+   *
+   * @param a A Rest annotation
+   * @returns [[org.mashupbots.socko.rest.RestDeclaration]]
+   */
+  def apply(a: ru.Annotation): RestDeclaration = {
+    val method = if (a.tpe =:= restGetType) {
+      "GET"
+    } else {
+      throw new IllegalStateException("Unknonw annotation type " + a.tpe.toString)
+    }
+
+    def getArg[T](n: ru.Name, defaultValue: T): T = {
+      if (a.javaArgs.contains(n)) {
+        a.javaArgs(n).asInstanceOf[ru.LiteralArgument].value.value.asInstanceOf[T];
+      } else {
+        defaultValue
+      }
+    }
+
+    val uriTemplate = getArg(uriTemplateName, "")
+    val actorPath = getArg(actorPathName, "")
+    val responseClass = getArg(responseClassName, "")
+    val name = getArg(nameName, "")
+    val description = getArg(descriptionName, "")
+    val notes = getArg(notesName, "")
+    val depreciated = getArg(depreciatedName, false)
+    val errorResponses = getArg(errorResponsesName, Array.empty[String])
+    val errorResponsesMap = errorResponses.map(e => {
+      val s = e.split("=")
+      (Integer.parseInt(s(0)), s(1).trim())
+    }).toMap
+
+    RestDeclaration(method, uriTemplate, actorPath, responseClass,
+      name, description, notes,
+      depreciated, errorResponsesMap)
+  }
+
+  /**
+   * Finds if a rest annotation is in a list of annotations
+   *
+   * @param annotations List of annotations for a class
+   * @returns The first matching rest annotation. `None` if not match
+   */
+  def findAnnotation(annotations: List[ru.Annotation]): Option[ru.Annotation] = {
+    annotations.find(a => a.tpe =:= restGetType);
   }
 }
 
