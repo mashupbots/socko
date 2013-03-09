@@ -103,6 +103,14 @@ object RestDeclaration {
         defaultValue
       }
     }
+    def getStringArrayArg(n: ru.Name, defaultValue: Array[String]): Array[String] = {
+      if (a.javaArgs.contains(n)) {
+        val aa = a.javaArgs(n).asInstanceOf[ru.ArrayArgument].args
+        aa.map(l => l.asInstanceOf[ru.LiteralArgument].value.value.asInstanceOf[String]);        
+      } else {
+        defaultValue
+      }
+    }
 
     val uriTemplate = getArg(uriTemplateName, "")
     val actorPath = getArg(actorPathName, "")
@@ -111,7 +119,7 @@ object RestDeclaration {
     val description = getArg(descriptionName, "")
     val notes = getArg(notesName, "")
     val depreciated = getArg(depreciatedName, false)
-    val errorResponses = getArg(errorResponsesName, Array.empty[String])
+    val errorResponses = getStringArrayArg(errorResponsesName, Array.empty[String])
     val errorResponsesMap = errorResponses.map(e => {
       val s = e.split("=")
       (Integer.parseInt(s(0)), s(1).trim())

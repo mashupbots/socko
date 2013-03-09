@@ -80,5 +80,5 @@ public @interface RestGet {
 	 * 
 	 * For example: <tt>400=Username not found</tt>.
 	 */
-	ErrorResponse[] errorResponses() default {};
+	String[] errorResponses() default {};
 }
