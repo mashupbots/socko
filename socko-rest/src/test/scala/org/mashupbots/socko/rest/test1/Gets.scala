@@ -34,7 +34,7 @@ case class GetPetsResponse(context: RestResponseContext) extends RestResponse {
 
 @RestGet(
   uriTemplate = "/dogs1",
-  actorPath = "/my/actor/path",
+  actorPath = "/my/actor/path1",
   responseClass = "GetFunnyNameDogResponse")
 case class GetDogs1Request(context: RestRequestContext) extends RestRequest {
 
@@ -42,7 +42,7 @@ case class GetDogs1Request(context: RestRequestContext) extends RestRequest {
 
 @RestGet(
   uriTemplate = "/dogs2",
-  actorPath = "/my/actor/path",
+  actorPath = "/my/actor/path2",
   responseClass = "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse",
   errorResponses = Array("400=username not found", "401=yet another error"))
 case class GetDogs2Request(context: RestRequestContext) extends RestRequest {

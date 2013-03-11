@@ -18,6 +18,13 @@ import akka.actor.Actor
 import akka.event.Logging
 import org.mashupbots.socko.events.HttpRequestEvent
 
+/**
+ * The REST handler matches incoming data to a [[org.mashupbots.socko.rest.RestEndPoint]] and
+ * utilizes that end point to deserialize the data, dispatches it to an actor for processing and
+ * serializes the response.
+ * 
+ *  @param config Configuration 
+ */
 class RestHandler(config: RestHandlerConfig) extends Actor {
    
   /**
@@ -36,14 +43,14 @@ class RestHandler(config: RestHandlerConfig) extends Actor {
  * @param apiVersion the version of your API
  * @param swaggerVersion Swagger definition version
  * @param basePath Full base path to your API from an external caller's point of view
- * @param actorPathMap Optional map of key/actor path. The key is specified in REST operation
+ * @param registry Optional map of key/actor path. The key is specified in REST operation
  *   `actorPath` that are prefixed with `lookup:`. For example,
  *    {{{
  *    // Uses lookup
- *    @Get(uriTemplate = "/pets", actorPath = "lookup:mykey")
+ *    @RestGet(uriTemplate = "/pets", actorPath = "lookup:mykey")
  * 
  *    // Will NOT use lookup
- *    @Get(uriTemplate = "/pets", actorPath = "/my/actor/path")
+ *    @RestGet(uriTemplate = "/pets", actorPath = "/my/actor/path")
  *    }}} 
  *   
  */
@@ -51,7 +58,7 @@ case class RestHandlerConfig(
   apiVersion: String,
   swaggerVersion: SwaggerVersion.Value,
   basePath: String,
-  actorPathMap: Map[String, String] = Map.empty)
+  registry: RestRegistry)
  
 /**
  * Support swagger version

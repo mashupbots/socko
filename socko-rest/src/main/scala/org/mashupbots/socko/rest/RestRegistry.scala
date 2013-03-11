@@ -22,14 +22,22 @@ import org.mashupbots.socko.infrastructure.Logger
 import scala.reflect.runtime.{ universe => ru }
 
 /**
- * Collection of meta data about REST endpoints
+ * Collection [[org.mashupbots.socko.rest.RestEndPoint]]s
  *
- * @param operations REST operations that will be used for dispatching requests
- * @param actorLookup Map of key as defined in the RestEndPoint annotation and the
- *   corresponding actor paths
+ * @param endPoints REST endpoints that will be used for dispatching requests
+ * @param actorLookup Map of key/actor path. The key is specified in REST operation
+ *   `actorPath` that are prefixed with `lookup:`. For example,
+ *    {{{
+ *    // Uses lookup
+ *    @RestGet(uriTemplate = "/pets", actorPath = "lookup:mykey")
+ * 
+ *    // Will NOT use lookup
+ *    @RestGet(uriTemplate = "/pets", actorPath = "/my/actor/path")
+ *    }}} 
+ *   
  */
 case class RestRegistry(
-  operations: Seq[RestOperation],
+  endPoints: Seq[RestEndPoint],
   actorLookup: Map[String, String]) {
 
 }
@@ -81,12 +89,12 @@ object RestRegistry extends Logger {
 
     val restOperations = for (
       cs <- classSymbols;
-      declaration = findRestDeclaration(rm, cs);
-      resp = findRestResponse(declaration, cs, classSymbols);
-      if (declaration.isDefined && resp.isDefined)
+      op = findRestOperation(rm, cs);
+      resp = findRestResponse(op, cs, classSymbols);
+      if (op.isDefined && resp.isDefined)
     ) yield {
-      log.debug("Registering ")
-      RestOperation(declaration.get, cs, cs)
+      log.debug("Registering {} {} {}", op.get, cs.fullName, resp.get.fullName)
+      RestEndPoint(op.get, cs, resp.get)
     }
 
     RestRegistry(restOperations, actorLookup)
@@ -96,16 +104,15 @@ object RestRegistry extends Logger {
   private val typeRestResponse = ru.typeOf[RestResponse]
 
   /**
-   * Finds a [[org.mashupbots.socko.rest.RestDeclaration]] annotation in a
-   * [[org.mashupbots.socko.rest.RestRequest]] class.
+   * Finds a REST operation annotation in a [[org.mashupbots.socko.rest.RestRequest]] class.
    *
    * @param rm Runtime mirror
    * @param cs class symbol of class to check
    * @returns An instance of the annotation class or `None` if annotation not found
    */
-  def findRestDeclaration(rm: ru.RuntimeMirror, cs: ru.ClassSymbol): Option[RestDeclaration] = {
+  def findRestOperation(rm: ru.RuntimeMirror, cs: ru.ClassSymbol): Option[RestOperation] = {
     val isRestRequest = cs.toType <:< typeRestRequest;
-    val annotationType = RestDeclaration.findAnnotation(cs.annotations);
+    val annotationType = RestOperation.findAnnotation(cs.annotations);
     if (!isRestRequest && annotationType.isEmpty) {
       None
     } else if (isRestRequest && annotationType.isEmpty) {
@@ -115,33 +122,33 @@ object RestRegistry extends Logger {
       log.warn("{} does not extend RestRequest but is annotated with a RestOperation ", cs.fullName)
       None
     } else {
-      Some(RestDeclaration(annotationType.get))
+      Some(RestOperation(annotationType.get))
     }
   }
 
   /**
    * Finds a corresponding response class given the operation and the request
    *
-   * If operation `responseClass` is empty, the assumed response class is the same class path
+   * If operation `responseClass` field is empty, the assumed response class is the same class path
    * and name as the request class; but with `Request` suffix replaced with `Response`.
    *
    * If not empty, we will try to find the specified response class
    *
-   * @param op RestOperation
+   * @param op Operation for which a response is to be located
    * @param requestClassSymbol Class Symbol for the request class
    * @param classSymbols Sequence of class symbols to check for the response class
    * @returns the response class symbol or `None` if not found
    */
   def findRestResponse(
-    declaration: Option[RestDeclaration],
+    op: Option[RestOperation],
     requestClassSymbol: ru.ClassSymbol,
     classSymbols: Seq[ru.ClassSymbol]): Option[ru.ClassSymbol] = {
 
     val requestClassName = requestClassSymbol.fullName;
 
-    if (declaration.isEmpty) {
+    if (op.isEmpty) {
       None
-    } else if (declaration.get.responseClass == "") {
+    } else if (op.get.responseClass == "") {
       // Not specified so trying finding by replacing Request in the class name
       // with Response
       val responseClassName = if (requestClassName.endsWith("Request")) {
@@ -150,7 +157,7 @@ object RestRegistry extends Logger {
         requestClassName + "Response"
       }
 
-      val responseClassSymbol = classSymbols.find(cs => cs.fullName == requestClassName)
+      val responseClassSymbol = classSymbols.find(cs => cs.fullName == responseClassName)
       if (responseClassSymbol.isEmpty) {
         log.warn("Cannot find corresponding RestResponse {} for RestRequest {}{}",
           responseClassName, requestClassName, "")
@@ -158,18 +165,18 @@ object RestRegistry extends Logger {
       responseClassSymbol
     } else {
       // Specified so let's try to find it
-      if (declaration.get.responseClass.contains(".")) {
+      if (op.get.responseClass.contains(".")) {
         // Full path specified because we have detected a . in the name
-        val responseClassSymbol = classSymbols.find(cs => cs.fullName == declaration.get.responseClass)
+        val responseClassSymbol = classSymbols.find(cs => cs.fullName == op.get.responseClass)
         if (responseClassSymbol.isEmpty) {
           log.warn("Cannot find corresponding RestResponse {} for RestRequest {}{}",
-            declaration.get.responseClass, requestClassName, "")
+            op.get.responseClass, requestClassName, "")
         }
         responseClassSymbol
       } else {
         // Only class name specified
         val pkgName = requestClassSymbol.fullName.substring(0, requestClassSymbol.fullName.lastIndexOf('.'))
-        val fullClassName = pkgName + declaration.get.responseClass
+        val fullClassName = pkgName + "." + op.get.responseClass
         val responseClassSymbol = classSymbols.find(cs => cs.fullName == fullClassName)
         if (responseClassSymbol.isEmpty) {
           log.warn("Cannot find corresponding RestResponse {} for RestRequest {}{}",
