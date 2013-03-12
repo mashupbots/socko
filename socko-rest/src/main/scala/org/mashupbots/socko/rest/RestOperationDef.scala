@@ -42,19 +42,19 @@ import org.mashupbots.socko.infrastructure.Logger
  *    If empty, the name of the request class will be used without the `Request` prefix.
  * @param description Optional short description. Less than 60 characters is recommended.
  * @param notes Optional long description
- * @param depreciated Flag to indicate if this endpoint is depreciated or not. Defaults to `false`.
+ * @param depreciated Flag to indicate if this operation is depreciated or not. Defaults to `false`.
  * @param errorResponses Map of HTTP error status codes and reasons
  */
 case class RestOperationDef(
   method: String, 
   uriTemplate: String, 
   actorPath: String, 
-  responseClass: String, 
-  name: String, 
-  description: String, 
-  notes: String, 
-  depreciated: Boolean, 
-  errorResponses: Map[Int, String]) extends Logger {
+  responseClass: String = "", 
+  name: String = "", 
+  description: String = "", 
+  notes: String = "", 
+  depreciated: Boolean = false, 
+  errorResponses: Map[Int, String] = Map.empty) extends Logger {
 
   /**
    * The `uriTemplate` split into path segments for ease of matching
@@ -68,6 +68,50 @@ case class RestOperationDef(
     val segments = ss.map(s => PathSegment(s))
     segments
   }
+  
+  /**
+   * Compares the address of this operation to another
+   *
+   * Comparison is based on method and path segments.
+   *
+   * For example, `GET /pets/{id}` is the same as `GET /{type}/{id}` because `{type}` is a variable
+   * and can contain `pets`.
+   *
+   * However, the following are different:
+   *  - `GET /pets` is different to `GET /users` because the static paths are different
+   *  - `DELETE /pets/{id}` is different to `PUT /pets/{id}` because methods are different
+   *
+   * @param op Another REST operation to compare against
+   * @returns `True` if the objects share the same end point address, `False` otherwise.
+   */
+  def compareAddress(opDef: RestOperationDef): Boolean = {
+
+    if (method != opDef.method) {
+      // If different methods, then cannot be the same
+      false
+    } else if (pathSegments.length != opDef.pathSegments.length) {
+      // If different number of segments, then cannot be the same
+      return false
+    } else {
+      // Compare paths
+      def comparePathSegment(segments: List[(PathSegment, PathSegment)]): Boolean = {
+        if (segments.isEmpty) {
+          // Must resolve to the same endpoint - same method and path segments
+          true
+        } else {
+          val (l, r) = segments.head
+          if (!l.isVariable && !r.isVariable && l.name != r.name) {
+            // If static segments are different, then cannot be the same
+            false
+          } else {
+            comparePathSegment(segments.tail)
+          }
+        }
+      }
+      comparePathSegment(pathSegments.zip(opDef.pathSegments))
+    }
+  }
+  
 }
 
 /**

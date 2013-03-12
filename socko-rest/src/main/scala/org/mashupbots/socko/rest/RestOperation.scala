@@ -24,15 +24,15 @@ import org.mashupbots.socko.infrastructure.Logger
  *  - dispatches the [[org.mashupbots.socko.rest.RestRequest]] to an actor for processing
  *  - actor returns a [[org.mashupbots.socko.rest.RestResponse]]
  *  - serializes [[org.mashupbots.socko.rest.RestResponse]] and returns the result to the caller
- *  
+ *
  * @param definition Meta data describing the object
  * @param requestClass The [[org.mashupbots.socko.rest.RestRequest]] class used to store deserialized inputs
  * @param responseClass The [[org.mashupbots.socko.rest.RestResponse]] class used to store outputs to be serialized
  */
 case class RestOperation(
-    definition: RestOperationDef,
-    requestClass: ru.ClassSymbol,
-    responseClass: ru.ClassSymbol) {
+  definition: RestOperationDef,
+  requestClass: ru.ClassSymbol,
+  responseClass: ru.ClassSymbol) {
 
 }
 

@@ -31,11 +31,11 @@ import scala.reflect.runtime.{ universe => ru }
  *    {{{
  *    // Uses lookup
  *    @RestGet(uriTemplate = "/pets", actorPath = "lookup:mykey")
- * 
+ *
  *    // Will NOT use lookup
  *    @RestGet(uriTemplate = "/pets", actorPath = "/my/actor/path")
- *    }}} 
- *   
+ *    }}}
+ *
  */
 case class RestRegistry(
   operations: Seq[RestOperation],
@@ -97,6 +97,18 @@ object RestRegistry extends Logger {
       log.debug("Registering {} {} {}", op.get, cs.fullName, resp.get.fullName)
       RestOperation(op.get, cs, resp.get)
     }
+
+    // Check for duplicate operation addresses
+    restOperations.foreach(op => {
+      val sameOp = restOperations.find(op2 => System.identityHashCode(op) != System.identityHashCode(op2) &&
+        op.definition.compareAddress(op2.definition))
+      if (sameOp.isDefined) {
+        val msg = "Operation '%s %s' for '%s' resolves to the same address as '%s %s' for '%s'".format(
+          op.definition.method, op.definition.uriTemplate, op.requestClass.fullName,
+          sameOp.get.definition.method, sameOp.get.definition.uriTemplate, sameOp.get.requestClass.fullName)
+        throw new IllegalStateException(msg)
+      }
+    })
 
     RestRegistry(restOperations, actorLookup)
   }
