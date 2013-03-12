@@ -22,9 +22,10 @@ import org.mashupbots.socko.infrastructure.Logger
 import scala.reflect.runtime.{ universe => ru }
 
 /**
- * Collection [[org.mashupbots.socko.rest.RestEndPoint]]s
+ * Collection [[org.mashupbots.socko.rest.RestOperation]]s that will be used to process
+ * incoming requests.
  *
- * @param endPoints REST endpoints that will be used for dispatching requests
+ * @param operations REST operations that will be used for processing requests
  * @param actorLookup Map of key/actor path. The key is specified in REST operation
  *   `actorPath` that are prefixed with `lookup:`. For example,
  *    {{{
@@ -37,7 +38,7 @@ import scala.reflect.runtime.{ universe => ru }
  *   
  */
 case class RestRegistry(
-  endPoints: Seq[RestEndPoint],
+  operations: Seq[RestOperation],
   actorLookup: Map[String, String]) {
 
 }
@@ -65,7 +66,7 @@ object RestRegistry extends Logger {
    * @param classLoader Class loader use to discover the classes in the specified package
    * @param pkg Name of package where your annotated REST request and response classes
    *   are defined
-   * @param actorLookup Map of key as defined in the RestEndPoint annotation and the
+   * @param actorLookup Map of key as defined in the REST operation annotation and the
    *   corresponding actor paths
    */
   def apply(classLoader: ClassLoader, pkg: String, actorLookup: Map[String, String]): RestRegistry = {
@@ -79,7 +80,7 @@ object RestRegistry extends Logger {
    * @param classLoader Class loader use to discover the classes in the specified package
    * @param pkg List of package names under which your annotated REST request and response
    *   classes are defined
-   * @param actorLookup Map of key as defined in the RestEndPoint annotation and the
+   * @param actorLookup Map of key as defined in the REST operation annotation and the
    *   corresponding actor paths
    */
   def apply(classLoader: ClassLoader, pkg: Seq[String], actorLookup: Map[String, String]): RestRegistry = {
@@ -94,7 +95,7 @@ object RestRegistry extends Logger {
       if (op.isDefined && resp.isDefined)
     ) yield {
       log.debug("Registering {} {} {}", op.get, cs.fullName, resp.get.fullName)
-      RestEndPoint(op.get, cs, resp.get)
+      RestOperation(op.get, cs, resp.get)
     }
 
     RestRegistry(restOperations, actorLookup)
@@ -110,9 +111,9 @@ object RestRegistry extends Logger {
    * @param cs class symbol of class to check
    * @returns An instance of the annotation class or `None` if annotation not found
    */
-  def findRestOperation(rm: ru.RuntimeMirror, cs: ru.ClassSymbol): Option[RestOperation] = {
+  def findRestOperation(rm: ru.RuntimeMirror, cs: ru.ClassSymbol): Option[RestOperationDef] = {
     val isRestRequest = cs.toType <:< typeRestRequest;
-    val annotationType = RestOperation.findAnnotation(cs.annotations);
+    val annotationType = RestOperationDef.findAnnotation(cs.annotations);
     if (!isRestRequest && annotationType.isEmpty) {
       None
     } else if (isRestRequest && annotationType.isEmpty) {
@@ -122,7 +123,7 @@ object RestRegistry extends Logger {
       log.warn("{} does not extend RestRequest but is annotated with a RestOperation ", cs.fullName)
       None
     } else {
-      Some(RestOperation(annotationType.get))
+      Some(RestOperationDef(annotationType.get))
     }
   }
 
@@ -140,7 +141,7 @@ object RestRegistry extends Logger {
    * @returns the response class symbol or `None` if not found
    */
   def findRestResponse(
-    op: Option[RestOperation],
+    op: Option[RestOperationDef],
     requestClassSymbol: ru.ClassSymbol,
     classSymbols: Seq[ru.ClassSymbol]): Option[ru.ClassSymbol] = {
 

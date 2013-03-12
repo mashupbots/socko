@@ -26,26 +26,26 @@ class RestRegistrySpec extends WordSpec with ShouldMatchers with GivenWhenThen w
     
     "correctly find operations" in  {
       val r = RestRegistry("org.mashupbots.socko.rest.test1")
-      r.endPoints.length should be (3)
+      r.operations.length should be (3)
       
-      r.endPoints.exists(e => e.operation.method == "GET" && 
-          e.operation.uriTemplate == "/pets" &&
-          e.operation.actorPath == "/my/actor/path" &&
-          e.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsRequest" &&
-          e.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsResponse") should be (true)
+      r.operations.exists(op => op.definition.method == "GET" && 
+          op.definition.uriTemplate == "/pets" &&
+          op.definition.actorPath == "/my/actor/path" &&
+          op.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsRequest" &&
+          op.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsResponse") should be (true)
       
-      r.endPoints.exists(e => e.operation.method == "GET" && 
-          e.operation.uriTemplate == "/dogs1" &&
-          e.operation.actorPath == "/my/actor/path1" &&
-          e.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs1Request" &&
-          e.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse") should be (true)
+      r.operations.exists(op => op.definition.method == "GET" && 
+          op.definition.uriTemplate == "/dogs1" &&
+          op.definition.actorPath == "/my/actor/path1" &&
+          op.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs1Request" &&
+          op.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse") should be (true)
       
-      r.endPoints.exists(e => e.operation.method == "GET" && 
-          e.operation.uriTemplate == "/dogs2" &&
-          e.operation.actorPath == "/my/actor/path2" &&
-          e.operation.errorResponses.size == 2 &&
-          e.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs2Request" &&
-          e.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse") should be (true)
+      r.operations.exists(op => op.definition.method == "GET" && 
+          op.definition.uriTemplate == "/dogs2" &&
+          op.definition.actorPath == "/my/actor/path2" &&
+          op.definition.errorResponses.size == 2 &&
+          op.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs2Request" &&
+          op.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse") should be (true)
     }
     
   }
