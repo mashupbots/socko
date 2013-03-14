@@ -70,6 +70,9 @@ class EndPointSpec extends WordSpec with ShouldMatchers {
       ep.method should equal("GET")
       ep.host should equal("localhost")
       ep.path should equal("/folder/file.html")
+      ep.pathSegments.length should be(2)
+      ep.pathSegments(0) should be("folder")
+      ep.pathSegments(1) should be("file.html")
       ep.queryString should equal("p1=v1&p2=v2")
     }
 

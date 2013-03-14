@@ -20,7 +20,7 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class RestOperationSpec extends WordSpec with ShouldMatchers with GivenWhenThen with Logger {
+class RestOperationDefSpec extends WordSpec with ShouldMatchers with GivenWhenThen with Logger {
 
   "RestOperationSpec" should {
     

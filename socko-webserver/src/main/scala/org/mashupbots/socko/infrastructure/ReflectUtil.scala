@@ -20,6 +20,7 @@ import java.net.URISyntaxException
 import java.util.jar.JarFile
 
 import scala.collection.JavaConversions._
+import scala.reflect.runtime.{ universe => ru }
 
 /**
  * Reflection utility functions
@@ -28,8 +29,8 @@ object ReflectUtil extends Logger {
 
   /**
    * Returns a list of classes in the package and its sub-packages
-   * 
-   * 
+   *
+   *
    * @param classLoader Class loaded to use to reflect classes. To make things simple, use a classloader
    *   of a class in the package you wish to reflect
    * @param packageName Name of package. For example, `org.mypackage`.
@@ -100,4 +101,39 @@ object ReflectUtil extends Logger {
     classes.toList
   }
 
+  /**
+   * Retrieves the value of an argument in an annotation
+   *
+   * @param a Annotation
+   * @param n Name of annotation parameter
+   * @param defaultValue value to return if `n` is not found
+   * @returns Value of the annotation if found, `defaultValue` otherwise
+   */
+  def getAnnotationJavaLiteralArg[T](a: ru.Annotation, n: ru.Name, defaultValue: T): T = {
+    val x = a.javaArgs
+    val y = a.scalaArgs
+    val arg = a.javaArgs.get(n)
+    if (arg.isDefined) {
+      arg.get.asInstanceOf[ru.LiteralArgument].value.value.asInstanceOf[T];
+    } else {
+      defaultValue
+    }
+  }
+
+  /**
+   * Retrieves the value of an argument in an annotation as a string array
+   *
+   * @param a Annotation
+   * @param n Name of annotation parameter
+   * @param defaultValue value to return if `n` is not found
+   * @returns Value of the annotation if found, `defaultValue` otherwise
+   */
+  def getAnnotationJavaStringArrayArg(a: ru.Annotation, n: ru.Name, defaultValue: Array[String]): Array[String] = {
+    if (a.javaArgs.contains(n)) {
+      val aa = a.javaArgs(n).asInstanceOf[ru.ArrayArgument].args
+      aa.map(l => l.asInstanceOf[ru.LiteralArgument].value.value.asInstanceOf[String]);
+    } else {
+      defaultValue
+    }
+  }
 } 

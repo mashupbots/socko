@@ -17,6 +17,7 @@ package org.mashupbots.socko.rest
 import scala.collection.JavaConversions._
 import scala.reflect.runtime.{ universe => ru }
 import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.infrastructure.ReflectUtil
 
 /**
  * REST operation definition. Meta data describing a REST operation.
@@ -46,14 +47,14 @@ import org.mashupbots.socko.infrastructure.Logger
  * @param errorResponses Map of HTTP error status codes and reasons
  */
 case class RestOperationDef(
-  method: String, 
-  uriTemplate: String, 
-  actorPath: String, 
-  responseClass: String = "", 
-  name: String = "", 
-  description: String = "", 
-  notes: String = "", 
-  depreciated: Boolean = false, 
+  method: String,
+  uriTemplate: String,
+  actorPath: String,
+  responseClass: String = "",
+  name: String = "",
+  description: String = "",
+  notes: String = "",
+  depreciated: Boolean = false,
   errorResponses: Map[Int, String] = Map.empty) extends Logger {
 
   /**
@@ -68,7 +69,7 @@ case class RestOperationDef(
     val segments = ss.map(s => PathSegment(s))
     segments
   }
-  
+
   /**
    * Compares the address of this operation to another
    *
@@ -111,7 +112,7 @@ case class RestOperationDef(
       comparePathSegment(pathSegments.zip(opDef.pathSegments))
     }
   }
-  
+
 }
 
 /**
@@ -119,16 +120,16 @@ case class RestOperationDef(
  */
 object RestOperationDef extends Logger {
 
-  val restGetType = ru.typeOf[RestGet]
+  private val restGetType = ru.typeOf[Get]
 
-  val uriTemplateName = ru.newTermName("uriTemplate")
-  val actorPathName = ru.newTermName("actorPath")
-  val responseClassName = ru.newTermName("responseClass")
-  val nameName = ru.newTermName("name")
-  val descriptionName = ru.newTermName("description")
-  val notesName = ru.newTermName("notes")
-  val depreciatedName = ru.newTermName("depreciated")
-  val errorResponsesName = ru.newTermName("errorResponses")
+  private val uriTemplateName = ru.newTermName("uriTemplate")
+  private val actorPathName = ru.newTermName("actorPath")
+  private val responseClassName = ru.newTermName("responseClass")
+  private val nameName = ru.newTermName("name")
+  private val descriptionName = ru.newTermName("description")
+  private val notesName = ru.newTermName("notes")
+  private val depreciatedName = ru.newTermName("depreciated")
+  private val errorResponsesName = ru.newTermName("errorResponses")
 
   /**
    * Instance a `RestDeclaration` using information of an annotation
@@ -143,30 +144,14 @@ object RestOperationDef extends Logger {
       throw new IllegalStateException("Unknonw annotation type " + a.tpe.toString)
     }
 
-    def getArg[T](n: ru.Name, defaultValue: T): T = {
-      if (a.javaArgs.contains(n)) {
-        a.javaArgs(n).asInstanceOf[ru.LiteralArgument].value.value.asInstanceOf[T];
-      } else {
-        defaultValue
-      }
-    }
-    def getStringArrayArg(n: ru.Name, defaultValue: Array[String]): Array[String] = {
-      if (a.javaArgs.contains(n)) {
-        val aa = a.javaArgs(n).asInstanceOf[ru.ArrayArgument].args
-        aa.map(l => l.asInstanceOf[ru.LiteralArgument].value.value.asInstanceOf[String]);
-      } else {
-        defaultValue
-      }
-    }
-
-    val uriTemplate = getArg(uriTemplateName, "")
-    val actorPath = getArg(actorPathName, "")
-    val responseClass = getArg(responseClassName, "")
-    val name = getArg(nameName, "")
-    val description = getArg(descriptionName, "")
-    val notes = getArg(notesName, "")
-    val depreciated = getArg(depreciatedName, false)
-    val errorResponses = getStringArrayArg(errorResponsesName, Array.empty[String])
+    val uriTemplate = ReflectUtil.getAnnotationJavaLiteralArg(a, uriTemplateName, "")
+    val actorPath = ReflectUtil.getAnnotationJavaLiteralArg(a, actorPathName, "")
+    val responseClass = ReflectUtil.getAnnotationJavaLiteralArg(a, responseClassName, "")
+    val name = ReflectUtil.getAnnotationJavaLiteralArg(a, nameName, "")
+    val description = ReflectUtil.getAnnotationJavaLiteralArg(a, descriptionName, "")
+    val notes = ReflectUtil.getAnnotationJavaLiteralArg(a, notesName, "")
+    val depreciated = ReflectUtil.getAnnotationJavaLiteralArg(a, depreciatedName, false)
+    val errorResponses = ReflectUtil.getAnnotationJavaStringArrayArg(a, errorResponsesName, Array.empty[String])
     val errorResponsesMap: Map[Int, String] = try {
       errorResponses.map(e => {
         val s = e.split("=")
@@ -229,7 +214,7 @@ object PathSegment {
    */
   def apply(s: String): PathSegment =
     if (s == null || s.length == 0) throw new IllegalArgumentException("Path segment cannot be null or empty")
-    else if (s.startsWith("{") && s.endsWith("}")) PathSegment(s.substring(1, s.length - 2), true)
+    else if (s.startsWith("{") && s.endsWith("}")) PathSegment(s.substring(1, s.length - 1), true)
     else PathSegment(s, false)
 }
 

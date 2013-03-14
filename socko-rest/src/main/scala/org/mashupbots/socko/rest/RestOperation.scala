@@ -15,8 +15,8 @@
 //
 package org.mashupbots.socko.rest
 
-import scala.reflect.runtime.{ universe => ru }
 import org.mashupbots.socko.infrastructure.Logger
+import scala.reflect.runtime.{ universe => ru }
 
 /**
  * A REST operation processes data in the following manner:
@@ -26,13 +26,19 @@ import org.mashupbots.socko.infrastructure.Logger
  *  - serializes [[org.mashupbots.socko.rest.RestResponse]] and returns the result to the caller
  *
  * @param definition Meta data describing the object
- * @param requestClass The [[org.mashupbots.socko.rest.RestRequest]] class used to store deserialized inputs
+ * @param deseralizer Deserializes incoming data into a [[org.mashupbots.socko.rest.RestRequest]]
  * @param responseClass The [[org.mashupbots.socko.rest.RestResponse]] class used to store outputs to be serialized
  */
 case class RestOperation(
   definition: RestOperationDef,
-  requestClass: ru.ClassSymbol,
+  deseralizer: RestRequestDeserializer,
   responseClass: ru.ClassSymbol) {
-
+  
 }
+
+
+
+
+
+
 

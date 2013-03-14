@@ -41,7 +41,15 @@ case class EndPoint(
    * Path portion of the request URI without the query string. For example: `/folder/file.html`
    */
   val path = if (uri.indexOf("?") < 0) uri else uri.substring(0, uri.indexOf("?"))
-
+  
+  /**
+   * Given `/one/two/three`, `List("one", "two", "three")` is returned
+   */
+  lazy val pathSegments: List[String] = {
+    val s = if (path.startsWith("/")) path.substring(1) else path
+    s.split("/").toList  
+  }
+  
   /**
    * queryString Query String without the leading "?". For example: `param1=value1&param2=value2`
    */

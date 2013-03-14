@@ -31,29 +31,40 @@ class RestRegistrySpec extends WordSpec with ShouldMatchers with GivenWhenThen w
       r.operations.exists(op => op.definition.method == "GET" &&
         op.definition.uriTemplate == "/pets" &&
         op.definition.actorPath == "/my/actor/path" &&
-        op.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsRequest" &&
+        op.deseralizer.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsRequest" &&
         op.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsResponse") should be(true)
 
       r.operations.exists(op => op.definition.method == "GET" &&
         op.definition.uriTemplate == "/dogs1" &&
         op.definition.actorPath == "/my/actor/path1" &&
-        op.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs1Request" &&
+        op.deseralizer.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs1Request" &&
         op.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse") should be(true)
 
       r.operations.exists(op => op.definition.method == "GET" &&
         op.definition.uriTemplate == "/dogs2" &&
         op.definition.actorPath == "/my/actor/path2" &&
         op.definition.errorResponses.size == 2 &&
-        op.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs2Request" &&
+        op.deseralizer.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs2Request" &&
         op.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse") should be(true)
     }
 
     "catch duplcate operation addresses" in {
-      val thrown = intercept[IllegalStateException] {
+      val thrown = intercept[RestDefintionException] {
         val r = RestRegistry("org.mashupbots.socko.rest.test2")
       }
       thrown.getMessage should be ("Operation 'GET /pets' for 'org.mashupbots.socko.rest.test2.GetPets1Request' resolves to the same address as 'GET /pets' for 'org.mashupbots.socko.rest.test2.GetPets2Request'")
     }
 
+    "correctly bind parameters" in {
+      val r = RestRegistry("org.mashupbots.socko.rest.test3")
+      r.operations.length should be(1)
+
+      r.operations.exists(op => op.definition.method == "GET" &&
+        op.definition.uriTemplate == "/pets/{id}" &&
+        op.definition.actorPath == "/my/actor/path" &&
+        op.deseralizer.requestClass.fullName == "org.mashupbots.socko.rest.test3.GetPetRequest" &&
+        op.responseClass.fullName == "org.mashupbots.socko.rest.test3.GetPetResponse") should be(true)
+    }
+    
   }
 }

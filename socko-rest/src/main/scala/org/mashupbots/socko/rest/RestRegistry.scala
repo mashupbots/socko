@@ -95,7 +95,8 @@ object RestRegistry extends Logger {
       if (op.isDefined && resp.isDefined)
     ) yield {
       log.debug("Registering {} {} {}", op.get, cs.fullName, resp.get.fullName)
-      RestOperation(op.get, cs, resp.get)
+      val deseralizer = RestRequestDeserializer(rm, op.get, cs)
+      RestOperation(op.get, deseralizer, resp.get)
     }
 
     // Check for duplicate operation addresses
@@ -104,9 +105,9 @@ object RestRegistry extends Logger {
         op.definition.compareAddress(op2.definition))
       if (sameOp.isDefined) {
         val msg = "Operation '%s %s' for '%s' resolves to the same address as '%s %s' for '%s'".format(
-          op.definition.method, op.definition.uriTemplate, op.requestClass.fullName,
-          sameOp.get.definition.method, sameOp.get.definition.uriTemplate, sameOp.get.requestClass.fullName)
-        throw new IllegalStateException(msg)
+          op.definition.method, op.definition.uriTemplate, op.deseralizer.requestClass.fullName,
+          sameOp.get.definition.method, sameOp.get.definition.uriTemplate, sameOp.get.deseralizer.requestClass.fullName)
+        throw RestDefintionException(msg)
       }
     })
 

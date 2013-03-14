@@ -30,11 +30,22 @@ case class RestRequestContext(
   endPoint: EndPoint,
   headers: Map[String, String]) {
 
-  /**
-   * Constructor that automatically adds a UUId for us
-   */
   def this(endPoint: EndPoint,
     headers: Map[String, String]) =
     this(UUID.randomUUID(), endPoint, headers)
 
+}
+
+object RestRequestContext {
+
+  /**
+   * Factory to instance a new [[org.mashupbots.socko.rest.RestRequestContext]] with a random
+   * UUID.
+   *
+   * @param endPoint HTTP URL at which the request was received
+   * @param headers HTTP request headers
+   */
+  def apply(endPoint: EndPoint, headers: Map[String, String]): RestRequestContext = {
+    RestRequestContext(UUID.randomUUID(), endPoint, headers)
+  }
 }

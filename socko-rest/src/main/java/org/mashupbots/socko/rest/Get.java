@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
-public @interface RestGet {
+public @interface Get {
 	/**
 	 * Template URI.
 	 */
