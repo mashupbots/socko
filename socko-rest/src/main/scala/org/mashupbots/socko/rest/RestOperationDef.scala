@@ -120,7 +120,7 @@ case class RestOperationDef(
  */
 object RestOperationDef extends Logger {
 
-  private val restGetType = ru.typeOf[Get]
+  private val restGetType = ru.typeOf[RestGet]
 
   private val uriTemplateName = ru.newTermName("uriTemplate")
   private val actorPathName = ru.newTermName("actorPath")

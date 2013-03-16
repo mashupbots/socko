@@ -84,17 +84,17 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
 }
 
 case class PathParamRequest1(context: RestRequestContext,
-  @Path() id: String) extends RestRequest
+  @RestPath() id: String) extends RestRequest
 
 case class PathParamRequest2(context: RestRequestContext,
-  @Path(name = "aaa", description = "test2") id: Int,
-  @Path() format: String) extends RestRequest
+  @RestPath(name = "aaa", description = "test2") id: Int,
+  @RestPath() format: String) extends RestRequest
 
 case class QueryStringParamRequest1(context: RestRequestContext,
-  @Path() format: String,
-  @QueryString() number: Int,
-  @QueryString(name = "string", description = "hello") s: String,
-  @QueryString() exist: Option[String],
-  @QueryString() notexist: Option[Int]) extends RestRequest
+  @RestPath() format: String,
+  @RestQuery() number: Int,
+  @RestQuery(name = "string", description = "hello") s: String,
+  @RestQuery() exist: Option[String],
+  @RestQuery() notexist: Option[Int]) extends RestRequest
 
   

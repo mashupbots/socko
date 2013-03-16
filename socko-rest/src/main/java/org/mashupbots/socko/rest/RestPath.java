@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
-public @interface Path {
+public @interface RestPath {
 	/**
 	 * Optional name of the path parameter
 	 * 

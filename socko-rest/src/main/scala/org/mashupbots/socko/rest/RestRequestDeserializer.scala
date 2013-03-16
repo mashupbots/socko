@@ -108,9 +108,9 @@ trait RequestParamBinding {
  * Companion object
  */
 object RequestParamBinding {
-  private val pathParamAnnotationType = ru.typeOf[Path]
-  private val queryStringParamAnnotationType = ru.typeOf[QueryString]
-  private val headerParamAnnotationType = ru.typeOf[Header]
+  private val pathParamAnnotationType = ru.typeOf[RestPath]
+  private val queryStringParamAnnotationType = ru.typeOf[RestQuery]
+  private val headerParamAnnotationType = ru.typeOf[RestHeader]
   private val validParamAnnotationTypes = List(pathParamAnnotationType, queryStringParamAnnotationType, headerParamAnnotationType)
   private val optionType = ru.typeOf[Option[_]]
 

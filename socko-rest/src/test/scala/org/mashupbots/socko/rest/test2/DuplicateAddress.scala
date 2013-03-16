@@ -15,13 +15,13 @@
 //
 package org.mashupbots.socko.rest.test2
 
-import org.mashupbots.socko.rest.Get
+import org.mashupbots.socko.rest.RestGet
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
 
-@Get(
+@RestGet(
   uriTemplate = "/pets",
   actorPath = "/my/actor/path")
 case class GetPets1Request(context: RestRequestContext) extends RestRequest {
@@ -33,7 +33,7 @@ case class GetPets1Response(context: RestResponseContext) extends RestResponse {
 }
 
 // A duplicate of the above end point address
-@Get(
+@RestGet(
   uriTemplate = "/pets",
   actorPath = "/my/actor/path")
 case class GetPets2Request(context: RestRequestContext) extends RestRequest {

@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})
-public @interface QueryString {
+public @interface RestQuery {
 	/**
 	 * Optional name of the path parameter
 	 * 

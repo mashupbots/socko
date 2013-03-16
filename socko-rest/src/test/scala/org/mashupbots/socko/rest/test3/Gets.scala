@@ -15,18 +15,18 @@
 //
 package org.mashupbots.socko.rest.test3
 
-import org.mashupbots.socko.rest.Get
+import org.mashupbots.socko.rest.RestGet
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
-import org.mashupbots.socko.rest.Path
+import org.mashupbots.socko.rest.RestPath
 
-@Get(
+@RestGet(
   uriTemplate = "/pets/{id}",
   actorPath = "/my/actor/path")
 case class GetPetRequest(context: RestRequestContext, 
-    @Path() id: String) extends RestRequest {
+    @RestPath() id: String) extends RestRequest {
 
 }
 
