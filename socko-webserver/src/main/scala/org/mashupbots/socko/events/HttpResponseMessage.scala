@@ -359,6 +359,8 @@ case class HttpResponseMessage(event: HttpEvent) {
     assert(!hasBeenWritten, "Response has ended")
     assert(request.httpVersion == HttpVersion.HTTP_1_1.toString, "Chunked enconding only available for HTTP/1.1 requests")
 
+    this.status = status
+
     if (contentType != "") {
       this.contentType = contentType
     }
@@ -389,6 +391,31 @@ case class HttpResponseMessage(event: HttpEvent) {
     writingChunks = true
   }
 
+  /**
+   * Initiates a HTTP chunk response to the client
+   *
+   * Use this method to initiate the response. Call `writeChunk()` to send the individual chunks and finish by
+   * calling `writeLastChunk()`.
+   *
+   * Writing the first chunk is NOT buffered. The chunk is immediately sent to the client.
+   *
+   * Calling `writeFirstChunk()` more than once results in an exception being thrown because only 1 response is
+   * permitted per request.
+   *
+   * @param status HTTP response status
+   * @param contentType MIME content type to set in the response header. For example, "image/gif". If omitted, the
+   *  content type set in `headers` will be used.
+   * @param headers Headers to add to the HTTP response.
+   */
+  def writeFirstChunk(
+    status: HttpResponseStatus,
+    contentType: String,
+    headers: Map[String, String]): Unit = {
+    
+    this.status = status
+    writeFirstChunk(contentType, headers)
+  }
+  
   /**
    * Sends a chunk of data to the client.
    *

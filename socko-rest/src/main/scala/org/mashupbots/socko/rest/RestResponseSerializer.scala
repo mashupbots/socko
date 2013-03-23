@@ -15,17 +15,18 @@
 //
 package org.mashupbots.socko.rest
 
-import scala.reflect.runtime.{ universe => ru }
-import org.mashupbots.socko.infrastructure.ReflectUtil
-import java.util.Date
-import java.text.SimpleDateFormat
-import org.mashupbots.socko.infrastructure.DateUtil
 import java.io.InputStream
+import java.net.URL
+import java.util.Date
+import scala.reflect.runtime.{ universe => ru }
+import org.jboss.netty.handler.codec.http.HttpHeaders
+import org.json4s.NoTypeHints
+import org.json4s.native.{ Serialization => json }
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.infrastructure.CharsetUtil
-import org.json4s.native.{ Serialization => json }
-import org.json4s.NoTypeHints
+import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.IOUtil
+import java.io.BufferedInputStream
 
 /**
  * Seralized outgoing data from a [[org.mashupbots.socko.rest.RestResposne]]
@@ -43,12 +44,12 @@ case class RestResponseSerializer(
    *
    * @returns `None` if the response data type is void, else the value of the data field
    */
-  def getData(response: RestResponse): Option[Any] = {
-    if (responseDataType == ResponseDataType.Void) None
+  def getData(response: RestResponse): Any = {
+    if (responseDataType == ResponseDataType.Void) null
     else {
       val instanceMirror = rm.reflect(response)
       val fieldMirror = instanceMirror.reflectField(responseDataTerm.get)
-      Some(fieldMirror.get)
+      fieldMirror.get
     }
   }
 
@@ -60,40 +61,52 @@ case class RestResponseSerializer(
    */
   def serialize(http: HttpRequestEvent, response: RestResponse) {
     responseDataType match {
-      case ResponseDataType.Void => {
-        http.response.write(response.context.status, Array.empty[Byte], "", response.context.headers)
+      case ResponseDataType.Object => {
+        val data = getData(response)
+        val bytes = {
+          implicit val formats = json.formats(NoTypeHints)
+          val s = json.write(data.asInstanceOf[AnyRef])
+          s.getBytes(CharsetUtil.UTF_8)
+        }
+        http.response.write(response.context.status, bytes, "application/json; charset=UTF-8", response.context.headers)
+      }
+      case ResponseDataType.ByteArray => {
+        val data = getData(response)
+        val bytes = data.asInstanceOf[Array[Byte]]
+        val contentType = response.context.headers.getOrElse(HttpHeaders.Names.CONTENT_TYPE, "application/octet-string")
+        http.response.write(response.context.status, bytes, contentType, response.context.headers)
+      }
+      case ResponseDataType.URL => {
+        val data = getData(response)
+        val url = data.asInstanceOf[URL]
+        val contentType = response.context.headers.getOrElse(HttpHeaders.Names.CONTENT_TYPE, "application/octet-string")
+        http.response.writeFirstChunk(response.context.status, contentType, response.context.headers)
+
+        // TO DO use chunk writers to be more efficient and non blocking
+        val buf = new Array[Byte](8192)
+        IOUtil.using(new BufferedInputStream(url.openStream())) { r =>
+          def doPipe(): Unit = {
+            val bytesRead = r.read(buf)
+            if (bytesRead > 0) {
+              val w = if (bytesRead == buf.length) buf else buf.slice(0, bytesRead)
+              http.response.writeChunk(buf)
+              doPipe()
+            }
+          }
+          doPipe()
+        }
+
+        http.response.writeLastChunk()
       }
       case ResponseDataType.Primitive => {
         val data = getData(response)
-        val bytes = if (data.isDefined) {
-          data.get.toString.getBytes(CharsetUtil.UTF_8)
-        } else {
-          Array.empty[Byte]
-        }
+        val bytes = data.toString.getBytes(CharsetUtil.UTF_8)
         http.response.write(response.context.status, bytes, "text/plain; charset=UTF-8", response.context.headers)
       }
-      case ResponseDataType.Object => {
-        val data = getData(response)
-        val bytes = if (data.isDefined) {
-          implicit val formats = json.formats(NoTypeHints)
-          val s = json.write(data.get.asInstanceOf[AnyRef])
-          s.getBytes(CharsetUtil.UTF_8)
-        } else {
-          Array.empty[Byte]
-        }
-        http.response.write(response.context.status, bytes, "application/json; charset=UTF-8", response.context.headers)
+      case ResponseDataType.Void => {
+        http.response.write(response.context.status, Array.empty[Byte], "", response.context.headers)
       }
-      case ResponseDataType.InputStream => {
-        val data = getData(response)
-        val bytes = if (data.isDefined) {
-          // TODO chunk it
-          IOUtil.readInputStream(data.get.asInstanceOf[InputStream])
-        } else {
-          Array.empty[Byte]
-        }
-        http.response.write(response.context.status, bytes, "application/json; charset=UTF-8", response.context.headers)
-      }
-      case _ => { 
+      case _ => {
         throw new IllegalStateException(s"Unsupported ResponseDataType ${responseDataType.toString}")
       }
     }
@@ -133,7 +146,7 @@ object RestResponseSerializer {
     if (responseConstructorParams.size == 0) {
       throw RestDefintionException(s"${responseClassSymbol.fullName} constructor must have parameters.")
     } else if (responseConstructorParams(0).name.toString() != "context") {
-      throw RestDefintionException(s"First constructor parameter for ${responseClassSymbol.fullName} must be 'context'.")
+      throw RestDefintionException(s"First constructor parameter for ${responseClassSymbol.fullName} must be termed 'context'.")
     }
 
     val responseDataType = if (responseConstructorParams.size == 1) {
@@ -143,10 +156,14 @@ object RestResponseSerializer {
       val contentType = contentTerm.typeSignature
       if (primitiveTypes.exists(t => t._1 =:= contentType)) {
         ResponseDataType.Primitive
-      } else if (contentType <:< inputStreamType) {
-        ResponseDataType.InputStream
-      } else {
+      } else if (contentType =:= ru.typeOf[Array[Byte]]) {
+        ResponseDataType.ByteArray
+      } else if (contentType =:= ru.typeOf[URL]) {
+        ResponseDataType.URL
+      } else if (contentType <:< ru.typeOf[AnyRef]) {
         ResponseDataType.Object
+      } else {
+        throw new IllegalArgumentException(s"Unsupported REST response data type ${contentType} in ${responseClassSymbol.fullName}.")
       }
     }
 
@@ -164,7 +181,7 @@ object RestResponseSerializer {
 
 object ResponseDataType extends Enumeration {
   type ResponseDataType = Value
-  val Void, Primitive, Object, InputStream = Value
+  val Void, Primitive, Object, ByteArray, URL = Value
 } 
 
   

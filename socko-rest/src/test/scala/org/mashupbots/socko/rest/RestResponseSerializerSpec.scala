@@ -27,6 +27,7 @@ import org.mashupbots.socko.infrastructure.DateUtil
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 import org.mashupbots.socko.events.HttpResponseStatus
+import java.net.URL
 
 class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with GivenWhenThen with Logger {
 
@@ -57,8 +58,7 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
       val response = StringResponse(responseContext, "hello")
       val x = s.getData(response)
 
-      x.isDefined should be(true)
-      x.get.asInstanceOf[String] should be("hello")
+      x.asInstanceOf[String] should be("hello")
     }
 
     "Serailize primitive date response" in {
@@ -73,8 +73,7 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
       val response = DateResponse(responseContext, date)
       val x = s.getData(response)
 
-      x.isDefined should be(true)
-      x.get.asInstanceOf[Date].getTime should be(date.getTime)
+      x.asInstanceOf[Date].getTime should be(date.getTime)
     }
 
     "Serailize object response" in {
@@ -89,25 +88,37 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
       val response = ObjectResponse(responseContext, pet)
       val x = s.getData(response)
 
-      x.isDefined should be(true)
-      x.get.asInstanceOf[Pet].name should be("spot")
+      x.asInstanceOf[Pet].name should be("spot")
     }
 
-    "Serailize stream response" in {
+    "Serailize byte array response" in {
       val s = RestResponseSerializer(
         mirror,
         RestOperationDef("PUT", "/pets/{id}", "/actor/path"),
-        ru.typeOf[StreamResponse].typeSymbol.asClass)
+        ru.typeOf[ByteArrayResponse].typeSymbol.asClass)
 
-      s.responseDataType should be(ResponseDataType.InputStream)
+      s.responseDataType should be(ResponseDataType.ByteArray)
 
-      val bais = new ByteArrayInputStream(Array.empty)
-      val response = StreamResponse(responseContext, bais)
+      val response = ByteArrayResponse(responseContext, Array(1, 2, 3))
       val x = s.getData(response)
 
-      x.isDefined should be(true)
-      x.get.asInstanceOf[InputStream] should be(bais)
-    }    
+      x.asInstanceOf[Array[Byte]].length should be(3)
+    }
+
+    "Serailize url response" in {
+      val s = RestResponseSerializer(
+        mirror,
+        RestOperationDef("PUT", "/pets/{id}", "/actor/path"),
+        ru.typeOf[UrlResponse].typeSymbol.asClass)
+
+      s.responseDataType should be(ResponseDataType.URL)
+
+      val response = UrlResponse(responseContext, new URL("file://c://temp//test.txt"))
+      val x = s.getData(response)
+
+      x.asInstanceOf[URL].toString() should be("file://c://temp//test.txt")
+    }
+
   }
 }
 case class VoidResponse(context: RestResponseContext) extends RestResponse
@@ -119,4 +130,5 @@ case class DateResponse(context: RestResponseContext, data: Date) extends RestRe
 case class Pet(name: String, description: String)
 case class ObjectResponse(context: RestResponseContext, data: Pet) extends RestResponse
 
-case class StreamResponse(context: RestResponseContext, data: ByteArrayInputStream) extends RestResponse
+case class ByteArrayResponse(context: RestResponseContext, data: Array[Byte]) extends RestResponse
+case class UrlResponse(context: RestResponseContext, data: URL) extends RestResponse
