@@ -17,6 +17,9 @@ package org.mashupbots.socko.rest
 
 import scala.reflect.runtime.{ universe => ru }
 import org.mashupbots.socko.infrastructure.ReflectUtil
+import java.util.Date
+import java.text.SimpleDateFormat
+import org.mashupbots.socko.infrastructure.DateUtil
 
 /**
  * Deserializes incoming data into a [[org.mashupbots.socko.rest.RestRequest]]
@@ -130,7 +133,9 @@ object RequestParamBinding {
     (ru.typeOf[Double], (s: String) => s.toDouble),
     (ru.typeOf[Option[Double]], (s: String) => Some(s.toDouble)),
     (ru.typeOf[Float], (s: String) => s.toFloat),
-    (ru.typeOf[Option[Float]], (s: String) => Some(s.toFloat)))
+    (ru.typeOf[Option[Float]], (s: String) => Some(s.toFloat)),
+    (ru.typeOf[Date], (s: String) => DateUtil.parseISO8601Date(s)),
+    (ru.typeOf[Option[Date]], (s: String) => if (s ==null || s.isEmpty()) None else Some(DateUtil.parseISO8601Date(s))))
 
   private val nameName = ru.newTermName("name")
   private val descriptionName = ru.newTermName("description")
@@ -200,8 +205,10 @@ object RequestParamBinding {
     } else {
       throw new RestBindingException("Unsupported type: " + tpe)
     }
-
   }
+  
+
+  
 }
 
 /**

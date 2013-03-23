@@ -18,6 +18,7 @@ package org.mashupbots.socko.infrastructure
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
+import java.util.Date
 
 /**
  * Utility methods associated with dates
@@ -44,6 +45,56 @@ object DateUtil {
     val df = new SimpleDateFormat(RFC1123_DATE_FORMAT, Locale.US)
     df.setTimeZone(TimeZone.getTimeZone(RFC1123_DATE_GMT_TIMEZONE))
     df
+  }
+
+  /**
+   * Parse different forms of ISO8601 date formats.  The following variants are supported
+   *  - 2001-07-04
+   *  - 2001-07-04T12:08:56
+   *  - 2001-07-04T12:08:56Z
+   *  - 2001-07-04T12:08:56.235
+   *  - 2001-07-04T12:08:56-0700
+   *  - 2001-07-04T12:08:56-07:00
+   *  - 2001-07-04T12:08:56.235-0700
+   *  - 2001-07-04T12:08:56.235-07:00
+   *
+   * @param s String to parse
+   * @return Date in local time
+   */
+  def parseISO8601Date(s: String): Date = {
+    if (s == null || s.isEmpty()) {
+      throw new IllegalArgumentException("Null or empty string")
+    } else {
+      s.length match {
+        case 10 => new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(s)
+        case 19 => new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).parse(s)
+        case 20 => { 
+        	val df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+        	df.setTimeZone(TimeZone.getTimeZone("UTC"))
+        	df.parse(s)
+          }
+        case 23 => new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.US).parse(s)
+        case 24 => new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXX", Locale.US).parse(s)
+        case 25 => new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US).parse(s)
+        case 28 => new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXX", Locale.US).parse(s)
+        case 29 => new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.US).parse(s)
+        case _ => throw new IllegalArgumentException("Cannot parse date: " + s)
+      }
+    }
+  }
+
+  def formatISO8601Date(d: Date): String = {
+	  new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(d)
+  }
+
+  def formatISO8601DateTime(d: Date): String = {
+	  new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.US).format(d)
+  }
+
+  def formatISO8601UTCDateTime(d: Date): String = {
+	val df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+	df.setTimeZone(TimeZone.getTimeZone("UTC"))
+	df.format(d)
   }
   
 }

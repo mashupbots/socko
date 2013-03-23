@@ -37,7 +37,7 @@ class UtilSpec extends WordSpec with ShouldMatchers with GivenWhenThen with Logg
       s should be("Wed, 06 Jun 2012 10:20:30 GMT")
     }
 
-    "parse dates" in {
+    "parse rfc dates" in {
       val cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"))
       cal.set(2012, 5, 6, 10, 20, 30)
       cal.set(Calendar.MILLISECOND, 0)
@@ -46,11 +46,29 @@ class UtilSpec extends WordSpec with ShouldMatchers with GivenWhenThen with Logg
       d.getTime should equal(cal.getTime.getTime)
     }
 
-    "throw exception with invalid dates" in {
+    "throw exception with invalid rfc dates" in {
       val ex = intercept[ParseException] {
         DateUtil.rfc1123DateFormatter.parse("2010-1-1 10:20:30")
       }
     }
+    
+    "parse and format iso dates" in {
+      val cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"))
+      cal.set(2012, 5, 6, 10, 20, 30)
+      cal.set(Calendar.MILLISECOND, 0)
+
+      DateUtil.parseISO8601Date("2012-06-06T10:20:30Z").getTime should equal(cal.getTime.getTime)
+      DateUtil.parseISO8601Date("2012-06-06T10:20:30+0000").getTime should equal(cal.getTime.getTime)
+      DateUtil.formatISO8601UTCDateTime(cal.getTime) should be ("2012-06-06T10:20:30Z")
+            
+      val cal2 = new GregorianCalendar()
+      cal2.set(2012, 5, 6, 0, 0, 0)
+      cal2.set(Calendar.MILLISECOND, 0)
+
+      DateUtil.parseISO8601Date("2012-06-06").getTime should equal(cal2.getTime.getTime)
+      DateUtil.formatISO8601Date(cal2.getTime) should be ("2012-06-06")
+    }
+    
   }
 
   "IOUtil" should {
