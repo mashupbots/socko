@@ -21,4 +21,5 @@ trait RestResponse {
    * Context of this response
    */
   def context: RestResponseContext
+
 }

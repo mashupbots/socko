@@ -31,21 +31,21 @@ class RestRegistrySpec extends WordSpec with ShouldMatchers with GivenWhenThen w
       r.operations.exists(op => op.definition.method == "GET" &&
         op.definition.uriTemplate == "/pets" &&
         op.definition.actorPath == "/my/actor/path" &&
-        op.deseralizer.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsRequest" &&
-        op.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsResponse") should be(true)
+        op.deserializer.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsRequest" &&
+        op.serializer.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsResponse") should be(true)
 
       r.operations.exists(op => op.definition.method == "GET" &&
         op.definition.uriTemplate == "/dogs1" &&
         op.definition.actorPath == "/my/actor/path1" &&
-        op.deseralizer.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs1Request" &&
-        op.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse") should be(true)
+        op.deserializer.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs1Request" &&
+        op.serializer.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse") should be(true)
 
       r.operations.exists(op => op.definition.method == "GET" &&
         op.definition.uriTemplate == "/dogs2" &&
         op.definition.actorPath == "/my/actor/path2" &&
         op.definition.errorResponses.size == 2 &&
-        op.deseralizer.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs2Request" &&
-        op.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse") should be(true)
+        op.deserializer.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs2Request" &&
+        op.serializer.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse") should be(true)
     }
 
     "catch duplcate operation addresses" in {
@@ -62,8 +62,8 @@ class RestRegistrySpec extends WordSpec with ShouldMatchers with GivenWhenThen w
       r.operations.exists(op => op.definition.method == "GET" &&
         op.definition.uriTemplate == "/pets/{id}" &&
         op.definition.actorPath == "/my/actor/path" &&
-        op.deseralizer.requestClass.fullName == "org.mashupbots.socko.rest.test3.GetPetRequest" &&
-        op.responseClass.fullName == "org.mashupbots.socko.rest.test3.GetPetResponse") should be(true)
+        op.deserializer.requestClass.fullName == "org.mashupbots.socko.rest.test3.GetPetRequest" &&
+        op.serializer.responseClass.fullName == "org.mashupbots.socko.rest.test3.GetPetResponse") should be(true)
     }
     
   }

@@ -20,10 +20,12 @@ import org.mashupbots.socko.infrastructure.ReflectUtil
 import java.util.Date
 import java.text.SimpleDateFormat
 import org.mashupbots.socko.infrastructure.DateUtil
+import org.mashupbots.socko.events.HttpRequestEvent
 
 /**
  * Deserializes incoming data into a [[org.mashupbots.socko.rest.RestRequest]]
  *
+ * @param requestClass Request class
  * @param requestConstructor Constructor to call when instancing the request class
  * @param params Bindings to extract values form the request data. The values will be
  *   passed into the requestConstructor to instance the request class.
@@ -33,11 +35,22 @@ case class RestRequestDeserializer(
   requestConstructorMirror: ru.MethodMirror,
   requestParamBindings: List[RequestParamBinding]) {
 
+  /**
+   * Deserialize a [[org.mashupbots.socko.rest.RestRequest]] given a context
+   */
   def deserialize(context: RestRequestContext): RestRequest = {
-
     val params: List[_] = context :: requestParamBindings.map(b => b.extract(context))
     requestConstructorMirror(params: _*).asInstanceOf[RestRequest]
   }
+
+  /**
+   * Deserialize a [[org.mashupbots.socko.rest.RestRequest]] from a HTTP request event
+   */
+  def deserialize(http: HttpRequestEvent): RestRequest = {
+    val context = RestRequestContext(http.endPoint, http.request.headers)
+    deserialize(context)
+  }
+
 }
 
 /**
@@ -48,7 +61,7 @@ object RestRequestDeserializer {
   private val restResponseContextType = ru.typeOf[RestResponseContext]
 
   /**
-   * Factory for RestRequestBinding
+   * Factory for RestRequestDeserializer
    *
    * @param rm Runtime Mirror with the same class loaders as the specified request class
    * @param definition Definition of the operation
@@ -98,6 +111,19 @@ trait RequestParamBinding {
   def required: Boolean
 
   /**
+   * Parse a string into the specified
+   */
+  val parseFunc: (String) => Any = {
+    val entry = RequestParamBinding.primitiveTypes.find(e => e._1 =:= tpe)
+    if (entry.isDefined) {
+      val (t, conversionFunc) = entry.get
+      conversionFunc
+    } else {
+      throw new RestBindingException("Unsupported type: " + tpe)
+    }
+  }
+
+  /**
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
    *
    * @param context Request context
@@ -117,7 +143,7 @@ object RequestParamBinding {
   private val validParamAnnotationTypes = List(pathParamAnnotationType, queryStringParamAnnotationType, headerParamAnnotationType)
   private val optionType = ru.typeOf[Option[_]]
 
-  private val standardTypes: Map[ru.Type, (String) => Any] = Map(
+  private val primitiveTypes: Map[ru.Type, (String) => Any] = Map(
     (ru.typeOf[String], (s: String) => s),
     (ru.typeOf[Option[String]], (s: String) => Some(s)),
     (ru.typeOf[Int], (s: String) => s.toInt),
@@ -135,7 +161,7 @@ object RequestParamBinding {
     (ru.typeOf[Float], (s: String) => s.toFloat),
     (ru.typeOf[Option[Float]], (s: String) => Some(s.toFloat)),
     (ru.typeOf[Date], (s: String) => DateUtil.parseISO8601Date(s)),
-    (ru.typeOf[Option[Date]], (s: String) => if (s ==null || s.isEmpty()) None else Some(DateUtil.parseISO8601Date(s))))
+    (ru.typeOf[Option[Date]], (s: String) => if (s == null || s.isEmpty()) None else Some(DateUtil.parseISO8601Date(s))))
 
   private val nameName = ru.newTermName("name")
   private val descriptionName = ru.newTermName("description")
@@ -198,7 +224,7 @@ object RequestParamBinding {
    * @returns strictly typed value as specified in `tpe`
    */
   def parse(s: String, tpe: ru.Type): Any = {
-    val entry = standardTypes.find(e => e._1 =:= tpe)
+    val entry = primitiveTypes.find(e => e._1 =:= tpe)
     if (entry.isDefined) {
       val (t, conversionFunc) = entry.get
       conversionFunc(s)
@@ -206,9 +232,7 @@ object RequestParamBinding {
       throw new RestBindingException("Unsupported type: " + tpe)
     }
   }
-  
 
-  
 }
 
 /**
@@ -232,7 +256,7 @@ case class PathBinding(name: String,
     if (s.isEmpty) {
       throw new RestBindingException(s"Cannot find path variable '${name}' in ${context.endPoint.path}")
     }
-    RequestParamBinding.parse(s, tpe)
+    parseFunc(s)
   }
 }
 
@@ -260,7 +284,7 @@ case class QueryStringBinding(name: String,
         None
       }
     } else {
-      RequestParamBinding.parse(s.get, tpe)
+      parseFunc(s.get)
     }
   }
 }
@@ -289,7 +313,7 @@ case class HeaderBinding(name: String,
         None
       }
     } else {
-      RequestParamBinding.parse(s.get, tpe)
+      parseFunc(s.get)
     }
   }
 
