@@ -18,6 +18,7 @@ import scala.collection.JavaConversions._
 import scala.reflect.runtime.{ universe => ru }
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.ReflectUtil
+import org.mashupbots.socko.events.EndPoint
 
 /**
  * REST operation definition. Meta data describing a REST operation.
@@ -25,7 +26,8 @@ import org.mashupbots.socko.infrastructure.ReflectUtil
  * A REST operation is uniquely defined by its HTTP method and path.
  *
  * @param method HTTP method
- * @param uriTemplate URI template used for matching incoming REST requests
+ * @param rootUri Root URI
+ * @param urlTemplate relative URI template used for matching incoming REST requests
  *  - The template can be an exact match like `/pets`.
  *  - The template can have a path variable like `/pets/{petId}`. In this case, the template
  *    will match all paths with 2 segments and the first segment being `pets`. The second
@@ -48,7 +50,8 @@ import org.mashupbots.socko.infrastructure.ReflectUtil
  */
 case class RestOperationDef(
   method: String,
-  uriTemplate: String,
+  rootUrl: String,
+  urlTemplate: String,
   actorPath: String,
   responseClass: String = "",
   name: String = "",
@@ -57,21 +60,37 @@ case class RestOperationDef(
   depreciated: Boolean = false,
   errorResponses: Map[Int, String] = Map.empty) extends Logger {
 
+  private val isLookupActorPath: Boolean = actorPath.startsWith("lookup:")
+
+  private val lookupActorPathKey: String = if (isLookupActorPath) actorPath.substring(7) else ""
+
+  private val fullUrlTemplate = if (rootUrl == "/") urlTemplate else rootUrl + urlTemplate
+  
   /**
-   * The `uriTemplate` split into path segments for ease of matching
+   * The full URL template split into path segments for ease of matching
+   *
+   * ==Example Usage==
+   * {{{
+   * // '/user/{Id}'
+   * List(
+   *   PathSegment("user", false),
+   *   PathSegment("Id", true)
+   * )
+   * }}}
+   *
    */
   val pathSegments: List[PathSegment] = {
-    if (uriTemplate == null || uriTemplate.length == 0)
+    if (urlTemplate == null || urlTemplate.length == 0)
       throw new IllegalArgumentException("URI cannot be null or empty")
 
-    val s = if (uriTemplate.startsWith("/")) uriTemplate.substring(1) else uriTemplate
+    val s = if (fullUrlTemplate.startsWith("/")) fullUrlTemplate.substring(1) else fullUrlTemplate
     val ss = s.split("/").toList
     val segments = ss.map(s => PathSegment(s))
     segments
   }
 
   /**
-   * Compares the address of this operation to another
+   * Compares the URI of this operation to another.
    *
    * Comparison is based on method and path segments.
    *
@@ -83,9 +102,10 @@ case class RestOperationDef(
    *  - `DELETE /pets/{id}` is different to `PUT /pets/{id}` because methods are different
    *
    * @param op Another REST operation to compare against
-   * @returns `True` if the objects share the same end point address, `False` otherwise.
+   * @returns `True` if the URI templates are ambiguous and 2 or more unique end points can resolve to
+   *   either URI templates.  `False` otherwise..
    */
-  def compareAddress(opDef: RestOperationDef): Boolean = {
+  def compareUriTemplate(opDef: RestOperationDef): Boolean = {
 
     if (method != opDef.method) {
       // If different methods, then cannot be the same
@@ -113,6 +133,55 @@ case class RestOperationDef(
     }
   }
 
+  /**
+   * Sees if the URI template matches the specified end point
+   *
+   * Matching is only performed on static segments of the uri path.
+   *
+   * @param endpoint End point to match
+   * @return `True` if this is a match; `False` if not a match.
+   */
+  def matchEndPoint(endpoint: EndPoint): Boolean = {
+    if (method != endpoint.method) {
+      false
+    } else if (pathSegments.length != endpoint.pathSegments.length) {
+      return false
+    } else {
+      // Compare paths
+      def comparePathSegment(segments: List[(PathSegment, String)]): Boolean = {
+        if (segments.isEmpty) {
+          // Must resolve to the same endpoint - same method and path segments
+          true
+        } else {
+          val (ps, endpoint) = segments.head
+          if (!ps.isVariable && ps.name != endpoint) {
+            // If static segments are different, then cannot be the same
+            false
+          } else {
+            comparePathSegment(segments.tail)
+          }
+        }
+      }
+      comparePathSegment(pathSegments.zip(endpoint.pathSegments))
+    }
+  }
+
+  /**
+   * Returns the actor path for this operation.
+   *
+   * If a lookup is required, it is performed on the suppled map.
+   *
+   * @param lookup Map of key-actor path to use for lookup
+   * @return Actor path or `None` if not found.
+   */
+  def resolveActorPath(lookup: Map[String, String]): Option[String] = {
+    if (isLookupActorPath) {
+      lookup.get(lookupActorPathKey)
+    } else {
+      Some(actorPath)
+    }
+  }
+
 }
 
 /**
@@ -122,7 +191,7 @@ object RestOperationDef extends Logger {
 
   private val restGetType = ru.typeOf[RestGet]
 
-  private val uriTemplateName = ru.newTermName("uriTemplate")
+  private val urlTemplateName = ru.newTermName("urlTemplate")
   private val actorPathName = ru.newTermName("actorPath")
   private val responseClassName = ru.newTermName("responseClass")
   private val nameName = ru.newTermName("name")
@@ -135,16 +204,17 @@ object RestOperationDef extends Logger {
    * Instance a `RestDeclaration` using information of an annotation
    *
    * @param a A Rest annotation
+   * @param config REST configuration
    * @returns [[org.mashupbots.socko.rest.RestDeclaration]]
    */
-  def apply(a: ru.Annotation): RestOperationDef = {
+  def apply(a: ru.Annotation, config: RestConfig): RestOperationDef = {
     val method = if (a.tpe =:= restGetType) {
       "GET"
     } else {
       throw new IllegalStateException("Unknonw annotation type " + a.tpe.toString)
     }
 
-    val uriTemplate = ReflectUtil.getAnnotationJavaLiteralArg(a, uriTemplateName, "")
+    val urlTemplate = ReflectUtil.getAnnotationJavaLiteralArg(a, urlTemplateName, "")
     val actorPath = ReflectUtil.getAnnotationJavaLiteralArg(a, actorPathName, "")
     val responseClass = ReflectUtil.getAnnotationJavaLiteralArg(a, responseClassName, "")
     val name = ReflectUtil.getAnnotationJavaLiteralArg(a, nameName, "")
@@ -160,12 +230,12 @@ object RestOperationDef extends Logger {
     } catch {
       case ex: Throwable => {
         log.error("Error '%s' parsing error response map for '%s %s': (%s). All error responses for this operation will be ignored.".format(
-          ex.getMessage, method, uriTemplate, errorResponses.mkString(",")), ex)
+          ex.getMessage, method, urlTemplate, errorResponses.mkString(",")), ex)
         Map.empty
       }
     }
 
-    RestOperationDef(method, uriTemplate, actorPath, responseClass, name, description, notes, depreciated, errorResponsesMap)
+    RestOperationDef(method, config.rootUrl, urlTemplate, actorPath, responseClass, name, description, notes, depreciated, errorResponsesMap)
   }
 
   /**

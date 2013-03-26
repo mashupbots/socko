@@ -17,6 +17,7 @@ package org.mashupbots.socko.rest
 
 import org.mashupbots.socko.events.EndPoint
 import java.util.UUID
+import org.mashupbots.socko.events.HttpResponseStatus
 
 /**
  * Context of the rest request
@@ -33,6 +34,14 @@ case class RestRequestContext(
   def this(endPoint: EndPoint,
     headers: Map[String, String]) =
     this(UUID.randomUUID(), endPoint, headers)
+
+  def responseContext(status: HttpResponseStatus): RestResponseContext = {
+    RestResponseContext(this, status, Map.empty)
+  }
+
+  def responseContext(status: HttpResponseStatus, headers: Map[String, String]): RestResponseContext = {
+    RestResponseContext(this, status, headers)
+  }
 
 }
 

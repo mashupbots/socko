@@ -18,53 +18,109 @@ package org.mashupbots.socko.rest
 import akka.actor.Actor
 import akka.event.Logging
 import org.mashupbots.socko.events.HttpRequestEvent
+import akka.actor.FSM
+import akka.actor.Terminated
+import scala.concurrent.duration._
+import akka.actor.Props
+import java.util.UUID
 
 /**
- * The REST handler matches incoming data to a [[org.mashupbots.socko.rest.RestEndPoint]] and
- * utilizes that end point to deserialize the data, dispatches it to an actor for processing and
- * serializes the response.
- * 
- *  @param config Configuration 
+ * FSM states for [[org.mashupbots.socko.rest.RestHandler]]
  */
-class RestHandler(config: RestHandlerConfig) extends Actor {
-   
+sealed trait RestHandlerState
+
+/**
+ * FSM data for [[org.mashupbots.socko.rest.RestHandler]]
+ */
+trait RestHandlerData
+
+/**
+ * The initial processing point for incoming requests. It farms the work out to
+ * works to perform processing.
+ *
+ * Capacity control is implemented here. The maximum number of workers is limited. When the limit
+ * is reached, messages are rescheduled for processing.
+ *
+ * @param registry Registry to find operations
+ */
+class RestHandler(registry: RestRegistry) extends Actor with FSM[RestHandlerState, RestHandlerData] with akka.actor.ActorLogging {
+
+  import context.dispatcher
+
+  //*******************************************************************************************************************
+  // State
+  //*******************************************************************************************************************
   /**
-   * 
+   * Workers available to process request
    */
-  def receive = {
-    case request: HttpRequestEvent => {
-      
-    }
-  }  
-}
+  case object Active extends RestHandlerState
 
-/**
- * Configuration for the REST handler
- * 
- * @param apiVersion the version of your API
- * @param swaggerVersion Swagger definition version
- * @param basePath Full base path to your API from an external caller's point of view
- * @param registry Optional map of key/actor path. The key is specified in REST operation
- *   `actorPath` that are prefixed with `lookup:`. For example,
- *    {{{
- *    // Uses lookup
- *    @RestGet(uriTemplate = "/pets", actorPath = "lookup:mykey")
- * 
- *    // Will NOT use lookup
- *    @RestGet(uriTemplate = "/pets", actorPath = "/my/actor/path")
- *    }}} 
- *   
- */
-case class RestHandlerConfig(
-  apiVersion: String,
-  swaggerVersion: SwaggerVersion.Value,
-  basePath: String,
-  registry: RestRegistry)
- 
-/**
- * Support swagger version
- */
-object SwaggerVersion extends Enumeration {
-  type SwaggerVersion = Value
-  val V1_1 = Value("1.1")
+  /**
+   * All workers currently being utilized
+   */
+  case object MaxCapacity extends RestHandlerState
+
+  //*******************************************************************************************************************
+  // Data
+  //*******************************************************************************************************************
+  /**
+   * Data used when active
+   *
+   * @param workerCount Number of [[org.mashupbots.socko.rest.RestWorker]]s running.
+   */
+  case class Data(workerCount: Int) extends RestHandlerData {
+
+    def incrementWokerCount(): Data = {
+      this.copy(workerCount = workerCount + 1)
+    }
+
+    def decrementWokerCount(): Data = {
+      if (workerCount > 0) this.copy(workerCount = workerCount - 1)
+      else this.copy(workerCount = 0)
+    }
+
+  }
+
+  //*******************************************************************************************************************
+  // Transitions
+  //*******************************************************************************************************************
+  startWith(Active, Data(0))
+
+  when(Active) {
+    case Event(msg: HttpRequestEvent, data: Data) =>
+      // Start worker and register death watch so that we will receive a `Terminated` message when the actor stops
+      val worker = context.actorOf(Props(new RestHttpWorker(registry, msg)), "worker-" + UUID.randomUUID().toString)
+      context.watch(worker)
+      
+      // Manage worker count
+      val newData = data.incrementWokerCount()
+      if (newData.workerCount < registry.config.maxWorkerCount) stay using newData
+      else goto(MaxCapacity) using newData
+
+    case Event(msg: Terminated, data: Data) =>
+      // A worker has terminated so reduce the count
+      stay using data.decrementWokerCount()
+      
+    case unknown => 
+      log.debug("Received unknown message while Active: {}", unknown.toString)
+      stay
+      
+  }
+
+  when(MaxCapacity) {
+    case Event(msg: HttpRequestEvent, data: Data) =>
+      log.info("Rescheduling HttpRequestEvent channel {} because all workers are busy.", msg.channel.getId)
+      context.system.scheduler.scheduleOnce(registry.config.maxWorkerRescheduleMilliSeconds milliseconds, self, msg)
+      stay
+      
+    case Event(msg: Terminated, data: Data) =>
+      // A worker has terminated so reduce the count
+      goto(Active) using data.decrementWokerCount()
+      
+    case unknown => 
+      log.debug("Received unknown message while MaxCapacity: {}", unknown.toString)
+      stay
+      
+  }
+
 }

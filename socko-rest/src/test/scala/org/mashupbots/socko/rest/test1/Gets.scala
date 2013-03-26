@@ -22,7 +22,7 @@ import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
 
 @RestGet(
-  uriTemplate = "/pets",
+  urlTemplate = "/pets",
   actorPath = "/my/actor/path")
 case class GetPetsRequest(context: RestRequestContext) extends RestRequest {
 
@@ -33,7 +33,7 @@ case class GetPetsResponse(context: RestResponseContext) extends RestResponse {
 }
 
 @RestGet(
-  uriTemplate = "/dogs1",
+  urlTemplate = "/dogs1",
   actorPath = "/my/actor/path1",
   responseClass = "GetFunnyNameDogResponse")
 case class GetDogs1Request(context: RestRequestContext) extends RestRequest {
@@ -41,7 +41,7 @@ case class GetDogs1Request(context: RestRequestContext) extends RestRequest {
 }
 
 @RestGet(
-  uriTemplate = "/dogs2",
+  urlTemplate = "/dogs2",
   actorPath = "/my/actor/path2",
   responseClass = "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse",
   errorResponses = Array("400=username not found", "401=yet another error"))
@@ -55,7 +55,7 @@ case class GetFunnyNameDogResponse(context: RestResponseContext) extends RestRes
 
 // Ignored because there is no corresponding response class
 @RestGet(
-  uriTemplate = "/noresponse",
+  urlTemplate = "/noresponse",
   actorPath = "/my/actor/path")
 case class NoResponseRequest(context: RestRequestContext) extends RestRequest
 

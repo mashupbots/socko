@@ -39,7 +39,7 @@ case class RestRequestDeserializer(
    * Deserialize a [[org.mashupbots.socko.rest.RestRequest]] given a context
    */
   def deserialize(context: RestRequestContext): RestRequest = {
-    val params: List[_] = context :: requestParamBindings.map(b => b.extract(context))
+    val params: List[_] = context :: requestParamBindings.map(b => b.extract(context, requestClass))
     requestConstructorMirror(params: _*).asInstanceOf[RestRequest]
   }
 
@@ -127,9 +127,10 @@ trait RequestParamBinding {
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
    *
    * @param context Request context
+   * @param requestClass Request class to use in error messages
    * @returns a value for passing to the constructor
    */
-  def extract(context: RestRequestContext): Any
+  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol): Any
 
 }
 
@@ -201,35 +202,15 @@ object RequestParamBinding {
       val idx = opDef.pathSegments.indexWhere(ps => ps.name == name && ps.isVariable)
       if (idx == -1) {
         throw RestDefintionException(s"Constructor parameter '${p.name}' of '${requestClass.fullName}' cannot be bound to the uri template path. " +
-          s"'${opDef.uriTemplate}' does not contain variable named '${name}'.")
+          s"'${opDef.urlTemplate}' does not contain variable named '${name}'.")
       }
       PathBinding(name, p.typeSignature, description, idx)
-
     } else if (a.tpe =:= queryStringParamAnnotationType) {
       QueryStringBinding(name, p.typeSignature, description, required)
-
     } else if (a.tpe =:= headerParamAnnotationType) {
       HeaderBinding(name, p.typeSignature, description, required)
-
     } else {
       throw new IllegalStateException("Unsupported annotation: " + a.tpe)
-    }
-
-  }
-
-  /**
-   * Parses a string and returns the required strictly types value
-   *
-   * @param s string to parse
-   * @returns strictly typed value as specified in `tpe`
-   */
-  def parse(s: String, tpe: ru.Type): Any = {
-    val entry = primitiveTypes.find(e => e._1 =:= tpe)
-    if (entry.isDefined) {
-      val (t, conversionFunc) = entry.get
-      conversionFunc(s)
-    } else {
-      throw new RestBindingException("Unsupported type: " + tpe)
     }
   }
 
@@ -249,14 +230,20 @@ case class PathBinding(name: String,
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
    *
    * @param context Request context
+   * @param requestClass Request class to use in error messages
    * @returns a value for passing to the constructor
    */
-  def extract(context: RestRequestContext): Any = {
+  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol): Any = {
     val s = context.endPoint.pathSegments(pathIndex)
     if (s.isEmpty) {
-      throw new RestBindingException(s"Cannot find path variable '${name}' in ${context.endPoint.path}")
+      throw new RestBindingException(s"Cannot find path variable '${name}' in '${context.endPoint.path}' for request '${requestClass.fullName}'")
     }
-    parseFunc(s)
+    try {
+      parseFunc(s)
+    } catch {
+      case e: Throwable =>
+        throw RestBindingException(s"Cannot parse '${s}' for path variable '${name}' in '${context.endPoint.path}' for request '${requestClass.fullName}'", e)
+    }
   }
 }
 
@@ -272,19 +259,25 @@ case class QueryStringBinding(name: String,
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
    *
    * @param context Request context
+   * @param requestClass Request class to use in error messages
    * @returns a value for passing to the constructor
    */
-  def extract(context: RestRequestContext): Any = {
+  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol): Any = {
     val s = context.endPoint.getQueryString(name)
     if (s.isEmpty || (s.isDefined && s.get.length == 0)) {
       if (required) {
-        throw new RestBindingException(s"Cannot find query string variable '${name}' in ${context.endPoint.uri}")
+        throw new RestBindingException(s"Cannot find query string variable '${name}' in '${context.endPoint.uri}' for request '${requestClass.fullName}'")
       } else {
         // Must be an option because it is not required
         None
       }
     } else {
-      parseFunc(s.get)
+      try {
+        parseFunc(s.get)
+      } catch {
+        case e: Throwable =>
+          throw RestBindingException(s"Cannot parse '${s}' for query string variable '${name}' in '${context.endPoint.uri}' for request '${requestClass.fullName}'", e)
+      }
     }
   }
 }
@@ -301,19 +294,25 @@ case class HeaderBinding(name: String,
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
    *
    * @param context Request context
+   * @param requestClass Request class to use in error messages
    * @returns a value for passing to the constructor
    */
-  def extract(context: RestRequestContext): Any = {
+  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol): Any = {
     val s = context.headers.get(name)
     if (s.isEmpty) {
       if (required) {
-        throw new RestBindingException(s"Cannot find header variable '${name}' in ${context.headers}")
+        throw new RestBindingException(s"Cannot find header variable '${name}' for request '${requestClass.fullName}'")
       } else {
         // Must be an option because it is not required
         None
       }
     } else {
-      parseFunc(s.get)
+      try {
+        parseFunc(s.get)
+      } catch {
+        case e: Throwable =>
+          throw RestBindingException(s"Cannot parse '${s}' for header variable '${name}' for request '${requestClass.fullName}'", e)
+      }
     }
   }
 

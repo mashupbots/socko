@@ -27,9 +27,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface RestGet {
 	/**
-	 * Template URI.
+	 * Template URL to use for matching to this request
 	 */
-	String uriTemplate();
+	String urlTemplate();
 
 	/**
 	 * Path to actor to which this request will be sent for processing.

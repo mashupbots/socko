@@ -35,12 +35,12 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
 
       val d = RestRequestDeserializer(
         mirror,
-        RestOperationDef("PUT", "/pets/{id}", "/actor/path"),
+        RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[PathParamRequest1].typeSymbol.asClass)
       d.requestParamBindings.length should be(1)
       d.requestParamBindings(0).name should be("id")
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/path/1234"), Map.empty)
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/1234"), Map.empty)
       val req = d.deserialize(ctx).asInstanceOf[PathParamRequest1]
       req.id should be("1234")
     }
@@ -48,23 +48,39 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
     "Parse path parameters with multiple variables" in {
       val d = RestRequestDeserializer(
         mirror,
-        RestOperationDef("PUT", "/pets/{aaa}/stuff/{format}", "/actor/path"),
+        RestOperationDef("PUT", "/api", "/pets/{aaa}/stuff/{format}", "/actor/path"),
         ru.typeOf[PathParamRequest2].typeSymbol.asClass)
       d.requestParamBindings.length should be(2)
       d.requestParamBindings(0).name should be("aaa")
       d.requestParamBindings(0).description should be("test2")
       d.requestParamBindings(1).name should be("format")
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/path/5555/stuff/json/1.2/2.2"), Map.empty)
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/5555/stuff/json/1.2/2.2"), Map.empty)
       val req = d.deserialize(ctx).asInstanceOf[PathParamRequest2]
       req.id should be(5555)
       req.format should be("json")
     }
 
+    "Parse path parameters with invalid data" in {
+      val d = RestRequestDeserializer(
+        mirror,
+        RestOperationDef("PUT", "/api", "/pets/stuff/{id}", "/actor/path"),
+        ru.typeOf[PathParamRequest3].typeSymbol.asClass)
+      d.requestParamBindings.length should be(1)
+
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/stuff/stringnotint"), Map.empty)
+      
+      val thrown = intercept[RestBindingException] {
+        val req = d.deserialize(ctx).asInstanceOf[PathParamRequest3]
+      }
+      thrown.getMessage should be ("Cannot parse 'stringnotint' for path variable 'id' in '/api/path/stuff/stringnotint' for request 'org.mashupbots.socko.rest.PathParamRequest3'")
+    }
+
+
     "Parse query string parameters" in {
       val d = RestRequestDeserializer(
         mirror,
-        RestOperationDef("GET", "/pets/{format}", "/actor/path"),
+        RestOperationDef("GET", "/api", "/pets/{format}", "/actor/path"),
         ru.typeOf[QueryStringParamRequest1].typeSymbol.asClass)
       d.requestParamBindings.length should be(5)
       d.requestParamBindings(0).name should be("format")
@@ -74,7 +90,7 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
       d.requestParamBindings(3).name should be("exist")
       d.requestParamBindings(4).name should be("notexist")
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/pets/json?number=1&string=hello&exist=world"), Map.empty)
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json?number=1&string=hello&exist=world"), Map.empty)
       val req = d.deserialize(ctx).asInstanceOf[QueryStringParamRequest1]
       req.number should be(1)
       req.s should be("hello")
@@ -85,7 +101,7 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
     "Parse header parameters" in {
       val d = RestRequestDeserializer(
         mirror,
-        RestOperationDef("GET", "/pets/{format}", "/actor/path"),
+        RestOperationDef("GET", "/api", "/pets/{format}", "/actor/path"),
         ru.typeOf[HeaderParamRequest1].typeSymbol.asClass)
       d.requestParamBindings.length should be(5)
       d.requestParamBindings(0).name should be("format")
@@ -95,7 +111,7 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
       d.requestParamBindings(3).name should be("exist")
       d.requestParamBindings(4).name should be("notexist")
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/pets/json"),
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
         Map("number" -> "1", "string" -> "hello", "exist" -> "world"))
 
       val req = d.deserialize(ctx).asInstanceOf[HeaderParamRequest1]
@@ -108,10 +124,10 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
     "Parse all data types" in {
       val d = RestRequestDeserializer(
         mirror,
-        RestOperationDef("GET", "/pets", "/actor/path"),
+        RestOperationDef("GET", "/api", "/pets", "/actor/path"),
         ru.typeOf[AllDataTypeRequest].typeSymbol.asClass)
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/pets/json"),
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
         Map("string" -> "s", 
             "int" -> "2000000",
             "byte" -> "1",
@@ -137,10 +153,10 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
     "Parse all optional data types" in {
       val d = RestRequestDeserializer(
         mirror,
-        RestOperationDef("GET", "/pets", "/actor/path"),
+        RestOperationDef("GET", "/api", "/pets", "/actor/path"),
         ru.typeOf[AllOptionalDataTypeRequest].typeSymbol.asClass)
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/pets/json"),
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
         Map("string" -> "s", 
             "int" -> "2000000",
             "byte" -> "1",
@@ -162,7 +178,7 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
       req.double should be(Some("2.2".toDouble))
       req.date should be(Some(DateUtil.parseISO8601Date("2001-07-04")))
     
-      val ctx2 = RestRequestContext(EndPoint("GET", "localhost", "/pets/json"), Map.empty)
+      val ctx2 = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"), Map.empty)
 
       val req2 = d.deserialize(ctx2).asInstanceOf[AllOptionalDataTypeRequest]
       req2.string should be(None)
@@ -184,6 +200,9 @@ case class PathParamRequest1(context: RestRequestContext,
 case class PathParamRequest2(context: RestRequestContext,
   @RestPath(name = "aaa", description = "test2") id: Int,
   @RestPath() format: String) extends RestRequest
+
+case class PathParamRequest3(context: RestRequestContext,
+  @RestPath() id: Int) extends RestRequest
 
 case class QueryStringParamRequest1(context: RestRequestContext,
   @RestPath() format: String,

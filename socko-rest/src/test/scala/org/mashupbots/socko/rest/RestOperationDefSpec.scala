@@ -25,32 +25,32 @@ class RestOperationDefSpec extends WordSpec with ShouldMatchers with GivenWhenTh
   "RestOperationSpec" should {
     
     "compare endpoint address with different methods" in  {
-      RestOperationDef("GET", "/pets" ,"/actor/path").compareAddress(
-          RestOperationDef("PUT", "/pets" ,"/actor/path")) should be (false)
+      RestOperationDef("GET", "/api", "/pets" ,"/actor/path").compareUriTemplate(
+          RestOperationDef("PUT", "/api", "/pets" ,"/actor/path")) should be (false)
       
-      RestOperationDef("PUT", "/pets/{id}" ,"/actor/path").compareAddress(
-          RestOperationDef("POST", "/pets/{id}" ,"/actor/path")) should be (false)
+      RestOperationDef("PUT", "/api", "/pets/{id}" ,"/actor/path").compareUriTemplate(
+          RestOperationDef("POST", "/api", "/pets/{id}" ,"/actor/path")) should be (false)
       
-      RestOperationDef("PUT", "/pets/{id}" ,"/actor/path").compareAddress(
-          RestOperationDef("POST", "/{type}/{id}" ,"/actor/path")) should be (false)      
+      RestOperationDef("PUT", "/api", "/pets/{id}" ,"/actor/path").compareUriTemplate(
+          RestOperationDef("POST", "/api", "/{type}/{id}" ,"/actor/path")) should be (false)      
     }
 
     "compare endpoint address with different paths" in  {
-      RestOperationDef("GET", "/pets" ,"/actor/path").compareAddress(
-          RestOperationDef("GET", "/pets" ,"/actor/path")) should be (true)
+      RestOperationDef("GET", "/api", "/pets" ,"/actor/path").compareUriTemplate(
+          RestOperationDef("GET", "/api", "/pets" ,"/actor/path")) should be (true)
       
-      RestOperationDef("GET", "/pets" ,"/actor/path").compareAddress(
-          RestOperationDef("GET", "/dogs" ,"/actor/path")) should be (false)
+      RestOperationDef("GET", "/api", "/pets" ,"/actor/path").compareUriTemplate(
+          RestOperationDef("GET", "/api", "/dogs" ,"/actor/path")) should be (false)
 
-      RestOperationDef("GET", "/pets" ,"/actor/path").compareAddress(
-          RestOperationDef("GET", "/pets/dogs" ,"/actor/path")) should be (false)
+      RestOperationDef("GET", "/api", "/pets" ,"/actor/path").compareUriTemplate(
+          RestOperationDef("GET", "/api", "/pets/dogs" ,"/actor/path")) should be (false)
 
-      RestOperationDef("PUT", "/pets/{id}" ,"/actor/path").compareAddress(
-          RestOperationDef("PUT", "/pets/{id}" ,"/actor/path")) should be (true)
+      RestOperationDef("PUT", "/api", "/pets/{id}" ,"/actor/path").compareUriTemplate(
+          RestOperationDef("PUT", "/api", "/pets/{id}" ,"/actor/path")) should be (true)
 
       // Mix of variable and static in 1st path segment makes it the same address
-      RestOperationDef("PUT", "/pets/{id}" ,"/actor/path").compareAddress(
-          RestOperationDef("PUT", "/{type}/{id}" ,"/actor/path")) should be (true)
+      RestOperationDef("PUT", "/api", "/pets/{id}" ,"/actor/path").compareUriTemplate(
+          RestOperationDef("PUT", "/api", "/{type}/{id}" ,"/actor/path")) should be (true)
       
       
     }

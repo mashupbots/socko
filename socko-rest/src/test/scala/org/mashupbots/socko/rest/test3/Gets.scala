@@ -23,7 +23,7 @@ import org.mashupbots.socko.rest.RestResponseContext
 import org.mashupbots.socko.rest.RestPath
 
 @RestGet(
-  uriTemplate = "/pets/{id}",
+  urlTemplate = "/pets/{id}",
   actorPath = "/my/actor/path")
 case class GetPetRequest(context: RestRequestContext, 
     @RestPath() id: String) extends RestRequest {

@@ -62,41 +62,46 @@ case class RestResponseSerializer(
   def serialize(http: HttpRequestEvent, response: RestResponse) {
     responseDataType match {
       case ResponseDataType.Object => {
-        val data = getData(response)
-        val bytes = {
+        val data = getData(response).asInstanceOf[AnyRef]
+        val bytes: Array[Byte] = if (data == null) Array.empty else {
           implicit val formats = json.formats(NoTypeHints)
-          val s = json.write(data.asInstanceOf[AnyRef])
+          val s = json.write(data)
           s.getBytes(CharsetUtil.UTF_8)
         }
         http.response.write(response.context.status, bytes, "application/json; charset=UTF-8", response.context.headers)
       }
       case ResponseDataType.ByteArray => {
-        val data = getData(response)
-        val bytes = data.asInstanceOf[Array[Byte]]
+        val data = getData(response).asInstanceOf[Array[Byte]]
+        val bytes: Array[Byte] = if (data == null) Array.empty else data
         val contentType = response.context.headers.getOrElse(HttpHeaders.Names.CONTENT_TYPE, "application/octet-string")
         http.response.write(response.context.status, bytes, contentType, response.context.headers)
       }
       case ResponseDataType.URL => {
         val data = getData(response)
         val url = data.asInstanceOf[URL]
-        val contentType = response.context.headers.getOrElse(HttpHeaders.Names.CONTENT_TYPE, "application/octet-string")
-        http.response.writeFirstChunk(response.context.status, contentType, response.context.headers)
 
-        // TO DO use chunk writers to be more efficient and non blocking
-        val buf = new Array[Byte](8192)
-        IOUtil.using(new BufferedInputStream(url.openStream())) { r =>
-          def doPipe(): Unit = {
-            val bytesRead = r.read(buf)
-            if (bytesRead > 0) {
-              val w = if (bytesRead == buf.length) buf else buf.slice(0, bytesRead)
-              http.response.writeChunk(buf)
-              doPipe()
+        if (url == null) {
+          http.response.write(response.context.status, Array.empty[Byte], "", response.context.headers)
+        } else {
+          val contentType = response.context.headers.getOrElse(HttpHeaders.Names.CONTENT_TYPE, "application/octet-string")
+          http.response.writeFirstChunk(response.context.status, contentType, response.context.headers)
+
+          // TO DO use chunk writers to be more efficient and non blocking
+          val buf = new Array[Byte](8192)
+          IOUtil.using(new BufferedInputStream(url.openStream())) { r =>
+            def doPipe(): Unit = {
+              val bytesRead = r.read(buf)
+              if (bytesRead > 0) {
+                val w = if (bytesRead == buf.length) buf else buf.slice(0, bytesRead)
+                http.response.writeChunk(buf)
+                doPipe()
+              }
             }
+            doPipe()
           }
-          doPipe()
-        }
 
-        http.response.writeLastChunk()
+          http.response.writeLastChunk()
+        }
       }
       case ResponseDataType.Primitive => {
         val data = getData(response)

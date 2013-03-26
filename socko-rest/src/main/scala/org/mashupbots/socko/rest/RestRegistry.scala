@@ -20,6 +20,7 @@ import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.infrastructure.ReflectUtil
 import org.mashupbots.socko.infrastructure.Logger
 import scala.reflect.runtime.{ universe => ru }
+import org.mashupbots.socko.events.EndPoint
 
 /**
  * Collection [[org.mashupbots.socko.rest.RestOperation]]s that will be used to process
@@ -35,11 +36,40 @@ import scala.reflect.runtime.{ universe => ru }
  *    // Will NOT use lookup
  *    @RestGet(uriTemplate = "/pets", actorPath = "/my/actor/path")
  *    }}}
- *
+ * @param config REST configuration
  */
 case class RestRegistry(
   operations: Seq[RestOperation],
-  actorLookup: Map[String, String]) {
+  actorLookup: Map[String, String],
+  config: RestConfig) {
+
+  /**
+   * Finds the operation that matches the specified end point
+   *
+   * @param endPoint Endpoint to match
+   * @returns Matching [[org.mashupbots.socko.rest.RestOperation]]
+   */
+  def findOperation(endPoint: EndPoint): RestOperation = {
+    val op = operations.find(op => op.definition.matchEndPoint(endPoint))
+    if (op.isEmpty) {
+      throw RestBindingException(s"Cannot find operation for path: '${endPoint.path}'")
+    }
+    op.get
+  }
+
+  /**
+   * Finds the path of the actor that will be used to process the request
+   *
+   * @param op Operation associated with the request
+   * @returns actor path
+   */
+  def findPrcoessingActorPath(op: RestOperation): String = {
+    val actorPath = op.definition.resolveActorPath(actorLookup)
+    if (actorPath.isEmpty) {
+      throw RestBindingException(s"Cannot find actor path for operation associated with: '${op.deserializer.requestClass.fullName}'")
+    }
+    actorPath.get
+  }
 
 }
 
@@ -55,8 +85,8 @@ object RestRegistry extends Logger {
    * @param pkg Name of package where your annotated REST request and response classes
    *   are defined
    */
-  def apply(pkg: String): RestRegistry = {
-    apply(getClass().getClassLoader(), List(pkg), Map.empty[String, String])
+  def apply(pkg: String, config: RestConfig): RestRegistry = {
+    apply(getClass().getClassLoader(), List(pkg), Map.empty[String, String], config)
   }
 
   /**
@@ -69,8 +99,8 @@ object RestRegistry extends Logger {
    * @param actorLookup Map of key as defined in the REST operation annotation and the
    *   corresponding actor paths
    */
-  def apply(classLoader: ClassLoader, pkg: String, actorLookup: Map[String, String]): RestRegistry = {
-    apply(classLoader, List(pkg), actorLookup)
+  def apply(classLoader: ClassLoader, pkg: String, actorLookup: Map[String, String], config: RestConfig): RestRegistry = {
+    apply(classLoader, List(pkg), actorLookup, config)
   }
 
   /**
@@ -83,14 +113,14 @@ object RestRegistry extends Logger {
    * @param actorLookup Map of key as defined in the REST operation annotation and the
    *   corresponding actor paths
    */
-  def apply(classLoader: ClassLoader, pkg: Seq[String], actorLookup: Map[String, String]): RestRegistry = {
+  def apply(classLoader: ClassLoader, pkg: Seq[String], actorLookup: Map[String, String], config: RestConfig): RestRegistry = {
     val rm = ru.runtimeMirror(classLoader)
     val classes = pkg.flatMap(packageName => ReflectUtil.getClasses(classLoader, packageName))
     val classSymbols = classes.map(clz => rm.classSymbol(clz))
 
     val restOperations = for (
       cs <- classSymbols;
-      op = findRestOperation(rm, cs);
+      op = findRestOperation(rm, cs, config);
       resp = findRestResponse(op, cs, classSymbols);
       if (op.isDefined && resp.isDefined)
     ) yield {
@@ -103,16 +133,16 @@ object RestRegistry extends Logger {
     // Check for duplicate operation addresses
     restOperations.foreach(op => {
       val sameOp = restOperations.find(op2 => System.identityHashCode(op) != System.identityHashCode(op2) &&
-        op.definition.compareAddress(op2.definition))
+        op.definition.compareUriTemplate(op2.definition))
       if (sameOp.isDefined) {
         val msg = "Operation '%s %s' for '%s' resolves to the same address as '%s %s' for '%s'".format(
-          op.definition.method, op.definition.uriTemplate, op.deserializer.requestClass.fullName,
-          sameOp.get.definition.method, sameOp.get.definition.uriTemplate, sameOp.get.deserializer.requestClass.fullName)
+          op.definition.method, op.definition.urlTemplate, op.deserializer.requestClass.fullName,
+          sameOp.get.definition.method, sameOp.get.definition.urlTemplate, sameOp.get.deserializer.requestClass.fullName)
         throw RestDefintionException(msg)
       }
     })
 
-    RestRegistry(restOperations, actorLookup)
+    RestRegistry(restOperations, actorLookup, config)
   }
 
   private val typeRestRequest = ru.typeOf[RestRequest]
@@ -123,9 +153,10 @@ object RestRegistry extends Logger {
    *
    * @param rm Runtime mirror
    * @param cs class symbol of class to check
+   * @param config REST configuration
    * @returns An instance of the annotation class or `None` if annotation not found
    */
-  def findRestOperation(rm: ru.RuntimeMirror, cs: ru.ClassSymbol): Option[RestOperationDef] = {
+  def findRestOperation(rm: ru.RuntimeMirror, cs: ru.ClassSymbol, config: RestConfig): Option[RestOperationDef] = {
     val isRestRequest = cs.toType <:< typeRestRequest;
     val annotationType = RestOperationDef.findAnnotation(cs.annotations);
     if (!isRestRequest && annotationType.isEmpty) {
@@ -137,7 +168,7 @@ object RestRegistry extends Logger {
       log.warn("{} does not extend RestRequest but is annotated with a RestOperation ", cs.fullName)
       None
     } else {
-      Some(RestOperationDef(annotationType.get))
+      Some(RestOperationDef(annotationType.get, config))
     }
   }
 

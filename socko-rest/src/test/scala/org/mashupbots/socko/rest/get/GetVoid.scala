@@ -13,34 +13,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.rest.test2
+package org.mashupbots.socko.rest.get
 
 import org.mashupbots.socko.rest.RestGet
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
+import akka.actor.Actor
+import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.events.HttpResponseStatus
 
 @RestGet(
-  urlTemplate = "/pets",
-  actorPath = "/my/actor/path")
-case class GetPets1Request(context: RestRequestContext) extends RestRequest {
+  urlTemplate = "/void/{status}",
+  actorPath = "/user/GetVoidProcessor")
+case class GetVoidRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest {
 
 }
 
-case class GetPets1Response(context: RestResponseContext) extends RestResponse {
+case class GetVoidResponse(context: RestResponseContext) extends RestResponse {
 
 }
 
-// A duplicate of the above end point address
-@RestGet(
-  urlTemplate = "/pets",
-  actorPath = "/my/actor/path")
-case class GetPets2Request(context: RestRequestContext) extends RestRequest {
+class GetVoidProcessor() extends Actor with akka.actor.ActorLogging {
 
+  def receive = {
+    case req: GetVoidRequest =>
+      sender ! GetVoidResponse(req.context.responseContext(HttpResponseStatus(req.status)))
+  }
 }
-
-case class GetPets2Response(context: RestResponseContext) extends RestResponse {
-
-}
-

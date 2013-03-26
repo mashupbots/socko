@@ -40,7 +40,7 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
     "Serailize void response" in {
       val s = RestResponseSerializer(
         mirror,
-        RestOperationDef("PUT", "/pets/{id}", "/actor/path"),
+        RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[VoidResponse].typeSymbol.asClass)
 
       s.responseDataType should be(ResponseDataType.Void)
@@ -50,7 +50,7 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
     "Serailize primitive string response" in {
       val s = RestResponseSerializer(
         mirror,
-        RestOperationDef("PUT", "/pets/{id}", "/actor/path"),
+        RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[StringResponse].typeSymbol.asClass)
 
       s.responseDataType should be(ResponseDataType.Primitive)
@@ -64,7 +64,7 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
     "Serailize primitive date response" in {
       val s = RestResponseSerializer(
         mirror,
-        RestOperationDef("PUT", "/pets/{id}", "/actor/path"),
+        RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[DateResponse].typeSymbol.asClass)
 
       s.responseDataType should be(ResponseDataType.Primitive)
@@ -79,7 +79,7 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
     "Serailize object response" in {
       val s = RestResponseSerializer(
         mirror,
-        RestOperationDef("PUT", "/pets/{id}", "/actor/path"),
+        RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[ObjectResponse].typeSymbol.asClass)
 
       s.responseDataType should be(ResponseDataType.Object)
@@ -94,7 +94,7 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
     "Serailize byte array response" in {
       val s = RestResponseSerializer(
         mirror,
-        RestOperationDef("PUT", "/pets/{id}", "/actor/path"),
+        RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[ByteArrayResponse].typeSymbol.asClass)
 
       s.responseDataType should be(ResponseDataType.ByteArray)
@@ -108,7 +108,7 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
     "Serailize url response" in {
       val s = RestResponseSerializer(
         mirror,
-        RestOperationDef("PUT", "/pets/{id}", "/actor/path"),
+        RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[UrlResponse].typeSymbol.asClass)
 
       s.responseDataType should be(ResponseDataType.URL)
