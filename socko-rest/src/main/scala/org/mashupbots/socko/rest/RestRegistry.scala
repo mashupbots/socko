@@ -54,6 +54,11 @@ case class RestRegistry(
  */
 object RestRegistry extends Logger {
 
+  private val typeRestRequest = ru.typeOf[RestRequest]
+  private val typeRestResponse = ru.typeOf[RestResponse]
+  private val typeRestProcessorLocator = ru.typeOf[RestDispatcher]
+  private val dispatcherClassCache = scala.collection.mutable.Map.empty[String, RestDispatcher]
+
   /**
    * Instance registry using the classes under the specified package name and
    * the class loader of this class
@@ -117,10 +122,6 @@ object RestRegistry extends Logger {
 
     RestRegistry(restOperations, config)
   }
-
-  private val typeRestRequest = ru.typeOf[RestRequest]
-  private val typeRestResponse = ru.typeOf[RestResponse]
-  private val typeRestProcessorLocator = ru.typeOf[RestDispatcher]
 
   /**
    * Finds a REST operation annotation in a [[org.mashupbots.socko.rest.RestRequest]] class.
@@ -237,17 +238,22 @@ object RestRegistry extends Logger {
       None
     } else {
       val cs = dispatcherClassSymbol.get
-      val classMirror = rm.reflectClass(cs)
-      val constructorMethodSymbol = cs.toType.declaration(ru.nme.CONSTRUCTOR).asMethod
-      val constructorMethodMirror = classMirror.reflectConstructor(constructorMethodSymbol)
-      val x = constructorMethodSymbol.paramss
-      if (constructorMethodSymbol.paramss(0).size != 0) {
-        log.warn("RestDispatcher '{}' for RestRequest '{}' does not have a parameterless constructor{}",
-          cs.fullName, requestClassName, "")
-        None
-      } else {
-        val obj = constructorMethodMirror().asInstanceOf[RestDispatcher]
-        Some(obj)
+      val cachedObj = dispatcherClassCache.get(cs.fullName)
+      if (cachedObj.isDefined) cachedObj
+      else {
+        val classMirror = rm.reflectClass(cs)
+        val constructorMethodSymbol = cs.toType.declaration(ru.nme.CONSTRUCTOR).asMethod
+        val constructorMethodMirror = classMirror.reflectConstructor(constructorMethodSymbol)
+        val x = constructorMethodSymbol.paramss
+        if (constructorMethodSymbol.paramss(0).size != 0) {
+          log.warn("RestDispatcher '{}' for RestRequest '{}' does not have a parameterless constructor{}",
+            cs.fullName, requestClassName, "")
+          None
+        } else {
+          val obj = constructorMethodMirror().asInstanceOf[RestDispatcher]
+          dispatcherClassCache.put(cs.fullName, obj)
+          Some(obj)
+        }
       }
     }
   }
