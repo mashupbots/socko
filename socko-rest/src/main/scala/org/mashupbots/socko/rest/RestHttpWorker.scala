@@ -26,16 +26,6 @@ import akka.util.Timeout.durationToTimeout
 import org.mashupbots.socko.events.HttpResponseStatus
 
 /**
- * FSM states for [[org.mashupbots.socko.rest.RestHttpWorker]]
- */
-sealed trait RestHttpWorkerState
-
-/**
- * FSM data for [[org.mashupbots.socko.rest.RestHttpWorker]]
- */
-trait RestHttpWorkerData
-
-/**
  * Processes a HTTP REST request.
  *
  * Processing steps:
@@ -95,14 +85,13 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
     case Event(msg: Start, data: Data) =>
       log.debug(s"RestHttpWorker start")
       val op = registry.findOperation(httpRequest.endPoint)
-      val actorPath = registry.findPrcoessingActorPath(op)
-
-      val processingActor = context.actorFor(actorPath)
-      if (processingActor.isTerminated) {
-        throw RestBindingException(s"Processing actor '${actorPath}' is terminated")
-      }
 
       val restRequest = op.deserializer.deserialize(httpRequest)
+      val processingActor = restRequest.processingActor(context.system)
+      if (processingActor.isTerminated) {
+        throw RestBindingException(s"Processing actor '${processingActor.path}' for '${op.deserializer.requestClass.fullName}' is terminated")
+      }
+      
       val future = ask(processingActor, restRequest)(registry.config.requestTimeoutSeconds seconds).mapTo[RestResponse]
       future pipeTo self
 
@@ -156,5 +145,14 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
    self ! ProcessingError(reason)
   }
 
-}
+}	// end class
 
+/**
+ * FSM states for [[org.mashupbots.socko.rest.RestHttpWorker]]
+ */
+sealed trait RestHttpWorkerState
+
+/**
+ * FSM data for [[org.mashupbots.socko.rest.RestHttpWorker]]
+ */
+trait RestHttpWorkerData

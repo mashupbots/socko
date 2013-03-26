@@ -25,16 +25,6 @@ import akka.actor.Props
 import java.util.UUID
 
 /**
- * FSM states for [[org.mashupbots.socko.rest.RestHandler]]
- */
-sealed trait RestHandlerState
-
-/**
- * FSM data for [[org.mashupbots.socko.rest.RestHandler]]
- */
-trait RestHandlerData
-
-/**
  * The initial processing point for incoming requests. It farms the work out to
  * works to perform processing.
  *
@@ -90,7 +80,7 @@ class RestHandler(registry: RestRegistry) extends Actor with FSM[RestHandlerStat
     case Event(msg: HttpRequestEvent, data: Data) =>
       // Start worker and register death watch so that we will receive a `Terminated` message when the actor stops
       val worker = context.actorOf(Props(new RestHttpWorker(registry, msg)), "worker-" + UUID.randomUUID().toString)
-      context.watch(worker)
+      context.watch(worker)      
       
       // Manage worker count
       val newData = data.incrementWokerCount()
@@ -101,6 +91,10 @@ class RestHandler(registry: RestRegistry) extends Actor with FSM[RestHandlerStat
       // A worker has terminated so reduce the count
       stay using data.decrementWokerCount()
       
+    case Event(msg: RestHandlerWorkerCountRequest, data: Data) =>
+      sender ! data.workerCount
+      stay
+
     case unknown => 
       log.debug("Received unknown message while Active: {}", unknown.toString)
       stay
@@ -117,10 +111,29 @@ class RestHandler(registry: RestRegistry) extends Actor with FSM[RestHandlerStat
       // A worker has terminated so reduce the count
       goto(Active) using data.decrementWokerCount()
       
+    case Event(msg: RestHandlerWorkerCountRequest, data: Data) =>
+      sender ! data.workerCount
+      stay
+
     case unknown => 
       log.debug("Received unknown message while MaxCapacity: {}", unknown.toString)
-      stay
-      
+      stay      
   }
 
-}
+}	// end class
+
+
+/**
+ * FSM states for [[org.mashupbots.socko.rest.RestHandler]]
+ */
+sealed trait RestHandlerState
+
+/**
+ * FSM data for [[org.mashupbots.socko.rest.RestHandler]]
+ */
+trait RestHandlerData
+
+/**
+ * Message that can be sent to a RestHandler to retrieve the current number of workers
+ */
+case class RestHandlerWorkerCountRequest()

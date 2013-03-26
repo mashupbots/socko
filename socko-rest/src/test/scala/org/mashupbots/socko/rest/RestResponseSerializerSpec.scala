@@ -18,7 +18,7 @@ package org.mashupbots.socko.rest
 import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.matchers.MustMatchers
 import scala.reflect.runtime.{ universe => ru }
 import java.util.UUID
 import org.mashupbots.socko.events.EndPoint
@@ -29,9 +29,9 @@ import java.io.InputStream
 import org.mashupbots.socko.events.HttpResponseStatus
 import java.net.URL
 
-class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with GivenWhenThen with Logger {
+class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
-  "RestResponseSerializerSpec" should {
+  "RestResponseSerializerSpec" must {
 
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
     val requestContext = RestRequestContext(EndPoint("GET", "localhost", "/path/1234"), Map.empty)
@@ -43,8 +43,8 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[VoidResponse].typeSymbol.asClass)
 
-      s.responseDataType should be(ResponseDataType.Void)
-      s.responseDataTerm should be(None)
+      s.responseDataType must be(ResponseDataType.Void)
+      s.responseDataTerm must be(None)
     }
 
     "Serailize primitive string response" in {
@@ -53,12 +53,12 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[StringResponse].typeSymbol.asClass)
 
-      s.responseDataType should be(ResponseDataType.Primitive)
+      s.responseDataType must be(ResponseDataType.Primitive)
 
       val response = StringResponse(responseContext, "hello")
       val x = s.getData(response)
 
-      x.asInstanceOf[String] should be("hello")
+      x.asInstanceOf[String] must be("hello")
     }
 
     "Serailize primitive date response" in {
@@ -67,13 +67,13 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[DateResponse].typeSymbol.asClass)
 
-      s.responseDataType should be(ResponseDataType.Primitive)
+      s.responseDataType must be(ResponseDataType.Primitive)
 
       val date = DateUtil.parseISO8601Date("2010-01-02T10:20:30Z")
       val response = DateResponse(responseContext, date)
       val x = s.getData(response)
 
-      x.asInstanceOf[Date].getTime should be(date.getTime)
+      x.asInstanceOf[Date].getTime must be(date.getTime)
     }
 
     "Serailize object response" in {
@@ -82,13 +82,13 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[ObjectResponse].typeSymbol.asClass)
 
-      s.responseDataType should be(ResponseDataType.Object)
+      s.responseDataType must be(ResponseDataType.Object)
 
       val pet = Pet("spot", "dog")
       val response = ObjectResponse(responseContext, pet)
       val x = s.getData(response)
 
-      x.asInstanceOf[Pet].name should be("spot")
+      x.asInstanceOf[Pet].name must be("spot")
     }
 
     "Serailize byte array response" in {
@@ -97,12 +97,12 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[ByteArrayResponse].typeSymbol.asClass)
 
-      s.responseDataType should be(ResponseDataType.ByteArray)
+      s.responseDataType must be(ResponseDataType.ByteArray)
 
       val response = ByteArrayResponse(responseContext, Array(1, 2, 3))
       val x = s.getData(response)
 
-      x.asInstanceOf[Array[Byte]].length should be(3)
+      x.asInstanceOf[Array[Byte]].length must be(3)
     }
 
     "Serailize url response" in {
@@ -111,12 +111,12 @@ class RestResponseSerializerSpec extends WordSpec with ShouldMatchers with Given
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[UrlResponse].typeSymbol.asClass)
 
-      s.responseDataType should be(ResponseDataType.URL)
+      s.responseDataType must be(ResponseDataType.URL)
 
       val response = UrlResponse(responseContext, new URL("file://c://temp//test.txt"))
       val x = s.getData(response)
 
-      x.asInstanceOf[URL].toString() should be("file://c://temp//test.txt")
+      x.asInstanceOf[URL].toString() must be("file://c://temp//test.txt")
     }
 
   }

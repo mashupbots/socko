@@ -142,7 +142,7 @@ object Dependencies {
 
   val rest = Seq(
     Dependency.json4s, Dependency.swagger, Dependency.logback, 
-    Dependency.scalatest
+    Dependency.scalatest, Dependency.akkaTestKit
   )  
 
   val examples = Seq(
@@ -165,7 +165,7 @@ object Dependency {
   val nextProtoNeg  = "org.eclipse.jetty.npn"                   % "npn-api"                      % "1.1.0.v20120525"
   val json4s        = "org.json4s"                              %% "json4s-native"               % "3.2.1"
   val scalatest     = "org.scalatest"                           % "scalatest_2.10"               % "2.0.M5b" % "test"
-  val swagger       = "com.wordnik"                             % "swagger-core_2.10.0"          % "1.2.0"
+  val swagger       = "com.wordnik"                             % "swagger-core_2.10.0"          % "1.2.0" exclude("org.slf4j", "slf4j-log4j12") exclude("log4j", "log4j")
 }
 
 

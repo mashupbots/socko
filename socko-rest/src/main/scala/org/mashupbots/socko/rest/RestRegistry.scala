@@ -27,20 +27,10 @@ import org.mashupbots.socko.events.EndPoint
  * incoming requests.
  *
  * @param operations REST operations that will be used for processing requests
- * @param actorLookup Map of key/actor path. The key is specified in REST operation
- *   `actorPath` that are prefixed with `lookup:`. For example,
- *    {{{
- *    // Uses lookup
- *    @RestGet(uriTemplate = "/pets", actorPath = "lookup:mykey")
- *
- *    // Will NOT use lookup
- *    @RestGet(uriTemplate = "/pets", actorPath = "/my/actor/path")
- *    }}}
  * @param config REST configuration
  */
 case class RestRegistry(
   operations: Seq[RestOperation],
-  actorLookup: Map[String, String],
   config: RestConfig) {
 
   /**
@@ -55,20 +45,6 @@ case class RestRegistry(
       throw RestBindingException(s"Cannot find operation for path: '${endPoint.path}'")
     }
     op.get
-  }
-
-  /**
-   * Finds the path of the actor that will be used to process the request
-   *
-   * @param op Operation associated with the request
-   * @returns actor path
-   */
-  def findPrcoessingActorPath(op: RestOperation): String = {
-    val actorPath = op.definition.resolveActorPath(actorLookup)
-    if (actorPath.isEmpty) {
-      throw RestBindingException(s"Cannot find actor path for operation associated with: '${op.deserializer.requestClass.fullName}'")
-    }
-    actorPath.get
   }
 
 }
@@ -86,7 +62,7 @@ object RestRegistry extends Logger {
    *   are defined
    */
   def apply(pkg: String, config: RestConfig): RestRegistry = {
-    apply(getClass().getClassLoader(), List(pkg), Map.empty[String, String], config)
+    apply(getClass().getClassLoader(), List(pkg), config)
   }
 
   /**
@@ -96,11 +72,9 @@ object RestRegistry extends Logger {
    * @param classLoader Class loader use to discover the classes in the specified package
    * @param pkg Name of package where your annotated REST request and response classes
    *   are defined
-   * @param actorLookup Map of key as defined in the REST operation annotation and the
-   *   corresponding actor paths
    */
-  def apply(classLoader: ClassLoader, pkg: String, actorLookup: Map[String, String], config: RestConfig): RestRegistry = {
-    apply(classLoader, List(pkg), actorLookup, config)
+  def apply(classLoader: ClassLoader, pkg: String, config: RestConfig): RestRegistry = {
+    apply(classLoader, List(pkg), config)
   }
 
   /**
@@ -110,10 +84,8 @@ object RestRegistry extends Logger {
    * @param classLoader Class loader use to discover the classes in the specified package
    * @param pkg List of package names under which your annotated REST request and response
    *   classes are defined
-   * @param actorLookup Map of key as defined in the REST operation annotation and the
-   *   corresponding actor paths
    */
-  def apply(classLoader: ClassLoader, pkg: Seq[String], actorLookup: Map[String, String], config: RestConfig): RestRegistry = {
+  def apply(classLoader: ClassLoader, pkg: Seq[String], config: RestConfig): RestRegistry = {
     val rm = ru.runtimeMirror(classLoader)
     val classes = pkg.flatMap(packageName => ReflectUtil.getClasses(classLoader, packageName))
     val classSymbols = classes.map(clz => rm.classSymbol(clz))
@@ -142,7 +114,7 @@ object RestRegistry extends Logger {
       }
     })
 
-    RestRegistry(restOperations, actorLookup, config)
+    RestRegistry(restOperations, config)
   }
 
   private val typeRestRequest = ru.typeOf[RestRequest]

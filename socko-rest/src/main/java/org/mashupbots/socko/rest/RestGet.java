@@ -32,15 +32,6 @@ public @interface RestGet {
 	String urlTemplate();
 
 	/**
-	 * Path to actor to which this request will be sent for processing.
-	 * 
-	 * You can also bind your request to an actor at bootup time using the
-	 * <tt>lookup:{key}</tt> prefix. The `key` is the key to a map of actor names
-	 * passed into the request processor.
-	 */
-	String actorPath();
-
-	/**
 	 * Class path of the response class.
 	 * 
 	 * If empty, the assumed response class has the same class path and name as

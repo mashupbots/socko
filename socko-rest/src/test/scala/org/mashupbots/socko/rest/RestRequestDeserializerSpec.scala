@@ -18,16 +18,18 @@ package org.mashupbots.socko.rest
 import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.matchers.MustMatchers
 import scala.reflect.runtime.{ universe => ru }
 import java.util.UUID
 import org.mashupbots.socko.events.EndPoint
 import java.util.Date
 import org.mashupbots.socko.infrastructure.DateUtil
+import akka.actor.ActorRef
+import akka.actor.ActorSystem
 
-class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with GivenWhenThen with Logger {
+class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
-  "RestRequestDeserializerSpec" should {
+  "RestRequestDeserializerSpec" must {
 
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
 
@@ -37,12 +39,12 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
         mirror,
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[PathParamRequest1].typeSymbol.asClass)
-      d.requestParamBindings.length should be(1)
-      d.requestParamBindings(0).name should be("id")
+      d.requestParamBindings.length must be(1)
+      d.requestParamBindings(0).name must be("id")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/1234"), Map.empty)
       val req = d.deserialize(ctx).asInstanceOf[PathParamRequest1]
-      req.id should be("1234")
+      req.id must be("1234")
     }
 
     "Parse path parameters with multiple variables" in {
@@ -50,15 +52,15 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
         mirror,
         RestOperationDef("PUT", "/api", "/pets/{aaa}/stuff/{format}", "/actor/path"),
         ru.typeOf[PathParamRequest2].typeSymbol.asClass)
-      d.requestParamBindings.length should be(2)
-      d.requestParamBindings(0).name should be("aaa")
-      d.requestParamBindings(0).description should be("test2")
-      d.requestParamBindings(1).name should be("format")
+      d.requestParamBindings.length must be(2)
+      d.requestParamBindings(0).name must be("aaa")
+      d.requestParamBindings(0).description must be("test2")
+      d.requestParamBindings(1).name must be("format")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/5555/stuff/json/1.2/2.2"), Map.empty)
       val req = d.deserialize(ctx).asInstanceOf[PathParamRequest2]
-      req.id should be(5555)
-      req.format should be("json")
+      req.id must be(5555)
+      req.format must be("json")
     }
 
     "Parse path parameters with invalid data" in {
@@ -66,14 +68,14 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
         mirror,
         RestOperationDef("PUT", "/api", "/pets/stuff/{id}", "/actor/path"),
         ru.typeOf[PathParamRequest3].typeSymbol.asClass)
-      d.requestParamBindings.length should be(1)
+      d.requestParamBindings.length must be(1)
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/stuff/stringnotint"), Map.empty)
       
       val thrown = intercept[RestBindingException] {
         val req = d.deserialize(ctx).asInstanceOf[PathParamRequest3]
       }
-      thrown.getMessage should be ("Cannot parse 'stringnotint' for path variable 'id' in '/api/path/stuff/stringnotint' for request 'org.mashupbots.socko.rest.PathParamRequest3'")
+      thrown.getMessage must be ("Cannot parse 'stringnotint' for path variable 'id' in '/api/path/stuff/stringnotint' for request 'org.mashupbots.socko.rest.PathParamRequest3'")
     }
 
 
@@ -82,20 +84,20 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
         mirror,
         RestOperationDef("GET", "/api", "/pets/{format}", "/actor/path"),
         ru.typeOf[QueryStringParamRequest1].typeSymbol.asClass)
-      d.requestParamBindings.length should be(5)
-      d.requestParamBindings(0).name should be("format")
-      d.requestParamBindings(1).name should be("number")
-      d.requestParamBindings(2).name should be("string")
-      d.requestParamBindings(2).description should be("hello")
-      d.requestParamBindings(3).name should be("exist")
-      d.requestParamBindings(4).name should be("notexist")
+      d.requestParamBindings.length must be(5)
+      d.requestParamBindings(0).name must be("format")
+      d.requestParamBindings(1).name must be("number")
+      d.requestParamBindings(2).name must be("string")
+      d.requestParamBindings(2).description must be("hello")
+      d.requestParamBindings(3).name must be("exist")
+      d.requestParamBindings(4).name must be("notexist")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json?number=1&string=hello&exist=world"), Map.empty)
       val req = d.deserialize(ctx).asInstanceOf[QueryStringParamRequest1]
-      req.number should be(1)
-      req.s should be("hello")
-      req.exist should be(Some("world"))
-      req.notexist should be(None)
+      req.number must be(1)
+      req.s must be("hello")
+      req.exist must be(Some("world"))
+      req.notexist must be(None)
     }
 
     "Parse header parameters" in {
@@ -103,22 +105,22 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
         mirror,
         RestOperationDef("GET", "/api", "/pets/{format}", "/actor/path"),
         ru.typeOf[HeaderParamRequest1].typeSymbol.asClass)
-      d.requestParamBindings.length should be(5)
-      d.requestParamBindings(0).name should be("format")
-      d.requestParamBindings(1).name should be("number")
-      d.requestParamBindings(2).name should be("string")
-      d.requestParamBindings(2).description should be("hello")
-      d.requestParamBindings(3).name should be("exist")
-      d.requestParamBindings(4).name should be("notexist")
+      d.requestParamBindings.length must be(5)
+      d.requestParamBindings(0).name must be("format")
+      d.requestParamBindings(1).name must be("number")
+      d.requestParamBindings(2).name must be("string")
+      d.requestParamBindings(2).description must be("hello")
+      d.requestParamBindings(3).name must be("exist")
+      d.requestParamBindings(4).name must be("notexist")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
         Map("number" -> "1", "string" -> "hello", "exist" -> "world"))
 
       val req = d.deserialize(ctx).asInstanceOf[HeaderParamRequest1]
-      req.number should be(1)
-      req.s should be("hello")
-      req.exist should be(Some("world"))
-      req.notexist should be(None)
+      req.number must be(1)
+      req.s must be("hello")
+      req.exist must be(Some("world"))
+      req.notexist must be(None)
     }
 
     "Parse all data types" in {
@@ -139,15 +141,15 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
             "date" -> "2001-07-04T12:08:56.235-07:00"))
 
       val req = d.deserialize(ctx).asInstanceOf[AllDataTypeRequest]
-      req.string should be("s")
-      req.int should be("2000000".toInt)
-      req.byte should be("1".toByte)
-      req.bool should be(true)
-      req.short should be("200".toShort)
-      req.long should be("10000000".toLong)
-      req.float should be("1.1".toFloat)
-      req.double should be("2.2".toDouble)
-      req.date should be(DateUtil.parseISO8601Date("2001-07-04T12:08:56.235-07:00"))
+      req.string must be("s")
+      req.int must be("2000000".toInt)
+      req.byte must be("1".toByte)
+      req.bool must be(true)
+      req.short must be("200".toShort)
+      req.long must be("10000000".toLong)
+      req.float must be("1.1".toFloat)
+      req.double must be("2.2".toDouble)
+      req.date must be(DateUtil.parseISO8601Date("2001-07-04T12:08:56.235-07:00"))
     }
 
     "Parse all optional data types" in {
@@ -168,55 +170,65 @@ class RestRequestDeserializerSpec extends WordSpec with ShouldMatchers with Give
             "date" -> "2001-07-04"))
 
       val req = d.deserialize(ctx).asInstanceOf[AllOptionalDataTypeRequest]
-      req.string should be(Some("s"))
-      req.int should be(Some("2000000".toInt))
-      req.byte should be(Some("1".toByte))
-      req.bool should be(Some(true))
-      req.short should be(Some("200".toShort))
-      req.long should be(Some("10000000".toLong))
-      req.float should be(Some("1.1".toFloat))
-      req.double should be(Some("2.2".toDouble))
-      req.date should be(Some(DateUtil.parseISO8601Date("2001-07-04")))
+      req.string must be(Some("s"))
+      req.int must be(Some("2000000".toInt))
+      req.byte must be(Some("1".toByte))
+      req.bool must be(Some(true))
+      req.short must be(Some("200".toShort))
+      req.long must be(Some("10000000".toLong))
+      req.float must be(Some("1.1".toFloat))
+      req.double must be(Some("2.2".toDouble))
+      req.date must be(Some(DateUtil.parseISO8601Date("2001-07-04")))
     
       val ctx2 = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"), Map.empty)
 
       val req2 = d.deserialize(ctx2).asInstanceOf[AllOptionalDataTypeRequest]
-      req2.string should be(None)
-      req2.int should be(None)
-      req2.byte should be(None)
-      req2.bool should be(None)
-      req2.short should be(None)
-      req2.long should be(None)
-      req2.float should be(None)
-      req2.double should be(None)      
-      req2.date should be(None)      
+      req2.string must be(None)
+      req2.int must be(None)
+      req2.byte must be(None)
+      req2.bool must be(None)
+      req2.short must be(None)
+      req2.long must be(None)
+      req2.float must be(None)
+      req2.double must be(None)      
+      req2.date must be(None)      
     }    
   }
 }
 
 case class PathParamRequest1(context: RestRequestContext,
-  @RestPath() id: String) extends RestRequest
+  @RestPath() id: String) extends RestRequest {
+  def processingActor(actorSystem: ActorSystem): ActorRef = null  
+}
 
 case class PathParamRequest2(context: RestRequestContext,
   @RestPath(name = "aaa", description = "test2") id: Int,
-  @RestPath() format: String) extends RestRequest
+  @RestPath() format: String) extends RestRequest {
+  def processingActor(actorSystem: ActorSystem): ActorRef = null    
+}
 
 case class PathParamRequest3(context: RestRequestContext,
-  @RestPath() id: Int) extends RestRequest
+  @RestPath() id: Int) extends RestRequest {
+  def processingActor(actorSystem: ActorSystem): ActorRef = null    
+}
 
 case class QueryStringParamRequest1(context: RestRequestContext,
   @RestPath() format: String,
   @RestQuery() number: Int,
   @RestQuery(name = "string", description = "hello") s: String,
   @RestQuery() exist: Option[String],
-  @RestQuery() notexist: Option[Int]) extends RestRequest
+  @RestQuery() notexist: Option[Int]) extends RestRequest {
+  def processingActor(actorSystem: ActorSystem): ActorRef = null    
+}
 
 case class HeaderParamRequest1(context: RestRequestContext,
   @RestPath() format: String,
   @RestHeader() number: Int,
   @RestHeader(name = "string", description = "hello") s: String,
   @RestHeader() exist: Option[String],
-  @RestHeader() notexist: Option[Int]) extends RestRequest
+  @RestHeader() notexist: Option[Int]) extends RestRequest {
+  def processingActor(actorSystem: ActorSystem): ActorRef = null    
+}
 
 case class AllDataTypeRequest(context: RestRequestContext,
   @RestHeader() string: String,
@@ -227,7 +239,9 @@ case class AllDataTypeRequest(context: RestRequestContext,
   @RestHeader() long: Long,
   @RestHeader() float: Float,
   @RestHeader() double: Double,
-  @RestHeader() date: Date) extends RestRequest
+  @RestHeader() date: Date) extends RestRequest {
+  def processingActor(actorSystem: ActorSystem): ActorRef = null    
+}
   
 case class AllOptionalDataTypeRequest(context: RestRequestContext,
   @RestHeader() string: Option[String],
@@ -238,5 +252,7 @@ case class AllOptionalDataTypeRequest(context: RestRequestContext,
   @RestHeader() long: Option[Long],
   @RestHeader() float: Option[Float],
   @RestHeader() double: Option[Double],
-  @RestHeader() date: Option[Date]) extends RestRequest  
+  @RestHeader() date: Option[Date]) extends RestRequest {
+  def processingActor(actorSystem: ActorSystem): ActorRef = null    
+}  
     

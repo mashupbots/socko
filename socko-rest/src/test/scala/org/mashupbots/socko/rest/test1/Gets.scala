@@ -20,12 +20,12 @@ import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
+import akka.actor.ActorRef
+import akka.actor.ActorSystem
 
-@RestGet(
-  urlTemplate = "/pets",
-  actorPath = "/my/actor/path")
+@RestGet(urlTemplate = "/pets")
 case class GetPetsRequest(context: RestRequestContext) extends RestRequest {
-
+  def processingActor(actorSystem: ActorSystem): ActorRef = null
 }
 
 case class GetPetsResponse(context: RestResponseContext) extends RestResponse {
@@ -34,33 +34,33 @@ case class GetPetsResponse(context: RestResponseContext) extends RestResponse {
 
 @RestGet(
   urlTemplate = "/dogs1",
-  actorPath = "/my/actor/path1",
   responseClass = "GetFunnyNameDogResponse")
 case class GetDogs1Request(context: RestRequestContext) extends RestRequest {
-
+  def processingActor(actorSystem: ActorSystem): ActorRef = null
 }
 
 @RestGet(
   urlTemplate = "/dogs2",
-  actorPath = "/my/actor/path2",
   responseClass = "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse",
   errorResponses = Array("400=username not found", "401=yet another error"))
 case class GetDogs2Request(context: RestRequestContext) extends RestRequest {
-
+  def processingActor(actorSystem: ActorSystem): ActorRef = null
 }
 
 case class GetFunnyNameDogResponse(context: RestResponseContext) extends RestResponse {
-
+ 
 }
 
 // Ignored because there is no corresponding response class
-@RestGet(
-  urlTemplate = "/noresponse",
-  actorPath = "/my/actor/path")
-case class NoResponseRequest(context: RestRequestContext) extends RestRequest
+@RestGet(urlTemplate = "/noresponse")
+case class NoResponseRequest(context: RestRequestContext) extends RestRequest{
+  def processingActor(actorSystem: ActorSystem): ActorRef = null
+}
 
 // Ignored because this does not have a @RestGet
-case class NoDeclarationRequest(context: RestRequestContext) extends RestRequest
+case class NoDeclarationRequest(context: RestRequestContext) extends RestRequest {
+  def processingActor(actorSystem: ActorSystem): ActorRef = null
+}
 
 // Ignored because not a RestRequest
 case class NotARestClass()

@@ -15,12 +15,21 @@
 //
 package org.mashupbots.socko.rest
 
+import akka.actor.ActorRef
+import akka.actor.ActorSystem
+
 trait RestRequest {
 
   /**
    * Context of this request. Contains information like endpoints and headers
    */
   def context: RestRequestContext
-  
+ 
+  /**
+   * Returns the actor to process this request
+   * 
+   * @param actorSystem Actor system
+   */
+  def processingActor(actorSystem: ActorSystem): ActorRef
 }
 
