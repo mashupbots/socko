@@ -94,18 +94,19 @@ object RestRegistry extends Logger {
       cs <- classSymbols;
       op = findRestOperation(rm, cs, config);
       resp = findRestResponse(op, cs, classSymbols);
-      if (op.isDefined && resp.isDefined)
+      processorLocator = findRestProcessorLocator(rm, op, cs, classSymbols);
+      if (op.isDefined && resp.isDefined && processorLocator.isDefined)
     ) yield {
       log.debug("Registering {} {} {}", op.get, cs.fullName, resp.get.fullName)
       val deserializer = RestRequestDeserializer(rm, op.get, cs)
       val serializer = RestResponseSerializer(rm, op.get, resp.get)
-      RestOperation(op.get, deserializer, serializer)
+      RestOperation(op.get, processorLocator.get, deserializer, serializer)
     }
 
     // Check for duplicate operation addresses
     restOperations.foreach(op => {
       val sameOp = restOperations.find(op2 => System.identityHashCode(op) != System.identityHashCode(op2) &&
-        op.definition.compareUriTemplate(op2.definition))
+        op.definition.compareUrlTemplate(op2.definition))
       if (sameOp.isDefined) {
         val msg = "Operation '%s %s' for '%s' resolves to the same address as '%s %s' for '%s'".format(
           op.definition.method, op.definition.urlTemplate, op.deserializer.requestClass.fullName,
@@ -119,6 +120,7 @@ object RestRegistry extends Logger {
 
   private val typeRestRequest = ru.typeOf[RestRequest]
   private val typeRestResponse = ru.typeOf[RestResponse]
+  private val typeRestProcessorLocator = ru.typeOf[RestProcessorLocator]
 
   /**
    * Finds a REST operation annotation in a [[org.mashupbots.socko.rest.RestRequest]] class.
@@ -154,7 +156,7 @@ object RestRegistry extends Logger {
    *
    * @param op Operation for which a response is to be located
    * @param requestClassSymbol Class Symbol for the request class
-   * @param classSymbols Sequence of class symbols to check for the response class
+   * @param classSymbols Sequence of class symbols in which to search for the response class
    * @returns the response class symbol or `None` if not found
    */
   def findRestResponse(
@@ -162,22 +164,19 @@ object RestRegistry extends Logger {
     requestClassSymbol: ru.ClassSymbol,
     classSymbols: Seq[ru.ClassSymbol]): Option[ru.ClassSymbol] = {
 
-    val requestClassName = requestClassSymbol.fullName;
+    val requestClassName = requestClassSymbol.fullName
+
+    def findClassSymbol(fullClassName: String) = classSymbols.find(cs => cs.fullName == fullClassName &&
+      cs.toType <:< typeRestResponse)
 
     if (op.isEmpty) {
       None
     } else if (op.get.responseClass == "") {
-      // Not specified so trying finding by replacing Request in the class name
-      // with Response
-      val responseClassName = if (requestClassName.endsWith("Request")) {
-        requestClassName.substring(0, requestClassName.length - 7) + "Response"
-      } else {
-        requestClassName + "Response"
-      }
-
-      val responseClassSymbol = classSymbols.find(cs => cs.fullName == responseClassName)
+      // Not specified so trying finding by replacing Request in the class name with Response
+      val responseClassName = replaceRequestInName(requestClassName, "Response")
+      val responseClassSymbol = findClassSymbol(responseClassName)
       if (responseClassSymbol.isEmpty) {
-        log.warn("Cannot find corresponding RestResponse {} for RestRequest {}{}",
+        log.warn("Cannot find corresponding RestResponse '{}' for RestRequest '{}'{}",
           responseClassName, requestClassName, "")
       }
       responseClassSymbol
@@ -185,9 +184,9 @@ object RestRegistry extends Logger {
       // Specified so let's try to find it
       if (op.get.responseClass.contains(".")) {
         // Full path specified because we have detected a . in the name
-        val responseClassSymbol = classSymbols.find(cs => cs.fullName == op.get.responseClass)
+        val responseClassSymbol = findClassSymbol(op.get.responseClass)
         if (responseClassSymbol.isEmpty) {
-          log.warn("Cannot find corresponding RestResponse {} for RestRequest {}{}",
+          log.warn("Cannot find corresponding RestResponse '{}' for RestRequest '{}'{}",
             op.get.responseClass, requestClassName, "")
         }
         responseClassSymbol
@@ -195,15 +194,114 @@ object RestRegistry extends Logger {
         // Only class name specified
         val pkgName = requestClassSymbol.fullName.substring(0, requestClassSymbol.fullName.lastIndexOf('.'))
         val fullClassName = pkgName + "." + op.get.responseClass
-        val responseClassSymbol = classSymbols.find(cs => cs.fullName == fullClassName)
+        val responseClassSymbol = findClassSymbol(fullClassName)
         if (responseClassSymbol.isEmpty) {
-          log.warn("Cannot find corresponding RestResponse {} for RestRequest {}{}",
+          log.warn("Cannot find corresponding RestResponse '{}' for RestRequest '{}'{}",
             fullClassName, requestClassName, "")
         }
         responseClassSymbol
       }
     }
   }
+
+  /**
+   * Finds a corresponding processor locator class given the operation and the request
+   *
+   * If operation `processorLocatorClass` field is empty, the class is assumed the same class path
+   * and name as the request class; but with `Request` suffix replaced with `Processor` or `ProcessorLocator`.
+   *
+   * If not empty, we will try to find the specified response class
+   *
+   * @param rm Runtime mirror
+   * @param op Operation for which a response is to be located
+   * @param requestClassSymbol Class Symbol for the request class
+   * @param classSymbols Sequence of class symbols in which to search for the processor locator class
+   * @returns the response class symbol or `None` if not found
+   */
+  def findRestProcessorLocator(
+    rm: ru.RuntimeMirror,
+    op: Option[RestOperationDef],
+    requestClassSymbol: ru.ClassSymbol,
+    classSymbols: Seq[ru.ClassSymbol]): Option[RestProcessorLocator] = {
+
+    val requestClassName = requestClassSymbol.fullName
+
+    def findClassSymbol(fullClassName: String) = classSymbols.find(cs => {
+      cs.fullName == fullClassName //&& cs.toType <:< typeRestProcessorLocator
+    })
+
+    val processorLocatorClassSymbol = if (op.isEmpty) {
+      None
+    } else if (op.get.processorLocatorClass == "") {
+      // Not specified so trying finding by replacing Request in the class name with ProcessorLocator
+      val plClassName = replaceRequestInName(requestClassName, "ProcessorLocator")
+      val plClassSymbol = findClassSymbol(plClassName)
+      log.debug(s"YYY ${plClassSymbol.isEmpty}")
+      if (plClassSymbol.isEmpty) {
+        // Trying finding by replacing Request in the class name with Processor
+        val pClassName = replaceRequestInName(requestClassName, "Processor")
+        val pClassSymbol = findClassSymbol(pClassName)
+        if (pClassSymbol.isEmpty) {
+          log.warn("Cannot find corresponding RestProcessorLocator '{}' or '{}' for RestRequest '{}'",
+            plClassName, pClassName, requestClassName)
+          None
+        } else {
+          pClassSymbol
+        }
+      } else {
+        plClassSymbol
+      }
+    } else {
+      // Specified so let's try to find it
+      if (op.get.processorLocatorClass.contains(".")) {
+        // Full path specified because we have detected a . in the name
+        val plClassSymbol = findClassSymbol(op.get.processorLocatorClass)
+        if (plClassSymbol.isEmpty) {
+          log.warn("Cannot find corresponding RestProcessorLocator '{}' for RestRequest '{}'{}",
+            op.get.processorLocatorClass, requestClassName, "")
+        }
+        plClassSymbol
+      } else {
+        // Only class name specified
+        val pkgName = requestClassSymbol.fullName.substring(0, requestClassSymbol.fullName.lastIndexOf('.'))
+        val fullClassName = pkgName + "." + op.get.processorLocatorClass
+        val plClassSymbol = findClassSymbol(fullClassName)
+        if (plClassSymbol.isEmpty) {
+          log.warn("Cannot find corresponding RestProcessorLocator '{}' for RestRequest '{}'{}",
+            fullClassName, requestClassName, "")
+        }
+        plClassSymbol
+      }
+    }
+
+    // Get instance if available
+    if (processorLocatorClassSymbol.isEmpty) {
+      None
+    } else {
+      val cs = processorLocatorClassSymbol.get
+      val classMirror = rm.reflectClass(cs)
+      val constructorMethodSymbol = cs.toType.declaration(ru.nme.CONSTRUCTOR).asMethod
+      val constructorMethodMirror = classMirror.reflectConstructor(constructorMethodSymbol)
+      val x = constructorMethodSymbol.paramss
+      if (constructorMethodSymbol.paramss(0).size != 0) {
+        log.warn("RestProcessorLocator '{}' for RestRequest '{}' does not have a parameterless constructor{}",
+          cs.fullName, requestClassName, "")
+        None
+      } else {
+        val obj = constructorMethodMirror().asInstanceOf[RestProcessorLocator]
+        Some(obj)
+      }
+    }
+  }
+
+  private def replaceRequestInName(requestClassName: String, newSuffix: String): String = {
+    if (requestClassName.endsWith("Request")) {
+      requestClassName.substring(0, requestClassName.length - 7) + newSuffix
+    } else {
+      requestClassName + newSuffix
+    }
+  }
+
 }
 
 

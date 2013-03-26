@@ -15,14 +15,17 @@
 //
 package org.mashupbots.socko.rest
 
+import akka.actor.ActorRef
+import akka.actor.ActorSystem
+
 /**
- * The result of processing a [[org.mashupbots.socko.rest.RestRequest]] 
+ * Instances or finds an actor to process a [[org.mashupbots.socko.rest.RestRequest]].
  */
-trait RestResponse {
+trait RestProcessorLocator {
 
   /**
-   * Context of this response
+   * Instances or finds an actor to process a [[org.mashupbots.socko.rest.RestRequest]].
    */
-  def context: RestResponseContext
-
+  def locateProcessor(actorSystem: ActorSystem): ActorRef
 }
+

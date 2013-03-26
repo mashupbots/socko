@@ -23,16 +23,14 @@ import org.mashupbots.socko.rest.RestResponseContext
 import org.mashupbots.socko.rest.RestPath
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
+import org.mashupbots.socko.rest.RestProcessorLocator
 
 @RestGet(urlTemplate = "/pets/{id}")
 case class GetPetRequest(context: RestRequestContext, 
-    @RestPath() id: String) extends RestRequest {
+    @RestPath() id: String) extends RestRequest 
 
-  def processingActor(actorSystem: ActorSystem): ActorRef = null 
+case class GetPetResponse(context: RestResponseContext) extends RestResponse 
 
+class GetPetProcessorLocator extends RestProcessorLocator {
+  def locateProcessor(actorSystem: ActorSystem): ActorRef = null
 }
-
-case class GetPetResponse(context: RestResponseContext) extends RestResponse {
-
-}
-

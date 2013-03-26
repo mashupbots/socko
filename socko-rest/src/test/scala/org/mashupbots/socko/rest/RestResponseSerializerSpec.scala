@@ -15,19 +15,18 @@
 //
 package org.mashupbots.socko.rest
 
+import java.net.URL
+import java.util.Date
+
+import scala.reflect.runtime.{ universe => ru }
+
+import org.mashupbots.socko.events.EndPoint
+import org.mashupbots.socko.events.HttpResponseStatus
+import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
-import scala.reflect.runtime.{ universe => ru }
-import java.util.UUID
-import org.mashupbots.socko.events.EndPoint
-import java.util.Date
-import org.mashupbots.socko.infrastructure.DateUtil
-import java.io.ByteArrayInputStream
-import java.io.InputStream
-import org.mashupbots.socko.events.HttpResponseStatus
-import java.net.URL
 
 class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 

@@ -26,17 +26,18 @@ import org.mashupbots.socko.events.EndPoint
  * A REST operation is uniquely defined by its HTTP method and path.
  *
  * @param method HTTP method
- * @param rootUri Root URI
- * @param urlTemplate relative URI template used for matching incoming REST requests
+ * @param rootUrl Root URL
+ * @param urlTemplate relative URL template used for matching incoming REST requests
  *  - The template can be an exact match like `/pets`.
  *  - The template can have a path variable like `/pets/{petId}`. In this case, the template
  *    will match all paths with 2 segments and the first segment being `pets`. The second
  *    segment will be bound to a variable called `petId` using [[org.mashupbots.socko.rest.PathParam]].
- *  - The URI template does NOT support query string.  This is defined using
+ *  - The URL template does NOT support query string.  This is defined using
  *    [[org.mashupbots.socko.rest.QueryParam]].
- * @param actorPath Path to actor to which this request will be sent for processing.
- *  - You can also bind your request to an actor at bootup time using an actor path of `lookup:{key}`.
- *  - The `key` is the key to a map of actor names passed into [[org.mashupbots.socko.rest.RestRegistry]].
+ * @param processorLocatorClass Class path to singleton object that is a [[org.mashupbots.socko.rest.RestProcessorLocator]].
+ *  - If empty, the assumed response class is the same class path and name as the request class;
+ *    but with `Request` suffix replaced with `Processor` or `ProcessorLocator`. For `MyRestRequest`, the default 
+ *    response class that will be used in is `MyRestProcessor` or `MyRestProcessorLocator`.
  * @param responseClass Class path of the response class.
  *  - If empty, the assumed response class is the same class path and name as the request class;
  *    but with `Request` suffix replaced with `Response`. For `MyRestRequest`, the default response class
@@ -52,7 +53,7 @@ case class RestOperationDef(
   method: String,
   rootUrl: String,
   urlTemplate: String,
-  actorPath: String,
+  processorLocatorClass: String,
   responseClass: String = "",
   name: String = "",
   description: String = "",
@@ -60,12 +61,8 @@ case class RestOperationDef(
   depreciated: Boolean = false,
   errorResponses: Map[Int, String] = Map.empty) extends Logger {
 
-  private val isLookupActorPath: Boolean = actorPath.startsWith("lookup:")
-
-  private val lookupActorPathKey: String = if (isLookupActorPath) actorPath.substring(7) else ""
-
   private val fullUrlTemplate = if (rootUrl == "/") urlTemplate else rootUrl + urlTemplate
-  
+
   /**
    * The full URL template split into path segments for ease of matching
    *
@@ -90,7 +87,7 @@ case class RestOperationDef(
   }
 
   /**
-   * Compares the URI of this operation to another.
+   * Compares the URL of this operation to another.
    *
    * Comparison is based on method and path segments.
    *
@@ -105,7 +102,7 @@ case class RestOperationDef(
    * @returns `True` if the URI templates are ambiguous and 2 or more unique end points can resolve to
    *   either URI templates.  `False` otherwise..
    */
-  def compareUriTemplate(opDef: RestOperationDef): Boolean = {
+  def compareUrlTemplate(opDef: RestOperationDef): Boolean = {
 
     if (method != opDef.method) {
       // If different methods, then cannot be the same
@@ -134,9 +131,9 @@ case class RestOperationDef(
   }
 
   /**
-   * Sees if the URI template matches the specified end point
+   * Compares the URL template with the specified end point.
    *
-   * Matching is only performed on static segments of the uri path.
+   * For example, `GET /pets/{id}` matches the end point `GET /pets/123`.
    *
    * @param endpoint End point to match
    * @return `True` if this is a match; `False` if not a match.
@@ -166,22 +163,6 @@ case class RestOperationDef(
     }
   }
 
-  /**
-   * Returns the actor path for this operation.
-   *
-   * If a lookup is required, it is performed on the suppled map.
-   *
-   * @param lookup Map of key-actor path to use for lookup
-   * @return Actor path or `None` if not found.
-   */
-  def resolveActorPath(lookup: Map[String, String]): Option[String] = {
-    if (isLookupActorPath) {
-      lookup.get(lookupActorPathKey)
-    } else {
-      Some(actorPath)
-    }
-  }
-
 }
 
 /**
@@ -192,7 +173,7 @@ object RestOperationDef extends Logger {
   private val restGetType = ru.typeOf[RestGet]
 
   private val urlTemplateName = ru.newTermName("urlTemplate")
-  private val actorPathName = ru.newTermName("actorPath")
+  private val processorLocatorClassName = ru.newTermName("processorLocatorClass")
   private val responseClassName = ru.newTermName("responseClass")
   private val nameName = ru.newTermName("name")
   private val descriptionName = ru.newTermName("description")
@@ -215,7 +196,7 @@ object RestOperationDef extends Logger {
     }
 
     val urlTemplate = ReflectUtil.getAnnotationJavaLiteralArg(a, urlTemplateName, "")
-    val actorPath = ReflectUtil.getAnnotationJavaLiteralArg(a, actorPathName, "")
+    val processorLocatorClass = ReflectUtil.getAnnotationJavaLiteralArg(a, processorLocatorClassName, "")
     val responseClass = ReflectUtil.getAnnotationJavaLiteralArg(a, responseClassName, "")
     val name = ReflectUtil.getAnnotationJavaLiteralArg(a, nameName, "")
     val description = ReflectUtil.getAnnotationJavaLiteralArg(a, descriptionName, "")
@@ -235,7 +216,8 @@ object RestOperationDef extends Logger {
       }
     }
 
-    RestOperationDef(method, config.rootUrl, urlTemplate, actorPath, responseClass, name, description, notes, depreciated, errorResponsesMap)
+    RestOperationDef(method, config.rootUrl, urlTemplate, processorLocatorClass, responseClass,
+      name, description, notes, depreciated, errorResponsesMap)
   }
 
   /**

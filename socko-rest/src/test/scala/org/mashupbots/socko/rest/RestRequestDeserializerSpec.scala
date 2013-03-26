@@ -15,17 +15,16 @@
 //
 package org.mashupbots.socko.rest
 
+import java.util.Date
+
+import scala.reflect.runtime.{universe => ru}
+
+import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.infrastructure.DateUtil
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
-import scala.reflect.runtime.{ universe => ru }
-import java.util.UUID
-import org.mashupbots.socko.events.EndPoint
-import java.util.Date
-import org.mashupbots.socko.infrastructure.DateUtil
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
 
 class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
@@ -197,38 +196,28 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
 }
 
 case class PathParamRequest1(context: RestRequestContext,
-  @RestPath() id: String) extends RestRequest {
-  def processingActor(actorSystem: ActorSystem): ActorRef = null  
-}
+  @RestPath() id: String) extends RestRequest
 
 case class PathParamRequest2(context: RestRequestContext,
   @RestPath(name = "aaa", description = "test2") id: Int,
-  @RestPath() format: String) extends RestRequest {
-  def processingActor(actorSystem: ActorSystem): ActorRef = null    
-}
+  @RestPath() format: String) extends RestRequest
 
 case class PathParamRequest3(context: RestRequestContext,
-  @RestPath() id: Int) extends RestRequest {
-  def processingActor(actorSystem: ActorSystem): ActorRef = null    
-}
+  @RestPath() id: Int) extends RestRequest
 
 case class QueryStringParamRequest1(context: RestRequestContext,
   @RestPath() format: String,
   @RestQuery() number: Int,
   @RestQuery(name = "string", description = "hello") s: String,
   @RestQuery() exist: Option[String],
-  @RestQuery() notexist: Option[Int]) extends RestRequest {
-  def processingActor(actorSystem: ActorSystem): ActorRef = null    
-}
+  @RestQuery() notexist: Option[Int]) extends RestRequest 
 
 case class HeaderParamRequest1(context: RestRequestContext,
   @RestPath() format: String,
   @RestHeader() number: Int,
   @RestHeader(name = "string", description = "hello") s: String,
   @RestHeader() exist: Option[String],
-  @RestHeader() notexist: Option[Int]) extends RestRequest {
-  def processingActor(actorSystem: ActorSystem): ActorRef = null    
-}
+  @RestHeader() notexist: Option[Int]) extends RestRequest
 
 case class AllDataTypeRequest(context: RestRequestContext,
   @RestHeader() string: String,
@@ -239,9 +228,7 @@ case class AllDataTypeRequest(context: RestRequestContext,
   @RestHeader() long: Long,
   @RestHeader() float: Float,
   @RestHeader() double: Double,
-  @RestHeader() date: Date) extends RestRequest {
-  def processingActor(actorSystem: ActorSystem): ActorRef = null    
-}
+  @RestHeader() date: Date) extends RestRequest
   
 case class AllOptionalDataTypeRequest(context: RestRequestContext,
   @RestHeader() string: Option[String],
@@ -252,7 +239,5 @@ case class AllOptionalDataTypeRequest(context: RestRequestContext,
   @RestHeader() long: Option[Long],
   @RestHeader() float: Option[Float],
   @RestHeader() double: Option[Double],
-  @RestHeader() date: Option[Date]) extends RestRequest {
-  def processingActor(actorSystem: ActorSystem): ActorRef = null    
-}  
+  @RestHeader() date: Option[Date]) extends RestRequest 
     

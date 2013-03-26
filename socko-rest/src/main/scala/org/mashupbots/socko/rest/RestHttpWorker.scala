@@ -87,7 +87,7 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
       val op = registry.findOperation(httpRequest.endPoint)
 
       val restRequest = op.deserializer.deserialize(httpRequest)
-      val processingActor = restRequest.processingActor(context.system)
+      val processingActor = op.locator.locateProcessor(context.system)
       if (processingActor.isTerminated) {
         throw RestBindingException(s"Processing actor '${processingActor.path}' for '${op.deserializer.requestClass.fullName}' is terminated")
       }

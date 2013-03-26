@@ -30,7 +30,6 @@ object ReflectUtil extends Logger {
   /**
    * Returns a list of classes in the package and its sub-packages
    *
-   *
    * @param classLoader Class loaded to use to reflect classes. To make things simple, use a classloader
    *   of a class in the package you wish to reflect
    * @param packageName Name of package. For example, `org.mypackage`.

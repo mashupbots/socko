@@ -18,18 +18,14 @@ package org.mashupbots.socko.rest
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 
+/**
+ * A request to be processed by a REST processing actor
+ */
 trait RestRequest {
 
   /**
    * Context of this request. Contains information like endpoints and headers
    */
   def context: RestRequestContext
- 
-  /**
-   * Returns the actor to process this request
-   * 
-   * @param actorSystem Actor system
-   */
-  def processingActor(actorSystem: ActorSystem): ActorRef
 }
 
