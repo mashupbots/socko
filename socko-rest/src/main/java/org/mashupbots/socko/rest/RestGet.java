@@ -32,34 +32,8 @@ public @interface RestGet {
 	String urlTemplate();
 
 	/**
-	 * Class path of the processor actor locator class for this request. The class locates the actor
-	 * to process the request.
-	 * 
-	 * <p>
-	 * If empty, the following conventions are followed:
-	 * <ol>
-	 * <li>
-	 *   Same class path and name as the request class; but with <tt>Request</tt> suffix replaced with 
-	 *   <tt>ProcessorLocator</tt>. For <tt>MyRestRequest</tt>, the processor locator class would be 
-	 *   <tt>MyRestProcessorLocator</tt>.
-	 * </li>
-	 * <li>
-	 *   Same class path and name as the request class; but with <tt>Request</tt> suffix replaced with 
-	 *   <tt>Processor</tt>. For <tt>MyRestRequest</tt>, the processor locator class would be 
-	 *   <tt>MyRestProcessor</tt>.
-	 * </li>
-	 * </ol>
-	 * </p>
-	 * 
-	 * <p>
-	 * The class must extend <tt>org.mashupbots.socko.rest.RestProcessorLocator</tt>.  It can be a singleton object
-	 * or an instance class with a parameterless constructor.
-	 * </p>
-	 */
-	String processorLocatorClass() default "";
-	
-	/**
-	 * Class path of the response class.
+	 * Class path of the response class. If a package name is not provided, the class is assumed
+	 * to be in the same package as the request.
 	 * 
 	 * If empty, the assumed response class has the same class path and name as
 	 * the request class; but with <tt>Request</tt> suffix replaced with <tt>Response</tt>.
@@ -68,6 +42,18 @@ public @interface RestGet {
 	 */
 	String responseClass() default "";
 
+	/**
+	 * Class path of the class that will locate the actor to dispatch a request for processing.
+	 * If a package name is not provided, the class is assumed to be in the same package as the 
+	 * request.
+	 * 
+	 * If empty, the assumed response class has the same class path and name as
+	 * the request class; but with <tt>Request</tt> suffix replaced with <tt>Dispatcher</tt>.
+	 * 
+	 * For <tt>MyRestRequest</tt>, the default response class would be <tt>MyRestDispatcher</tt>.
+	 */
+	String dispatcherClass() default "";
+	
 	/**
 	 * Optional name used for the convenience of the UI and client code generator. 
 	 * 

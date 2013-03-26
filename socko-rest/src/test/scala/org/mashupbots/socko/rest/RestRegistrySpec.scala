@@ -32,19 +32,19 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
 
       r.operations.exists(op => op.definition.method == "GET" &&
         op.definition.urlTemplate == "/pets" &&
-        op.definition.processorLocatorClass == "" &&
+        op.definition.dispatcherClass == "" &&
         op.deserializer.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsRequest" &&
         op.serializer.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetPetsResponse") must be(true)
 
       r.operations.exists(op => op.definition.method == "GET" &&
         op.definition.urlTemplate == "/dogs1" &&
-        op.definition.processorLocatorClass == "GetPetsProcessorLocator" &&
+        op.definition.dispatcherClass == "GetPetsDispatcher" &&
         op.deserializer.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs1Request" &&
         op.serializer.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse") must be(true)
 
       r.operations.exists(op => op.definition.method == "GET" &&
         op.definition.urlTemplate == "/dogs2" &&
-        op.definition.processorLocatorClass == "org.mashupbots.socko.rest.test1.GetPetsProcessorLocator" &&
+        op.definition.dispatcherClass == "org.mashupbots.socko.rest.test1.GetPetsDispatcher" &&
         op.definition.errorResponses.size == 2 &&
         op.deserializer.requestClass.fullName == "org.mashupbots.socko.rest.test1.GetDogs2Request" &&
         op.serializer.responseClass.fullName == "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse") must be(true)
@@ -63,7 +63,7 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
 
       r.operations.exists(op => op.definition.method == "GET" &&
         op.definition.urlTemplate == "/pets/{id}" &&
-        op.definition.processorLocatorClass == "" &&
+        op.definition.dispatcherClass == "" &&
         op.deserializer.requestClass.fullName == "org.mashupbots.socko.rest.test3.GetPetRequest" &&
         op.serializer.responseClass.fullName == "org.mashupbots.socko.rest.test3.GetPetResponse") must be(true)
     }

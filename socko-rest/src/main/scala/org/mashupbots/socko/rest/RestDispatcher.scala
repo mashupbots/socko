@@ -21,11 +21,15 @@ import akka.actor.ActorSystem
 /**
  * Instances or finds an actor to process a [[org.mashupbots.socko.rest.RestRequest]].
  */
-trait RestProcessorLocator {
+trait RestDispatcher {
 
   /**
-   * Instances or finds an actor to process a [[org.mashupbots.socko.rest.RestRequest]].
+   * Returns an actor to which `request` will be sent for processing
+   * 
+   * @param actorSystem Actor system in which new actors maybe created
+   * @param request Rest Request to dispatch
+   * @return `ActorRef` of actor to which `request` will be sent for processing
    */
-  def locateProcessor(actorSystem: ActorSystem): ActorRef
+  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef
 }
 

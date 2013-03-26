@@ -22,7 +22,7 @@ import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
-import org.mashupbots.socko.rest.RestProcessorLocator
+import org.mashupbots.socko.rest.RestDispatcher
 
 @RestGet(urlTemplate = "/pets")
 case class GetPetsRequest(context: RestRequestContext) extends RestRequest
@@ -31,21 +31,21 @@ case class GetPetsResponse(context: RestResponseContext) extends RestResponse
 
 @RestGet(
   urlTemplate = "/dogs1",
-  processorLocatorClass = "GetPetsProcessorLocator",
-  responseClass = "GetFunnyNameDogResponse")
+  responseClass = "GetFunnyNameDogResponse",
+  dispatcherClass = "GetPetsDispatcher")
 case class GetDogs1Request(context: RestRequestContext) extends RestRequest
 
 @RestGet(
   urlTemplate = "/dogs2",
-  processorLocatorClass = "org.mashupbots.socko.rest.test1.GetPetsProcessorLocator",
   responseClass = "org.mashupbots.socko.rest.test1.GetFunnyNameDogResponse",
+  dispatcherClass = "org.mashupbots.socko.rest.test1.GetPetsDispatcher",
   errorResponses = Array("400=username not found", "401=yet another error"))
 case class GetDogs2Request(context: RestRequestContext) extends RestRequest
 
 case class GetFunnyNameDogResponse(context: RestResponseContext) extends RestResponse
 
 // Ignored because there is no corresponding response class
-@RestGet(urlTemplate = "/noresponse", processorLocatorClass = "GetPetsProcessorLocator")
+@RestGet(urlTemplate = "/noresponse", dispatcherClass = "GetPetsProcessorLocator")
 case class NoResponseRequest(context: RestRequestContext) extends RestRequest
 
 // Ignored because this does not have a @RestGet
@@ -54,6 +54,6 @@ case class NoDeclarationRequest(context: RestRequestContext) extends RestRequest
 // Ignored because not a RestRequest
 case class NotARestClass()
 
-class GetPetsProcessorLocator extends RestProcessorLocator {
-  def locateProcessor(actorSystem: ActorSystem): ActorRef = null
+class GetPetsDispatcher extends RestDispatcher {
+  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }

@@ -26,7 +26,7 @@ import org.mashupbots.socko.events.HttpResponseStatus
 import akka.actor.ActorSystem
 import akka.actor.ActorRef
 import akka.actor.Props
-import org.mashupbots.socko.rest.RestProcessorLocator
+import org.mashupbots.socko.rest.RestDispatcher
 
 @RestGet(urlTemplate = "/void/{status}")
 case class GetVoidRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest {
@@ -48,8 +48,8 @@ class GetVoidProcessor() extends Actor with akka.actor.ActorLogging {
   }
 }
 
-class GetVoidProcessorLocator extends RestProcessorLocator {
-  def locateProcessor(actorSystem: ActorSystem): ActorRef = {
+class GetVoidDispatcher extends RestDispatcher {
+  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
     actorSystem.actorOf(Props[GetVoidProcessor])
   }  
 }

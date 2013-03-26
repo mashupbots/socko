@@ -34,14 +34,14 @@ import org.mashupbots.socko.events.EndPoint
  *    segment will be bound to a variable called `petId` using [[org.mashupbots.socko.rest.PathParam]].
  *  - The URL template does NOT support query string.  This is defined using
  *    [[org.mashupbots.socko.rest.QueryParam]].
- * @param processorLocatorClass Class path to singleton object that is a [[org.mashupbots.socko.rest.RestProcessorLocator]].
- *  - If empty, the assumed response class is the same class path and name as the request class;
- *    but with `Request` suffix replaced with `Processor` or `ProcessorLocator`. For `MyRestRequest`, the default 
- *    response class that will be used in is `MyRestProcessor` or `MyRestProcessorLocator`.
  * @param responseClass Class path of the response class.
  *  - If empty, the assumed response class is the same class path and name as the request class;
  *    but with `Request` suffix replaced with `Response`. For `MyRestRequest`, the default response class
  *    that will be used in is `MyRestResponse`.
+ * @param dispatcherClass Class path to singleton object that is a [[org.mashupbots.socko.rest.RestDispatcher]].
+ *  - If empty, the assumed response class is the same class path and name as the request class;
+ *    but with `Request` suffix replaced with `Dispatcher`. For `MyRestRequest`, the default 
+ *    response class that will be used in is `MyRestDispatcher`.
  * @param name Name provided for the convenience of the UI and client code generator
  *    If empty, the name of the request class will be used without the `Request` prefix.
  * @param description Optional short description. Less than 60 characters is recommended.
@@ -53,8 +53,8 @@ case class RestOperationDef(
   method: String,
   rootUrl: String,
   urlTemplate: String,
-  processorLocatorClass: String,
   responseClass: String = "",
+  dispatcherClass: String = "",
   name: String = "",
   description: String = "",
   notes: String = "",
@@ -173,8 +173,8 @@ object RestOperationDef extends Logger {
   private val restGetType = ru.typeOf[RestGet]
 
   private val urlTemplateName = ru.newTermName("urlTemplate")
-  private val processorLocatorClassName = ru.newTermName("processorLocatorClass")
   private val responseClassName = ru.newTermName("responseClass")
+  private val dispatcherClassName = ru.newTermName("dispatcherClass")
   private val nameName = ru.newTermName("name")
   private val descriptionName = ru.newTermName("description")
   private val notesName = ru.newTermName("notes")
@@ -196,8 +196,8 @@ object RestOperationDef extends Logger {
     }
 
     val urlTemplate = ReflectUtil.getAnnotationJavaLiteralArg(a, urlTemplateName, "")
-    val processorLocatorClass = ReflectUtil.getAnnotationJavaLiteralArg(a, processorLocatorClassName, "")
     val responseClass = ReflectUtil.getAnnotationJavaLiteralArg(a, responseClassName, "")
+    val dispatcherClass = ReflectUtil.getAnnotationJavaLiteralArg(a, dispatcherClassName, "")
     val name = ReflectUtil.getAnnotationJavaLiteralArg(a, nameName, "")
     val description = ReflectUtil.getAnnotationJavaLiteralArg(a, descriptionName, "")
     val notes = ReflectUtil.getAnnotationJavaLiteralArg(a, notesName, "")
@@ -216,7 +216,7 @@ object RestOperationDef extends Logger {
       }
     }
 
-    RestOperationDef(method, config.rootUrl, urlTemplate, processorLocatorClass, responseClass,
+    RestOperationDef(method, config.rootUrl, urlTemplate, responseClass, dispatcherClass,
       name, description, notes, depreciated, errorResponsesMap)
   }
 

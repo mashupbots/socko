@@ -26,16 +26,17 @@ import scala.reflect.runtime.{ universe => ru }
  *  - serializes [[org.mashupbots.socko.rest.RestResponse]] and returns the result to the caller
  *
  * @param definition Meta data describing the operation
- * @param locator Processing actor locator object
+ * @param dispatcher Locates the actor to which a [[org.mashupbots.socko.rest.RestRequest]] will be sent 
+ *   for processing
  * @param deserializer Deserializes incoming data into a [[org.mashupbots.socko.rest.RestRequest]]
  * @param serializer Serializes a [[org.mashupbots.socko.rest.RestResponse]] class to send to the client
  */
 case class RestOperation(
   definition: RestOperationDef,
-  locator: RestProcessorLocator,
+  dispatcher: RestDispatcher,
   deserializer: RestRequestDeserializer,
   serializer: RestResponseSerializer) {
-  
+
 }
 
 

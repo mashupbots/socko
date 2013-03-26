@@ -22,15 +22,15 @@ import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
-import org.mashupbots.socko.rest.RestProcessorLocator
+import org.mashupbots.socko.rest.RestDispatcher
 
 @RestGet(urlTemplate = "/pets")
 case class GetPets1Request(context: RestRequestContext) extends RestRequest
 
 case class GetPets1Response(context: RestResponseContext) extends RestResponse
 
-case class GetPets1Processor() extends RestProcessorLocator {
-  def locateProcessor(actorSystem: ActorSystem): ActorRef = null
+case class GetPets1Dispatcher() extends RestDispatcher {
+  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
 // A duplicate of the above end point address
@@ -39,6 +39,6 @@ case class GetPets2Request(context: RestRequestContext) extends RestRequest
 
 case class GetPets2Response(context: RestResponseContext) extends RestResponse 
 
-class GetPets2Processor extends RestProcessorLocator {
-  def locateProcessor(actorSystem: ActorSystem): ActorRef = null
+class GetPets2Dispatcher extends RestDispatcher {
+  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
