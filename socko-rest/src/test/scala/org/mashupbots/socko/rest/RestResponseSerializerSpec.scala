@@ -60,6 +60,24 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
       x.asInstanceOf[String] must be("hello")
     }
 
+    "Serailize primitive optional int response" in {
+      val s = RestResponseSerializer(
+        mirror,
+        RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
+        ru.typeOf[OptionalIntResponse].typeSymbol.asClass)
+
+      s.responseDataType must be(ResponseDataType.Primitive)
+
+      val response = OptionalIntResponse(responseContext, Some(1))
+      val x = s.getData(response)
+      x.asInstanceOf[Option[Int]] must be(Some(1))
+      
+      val response2 = OptionalIntResponse(responseContext, None)
+      val x2 = s.getData(response2)
+      x2.asInstanceOf[Option[Int]] must be(None)
+      
+    }
+    
     "Serailize primitive date response" in {
       val s = RestResponseSerializer(
         mirror,
@@ -123,6 +141,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
 case class VoidResponse(context: RestResponseContext) extends RestResponse
 
 case class StringResponse(context: RestResponseContext, data: String) extends RestResponse
+case class OptionalIntResponse(context: RestResponseContext, data: Option[Int]) extends RestResponse
 
 case class DateResponse(context: RestResponseContext, data: Date) extends RestResponse
 

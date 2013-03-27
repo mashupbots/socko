@@ -48,23 +48,21 @@ object RestGetSpec {
         event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
         loglevel = "DEBUG"
 	  }    
-    """  
+    """
 }
 
 class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender with WordSpec
-  with MustMatchers with BeforeAndAfterAll with TestHttpClient with Logger  {
-   
+  with MustMatchers with BeforeAndAfterAll with TestHttpClient with Logger {
 
-    
   def this() = this(ActorSystem("HttpSpec", ConfigFactory.parseString(RestGetSpec.cfg)))
-    
+
   var webServer: WebServer = null
   val port = 9020
   val path = "http://localhost:" + port + "/"
-    
+
   val restRegistry = RestRegistry("org.mashupbots.socko.rest.get", RestConfig("1.0", "/api"))
   val restHandler = system.actorOf(Props(new RestHandler(restRegistry)))
-    
+
   val routes = Routes({
     case HttpRequest(httpRequest) => httpRequest match {
       case PathSegments("api" :: x) => {
@@ -86,7 +84,7 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
   override def afterAll(configMap: Map[String, Any]) {
     webServer.stop()
   }
-  
+
   "RestGetSpec" should {
 
     "GET void operations" in {
@@ -95,28 +93,45 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val resp = getResponseContent(conn)
 
       resp.status must equal("200")
-      resp.content.length must be ( 0)
-      
+      resp.content.length must be(0)
+
       val url2 = new URL(path + "api/void/404")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       val resp2 = getResponseContent(conn2)
 
       resp2.status must equal("404")
-      resp2.content.length must be ( 0)
+      resp2.content.length must be(0)
 
       val url3 = new URL(path + "api/void/cannot_parse")
       val conn3 = url3.openConnection().asInstanceOf[HttpURLConnection]
       val resp3 = getResponseContent(conn3)
 
       resp3.status must equal("500")
-      resp3.content.length must be ( 0)
-      
-      restHandler ! RestHandlerWorkerCountRequest()
-      expectMsgPF(5 seconds) {
-        case m: Int => {
-          m must be(0)
-        }
-      }      
+      resp3.content.length must be(0)
+
+      //restHandler ! RestHandlerWorkerCountRequest()
+      //expectMsgPF(5 seconds) {
+      //  case m: Int => {
+      //    m must be(0)
+      //  }
+      //}      
+    }
+
+    "GET object operations" in {
+      val url = new URL(path + "api/object/200")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection]
+      val resp = getResponseContent(conn)
+
+      resp.status must equal("200")
+      resp.content must be("{\"name\":\"Boo\",\"age\":5}")
+      resp.headers.getOrElse("Content-Type", "") must be("application/json; charset=UTF-8")
+
+      val url2 = new URL(path + "api/object/404")
+      val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
+      val resp2 = getResponseContent(conn2)
+
+      resp2.status must equal("404")
+      resp2.content.length must be(0)
     }
 
   }

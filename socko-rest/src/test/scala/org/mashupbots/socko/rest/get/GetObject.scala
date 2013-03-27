@@ -28,22 +28,30 @@ import akka.actor.ActorRef
 import akka.actor.Props
 import org.mashupbots.socko.rest.RestDispatcher
 
-@RestGet(urlTemplate = "/void/{status}")
-case class GetVoidRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
+@RestGet(urlTemplate = "/object/{status}")
+case class GetObjectRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
 
-case class GetVoidResponse(context: RestResponseContext) extends RestResponse
+case class Pet(name: String, age: Int)
+case class GetObjectResponse(context: RestResponseContext, pet: Option[Pet]) extends RestResponse
 
-class GetVoidProcessor() extends Actor with akka.actor.ActorLogging {
+class GetObjectProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
-    case req: GetVoidRequest =>
-      sender ! GetVoidResponse(req.context.responseContext(HttpResponseStatus(req.status)))
+    case req: GetObjectRequest =>
+      if (req.status == 200) {
+        sender ! GetObjectResponse(
+          req.context.responseContext(HttpResponseStatus(req.status)),
+          Some(Pet("Boo", 5)))
+      } else {
+        sender ! GetObjectResponse(
+          req.context.responseContext(HttpResponseStatus(req.status)),
+          None)
+      }
       context.stop(self)
   }
 }
 
-class GetVoidDispatcher extends RestDispatcher {
+class GetObjectDispatcher extends RestDispatcher {
   def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[GetVoidProcessor])
-  }  
+    actorSystem.actorOf(Props[GetObjectProcessor])
+  }
 }
-

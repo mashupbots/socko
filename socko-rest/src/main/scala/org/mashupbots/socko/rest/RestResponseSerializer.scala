@@ -32,11 +32,19 @@ import java.io.BufferedInputStream
  * Seralized outgoing data from a [[org.mashupbots.socko.rest.RestResposne]]
  *
  * @param responseClass Response class symbol
+ * @param responseDataType Data type of the field use to store the response data
+ * @param responseDataTerm Name of field used to store response data.
+ *   For `case class StringResponse(context: RestResponseContext, data: String) extends RestResponse`,
+ *   the term is `data`.
+ * @param primitiveSerializer Function to use to convert a primitive response data type to
+ *   a string for returning to the client. Only applicable if `responseDataType` is `ResponseDataType.Primitive`.
+ * @param rm Mirror used to extract the value of `responseDataTerm` from the response object
  */
 case class RestResponseSerializer(
   responseClass: ru.ClassSymbol,
   responseDataType: ResponseDataType.Value,
   responseDataTerm: Option[ru.TermSymbol],
+  primitiveSerializer: Option[(Any) => String],
   rm: ru.Mirror) {
 
   /**
@@ -124,16 +132,36 @@ case class RestResponseSerializer(
  */
 object RestResponseSerializer {
 
+  private def optionToString(s: Any): String = {
+    val ss = s.asInstanceOf[Option[_]]
+    if (ss.isEmpty) ""
+    else ss.get.toString
+  }
+  private def optionDateToString(s: Any): String = {
+    val ss = s.asInstanceOf[Option[Date]]
+    if (ss.isEmpty) ""
+    else DateUtil.formatISO8601DateTime(ss.get)
+  }
+
   private val primitiveTypes: Map[ru.Type, (Any) => String] = Map(
     (ru.typeOf[String], (s: Any) => s.toString),
+    (ru.typeOf[Option[String]], (s: Any) => optionToString(s)),
     (ru.typeOf[Int], (s: Any) => s.toString),
+    (ru.typeOf[Option[Int]], (s: Any) => optionToString(s)),
     (ru.typeOf[Boolean], (s: Any) => s.toString),
+    (ru.typeOf[Option[Boolean]], (s: Any) => optionToString(s)),
     (ru.typeOf[Byte], (s: Any) => s.toString),
+    (ru.typeOf[Option[Byte]], (s: Any) => optionToString(s)),
     (ru.typeOf[Short], (s: Any) => s.toString),
+    (ru.typeOf[Option[Short]], (s: Any) => optionToString(s)),
     (ru.typeOf[Long], (s: Any) => s.toString),
+    (ru.typeOf[Option[Long]], (s: Any) => optionToString(s)),
     (ru.typeOf[Double], (s: Any) => s.toString),
+    (ru.typeOf[Option[Double]], (s: Any) => optionToString(s)),
     (ru.typeOf[Float], (s: Any) => s.toString),
-    (ru.typeOf[Date], (s: Any) => DateUtil.formatISO8601DateTime(s.asInstanceOf[Date])))
+    (ru.typeOf[Option[Float]], (s: Any) => optionToString(s)),
+    (ru.typeOf[Date], (s: Any) => DateUtil.formatISO8601DateTime(s.asInstanceOf[Date])),
+    (ru.typeOf[Option[Date]], (s: Any) => optionDateToString(s)))
 
   private val inputStreamType = ru.typeOf[InputStream]
 
@@ -179,7 +207,14 @@ object RestResponseSerializer {
       Some(responseClassSymbol.toType.declaration(contentTerm.name).asTerm.accessed.asTerm)
     }
 
-    RestResponseSerializer(responseClassSymbol, responseDataType, responseDataTerm, rm)
+    val primitiveSerializer = if (responseDataType != ResponseDataType.Primitive) None
+    	else {
+	      val contentTerm = responseConstructorParams(1)
+	      val contentType = contentTerm.typeSignature
+    	  primitiveTypes.get(contentType)
+    	}
+    
+    RestResponseSerializer(responseClassSymbol, responseDataType, responseDataTerm, primitiveSerializer, rm)
   }
 
 }
