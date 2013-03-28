@@ -86,7 +86,12 @@ case class RestResponseSerializer(
       }
       case ResponseDataType.URL => {
         val data = getData(response)
-        val url = data.asInstanceOf[URL]
+        val url: URL = if (data == null) null else {
+          data match {
+            case u: URL => u
+            case ou: Option[_] => if (ou.isEmpty) null else ou.get.asInstanceOf[URL]
+          }
+        }
 
         if (url == null) {
           http.response.write(response.context.status, Array.empty[Byte], "", response.context.headers)
@@ -95,13 +100,14 @@ case class RestResponseSerializer(
           http.response.writeFirstChunk(response.context.status, contentType, response.context.headers)
 
           // TO DO use chunk writers to be more efficient and non blocking
+          // Look at org.mashupbots.socko.netty.HttpChunkedFile for example
           val buf = new Array[Byte](8192)
           IOUtil.using(new BufferedInputStream(url.openStream())) { r =>
             def doPipe(): Unit = {
               val bytesRead = r.read(buf)
               if (bytesRead > 0) {
                 val w = if (bytesRead == buf.length) buf else buf.slice(0, bytesRead)
-                http.response.writeChunk(buf)
+                http.response.writeChunk(w)
                 doPipe()
               }
             }
@@ -113,7 +119,7 @@ case class RestResponseSerializer(
       }
       case ResponseDataType.Primitive => {
         val data = getData(response)
-        val bytes = data.toString.getBytes(CharsetUtil.UTF_8)
+        val bytes = primitiveSerializer.get(data).getBytes(CharsetUtil.UTF_8)
         http.response.write(response.context.status, bytes, "text/plain; charset=UTF-8", response.context.headers)
       }
       case ResponseDataType.Void => {
@@ -163,7 +169,10 @@ object RestResponseSerializer {
     (ru.typeOf[Date], (s: Any) => DateUtil.formatISO8601DateTime(s.asInstanceOf[Date])),
     (ru.typeOf[Option[Date]], (s: Any) => optionDateToString(s)))
 
-  private val inputStreamType = ru.typeOf[InputStream]
+  private val byteArrayType = ru.typeOf[Array[Byte]]
+  private val urlType = ru.typeOf[URL]
+  private val optionalUrlType = ru.typeOf[Option[URL]]
+  private val anytRefType = ru.typeOf[AnyRef]
 
   /**
    * Factory for RestResponseSerializer
@@ -189,11 +198,11 @@ object RestResponseSerializer {
       val contentType = contentTerm.typeSignature
       if (primitiveTypes.exists(t => t._1 =:= contentType)) {
         ResponseDataType.Primitive
-      } else if (contentType =:= ru.typeOf[Array[Byte]]) {
+      } else if (contentType =:= byteArrayType) {
         ResponseDataType.ByteArray
-      } else if (contentType =:= ru.typeOf[URL]) {
+      } else if (contentType =:= urlType || contentType =:= optionalUrlType) {
         ResponseDataType.URL
-      } else if (contentType <:< ru.typeOf[AnyRef]) {
+      } else if (contentType <:< anytRefType) {
         ResponseDataType.Object
       } else {
         throw new IllegalArgumentException(s"Unsupported REST response data type ${contentType} in ${responseClassSymbol.fullName}.")
@@ -208,12 +217,12 @@ object RestResponseSerializer {
     }
 
     val primitiveSerializer = if (responseDataType != ResponseDataType.Primitive) None
-    	else {
-	      val contentTerm = responseConstructorParams(1)
-	      val contentType = contentTerm.typeSignature
-    	  primitiveTypes.get(contentType)
-    	}
-    
+    else {
+      val contentTerm = responseConstructorParams(1)
+      val contentType = contentTerm.typeSignature
+      Some(primitiveTypes.find(e => e._1 =:= contentType).get._2)
+    }
+
     RestResponseSerializer(responseClassSymbol, responseDataType, responseDataTerm, primitiveSerializer, rm)
   }
 

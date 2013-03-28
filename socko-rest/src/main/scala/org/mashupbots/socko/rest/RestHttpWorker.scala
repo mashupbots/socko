@@ -70,7 +70,7 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
    * Processing data
    */
   case class Data(op: Option[RestOperation] = None, startedOn: Date = new Date()) extends RestHttpWorkerData {
-    
+
     def duration: Long = {
       new Date().getTime - startedOn.getTime
     }
@@ -89,9 +89,9 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
       val restRequest = op.deserializer.deserialize(httpRequest)
       val processingActor = op.dispatcher.getActor(context.system, restRequest)
       if (processingActor.isTerminated) {
-        throw RestBindingException(s"Processing actor '${processingActor.path}' for '${op.deserializer.requestClass.fullName}' is terminated")
+        throw RestProcessingException(s"Processing actor '${processingActor.path}' for '${op.deserializer.requestClass.fullName}' is terminated")
       }
-      
+
       val future = ask(processingActor, restRequest)(registry.config.requestTimeoutSeconds seconds).mapTo[RestResponse]
       future pipeTo self
 
@@ -99,7 +99,7 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
 
     case Event(msg: ProcessingError, data: Data) =>
       stop(FSM.Failure(msg.reason))
-      
+
     case unknown =>
       log.debug("Received unknown message while DispatchRequest: {}", unknown.toString)
       stay
@@ -122,7 +122,10 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
     case StopEvent(FSM.Normal, state, data: Data) =>
       log.debug(s"Finished in ${data.duration}ms")
     case StopEvent(FSM.Failure(cause: Throwable), state, data: Data) =>
-      httpRequest.response.write(HttpResponseStatus(500))
+      cause match {
+        case _: RestBindingException => httpRequest.response.write(HttpResponseStatus(400), cause.getMessage)
+        case _: Throwable => httpRequest.response.write(HttpResponseStatus(500), cause.getMessage)
+      }
       log.error(cause, s"Failed with error: ${cause.getMessage}")
     case e: Any =>
       log.debug(s"Shutdown " + e)
@@ -142,10 +145,10 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
    * Start with a ProcessingError so that we record the unhandled exception during processing and stop
    */
   override def postRestart(reason: Throwable) {
-   self ! ProcessingError(reason)
+    self ! ProcessingError(reason)
   }
 
-}	// end class
+} // end class
 
 /**
  * FSM states for [[org.mashupbots.socko.rest.RestHttpWorker]]

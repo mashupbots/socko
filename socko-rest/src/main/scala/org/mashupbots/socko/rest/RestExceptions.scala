@@ -24,9 +24,24 @@ object RestDefintionException {
   def apply(msg: String, cause: Throwable) = new RestDefintionException(msg).initCause(cause)
 }
 
+/**
+ * Exception raised during the process of deserializing and dispatching a request
+ * 
+ * @param msg Error message
+ */
 case class RestBindingException(msg: String) extends Exception(msg)
 
 object RestBindingException {
   def apply(msg: String, cause: Throwable) = new RestBindingException(msg).initCause(cause)
 }
 
+/**
+ * Exception raised during the process of a request
+ * 
+ * @param msg Error message
+ */
+case class RestProcessingException(msg: String) extends Exception(msg)
+
+object RestProcessingException {
+  def apply(msg: String, cause: Throwable) = new RestProcessingException(msg).initCause(cause)
+}

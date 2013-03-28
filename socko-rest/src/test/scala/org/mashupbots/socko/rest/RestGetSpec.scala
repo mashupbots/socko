@@ -17,9 +17,7 @@ package org.mashupbots.socko.rest
 
 import java.net.HttpURLConnection
 import java.net.URL
-
 import scala.concurrent.duration._
-
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.WebLogFormat
 import org.mashupbots.socko.routes.HttpRequest
@@ -33,13 +31,16 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Finders
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
-
 import com.typesafe.config.ConfigFactory
-
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.testkit.ImplicitSender
 import akka.testkit.TestKit
+import org.mashupbots.socko.infrastructure.DateUtil
+import java.io.File
+import org.mashupbots.socko.infrastructure.IOUtil
+import org.mashupbots.socko.infrastructure.CharsetUtil
+import java.net.URLEncoder
 
 object RestGetSpec {
   val cfg =
@@ -55,6 +56,8 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
   with MustMatchers with BeforeAndAfterAll with TestHttpClient with Logger {
 
   def this() = this(ActorSystem("HttpSpec", ConfigFactory.parseString(RestGetSpec.cfg)))
+
+  var tempDir: File = null
 
   var webServer: WebServer = null
   val port = 9020
@@ -77,12 +80,21 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     val webLogConfig = Some(WebLogConfig(None, WebLogFormat.Common))
     val config = WebServerConfig(port = port, webLog = webLogConfig, http = httpConfig)
 
+    tempDir = File.createTempFile("Temp_", "")
+    tempDir.delete()
+    tempDir.mkdir()
+
     webServer = new WebServer(config, routes, system)
     webServer.start()
   }
 
   override def afterAll(configMap: Map[String, Any]) {
     webServer.stop()
+
+    if (tempDir != null) {
+      IOUtil.deleteDir(tempDir)
+      tempDir = null
+    }
   }
 
   "RestGetSpec" should {
@@ -106,7 +118,7 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val conn3 = url3.openConnection().asInstanceOf[HttpURLConnection]
       val resp3 = getResponseContent(conn3)
 
-      resp3.status must equal("500")
+      resp3.status must equal("400")
       resp3.content.length must be(0)
 
       //restHandler ! RestHandlerWorkerCountRequest()
@@ -134,5 +146,75 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       resp2.content.length must be(0)
     }
 
+    "GET byte array operations" in {
+      val url = new URL(path + "api/bytearray/200")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection]
+      val resp = getResponseContent(conn)
+
+      resp.status must equal("200")
+      resp.content must be("hello everybody")
+      resp.headers.getOrElse("Content-Type", "") must be("text/plain; charset=UTF-8")
+
+      val url2 = new URL(path + "api/bytearray/404")
+      val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
+      val resp2 = getResponseContent(conn2)
+
+      resp2.status must equal("404")
+      resp2.content.length must be(0)
+    }
+
+    "GET primitive operations" in {
+      val url = new URL(path + "api/primitive/200")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection]
+      val resp = getResponseContent(conn)
+
+      resp.status must equal("200")
+      DateUtil.parseISO8601Date(resp.content)
+      resp.headers.getOrElse("Content-Type", "") must be("text/plain; charset=UTF-8")
+
+      val url2 = new URL(path + "api/bytearray/404")
+      val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
+      val resp2 = getResponseContent(conn2)
+
+      resp2.status must equal("404")
+      resp2.content.length must be(0)
+    }
+
+    "GET stream URL operations" in {
+      val sb = new StringBuilder
+      for (i <- 1 to 1000) sb.append("abc")
+      val content = sb.toString
+
+      val file = new File(tempDir, "streamurl.txt")
+      IOUtil.writeTextFile(file, content, CharsetUtil.UTF_8)
+
+      val url = new URL(path + "api/streamurl/200?sourceURL=" + URLEncoder.encode(file.toURI().toURL().toString(),"UTF-8"))
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection]
+      val resp = getResponseContent(conn)
+
+      resp.status must equal("200")
+      resp.content must equal(content)
+      resp.headers.getOrElse("Content-Type", "") must be("text/plain; charset=UTF-8")
+
+      val url2 = new URL(path + "api/streamurl/404?sourceURL=notrequired")
+      val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
+      val resp2 = getResponseContent(conn2)
+
+      resp2.status must equal("404")
+      resp2.content.length must be(0)
+    }
+
+    "Correctly handle binding errors" in {
+      
+      // Required query string "sourceURL" not present
+      val url2 = new URL(path + "api/streamurl/200")
+      val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
+      val resp2 = getResponseContent(conn2)
+
+      resp2.status must equal("400")
+      resp2.content.length must be(0)
+      
+    }
+    
   }
 }

@@ -19,6 +19,9 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
+import scala.reflect.runtime.{ universe => ru }
+import org.json4s.native.{ Serialization => json }
+import org.json4s.NoTypeHints
 
 class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
@@ -68,5 +71,21 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
         op.serializer.responseClass.fullName == "org.mashupbots.socko.rest.test3.GetPetResponse") must be(true)
     }
     
+    "test deserialize" in {
+      
+      val s = "{\"name\":\"Boo\",\"age\":5}"
+      val formats = json.formats(NoTypeHints)
+
+      val clz = Class.forName("org.mashupbots.socko.rest.Horse")
+      val y = org.json4s.reflect.Reflector.scalaTypeOf(clz)
+      val z = org.json4s.reflect.ManifestFactory.manifestOf(y)
+      val x = json.read(s)(formats, z)
+      
+      val hh = x.asInstanceOf[Horse]
+      hh.name must be ("Boo")
+    }
+    
   }
 }
+
+case class Horse(name: String, age: Int)
