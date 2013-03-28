@@ -261,10 +261,11 @@ case class HttpResponseMessage(event: HttpEvent) {
    *
    * @param status HTTP Status
    * @param content String to send in the response body. The MIME type will be set to `text/plain; charset=UTF-8`.
+   *   If null or empty string, no content will be sent to the client.
    */
   def write(status: HttpResponseStatus, content: String): Unit = {
     this.status = status
-    write(content)
+    if (content != null && content != "") write(content)
   }
 
   /**
@@ -411,11 +412,11 @@ case class HttpResponseMessage(event: HttpEvent) {
     status: HttpResponseStatus,
     contentType: String,
     headers: Map[String, String]): Unit = {
-    
+
     this.status = status
     writeFirstChunk(contentType, headers)
   }
-  
+
   /**
    * Sends a chunk of data to the client.
    *

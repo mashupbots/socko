@@ -29,6 +29,11 @@ import org.mashupbots.socko.infrastructure.ConfigUtil
  * @param maxWorkerCount Maximum number of workers per [[org.mashupbots.socko.rest.RestHandler]].
  * @param maxWorkerRescheduleMilliSeconds Reschedule a message for processing again using this delay when max worker
  *   count has been reached.
+ * @param reportRuntimeException Returns the message from runtime exceptions caught during handing of a REST request
+ *   in addition to the HTTP status code.
+ *   
+ *   Two types of exceptions are raised: `400 Bad Requests` and `500 Internal Server Error`.  If turned on, the 
+ *   message will be return in the response and the content type set to `text/plain; charset=UTF-8`.
  */
 case class RestConfig(
   apiVersion: String,
@@ -36,7 +41,8 @@ case class RestConfig(
   swaggerVersion: String = "1.1",
   requestTimeoutSeconds: Int = 60,
   maxWorkerCount: Int = 100,
-  maxWorkerRescheduleMilliSeconds: Int = 500) extends Extension {
+  maxWorkerRescheduleMilliSeconds: Int = 500,
+  reportRuntimeException: ReportRuntimeException.Value = ReportRuntimeException.Never) extends Extension {
 
   /**
    * Read configuration from AKKA's `application.conf`
@@ -47,5 +53,49 @@ case class RestConfig(
     ConfigUtil.getString(config, prefix + ".swagger-version", "1.1"),
     ConfigUtil.getInt(config, prefix + ".request-timeout-seconds", 60),
     ConfigUtil.getInt(config, prefix + ".max-worker-count", 100),
-    ConfigUtil.getInt(config, prefix + ".max-worker-reschedule-milliseconds", 500))
+    ConfigUtil.getInt(config, prefix + ".max-worker-reschedule-milliseconds", 500),
+    ReportRuntimeException.withName(ConfigUtil.getString(config, prefix + ".report-runtime-exception", "Never")))
+    
+  val reportOn400BadRequests = (reportRuntimeException == ReportRuntimeException.BadRequestsOnly || 
+      reportRuntimeException == ReportRuntimeException.All)
+
+  val reportOn500InternalServerError = (reportRuntimeException == ReportRuntimeException.InternalServerErrorOnly || 
+      reportRuntimeException == ReportRuntimeException.All)
+
 }
+
+/**
+ * Indicates if we want to return a runtime exception message to the caller
+ * 
+ * Depending on your security requirements, you may wish to turn off errors in production
+ * but turn then on in development. 
+ * 
+ * No error messages are returned by default (`Never`).
+ */
+object ReportRuntimeException extends Enumeration {
+  type ReportRuntimeException = Value
+
+  /**
+   * Only the HTTP status will be returned
+   */
+  val Never = Value
+
+  /**
+   * The error messages will only be returned in the case of 400 bad requests; i.e.
+   * errors from dispatching and deseralizing REST requests.
+   */
+  val BadRequestsOnly = Value
+
+  /**
+   * The error messages will only be returned in the case of 500 internal server error; i.e.
+   * errors from processing and seralizing a request
+   */
+  val InternalServerErrorOnly = Value
+
+  /**
+   * The error messages will always be returned for types of exceptions.
+   */
+  val All = Value
+
+}
+

@@ -63,7 +63,8 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
   val port = 9020
   val path = "http://localhost:" + port + "/"
 
-  val restRegistry = RestRegistry("org.mashupbots.socko.rest.get", RestConfig("1.0", "/api"))
+  val restRegistry = RestRegistry("org.mashupbots.socko.rest.get",
+    RestConfig("1.0", "/api", reportRuntimeException = ReportRuntimeException.All))
   val restHandler = system.actorOf(Props(new RestHandler(restRegistry)))
 
   val routes = Routes({
@@ -119,7 +120,7 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val resp3 = getResponseContent(conn3)
 
       resp3.status must equal("400")
-      resp3.content.length must be(0)
+      resp3.content.length must not be(0)
 
       //restHandler ! RestHandlerWorkerCountRequest()
       //expectMsgPF(5 seconds) {
@@ -188,7 +189,7 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val file = new File(tempDir, "streamurl.txt")
       IOUtil.writeTextFile(file, content, CharsetUtil.UTF_8)
 
-      val url = new URL(path + "api/streamurl/200?sourceURL=" + URLEncoder.encode(file.toURI().toURL().toString(),"UTF-8"))
+      val url = new URL(path + "api/streamurl/200?sourceURL=" + URLEncoder.encode(file.toURI().toURL().toString(), "UTF-8"))
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
       val resp = getResponseContent(conn)
 
@@ -205,16 +206,17 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     }
 
     "Correctly handle binding errors" in {
-      
+
       // Required query string "sourceURL" not present
       val url2 = new URL(path + "api/streamurl/200")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       val resp2 = getResponseContent(conn2)
 
       resp2.status must equal("400")
-      resp2.content.length must be(0)
-      
+      resp2.content.length must not be(0)
+      log.info(s"Error message: ${resp2.content}")
+
     }
-    
+
   }
 }

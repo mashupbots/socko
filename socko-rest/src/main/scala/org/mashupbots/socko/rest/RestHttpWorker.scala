@@ -43,6 +43,8 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
 
   import context.dispatcher
 
+  private val cfg = registry.config
+
   //*******************************************************************************************************************
   // Message
   //*******************************************************************************************************************
@@ -92,7 +94,7 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
         throw RestProcessingException(s"Processing actor '${processingActor.path}' for '${op.deserializer.requestClass.fullName}' is terminated")
       }
 
-      val future = ask(processingActor, restRequest)(registry.config.requestTimeoutSeconds seconds).mapTo[RestResponse]
+      val future = ask(processingActor, restRequest)(cfg.requestTimeoutSeconds seconds).mapTo[RestResponse]
       future pipeTo self
 
       goto(WaitingForResponse) using Data(op = Some(op))
@@ -123,8 +125,12 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
       log.debug(s"Finished in ${data.duration}ms")
     case StopEvent(FSM.Failure(cause: Throwable), state, data: Data) =>
       cause match {
-        case _: RestBindingException => httpRequest.response.write(HttpResponseStatus(400), cause.getMessage)
-        case _: Throwable => httpRequest.response.write(HttpResponseStatus(500), cause.getMessage)
+        case _: RestBindingException =>
+          val msg = if (cfg.reportOn400BadRequests) cause.getMessage else ""
+          httpRequest.response.write(HttpResponseStatus(400), msg)
+        case _: Throwable =>
+          val msg = if (cfg.reportOn500InternalServerError) cause.getMessage else ""
+          httpRequest.response.write(HttpResponseStatus(500), msg)
       }
       log.error(cause, s"Failed with error: ${cause.getMessage}")
     case e: Any =>
