@@ -21,7 +21,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * HTTP GET REST end point annotation
+ * HTTP GET REST end point annotation.
+ * 
+ * Note that HEAD requests will be mapped to GETs. However, no content will be returned.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})

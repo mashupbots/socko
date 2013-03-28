@@ -123,16 +123,20 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
   onTermination {
     case StopEvent(FSM.Normal, state, data: Data) =>
       log.debug(s"Finished in ${data.duration}ms")
+      
     case StopEvent(FSM.Failure(cause: Throwable), state, data: Data) =>
+      val isHead = httpRequest.endPoint.isHEAD      
       cause match {
         case _: RestBindingException =>
-          val msg = if (cfg.reportOn400BadRequests) cause.getMessage else ""
+          val msg = if (!isHead && cfg.reportOn400BadRequests) cause.getMessage else ""
           httpRequest.response.write(HttpResponseStatus(400), msg)
         case _: Throwable =>
-          val msg = if (cfg.reportOn500InternalServerError) cause.getMessage else ""
+          val msg = if (!isHead && cfg.reportOn500InternalServerError) cause.getMessage else ""
           httpRequest.response.write(HttpResponseStatus(500), msg)
       }
+      
       log.error(cause, s"Failed with error: ${cause.getMessage}")
+      
     case e: Any =>
       log.debug(s"Shutdown " + e)
   }

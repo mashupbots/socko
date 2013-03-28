@@ -115,13 +115,15 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       resp2.status must equal("404")
       resp2.content.length must be(0)
 
-      val url3 = new URL(path + "api/void/cannot_parse")
+      // HEAD
+      val url3 = new URL(path + "api/void/200")
       val conn3 = url3.openConnection().asInstanceOf[HttpURLConnection]
+      conn3.setRequestMethod("HEAD")
       val resp3 = getResponseContent(conn3)
 
-      resp3.status must equal("400")
-      resp3.content.length must not be(0)
-
+      resp3.status must equal("200")
+      resp3.content.length must be(0)
+      
       //restHandler ! RestHandlerWorkerCountRequest()
       //expectMsgPF(5 seconds) {
       //  case m: Int => {
@@ -145,6 +147,16 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
 
       resp2.status must equal("404")
       resp2.content.length must be(0)
+      
+      // HEAD
+      val url3 = new URL(path + "api/object/200")
+      val conn3 = url3.openConnection().asInstanceOf[HttpURLConnection]
+      conn3.setRequestMethod("HEAD")
+      val resp3 = getResponseContent(conn3)
+
+      resp3.status must equal("200")
+      resp3.content.length must be(0)
+      
     }
 
     "GET byte array operations" in {
@@ -162,6 +174,15 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
 
       resp2.status must equal("404")
       resp2.content.length must be(0)
+      
+      // HEAD
+      val url3 = new URL(path + "api/bytearray/200")
+      val conn3 = url3.openConnection().asInstanceOf[HttpURLConnection]
+      conn3.setRequestMethod("HEAD")
+      val resp3 = getResponseContent(conn3)
+
+      resp3.status must equal("200")
+      resp3.content.length must be(0)      
     }
 
     "GET primitive operations" in {
@@ -179,6 +200,15 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
 
       resp2.status must equal("404")
       resp2.content.length must be(0)
+      
+      // HEAD
+      val url3 = new URL(path + "api/primitive/200")
+      val conn3 = url3.openConnection().asInstanceOf[HttpURLConnection]
+      conn3.setRequestMethod("HEAD")
+      val resp3 = getResponseContent(conn3)
+
+      resp3.status must equal("200")
+      resp3.content.length must be(0)      
     }
 
     "GET stream URL operations" in {
@@ -203,6 +233,15 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
 
       resp2.status must equal("404")
       resp2.content.length must be(0)
+      
+      // HEAD
+      val url3 = new URL(path + "api/streamurl/200?sourceURL=" + URLEncoder.encode(file.toURI().toURL().toString(), "UTF-8"))
+      val conn3 = url3.openConnection().asInstanceOf[HttpURLConnection]
+      conn3.setRequestMethod("HEAD")
+      val resp3 = getResponseContent(conn3)
+
+      resp3.status must equal("200")
+      resp3.content.length must be(0)      
     }
 
     "Correctly handle binding errors" in {
@@ -216,6 +255,12 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       resp2.content.length must not be(0)
       log.info(s"Error message: ${resp2.content}")
 
+      val url3 = new URL(path + "api/void/cannot_parse")
+      val conn3 = url3.openConnection().asInstanceOf[HttpURLConnection]
+      val resp3 = getResponseContent(conn3)
+
+      resp3.status must equal("400")
+      resp3.content.length must not be(0)      
     }
 
   }

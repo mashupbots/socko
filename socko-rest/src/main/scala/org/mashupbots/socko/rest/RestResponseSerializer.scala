@@ -64,11 +64,16 @@ case class RestResponseSerializer(
   /**
    * Serialize the data to a HTTP response
    *
+   * HEAD method does not have a body. This method can be used for obtaining metainformation about the
+   * entity implied by the request without transferring the entity-body itself. Hence, we map HEAD to 
+   * a Void response data type.
+   *
    * @param http HTTP event
    * @param response Response object to serailize
    */
   def serialize(http: HttpRequestEvent, response: RestResponse) {
-    responseDataType match {
+    val dataType = if (http.endPoint.isHEAD) ResponseDataType.Void else responseDataType
+    dataType match {
       case ResponseDataType.Object => {
         val data = getData(response).asInstanceOf[AnyRef]
         val bytes: Array[Byte] = if (data == null) Array.empty else {

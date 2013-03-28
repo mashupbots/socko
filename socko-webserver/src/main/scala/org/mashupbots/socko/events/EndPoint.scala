@@ -37,19 +37,28 @@ case class EndPoint(
   require(host != null && host != "", "EndPoint host cannot be null or empty string")
   require(uri != null && uri != "", "EndPoint uri cannot be null or empty string")
 
+  lazy val isOPTIONS = method == "OPTIONS"
+  lazy val isGET = method == "GET"
+  lazy val isHEAD = method == "HEAD"
+  lazy val isPOST = method == "POST"
+  lazy val isPUT = method == "PUT"
+  lazy val isDELETE = method == "DELETE"
+  lazy val isTRACE = method == "TRACE"
+  lazy val isCONNECT = method == "CONNECT"
+
   /**
    * Path portion of the request URI without the query string. For example: `/folder/file.html`
    */
   val path = if (uri.indexOf("?") < 0) uri else uri.substring(0, uri.indexOf("?"))
-  
+
   /**
    * Given `/one/two/three`, `List("one", "two", "three")` is returned
    */
   lazy val pathSegments: List[String] = {
     val s = if (path.startsWith("/")) path.substring(1) else path
-    s.split("/").toList  
+    s.split("/").toList
   }
-  
+
   /**
    * queryString Query String without the leading "?". For example: `param1=value1&param2=value2`
    */

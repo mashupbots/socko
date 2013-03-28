@@ -40,7 +40,7 @@ import org.mashupbots.socko.events.EndPoint
  *    that will be used in is `MyRestResponse`.
  * @param dispatcherClass Class path to singleton object that is a [[org.mashupbots.socko.rest.RestDispatcher]].
  *  - If empty, the assumed response class is the same class path and name as the request class;
- *    but with `Request` suffix replaced with `Dispatcher`. For `MyRestRequest`, the default 
+ *    but with `Request` suffix replaced with `Dispatcher`. For `MyRestRequest`, the default
  *    response class that will be used in is `MyRestDispatcher`.
  * @param name Name provided for the convenience of the UI and client code generator
  *    If empty, the name of the request class will be used without the `Request` prefix.
@@ -139,7 +139,10 @@ case class RestOperationDef(
    * @return `True` if this is a match; `False` if not a match.
    */
   def matchEndPoint(endpoint: EndPoint): Boolean = {
-    if (method != endpoint.method) {
+    // Convert HEAD to GET
+    val endpointMethod = if (endpoint.isHEAD) "GET" else endpoint.method
+
+    if (method != endpointMethod) {
       false
     } else if (pathSegments.length != endpoint.pathSegments.length) {
       return false
