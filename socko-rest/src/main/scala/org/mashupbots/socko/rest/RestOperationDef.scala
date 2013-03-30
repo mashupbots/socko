@@ -174,6 +174,7 @@ case class RestOperationDef(
 object RestOperationDef extends Logger {
 
   private val restGetType = ru.typeOf[RestGet]
+  private val restDeleteType = ru.typeOf[RestDelete]
 
   private val urlTemplateName = ru.newTermName("urlTemplate")
   private val responseClassName = ru.newTermName("responseClass")
@@ -192,11 +193,9 @@ object RestOperationDef extends Logger {
    * @returns [[org.mashupbots.socko.rest.RestDeclaration]]
    */
   def apply(a: ru.Annotation, config: RestConfig): RestOperationDef = {
-    val method = if (a.tpe =:= restGetType) {
-      "GET"
-    } else {
-      throw new IllegalStateException("Unknonw annotation type " + a.tpe.toString)
-    }
+    val method = if (a.tpe =:= restGetType) "GET"
+    else if (a.tpe =:= restDeleteType) "DELETE"
+    else throw new IllegalStateException("Unknonw annotation type " + a.tpe.toString)
 
     val urlTemplate = ReflectUtil.getAnnotationJavaLiteralArg(a, urlTemplateName, "")
     val responseClass = ReflectUtil.getAnnotationJavaLiteralArg(a, responseClassName, "")
@@ -230,7 +229,8 @@ object RestOperationDef extends Logger {
    * @returns The first matching rest annotation. `None` if not match
    */
   def findAnnotation(annotations: List[ru.Annotation]): Option[ru.Annotation] = {
-    annotations.find(a => a.tpe =:= restGetType);
+    annotations.find(a => a.tpe =:= restGetType ||
+      a.tpe =:= restDeleteType);
   }
 }
 

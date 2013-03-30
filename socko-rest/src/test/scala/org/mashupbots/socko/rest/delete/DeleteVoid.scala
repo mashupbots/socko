@@ -13,12 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.rest.get
+package org.mashupbots.socko.rest.delete
 
 import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestGet
+import org.mashupbots.socko.rest.RestDelete
 import org.mashupbots.socko.rest.RestPath
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
@@ -30,28 +29,22 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(urlTemplate = "/bytearray/{status}")
-case class GetByteArrayRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
+@RestDelete(urlTemplate = "/void/{status}")
+case class DeleteVoidRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
 
-case class GetByteArrayResponse(context: RestResponseContext, data: Array[Byte]) extends RestResponse
+case class DeleteVoidResponse(context: RestResponseContext) extends RestResponse
 
-class GetByteArrayProcessor() extends Actor with akka.actor.ActorLogging {
+class DeleteVoidProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
-    case req: GetByteArrayRequest =>
-      if (req.status == 200) {
-        sender ! GetByteArrayResponse(
-          req.context.responseContext(HttpResponseStatus(req.status), Map("Content-Type" -> "text/plain; charset=UTF-8")),
-          "hello everybody".getBytes(CharsetUtil.UTF_8))
-      } else {
-        sender ! GetByteArrayResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)), Array.empty)
-      }
+    case req: DeleteVoidRequest =>
+      sender ! DeleteVoidResponse(req.context.responseContext(HttpResponseStatus(req.status)))
       context.stop(self)
   }
 }
 
-class GetByteArrayDispatcher extends RestDispatcher {
+class DeleteVoidDispatcher extends RestDispatcher {
   def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[GetByteArrayProcessor])
-  }
+    actorSystem.actorOf(Props[DeleteVoidProcessor])
+  }  
 }
+

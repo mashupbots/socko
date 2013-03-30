@@ -13,13 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.rest.get
+package org.mashupbots.socko.rest.delete
+
+import java.net.URL
 
 import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestGet
+import org.mashupbots.socko.rest.RestDelete
 import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.rest.RestQuery
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -30,28 +32,30 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(urlTemplate = "/bytearray/{status}")
-case class GetByteArrayRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
+@RestDelete(urlTemplate = "/streamurl/{status}")
+case class DeleteStreamUrlRequest(context: RestRequestContext,
+  @RestPath() status: Int,
+  @RestQuery() sourceURL: String) extends RestRequest
 
-case class GetByteArrayResponse(context: RestResponseContext, data: Array[Byte]) extends RestResponse
+case class DeleteStreamUrlResponse(context: RestResponseContext, data: URL) extends RestResponse
 
-class GetByteArrayProcessor() extends Actor with akka.actor.ActorLogging {
+class DeleteStreamUrlProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
-    case req: GetByteArrayRequest =>
+    case req: DeleteStreamUrlRequest =>
       if (req.status == 200) {
-        sender ! GetByteArrayResponse(
+        sender ! DeleteStreamUrlResponse(
           req.context.responseContext(HttpResponseStatus(req.status), Map("Content-Type" -> "text/plain; charset=UTF-8")),
-          "hello everybody".getBytes(CharsetUtil.UTF_8))
+          new URL(req.sourceURL))
       } else {
-        sender ! GetByteArrayResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)), Array.empty)
+        sender ! DeleteStreamUrlResponse(
+          req.context.responseContext(HttpResponseStatus(req.status)), null)
       }
       context.stop(self)
   }
 }
 
-class GetByteArrayDispatcher extends RestDispatcher {
+class DeleteStreamUrlDispatcher extends RestDispatcher {
   def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[GetByteArrayProcessor])
+    actorSystem.actorOf(Props[DeleteStreamUrlProcessor])
   }
 }

@@ -15,20 +15,21 @@
 //
 package org.mashupbots.socko.rest.get
 
+import java.util.Date
+
+import org.mashupbots.socko.events.HttpResponseStatus
+import org.mashupbots.socko.rest.RestDispatcher
 import org.mashupbots.socko.rest.RestGet
+import org.mashupbots.socko.rest.RestPath
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
+
 import akka.actor.Actor
-import org.mashupbots.socko.rest.RestPath
-import org.mashupbots.socko.events.HttpResponseStatus
-import akka.actor.ActorSystem
 import akka.actor.ActorRef
+import akka.actor.ActorSystem
 import akka.actor.Props
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.infrastructure.CharsetUtil
-import java.util.Date
 
 @RestGet(urlTemplate = "/primitive/{status}")
 case class GetPrimitiveRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest

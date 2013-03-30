@@ -15,21 +15,22 @@
 //
 package org.mashupbots.socko.rest.get
 
+import java.net.URL
+
+import org.mashupbots.socko.events.HttpResponseStatus
+import org.mashupbots.socko.rest.RestDispatcher
 import org.mashupbots.socko.rest.RestGet
+import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.rest.RestQuery
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
+
 import akka.actor.Actor
-import org.mashupbots.socko.rest.RestPath
-import org.mashupbots.socko.events.HttpResponseStatus
-import akka.actor.ActorSystem
 import akka.actor.ActorRef
+import akka.actor.ActorSystem
 import akka.actor.Props
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.infrastructure.CharsetUtil
-import java.net.URL
-import org.mashupbots.socko.rest.RestQuery
 
 @RestGet(urlTemplate = "/streamurl/{status}")
 case class GetStreamUrlRequest(context: RestRequestContext,

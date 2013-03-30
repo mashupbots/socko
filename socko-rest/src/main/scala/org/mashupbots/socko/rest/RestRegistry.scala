@@ -137,10 +137,10 @@ object RestRegistry extends Logger {
     if (!isRestRequest && annotationType.isEmpty) {
       None
     } else if (isRestRequest && annotationType.isEmpty) {
-      log.warn("{} extends RestRequest but is not annotated with a RestOperation ", cs.fullName)
+      log.warn("{} extends RestRequest but is not annotated with a Rest operation", cs.fullName)
       None
     } else if (!isRestRequest && annotationType.isDefined) {
-      log.warn("{} does not extend RestRequest but is annotated with a RestOperation ", cs.fullName)
+      log.warn("{} does not extend RestRequest but is annotated with a Rest operation", cs.fullName)
       None
     } else {
       Some(RestOperationDef(annotationType.get, config))
