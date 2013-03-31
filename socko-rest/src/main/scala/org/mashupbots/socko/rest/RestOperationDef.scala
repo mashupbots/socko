@@ -175,9 +175,12 @@ object RestOperationDef extends Logger {
 
   private val restGetType = ru.typeOf[RestGet]
   private val restDeleteType = ru.typeOf[RestDelete]
+  private val restPostType = ru.typeOf[RestPost]
+  private val restPutType = ru.typeOf[RestPut]
   
-  private val restOperationTypes: Map[ru.Type, String] = 
-    Map(restGetType -> "GET", restDeleteType -> "DELETE")
+  private val restOperationTypes: Map[ru.Type, String] = Map(
+      restGetType -> "GET", restDeleteType -> "DELETE",
+      restPostType -> "POST", restPutType -> "PUT")
   
   private val urlTemplateName = ru.newTermName("urlTemplate")
   private val responseClassName = ru.newTermName("responseClass")
@@ -199,7 +202,7 @@ object RestOperationDef extends Logger {
     val method = {
       val m = restOperationTypes.find(e => e._1 =:= a.tpe)
       if (m.isDefined) m.get._2
-      else throw new IllegalStateException("Unknonw annotation type " + a.tpe.toString)
+      else throw new IllegalStateException("Unknonw REST operation annotation type " + a.tpe.toString)
     }
 
     val urlTemplate = ReflectUtil.getAnnotationJavaLiteralArg(a, urlTemplateName, "")
@@ -233,7 +236,12 @@ object RestOperationDef extends Logger {
    * @param annotations List of annotations for a class
    * @returns The first matching rest annotation. `None` if not match
    */
-  def findAnnotation(annotations: List[ru.Annotation]): Option[ru.Annotation] = {
+  def findAnnotation(cs: ru.ClassSymbol): Option[ru.Annotation] = {
+    val annotations = cs.annotations
+    val count = annotations.count(a => restOperationTypes.exists(e => e._1 =:= a.tpe))
+    if (count > 1) {
+      throw RestDefintionException(s"'${cs.fullName}' contains more than one REST opeation annotation")
+    }
     annotations.find(a => restOperationTypes.exists(e => e._1 =:= a.tpe))
   }
 }

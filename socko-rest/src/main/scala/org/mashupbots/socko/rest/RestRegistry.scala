@@ -42,7 +42,7 @@ case class RestRegistry(
   def findOperation(endPoint: EndPoint): RestOperation = {
     val op = operations.find(op => op.definition.matchEndPoint(endPoint))
     if (op.isEmpty) {
-      throw RestBindingException(s"Cannot find operation for path: '${endPoint.path}'")
+      throw RestBindingException(s"Cannot find operation for request to: '${endPoint.method} ${endPoint.path}'")
     }
     op.get
   }
@@ -133,7 +133,7 @@ object RestRegistry extends Logger {
    */
   def findRestOperation(rm: ru.RuntimeMirror, cs: ru.ClassSymbol, config: RestConfig): Option[RestOperationDef] = {
     val isRestRequest = cs.toType <:< typeRestRequest;
-    val annotationType = RestOperationDef.findAnnotation(cs.annotations);
+    val annotationType = RestOperationDef.findAnnotation(cs);
     if (!isRestRequest && annotationType.isEmpty) {
       None
     } else if (isRestRequest && annotationType.isEmpty) {

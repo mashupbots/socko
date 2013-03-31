@@ -245,7 +245,14 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     }
 
     "Correctly handle binding errors" in {
+      // Not route
+      val url = new URL(path + "api/no_route")      
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection]
+      val resp = getResponseContent(conn)
 
+      resp.status must equal("400")
+      log.info(s"Error message: ${resp.content}")
+      
       // Required query string "sourceURL" not present
       val url2 = new URL(path + "api/streamurl/200")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]

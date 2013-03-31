@@ -236,7 +236,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
  * @param buffer Request body
  * @param contentType MIME type of the request body
  */
-class HttpContent(buffer: Option[ChannelBuffer], contentType: String) {
+case class HttpContent(buffer: Option[ChannelBuffer], contentType: String) {
 
   /**
    * Returns a map of the form data fields
@@ -341,7 +341,7 @@ case class InitialHttpRequestMessage(
     current.contentLength,
     createdOn)
 
-  val content: HttpContent = new HttpContent(None, "")
+  val content: HttpContent = HttpContent(None, "")
 
   /**
    * Number of milliseconds from the time when the initial request was made
@@ -385,7 +385,7 @@ case class HttpChunkMessage(nettyHttpChunk: HttpChunk) {
   /**
    * Body of the HTTP chunk
    */
-  val content = new HttpContent(if (nettyHttpChunk.getContent == null) None else Some(nettyHttpChunk.getContent), "")
+  val content = HttpContent(if (nettyHttpChunk.getContent == null) None else Some(nettyHttpChunk.getContent), "")
 
 }
 
