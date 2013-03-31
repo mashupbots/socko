@@ -13,12 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.rest.delete
+package org.mashupbots.socko.rest.get
 
 import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestDelete
+import org.mashupbots.socko.rest.RestGet
 import org.mashupbots.socko.rest.RestPath
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
@@ -30,28 +30,28 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestDelete(urlTemplate = "/bytearray/{status}")
-case class DeleteByteArrayRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
+@RestGet(urlTemplate = "/bytes/{status}")
+case class GetBytesRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
 
-case class DeleteByteArrayResponse(context: RestResponseContext, data: Array[Byte]) extends RestResponse
+case class GetBytesResponse(context: RestResponseContext, data: Seq[Byte]) extends RestResponse
 
-class DeleteByteArrayProcessor() extends Actor with akka.actor.ActorLogging {
+class GetBytesProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
-    case req: DeleteByteArrayRequest =>
+    case req: GetBytesRequest =>
       if (req.status == 200) {
-        sender ! DeleteByteArrayResponse(
+        sender ! GetBytesResponse(
           req.context.responseContext(HttpResponseStatus(req.status), Map("Content-Type" -> "text/plain; charset=UTF-8")),
           "hello everybody".getBytes(CharsetUtil.UTF_8))
       } else {
-        sender ! DeleteByteArrayResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)), Array.empty)
+        sender ! GetBytesResponse(
+          req.context.responseContext(HttpResponseStatus(req.status)), Seq.empty)
       }
       context.stop(self)
   }
 }
 
-class DeleteByteArrayDispatcher extends RestDispatcher {
+class GetBytesDispatcher extends RestDispatcher {
   def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[DeleteByteArrayProcessor])
+    actorSystem.actorOf(Props[GetBytesProcessor])
   }
 }

@@ -31,8 +31,8 @@ import org.mashupbots.socko.infrastructure.ConfigUtil
  *   count has been reached.
  * @param reportRuntimeException Returns the message from runtime exceptions caught during handing of a REST request
  *   in addition to the HTTP status code.
- *   
- *   Two types of exceptions are raised: `400 Bad Requests` and `500 Internal Server Error`.  If turned on, the 
+ *
+ *   Two types of exceptions are raised: `400 Bad Requests` and `500 Internal Server Error`.  If turned on, the
  *   message will be return in the response and the content type set to `text/plain; charset=UTF-8`.
  */
 case class RestConfig(
@@ -55,21 +55,21 @@ case class RestConfig(
     ConfigUtil.getInt(config, prefix + ".max-worker-count", 100),
     ConfigUtil.getInt(config, prefix + ".max-worker-reschedule-milliseconds", 500),
     ReportRuntimeException.withName(ConfigUtil.getString(config, prefix + ".report-runtime-exception", "Never")))
-    
-  val reportOn400BadRequests = (reportRuntimeException == ReportRuntimeException.BadRequestsOnly || 
-      reportRuntimeException == ReportRuntimeException.All)
 
-  val reportOn500InternalServerError = (reportRuntimeException == ReportRuntimeException.InternalServerErrorOnly || 
-      reportRuntimeException == ReportRuntimeException.All)
+  val reportOn400BadRequests = (reportRuntimeException == ReportRuntimeException.BadRequestsOnly ||
+    reportRuntimeException == ReportRuntimeException.All)
+
+  val reportOn500InternalServerError = (reportRuntimeException == ReportRuntimeException.InternalServerErrorOnly ||
+    reportRuntimeException == ReportRuntimeException.All)
 
 }
 
 /**
  * Indicates if we want to return a runtime exception message to the caller
- * 
+ *
  * Depending on your security requirements, you may wish to turn off errors in production
- * but turn then on in development. 
- * 
+ * but turn then on in development.
+ *
  * No error messages are returned by default (`Never`).
  */
 object ReportRuntimeException extends Enumeration {

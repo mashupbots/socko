@@ -103,8 +103,8 @@ object RestRegistry extends Logger {
       if (op.isDefined && resp.isDefined && dispatcher.isDefined)
     ) yield {
       log.debug("Registering {} {} {}", op.get, cs.fullName, resp.get.fullName)
-      val deserializer = RestRequestDeserializer(rm, op.get, cs)
-      val serializer = RestResponseSerializer(rm, op.get, resp.get)
+      val deserializer = RestRequestDeserializer(config, rm, op.get, cs)
+      val serializer = RestResponseSerializer(config, rm, op.get, resp.get)
       RestOperation(op.get, dispatcher.get, deserializer, serializer)
     }
 

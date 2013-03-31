@@ -13,45 +13,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.mashupbots.socko.rest.get
+package org.mashupbots.socko.rest.put
 
 import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.infrastructure.CharsetUtil
+import org.mashupbots.socko.rest.RestBody
 import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestGet
+import org.mashupbots.socko.rest.RestPut
 import org.mashupbots.socko.rest.RestPath
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
-
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
+import org.mashupbots.socko.events.HttpRequestEvent
 
-@RestGet(urlTemplate = "/bytearray/{status}")
-case class GetByteArrayRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
+@RestPut(urlTemplate = "/http/{status}")
+case class PutHttpRequest(context: RestRequestContext, @RestPath() status: Int, @RestBody() http: HttpRequestEvent) extends RestRequest
 
-case class GetByteArrayResponse(context: RestResponseContext, data: Array[Byte]) extends RestResponse
+case class PutHttpResponse(context: RestResponseContext, data: String) extends RestResponse
 
-class GetByteArrayProcessor() extends Actor with akka.actor.ActorLogging {
+class PutHttpProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
-    case req: GetByteArrayRequest =>
+    case req: PutHttpRequest =>
       if (req.status == 200) {
-        sender ! GetByteArrayResponse(
-          req.context.responseContext(HttpResponseStatus(req.status), Map("Content-Type" -> "text/plain; charset=UTF-8")),
-          "hello everybody".getBytes(CharsetUtil.UTF_8))
+        sender ! PutHttpResponse(req.context.responseContext(HttpResponseStatus(req.status), Map.empty), req.http.request.content.toString)
       } else {
-        sender ! GetByteArrayResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)), Array.empty)
+        sender ! PutHttpResponse(req.context.responseContext(HttpResponseStatus(req.status)), "")
       }
       context.stop(self)
   }
 }
 
-class GetByteArrayDispatcher extends RestDispatcher {
+class PutHttpDispatcher extends RestDispatcher {
   def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[GetByteArrayProcessor])
+    actorSystem.actorOf(Props[PutHttpProcessor])
   }
 }

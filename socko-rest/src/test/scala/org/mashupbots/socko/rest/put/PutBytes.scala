@@ -31,28 +31,25 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestPut(urlTemplate = "/bytearray/{status}")
-case class PutByteArrayRequest(context: RestRequestContext, @RestPath() status: Int, @RestBody() pet: Pet) extends RestRequest
+@RestPut(urlTemplate = "/bytes/{status}")
+case class PutBytesRequest(context: RestRequestContext, @RestPath() status: Int, @RestBody() bytes: Seq[Byte]) extends RestRequest
 
-case class PutByteArrayResponse(context: RestResponseContext, data: Array[Byte]) extends RestResponse
+case class PutBytesResponse(context: RestResponseContext, data: Seq[Byte]) extends RestResponse
 
-class PutByteArrayProcessor() extends Actor with akka.actor.ActorLogging {
+class PutBytesProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
-    case req: PutByteArrayRequest =>
+    case req: PutBytesRequest =>
       if (req.status == 200) {
-        sender ! PutByteArrayResponse(
-          req.context.responseContext(HttpResponseStatus(req.status), Map("Content-Type" -> "text/plain; charset=UTF-8")),
-          s"${req.pet.name}-${req.pet.age}".getBytes(CharsetUtil.UTF_8))
+        sender ! PutBytesResponse(req.context.responseContext(HttpResponseStatus(req.status), Map.empty), req.bytes)
       } else {
-        sender ! PutByteArrayResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)), Array.empty)
+        sender ! PutBytesResponse(req.context.responseContext(HttpResponseStatus(req.status)), Seq.empty)
       }
       context.stop(self)
   }
 }
 
-class PutByteArrayDispatcher extends RestDispatcher {
+class PutBytesDispatcher extends RestDispatcher {
   def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[PutByteArrayProcessor])
+    actorSystem.actorOf(Props[PutBytesProcessor])
   }
 }

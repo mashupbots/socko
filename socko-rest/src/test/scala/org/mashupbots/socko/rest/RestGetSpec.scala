@@ -159,8 +159,8 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       
     }
 
-    "GET byte array operations" in {
-      val url = new URL(path + "api/bytearray/200")
+    "GET bytes operations" in {
+      val url = new URL(path + "api/bytes/200")
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
       val resp = getResponseContent(conn)
 
@@ -168,7 +168,7 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       resp.content must be("hello everybody")
       resp.headers.getOrElse("Content-Type", "") must be("text/plain; charset=UTF-8")
 
-      val url2 = new URL(path + "api/bytearray/404")
+      val url2 = new URL(path + "api/bytes/404")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       val resp2 = getResponseContent(conn2)
 
@@ -176,7 +176,7 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       resp2.content.length must be(0)
       
       // HEAD
-      val url3 = new URL(path + "api/bytearray/200")
+      val url3 = new URL(path + "api/bytes/200")
       val conn3 = url3.openConnection().asInstanceOf[HttpURLConnection]
       conn3.setRequestMethod("HEAD")
       val resp3 = getResponseContent(conn3)
@@ -194,7 +194,7 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       DateUtil.parseISO8601Date(resp.content)
       resp.headers.getOrElse("Content-Type", "") must be("text/plain; charset=UTF-8")
 
-      val url2 = new URL(path + "api/bytearray/404")
+      val url2 = new URL(path + "api/primitive/404")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       val resp2 = getResponseContent(conn2)
 

@@ -24,39 +24,47 @@ import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.HttpContent
 import org.json4s.native.{ Serialization => json }
 import org.json4s.NoTypeHints
+import java.net.URL
+import java.io.File
+import org.mashupbots.socko.events.HttpRequestMessage
+import org.mashupbots.socko.events.HttpRequestEvent
 
 /**
  * Deserializes incoming data into a [[org.mashupbots.socko.rest.RestRequest]]
  *
+ * @param config REST config
  * @param requestClass Request class
  * @param requestConstructor Constructor to call when instancing the request class
  * @param params Bindings to extract values form the request data. The values will be
  *   passed into the requestConstructor to instance the request class.
  */
 case class RestRequestDeserializer(
+  config: RestConfig,
   requestClass: ru.ClassSymbol,
   requestConstructorMirror: ru.MethodMirror,
   requestParamBindings: List[RequestParamBinding]) {
 
   /**
-   * Deserialize a [[org.mashupbots.socko.rest.RestRequest]] given a context and content
+   * Deserialize a [[org.mashupbots.socko.rest.RestRequest]] from a HTTP request event. 
+   * This method is just use in unit testing
    *
-   * @param context HTTP context
-   * @param body HTTP request body or content
+   * @param context Context of the HTTP request
+   * @param httpRequestEvent HTTP event
    */
-  def deserialize(context: RestRequestContext, body: HttpContent): RestRequest = {
-    val params: List[_] = context :: requestParamBindings.map(b => b.extract(context, requestClass, body))
+  def deserialize(context: RestRequestContext, httpRequestEvent: HttpRequestEvent): RestRequest = {
+    val params: List[_] = context :: requestParamBindings.map(b => b.extract(context, requestClass, httpRequestEvent))
     requestConstructorMirror(params: _*).asInstanceOf[RestRequest]
   }
 
   /**
    * Deserialize a [[org.mashupbots.socko.rest.RestRequest]] from a HTTP request event
    *
-   * @param http HTTP event
+   * @param httpRequestEvent HTTP event
    */
-  def deserialize(http: HttpRequestEvent): RestRequest = {
-    val context = RestRequestContext(http.endPoint, http.request.headers)
-    deserialize(context, http.request.content)
+  def deserialize(httpRequestEvent: HttpRequestEvent): RestRequest = {
+    val context = RestRequestContext(httpRequestEvent.endPoint, httpRequestEvent.request.headers)
+    val params: List[_] = context :: requestParamBindings.map(b => b.extract(context, requestClass, httpRequestEvent))
+    requestConstructorMirror(params: _*).asInstanceOf[RestRequest]
   }
 
 }
@@ -71,11 +79,12 @@ object RestRequestDeserializer {
   /**
    * Factory for RestRequestDeserializer
    *
+   * @param config Rest configuration
    * @param rm Runtime Mirror with the same class loaders as the specified request class
    * @param definition Definition of the operation
    * @param requestClassSymbol Request class symbol
    */
-  def apply(rm: ru.Mirror, definition: RestOperationDef, requestClassSymbol: ru.ClassSymbol): RestRequestDeserializer = {
+  def apply(config: RestConfig, rm: ru.Mirror, definition: RestOperationDef, requestClassSymbol: ru.ClassSymbol): RestRequestDeserializer = {
     val requestConstructor: ru.MethodSymbol = requestClassSymbol.toType.declaration(ru.nme.CONSTRUCTOR).asMethod
     val requestConstructorMirror: ru.MethodMirror = rm.reflectClass(requestClassSymbol).reflectConstructor(requestConstructor)
 
@@ -86,9 +95,9 @@ object RestRequestDeserializer {
       throw RestDefintionException(s"First constructor parameter of '${requestClassSymbol.fullName}' must be of type RestRequestContext.")
     }
 
-    val params = requestConstructorParams.tail.map(p => RequestParamBinding(definition, requestClassSymbol, p))
+    val params = requestConstructorParams.tail.map(p => RequestParamBinding(config, definition, requestClassSymbol, p))
 
-    RestRequestDeserializer(requestClassSymbol, requestConstructorMirror, params)
+    RestRequestDeserializer(config, requestClassSymbol, requestConstructorMirror, params)
   }
 
 }
@@ -97,6 +106,11 @@ object RestRequestDeserializer {
  * Binding of a request value
  */
 trait RequestParamBinding {
+
+  /**
+   * REST configuration
+   */
+  def config: RestConfig
 
   /**
    * Name of the binding
@@ -123,10 +137,10 @@ trait RequestParamBinding {
    *
    * @param context Request context
    * @param requestClass Request class to use in error messages
-   * @param body HTTP request body or content
+   * @param httpRequestEvent HTTP request event
    * @returns a value for passing to the constructor
    */
-  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol, body: HttpContent): Any
+  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol, httpRequestEvent: HttpRequestEvent): Any
 }
 
 /**
@@ -140,6 +154,10 @@ object RequestParamBinding {
   private val validParamAnnotationTypes = List(pathParamAnnotationType,
     queryStringParamAnnotationType, headerParamAnnotationType, bodyParamAnnotationType)
   private val optionType = ru.typeOf[Option[_]]
+
+  private val bytesType = ru.typeOf[Seq[Byte]]
+  private val httpRequestEventType = ru.typeOf[HttpRequestEvent]
+  private val anytRefType = ru.typeOf[AnyRef]
 
   val primitiveTypes: Map[ru.Type, (String) => Any] = Map(
     (ru.typeOf[String], (s: String) => s),
@@ -167,11 +185,13 @@ object RequestParamBinding {
   /**
    * Factory to create a parameter binding for a specific parameter in the constructor
    *
+   * @param config REST config
    * @param opDef Operation definition
    * @param requestClass Class to bind request data
    * @param p Parameter in the constructor of `requestClass`
    */
   def apply(
+    config: RestConfig,
     opDef: RestOperationDef,
     requestClass: ru.ClassSymbol,
     p: ru.TermSymbol): RequestParamBinding = {
@@ -201,21 +221,38 @@ object RequestParamBinding {
         throw RestDefintionException(s"Constructor parameter '${p.name}' of '${requestClass.fullName}' cannot be bound to the uri template path. " +
           s"'${opDef.urlTemplate}' does not contain variable named '${name}'.")
       }
-      PathBinding(name, p.typeSignature, description, idx)
+      PathBinding(config, name, p.typeSignature, description, idx)
     } else if (a.tpe =:= queryStringParamAnnotationType) {
-      QueryStringBinding(name, p.typeSignature, description, required)
+      QueryStringBinding(config, name, p.typeSignature, description, required)
     } else if (a.tpe =:= headerParamAnnotationType) {
-      HeaderBinding(name, p.typeSignature, description, required)
+      HeaderBinding(config, name, p.typeSignature, description, required)
     } else if (a.tpe =:= bodyParamAnnotationType) {
-
-      val clz = if (required) Class.forName(p.typeSignature.typeSymbol.asClass.fullName) else {
-        // Extract type from Option
-        import ru._	// Remove unchecked warning: https://issues.scala-lang.org/browse/SI-6338
-        val targs = p.typeSignature match { case ru.TypeRef(_, _, args) => args }
-        Class.forName(targs(0).typeSymbol.asClass.fullName)
+      val tpe = p.typeSignature
+      val tpeCategory = if (primitiveTypes.exists(t => t._1 =:= tpe)) {
+        RequestBodyDataType.Primitive
+      } else if (tpe =:= bytesType) {
+        RequestBodyDataType.Bytes
+      } else if (tpe =:= httpRequestEventType) {
+        RequestBodyDataType.HttpRequestEvent
+      } else if (tpe <:< anytRefType) {
+        RequestBodyDataType.Object
+      } else {
+        throw new IllegalArgumentException(s"Unsupported REST request body data type ${tpe} in ${requestClass.fullName}.")
       }
 
-      BodyBinding(name, p.typeSignature, clz, description, required)
+      val objectClass = if (tpeCategory == RequestBodyDataType.Object) {
+        if (required) Some(Class.forName(p.typeSignature.typeSymbol.asClass.fullName))
+        else {
+          // Extract underlying type from Option to help with deserlialization
+          import ru._ // Remove unchecked warning: https://issues.scala-lang.org/browse/SI-6338
+          val targs = p.typeSignature match { case ru.TypeRef(_, _, args) => args }
+          Some(Class.forName(targs(0).typeSymbol.asClass.fullName))
+        }
+      } else {
+        None
+      }
+
+      BodyBinding(config, name, tpeCategory, tpe, objectClass, description, required)
     } else {
       throw new IllegalStateException("Unsupported annotation: " + a.tpe)
     }
@@ -257,12 +294,14 @@ trait PrimitiveParamBinding extends RequestParamBinding {
  *  - description = ""
  *  - pathIndex = 1
  *
+ * @param config REST config
  * @param name Name of the field in the [[org.mashupbots.socko.rest.RestRequest]] to bind data to
  * @param tpe Type of the field
  * @param description Description of the field
  * @param pathIndex Index of the value of the field in array of path segments
  */
 case class PathBinding(
+  config: RestConfig,
   name: String,
   tpe: ru.Type,
   description: String,
@@ -275,10 +314,10 @@ case class PathBinding(
    *
    * @param context Request context
    * @param requestClass Request class to use in error messages
-   * @param body HTTP request body or content
+   * @param httpRequestEvent HTTP request event
    * @returns a value for passing to the constructor
    */
-  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol, body: HttpContent): Any = {
+  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol, httpRequestEvent: HttpRequestEvent): Any = {
     val s = context.endPoint.pathSegments(pathIndex)
     if (s.isEmpty) {
       throw new RestBindingException(s"Cannot find path variable '${name}' in '${context.endPoint.path}' for request '${requestClass.fullName}'")
@@ -305,12 +344,14 @@ case class PathBinding(
  *  - description = ""
  *  - required = false
  *
+ * @param config REST config
  * @param name Name of the field in the [[org.mashupbots.socko.rest.RestRequest]] to bind data to
  * @param tpe Type of the field
  * @param description Description of the field
  * @param required Flag to indicate if this field is required or not. If not, it must be of type `Option[_]`
  */
 case class QueryStringBinding(
+  config: RestConfig,
   name: String,
   tpe: ru.Type,
   description: String,
@@ -321,10 +362,10 @@ case class QueryStringBinding(
    *
    * @param context Request context
    * @param requestClass Request class to use in error messages
-   * @param body HTTP request body or content
+   * @param httpRequestEvent HTTP request event
    * @returns a value for passing to the constructor
    */
-  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol, body: HttpContent): Any = {
+  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol, httpRequestEvent: HttpRequestEvent): Any = {
     val s = context.endPoint.getQueryString(name)
     if (s.isEmpty || (s.isDefined && s.get.length == 0)) {
       if (required) {
@@ -356,12 +397,14 @@ case class QueryStringBinding(
  *  - description = ""
  *  - required = true
  *
+ * @param config REST config
  * @param name Name of the field in the [[org.mashupbots.socko.rest.RestRequest]] to bind data to
  * @param tpe Type of the field
  * @param description Description of the field
  * @param required Flag to indicate if this field is required or not. If not, it must be of type `Option[_]`
  */
 case class HeaderBinding(
+  config: RestConfig,
   name: String,
   tpe: ru.Type,
   description: String,
@@ -372,10 +415,10 @@ case class HeaderBinding(
    *
    * @param context Request context
    * @param requestClass Request class to use in error messages
-   * @param body HTTP request body or content
+   * @param httpRequestEvent HTTP request event
    * @returns a value for passing to the constructor
    */
-  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol, body: HttpContent): Any = {
+  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol, httpRequestEvent: HttpRequestEvent): Any = {
     val s = context.headers.get(name)
     if (s.isEmpty) {
       if (required) {
@@ -408,49 +451,105 @@ case class HeaderBinding(
  *  - description = ""
  *  - required = true
  *
+ * @param config REST config
  * @param name Name of the field in the [[org.mashupbots.socko.rest.RestRequest]] to bind data to
+ * @param tpeCategory Our categorization of the type of the field
  * @param tpe Type of the field
- * @param clz Java class of the field
+ * @param objectClass For object fields that needs to be deserialized, this is the Java class of the field.
+ *   For other categories of deserialization (primitive, bytes, etc) this is set to `None` and not used.
  * @param description Description of the field
  * @param required Flag to indicate if this field is required or not. If not, it must be of type `Option[_]`
  */
 case class BodyBinding(
+  config: RestConfig,
   name: String,
+  tpeCategory: RequestBodyDataType.Value,
   tpe: ru.Type,
-  clz: Class[_],
+  objectClass: Option[Class[_]],
   description: String,
   required: Boolean) extends RequestParamBinding {
+
+  /**
+   * Parse a string into the specified
+   *
+   * We load this at intialization so it is done once.
+   */
+  val primitiveParser: Option[(String) => Any] = {
+    if (tpeCategory == RequestBodyDataType.Primitive) {
+      val entry = RequestParamBinding.primitiveTypes.find(e => e._1 =:= tpe)
+      if (entry.isDefined) {
+        val (t, conversionFunc) = entry.get
+        Some(conversionFunc)
+      } else {
+        throw new RestBindingException("Unsupported type: " + tpe)
+      }
+    } else {
+      None
+    }
+  }
 
   /**
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
    *
    * @param context Request context
    * @param requestClass Request class to use in error messages
-   * @param body HTTP request body or content
+   * @param httpRequestEvent HTTP request event
    * @returns a value for passing to the constructor
    */
-  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol, body: HttpContent): Any = {
-    val s = body.toString
-    if (s.isEmpty) {
-      if (required) {
-        throw new RestBindingException(s"Request body is empty for request '${requestClass.fullName}'")
-      } else {
-        // Must be an option because it is not required
-        None
-      }
-    } else {
-      try {
-        val formats = json.formats(NoTypeHints)
-        val scalaType = org.json4s.reflect.Reflector.scalaTypeOf(clz)
-        val scalaManifest = org.json4s.reflect.ManifestFactory.manifestOf(scalaType)
-        val data = json.read(s)(formats, scalaManifest)
-        if (required) data
-        else Some(data)
-      } catch {
-        case e: Throwable =>
-          throw RestBindingException(s"Cannot parse '${s}' for body '${name}' for request '${requestClass.fullName}'", e)
-      }
+  def extract(context: RestRequestContext, requestClass: ru.ClassSymbol, httpRequestEvent: HttpRequestEvent): Any = {
+    tpeCategory match {
+      case RequestBodyDataType.Object =>
+        val s = httpRequestEvent.request.content.toString
+        if (s.isEmpty) {
+          if (required) {
+            throw new RestBindingException(s"Request body is empty for request '${requestClass.fullName}'")
+          } else {
+            // Must be an option because it is not required
+            None
+          }
+        } else {
+          try {
+            val formats = json.formats(NoTypeHints)
+            val scalaType = org.json4s.reflect.Reflector.scalaTypeOf(objectClass.get)
+            val scalaManifest = org.json4s.reflect.ManifestFactory.manifestOf(scalaType)
+            val data = json.read(s)(formats, scalaManifest)
+            if (required) data
+            else Some(data)
+          } catch {
+            case e: Throwable =>
+              throw RestBindingException(s"Cannot parse '${s}' for body '${name}' for request '${requestClass.fullName}'", e)
+          }
+        }
+      case RequestBodyDataType.Primitive =>
+        val s = httpRequestEvent.request.content.toString
+        if (s.isEmpty) {
+          if (required) {
+            throw new RestBindingException(s"Cannot bind empty body for request '${requestClass.fullName}'")
+          } else {
+            // Must be an option because it is not required
+            None
+          }
+        } else {
+          try {
+            primitiveParser.get(s)
+          } catch {
+            case e: Throwable =>
+              throw RestBindingException(s"Cannot parse '${s}' for body for request '${requestClass.fullName}'", e)
+          }
+        }
+      case RequestBodyDataType.Bytes =>
+        httpRequestEvent.request.content.toBytes.toSeq
+
+      case RequestBodyDataType.HttpRequestEvent =>
+        httpRequestEvent
+
+      case _ => throw RestBindingException(s"Unsupported request body binding type category: ${tpeCategory}")
     }
   }
 }
+
+object RequestBodyDataType extends Enumeration {
+  type RequestBodyDataType = Value
+  val Primitive, Object, Bytes, HttpRequestEvent = Value
+} 
   

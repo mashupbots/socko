@@ -31,6 +31,7 @@ import java.io.BufferedInputStream
 /**
  * Seralized outgoing data from a [[org.mashupbots.socko.rest.RestResposne]]
  *
+ * @param config REST config
  * @param responseClass Response class symbol
  * @param responseDataType Data type of the field use to store the response data
  * @param responseDataTerm Name of field used to store response data.
@@ -41,6 +42,7 @@ import java.io.BufferedInputStream
  * @param rm Mirror used to extract the value of `responseDataTerm` from the response object
  */
 case class RestResponseSerializer(
+  config: RestConfig,
   responseClass: ru.ClassSymbol,
   responseDataType: ResponseDataType.Value,
   responseDataTerm: Option[ru.TermSymbol],
@@ -65,7 +67,7 @@ case class RestResponseSerializer(
    * Serialize the data to a HTTP response
    *
    * HEAD method does not have a body. This method can be used for obtaining metainformation about the
-   * entity implied by the request without transferring the entity-body itself. Hence, we map HEAD to 
+   * entity implied by the request without transferring the entity-body itself. Hence, we map HEAD to
    * a Void response data type.
    *
    * @param http HTTP event
@@ -83,11 +85,11 @@ case class RestResponseSerializer(
         }
         http.response.write(response.context.status, bytes, "application/json; charset=UTF-8", response.context.headers)
       }
-      case ResponseDataType.ByteArray => {
-        val data = getData(response).asInstanceOf[Array[Byte]]
-        val bytes: Array[Byte] = if (data == null) Array.empty else data
+      case ResponseDataType.Bytes => {
+        val data = getData(response).asInstanceOf[Seq[Byte]]
+        val bytes: Seq[Byte] = if (data == null) Seq.empty else data
         val contentType = response.context.headers.getOrElse(HttpHeaders.Names.CONTENT_TYPE, "application/octet-string")
-        http.response.write(response.context.status, bytes, contentType, response.context.headers)
+        http.response.write(response.context.status, bytes.toArray, contentType, response.context.headers)
       }
       case ResponseDataType.URL => {
         val data = getData(response)
@@ -174,7 +176,7 @@ object RestResponseSerializer {
     (ru.typeOf[Date], (s: Any) => DateUtil.formatISO8601UTCDateTime(s.asInstanceOf[Date])),
     (ru.typeOf[Option[Date]], (s: Any) => optionDateToString(s)))
 
-  private val byteArrayType = ru.typeOf[Array[Byte]]
+  private val bytesType = ru.typeOf[Seq[Byte]]
   private val urlType = ru.typeOf[URL]
   private val optionalUrlType = ru.typeOf[Option[URL]]
   private val anytRefType = ru.typeOf[AnyRef]
@@ -182,11 +184,12 @@ object RestResponseSerializer {
   /**
    * Factory for RestResponseSerializer
    *
+   * @param config REST config
    * @param rm Runtime Mirror with the same class loaders as the specified request class
    * @param definition Definition of the operation
    * @param responseClassSymbol Response class symbol
    */
-  def apply(rm: ru.Mirror, definition: RestOperationDef, responseClassSymbol: ru.ClassSymbol): RestResponseSerializer = {
+  def apply(config: RestConfig, rm: ru.Mirror, definition: RestOperationDef, responseClassSymbol: ru.ClassSymbol): RestResponseSerializer = {
     val responseConstructor: ru.MethodSymbol = responseClassSymbol.toType.declaration(ru.nme.CONSTRUCTOR).asMethod
     val responseConstructorParams: List[ru.TermSymbol] = responseConstructor.paramss(0).map(p => p.asTerm)
 
@@ -203,8 +206,8 @@ object RestResponseSerializer {
       val contentType = contentTerm.typeSignature
       if (primitiveTypes.exists(t => t._1 =:= contentType)) {
         ResponseDataType.Primitive
-      } else if (contentType =:= byteArrayType) {
-        ResponseDataType.ByteArray
+      } else if (contentType =:= bytesType) {
+        ResponseDataType.Bytes
       } else if (contentType =:= urlType || contentType =:= optionalUrlType) {
         ResponseDataType.URL
       } else if (contentType <:< anytRefType) {
@@ -228,14 +231,14 @@ object RestResponseSerializer {
       Some(primitiveTypes.find(e => e._1 =:= contentType).get._2)
     }
 
-    RestResponseSerializer(responseClassSymbol, responseDataType, responseDataTerm, primitiveSerializer, rm)
+    RestResponseSerializer(config, responseClassSymbol, responseDataType, responseDataTerm, primitiveSerializer, rm)
   }
 
 }
 
 object ResponseDataType extends Enumeration {
   type ResponseDataType = Value
-  val Void, Primitive, Object, ByteArray, URL = Value
+  val Void, Primitive, Object, Bytes, URL = Value
 } 
 
   

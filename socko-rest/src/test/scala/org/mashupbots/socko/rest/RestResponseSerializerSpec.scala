@@ -32,12 +32,14 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
 
   "RestResponseSerializerSpec" must {
 
+    val config = RestConfig("1.0", "/api")
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
     val requestContext = RestRequestContext(EndPoint("GET", "localhost", "/path/1234"), Map.empty)
     val responseContext = RestResponseContext(requestContext, HttpResponseStatus(200), Map.empty)
 
     "Serailize void response" in {
       val s = RestResponseSerializer(
+        config,
         mirror,
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[VoidResponse].typeSymbol.asClass)
@@ -48,6 +50,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
 
     "Serailize primitive string response" in {
       val s = RestResponseSerializer(
+        config,
         mirror,
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[StringResponse].typeSymbol.asClass)
@@ -62,6 +65,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
 
     "Serailize primitive optional int response" in {
       val s = RestResponseSerializer(
+        config,
         mirror,
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[OptionalIntResponse].typeSymbol.asClass)
@@ -80,6 +84,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
     
     "Serailize primitive date response" in {
       val s = RestResponseSerializer(
+        config,
         mirror,
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[DateResponse].typeSymbol.asClass)
@@ -95,6 +100,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
 
     "Serailize object response" in {
       val s = RestResponseSerializer(
+        config,
         mirror,
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[ObjectResponse].typeSymbol.asClass)
@@ -110,20 +116,22 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
 
     "Serailize byte array response" in {
       val s = RestResponseSerializer(
+        config,
         mirror,
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
-        ru.typeOf[ByteArrayResponse].typeSymbol.asClass)
+        ru.typeOf[BytesResponse].typeSymbol.asClass)
 
-      s.responseDataType must be(ResponseDataType.ByteArray)
+      s.responseDataType must be(ResponseDataType.Bytes)
 
-      val response = ByteArrayResponse(responseContext, Array(1, 2, 3))
+      val response = BytesResponse(responseContext, Seq(1, 2, 3))
       val x = s.getData(response)
 
-      x.asInstanceOf[Array[Byte]].length must be(3)
+      x.asInstanceOf[Seq[Byte]].length must be(3)
     }
 
     "Serailize url response" in {
       val s = RestResponseSerializer(
+        config,
         mirror,
         RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
         ru.typeOf[UrlResponse].typeSymbol.asClass)
@@ -148,5 +156,5 @@ case class DateResponse(context: RestResponseContext, data: Date) extends RestRe
 case class Pet(name: String, description: String)
 case class ObjectResponse(context: RestResponseContext, data: Pet) extends RestResponse
 
-case class ByteArrayResponse(context: RestResponseContext, data: Array[Byte]) extends RestResponse
+case class BytesResponse(context: RestResponseContext, data: Seq[Byte]) extends RestResponse
 case class UrlResponse(context: RestResponseContext, data: URL) extends RestResponse
