@@ -15,14 +15,16 @@
 //
 package org.mashupbots.socko.rest
 
-import akka.actor.Actor
-import akka.event.Logging
-import org.mashupbots.socko.events.HttpRequestEvent
-import akka.actor.FSM
-import akka.actor.Terminated
-import scala.concurrent.duration._
-import akka.actor.Props
 import java.util.UUID
+
+import scala.concurrent.duration._
+
+import org.mashupbots.socko.events.HttpRequestEvent
+
+import akka.actor.Actor
+import akka.actor.FSM
+import akka.actor.Props
+import akka.actor.Terminated
 
 /**
  * The initial processing point for incoming requests. It farms the work out to

@@ -14,13 +14,11 @@
 // limitations under the License.
 package org.mashupbots.socko.rest
 
-import akka.actor.Actor
-import akka.event.Logging
-import org.mashupbots.socko.events.HttpRequestEvent
-import org.mashupbots.socko.infrastructure.ReflectUtil
-import org.mashupbots.socko.infrastructure.Logger
-import scala.reflect.runtime.{ universe => ru }
+import scala.reflect.runtime.{universe => ru}
+
 import org.mashupbots.socko.events.EndPoint
+import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.infrastructure.ReflectUtil
 
 /**
  * Collection [[org.mashupbots.socko.rest.RestOperation]]s that will be used to process

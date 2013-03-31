@@ -15,18 +15,19 @@
 //
 package org.mashupbots.socko.rest
 
-import java.io.InputStream
+import java.io.BufferedInputStream
 import java.net.URL
 import java.util.Date
+
 import scala.reflect.runtime.{ universe => ru }
+
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.json4s.NoTypeHints
-import org.json4s.native.{ Serialization => json }
+import org.json4s.native.{Serialization => json}
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.IOUtil
-import java.io.BufferedInputStream
 
 /**
  * Seralized outgoing data from a [[org.mashupbots.socko.rest.RestResposne]]

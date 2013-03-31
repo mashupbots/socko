@@ -15,13 +15,12 @@
 //
 package org.mashupbots.socko.rest
 
+import org.json4s.NoTypeHints
+import org.json4s.native.{Serialization => json}
 import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
-import scala.reflect.runtime.{ universe => ru }
-import org.json4s.native.{ Serialization => json }
-import org.json4s.NoTypeHints
 
 class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 

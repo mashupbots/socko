@@ -16,14 +16,18 @@
 package org.mashupbots.socko.rest
 
 import java.util.Date
+
 import scala.concurrent.duration._
+
 import org.mashupbots.socko.events.HttpRequestEvent
+import org.mashupbots.socko.events.HttpResponseStatus
+
 import akka.actor.Actor
 import akka.actor.FSM
+import akka.actor.actorRef2Scala
 import akka.pattern.ask
 import akka.pattern.pipe
 import akka.util.Timeout.durationToTimeout
-import org.mashupbots.socko.events.HttpResponseStatus
 
 /**
  * Processes a HTTP REST request.

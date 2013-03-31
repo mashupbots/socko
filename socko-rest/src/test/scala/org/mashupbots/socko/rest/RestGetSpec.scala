@@ -15,9 +15,14 @@
 //
 package org.mashupbots.socko.rest
 
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
-import scala.concurrent.duration._
+import java.net.URLEncoder
+
+import org.mashupbots.socko.infrastructure.CharsetUtil
+import org.mashupbots.socko.infrastructure.DateUtil
+import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.WebLogFormat
 import org.mashupbots.socko.routes.HttpRequest
@@ -28,19 +33,15 @@ import org.mashupbots.socko.webserver.WebLogConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 import org.scalatest.BeforeAndAfterAll
-import org.scalatest.Finders
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
+
 import com.typesafe.config.ConfigFactory
+
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.testkit.ImplicitSender
 import akka.testkit.TestKit
-import org.mashupbots.socko.infrastructure.DateUtil
-import java.io.File
-import org.mashupbots.socko.infrastructure.IOUtil
-import org.mashupbots.socko.infrastructure.CharsetUtil
-import java.net.URLEncoder
 
 object RestGetSpec {
   val cfg =

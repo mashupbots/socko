@@ -15,19 +15,15 @@
 //
 package org.mashupbots.socko.rest
 
-import scala.reflect.runtime.{ universe => ru }
-import org.mashupbots.socko.infrastructure.ReflectUtil
 import java.util.Date
-import java.text.SimpleDateFormat
-import org.mashupbots.socko.infrastructure.DateUtil
-import org.mashupbots.socko.events.HttpRequestEvent
-import org.mashupbots.socko.events.HttpContent
-import org.json4s.native.{ Serialization => json }
+
+import scala.reflect.runtime.{ universe => ru }
+
 import org.json4s.NoTypeHints
-import java.net.URL
-import java.io.File
-import org.mashupbots.socko.events.HttpRequestMessage
+import org.json4s.native.{ Serialization => json }
 import org.mashupbots.socko.events.HttpRequestEvent
+import org.mashupbots.socko.infrastructure.DateUtil
+import org.mashupbots.socko.infrastructure.ReflectUtil
 
 /**
  * Deserializes incoming data into a [[org.mashupbots.socko.rest.RestRequest]]
@@ -45,14 +41,14 @@ case class RestRequestDeserializer(
   requestParamBindings: List[RequestParamBinding]) {
 
   /**
-   * Deserialize a [[org.mashupbots.socko.rest.RestRequest]] from a HTTP request event. 
+   * Deserialize a [[org.mashupbots.socko.rest.RestRequest]] from a HTTP request event.
    * This method is just use in unit testing
    *
    * @param context Context of the HTTP request
    * @param httpRequestEvent HTTP event
    */
-  def deserialize(context: RestRequestContext, httpRequestEvent: HttpRequestEvent): RestRequest = {
-    val params: List[_] = context :: requestParamBindings.map(b => b.extract(context, requestClass, httpRequestEvent))
+  def deserialize(context: RestRequestContext): RestRequest = {
+    val params: List[_] = context :: requestParamBindings.map(b => b.extract(context, requestClass, null))
     requestConstructorMirror(params: _*).asInstanceOf[RestRequest]
   }
 

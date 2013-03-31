@@ -14,11 +14,11 @@
 // limitations under the License.
 package org.mashupbots.socko.rest
 
-import scala.collection.JavaConversions._
-import scala.reflect.runtime.{ universe => ru }
+import scala.reflect.runtime.{universe => ru}
+
+import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.ReflectUtil
-import org.mashupbots.socko.events.EndPoint
 
 /**
  * REST operation definition. Meta data describing a REST operation.

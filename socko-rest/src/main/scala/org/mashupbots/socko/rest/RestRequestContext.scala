@@ -15,8 +15,9 @@
 //
 package org.mashupbots.socko.rest
 
-import org.mashupbots.socko.events.EndPoint
 import java.util.UUID
+
+import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.events.HttpResponseStatus
 
 /**
