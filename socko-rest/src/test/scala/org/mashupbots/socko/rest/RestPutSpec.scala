@@ -41,6 +41,9 @@ import java.io.File
 import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import java.net.URLEncoder
+import org.json4s.native.{ Serialization => json }
+import org.json4s.NoTypeHints
+import java.util.Date
 
 object RestPutSpec {
   val cfg =
@@ -115,6 +118,61 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val resp2 = getResponseContent(conn2)
 
       resp2.status must equal("204")
+      resp2.content.length must be(0)
+    }
+
+    "PUT object operations" in {
+      val url = new URL(path + "api/object/200")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection]
+      sendPutRequest(conn, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "{\"name\":\"Boo\",\"age\":5}")
+      val resp = getResponseContent(conn)
+
+      resp.status must equal("200")
+      resp.content must be("{\"name\":\"Boo\",\"age\":5,\"history\":[]}")
+      resp.headers.getOrElse("Content-Type", "") must be("application/json; charset=UTF-8")
+
+      val url2 = new URL(path + "api/object/404")
+      val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
+      sendPutRequest(conn2, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "{\"name\":\"Boo\",\"age\":5}")
+      val resp2 = getResponseContent(conn2)
+
+      resp2.status must equal("404")
+      resp2.content.length must be(0)
+
+      val evt1 = org.mashupbots.socko.rest.put.Event(new Date(), "born")
+      val evt2 = org.mashupbots.socko.rest.put.Event(new Date(), "Died")
+      val data = org.mashupbots.socko.rest.put.Fish("Flounder", 1, List(evt1, evt2))
+      implicit val formats = json.formats(NoTypeHints)
+      val s = json.write(data)
+      log.info("Sending JSON: " + s)
+
+      val url3 = new URL(path + "api/object/200")
+      val conn3 = url3.openConnection().asInstanceOf[HttpURLConnection]
+      sendPutRequest(conn3, "application/json; charset=UTF-8", CharsetUtil.UTF_8, s)
+      val resp3 = getResponseContent(conn3)
+
+      resp3.status must equal("200")
+      resp3.content must be(s)
+      resp3.headers.getOrElse("Content-Type", "") must be("application/json; charset=UTF-8")
+
+    }
+
+    "PUT byte array operations" in {
+      val url = new URL(path + "api/bytearray/200")
+      val conn = url.openConnection().asInstanceOf[HttpURLConnection]
+      sendPutRequest(conn, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "{\"name\":\"Boo\",\"age\":5}")
+      val resp = getResponseContent(conn)
+
+      resp.status must equal("200")
+      resp.content must be("Boo-5")
+      resp.headers.getOrElse("Content-Type", "") must be("text/plain; charset=UTF-8")
+
+      val url2 = new URL(path + "api/bytearray/404")
+      val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
+      sendPutRequest(conn2, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "{\"name\":\"Boo\",\"age\":5}")
+      val resp2 = getResponseContent(conn2)
+
+      resp2.status must equal("404")
       resp2.content.length must be(0)
     }
 

@@ -151,7 +151,7 @@ object RestResponseSerializer {
   private def optionDateToString(s: Any): String = {
     val ss = s.asInstanceOf[Option[Date]]
     if (ss.isEmpty) ""
-    else DateUtil.formatISO8601DateTime(ss.get)
+    else DateUtil.formatISO8601UTCDateTime(ss.get)
   }
 
   private val primitiveTypes: Map[ru.Type, (Any) => String] = Map(
@@ -171,7 +171,7 @@ object RestResponseSerializer {
     (ru.typeOf[Option[Double]], (s: Any) => optionToString(s)),
     (ru.typeOf[Float], (s: Any) => s.toString),
     (ru.typeOf[Option[Float]], (s: Any) => optionToString(s)),
-    (ru.typeOf[Date], (s: Any) => DateUtil.formatISO8601DateTime(s.asInstanceOf[Date])),
+    (ru.typeOf[Date], (s: Any) => DateUtil.formatISO8601UTCDateTime(s.asInstanceOf[Date])),
     (ru.typeOf[Option[Date]], (s: Any) => optionDateToString(s)))
 
   private val byteArrayType = ru.typeOf[Array[Byte]]
