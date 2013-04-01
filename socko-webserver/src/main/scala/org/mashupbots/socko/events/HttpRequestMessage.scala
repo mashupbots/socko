@@ -62,7 +62,7 @@ trait HttpRequestMessage {
    * For example, give then header `Accept-Encoding: gzip, deflate`, then an array containing
    * `gzip` and `defalte` will be returned.
    */
-  val acceptedEncodings: Array[String]
+  val acceptedEncodings: List[String]
 
   /**
    * HTTP version
@@ -145,12 +145,12 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
    * For example, give then header `Accept-Encoding: gzip, deflate`, then an array containing
    * `gzip` and `defalte` will be returned.
    */
-  val acceptedEncodings: Array[String] = {
+  val acceptedEncodings: List[String] = {
     val s = headers.get(HttpHeaders.Names.ACCEPT_ENCODING)
     if (s.isEmpty) {
-      Array()
+      List()
     } else {
-      s.get.replace(" ", "").split(",")
+      s.get.replace(" ", "").split(",").toList
     }
   }
 
@@ -317,7 +317,7 @@ case class InitialHttpRequestMessage(
   headers: Map[String, String],
   endPoint: EndPoint,
   isKeepAlive: Boolean,
-  acceptedEncodings: Array[String],
+  acceptedEncodings: List[String],
   httpVersion: String,
   is100ContinueExpected: Boolean,
   ifModifiedSince: Option[Date],
