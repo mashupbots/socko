@@ -40,9 +40,9 @@ import akka.util.Timeout.durationToTimeout
  *  - Serializes the response data
  *
  * @param registry Registry to find operations
- * @param httpRequest HTTP request to process
+ * @param httpRequestEvent HTTP request to process
  */
-class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) extends Actor
+class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent) extends Actor
   with FSM[RestHttpWorkerState, RestHttpWorkerData] with akka.actor.ActorLogging {
 
   import context.dispatcher
@@ -75,7 +75,10 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
   /**
    * Processing data
    */
-  case class Data(op: Option[RestOperation] = None, startedOn: Date = new Date()) extends RestHttpWorkerData {
+  case class Data(
+    op: Option[RestOperation] = None,
+    req: Option[RestRequest] = None,
+    startedOn: Date = new Date()) extends RestHttpWorkerData {
 
     def duration: Long = {
       new Date().getTime - startedOn.getTime
@@ -90,18 +93,22 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
   when(DispatchRequest) {
     case Event(msg: Start, data: Data) =>
       log.debug(s"RestHttpWorker start")
-      val op = registry.findOperation(httpRequest.endPoint)
+      val op = registry.findOperation(httpRequestEvent.endPoint)
+      val restRequest = op.deserializer.deserialize(httpRequestEvent)
 
-      val restRequest = op.deserializer.deserialize(httpRequest)
       val processingActor = op.dispatcher.getActor(context.system, restRequest)
       if (processingActor.isTerminated) {
         throw RestProcessingException(s"Processing actor '${processingActor.path}' for '${op.deserializer.requestClass.fullName}' is terminated")
       }
 
+      if (op.definition.accessSockoEvent) {
+        RestRequestEvents.put(restRequest.context, httpRequestEvent)
+      }
+
       val future = ask(processingActor, restRequest)(cfg.requestTimeoutSeconds seconds).mapTo[RestResponse]
       future pipeTo self
 
-      goto(WaitingForResponse) using Data(op = Some(op))
+      goto(WaitingForResponse) using Data(op = Some(op), req = Some(restRequest))
 
     case Event(msg: ProcessingError, data: Data) =>
       stop(FSM.Failure(msg.reason))
@@ -113,7 +120,7 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
 
   when(WaitingForResponse) {
     case Event(response: RestResponse, data: Data) =>
-      data.op.get.serializer.serialize(httpRequest, response)
+      data.op.get.serializer.serialize(httpRequestEvent, response)
       stop(FSM.Normal)
 
     case Event(msg: akka.actor.Status.Failure, data: Data) =>
@@ -126,23 +133,39 @@ class RestHttpWorker(registry: RestRegistry, httpRequest: HttpRequestEvent) exte
 
   onTermination {
     case StopEvent(FSM.Normal, state, data: Data) =>
+      clearSockoEventCache(data)
       log.debug(s"Finished in ${data.duration}ms")
-      
+
     case StopEvent(FSM.Failure(cause: Throwable), state, data: Data) =>
-      val isHead = httpRequest.endPoint.isHEAD      
+      clearSockoEventCache(data)
+      val isHead = httpRequestEvent.endPoint.isHEAD
       cause match {
         case _: RestBindingException =>
           val msg = if (!isHead && cfg.reportOn400BadRequests) cause.getMessage else ""
-          httpRequest.response.write(HttpResponseStatus(400), msg)
+          httpRequestEvent.response.write(HttpResponseStatus(400), msg)
         case _: Throwable =>
           val msg = if (!isHead && cfg.reportOn500InternalServerError) cause.getMessage else ""
-          httpRequest.response.write(HttpResponseStatus(500), msg)
+          httpRequestEvent.response.write(HttpResponseStatus(500), msg)
       }
-      
+
       log.error(cause, s"Failed with error: ${cause.getMessage}")
-      
+
     case e: Any =>
       log.debug(s"Shutdown " + e)
+  }
+
+  private def clearSockoEventCache(data: Data) = {
+    try {
+      if (data.op.isDefined && data.req.isDefined) {
+        if (data.op.get.definition.accessSockoEvent) {
+          RestRequestEvents.remove(data.req.get.context)
+        }
+      }
+    } catch {
+      // Can ignore the error because the entry should be automatically removed
+      // by the LocalCache.
+      case ex: Throwable => log.error(ex, "Error clearing SockoEvent")
+    }
   }
 
   //*******************************************************************************************************************

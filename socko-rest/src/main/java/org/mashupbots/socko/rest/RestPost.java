@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
  * HTTP POST REST end point annotation.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 public @interface RestPost {
 	/**
 	 * Template URL to use for matching to this request
@@ -32,33 +32,51 @@ public @interface RestPost {
 	String urlTemplate();
 
 	/**
-	 * Class path of the response class. If a package name is not provided, the class is assumed
-	 * to be in the same package as the request.
+	 * Class path of the response class. If a package name is not provided, the
+	 * class is assumed to be in the same package as the request.
 	 * 
 	 * If empty, the assumed response class has the same class path and name as
-	 * the request class; but with <tt>Request</tt> suffix replaced with <tt>Response</tt>.
+	 * the request class; but with <tt>Request</tt> suffix replaced with
+	 * <tt>Response</tt>.
 	 * 
-	 * For <tt>MyRestRequest</tt>, the default response class would be <tt>MyRestResponse</tt>.
+	 * For <tt>MyRestRequest</tt>, the default response class would be
+	 * <tt>MyRestResponse</tt>.
 	 */
 	String responseClass() default "";
 
 	/**
-	 * Class path of the class that will locate the actor to dispatch a request for processing.
-	 * If a package name is not provided, the class is assumed to be in the same package as the 
-	 * request.
+	 * Class path of the class that will locate the actor to dispatch a request
+	 * for processing. If a package name is not provided, the class is assumed
+	 * to be in the same package as the request.
 	 * 
 	 * If empty, the assumed response class has the same class path and name as
-	 * the request class; but with <tt>Request</tt> suffix replaced with <tt>Dispatcher</tt>.
+	 * the request class; but with <tt>Request</tt> suffix replaced with
+	 * <tt>Dispatcher</tt>.
 	 * 
-	 * For <tt>MyRestRequest</tt>, the default response class would be <tt>MyRestDispatcher</tt>.
+	 * For <tt>MyRestRequest</tt>, the default response class would be
+	 * <tt>MyRestDispatcher</tt>.
 	 */
 	String dispatcherClass() default "";
-	
+
 	/**
-	 * Optional name used for the convenience of the UI and client code generator. 
+	 * Flag to indicate the SockoEvent associated with a request is to be
+	 * accessible from <tt>RestRequestEvents</tt>. Defaults to `false`.
 	 * 
-	 * If empty, the name of the request class without the `Request` suffix 
-	 * will be used.
+	 * <p>
+	 * Accessing Socko Event is not generally required. However, in cases where
+	 * you need to perform custom deserailization of requests and/or custom
+	 * serialization of responses, the Socko Event can be uses to access the
+	 * network connection.
+	 * </p>
+	 */
+	boolean accessSockoEvent() default false;
+
+	/**
+	 * Optional name used for the convenience of the UI and client code
+	 * generator.
+	 * 
+	 * If empty, the name of the request class without the `Request` suffix will
+	 * be used.
 	 */
 	String name() default "";
 
@@ -73,7 +91,7 @@ public @interface RestPost {
 	String notes() default "";
 
 	/**
-	 * Flag to indicate if this operation is depreciated or not. 
+	 * Flag to indicate if this operation is depreciated or not.
 	 * 
 	 * Defaults to <tt>false</tt>.
 	 */

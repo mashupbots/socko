@@ -42,6 +42,8 @@ import org.mashupbots.socko.infrastructure.ReflectUtil
  *  - If empty, the assumed response class is the same class path and name as the request class;
  *    but with `Request` suffix replaced with `Dispatcher`. For `MyRestRequest`, the default
  *    response class that will be used in is `MyRestDispatcher`.
+ * @param accessSockoEvent Flag to denote if the [[org.mashupbots.socko.events.SockoEvent]] is to be made
+ *    accessible from [[org.mashupbots.socko.rest.RestRequestEvents]]. Defaults to `false`.
  * @param name Name provided for the convenience of the UI and client code generator
  *    If empty, the name of the request class will be used without the `Request` prefix.
  * @param description Optional short description. Less than 60 characters is recommended.
@@ -55,6 +57,7 @@ case class RestOperationDef(
   urlTemplate: String,
   responseClass: String = "",
   dispatcherClass: String = "",
+  accessSockoEvent: Boolean = false,
   name: String = "",
   description: String = "",
   notes: String = "",
@@ -185,6 +188,7 @@ object RestOperationDef extends Logger {
   private val urlTemplateName = ru.newTermName("urlTemplate")
   private val responseClassName = ru.newTermName("responseClass")
   private val dispatcherClassName = ru.newTermName("dispatcherClass")
+  private val accessSockoEventName = ru.newTermName("accessSockoEvent")
   private val nameName = ru.newTermName("name")
   private val descriptionName = ru.newTermName("description")
   private val notesName = ru.newTermName("notes")
@@ -208,6 +212,7 @@ object RestOperationDef extends Logger {
     val urlTemplate = ReflectUtil.getAnnotationJavaLiteralArg(a, urlTemplateName, "")
     val responseClass = ReflectUtil.getAnnotationJavaLiteralArg(a, responseClassName, "")
     val dispatcherClass = ReflectUtil.getAnnotationJavaLiteralArg(a, dispatcherClassName, "")
+    val accessSockoEvent = ReflectUtil.getAnnotationJavaLiteralArg(a, accessSockoEventName, false)
     val name = ReflectUtil.getAnnotationJavaLiteralArg(a, nameName, "")
     val description = ReflectUtil.getAnnotationJavaLiteralArg(a, descriptionName, "")
     val notes = ReflectUtil.getAnnotationJavaLiteralArg(a, notesName, "")
@@ -227,7 +232,7 @@ object RestOperationDef extends Logger {
     }
 
     RestOperationDef(method, config.rootUrl, urlTemplate, responseClass, dispatcherClass,
-      name, description, notes, depreciated, errorResponsesMap)
+      accessSockoEvent, name, description, notes, depreciated, errorResponsesMap)
   }
 
   /**

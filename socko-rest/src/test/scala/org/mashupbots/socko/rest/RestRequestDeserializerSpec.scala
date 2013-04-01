@@ -43,7 +43,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings.length must be(1)
       d.requestParamBindings(0).name must be("id")
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/1234"), Map.empty)
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/1234"), Map.empty, SockoEventType.HttpRequest)
       val req = d.deserialize(ctx).asInstanceOf[PathParamRequest1]
       req.id must be("1234")
     }
@@ -59,7 +59,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings(0).description must be("test2")
       d.requestParamBindings(1).name must be("format")
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/5555/stuff/json/1.2/2.2"), Map.empty)
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/5555/stuff/json/1.2/2.2"), Map.empty, SockoEventType.HttpRequest)
       val req = d.deserialize(ctx).asInstanceOf[PathParamRequest2]
       req.id must be(5555)
       req.format must be("json")
@@ -73,7 +73,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
         ru.typeOf[PathParamRequest3].typeSymbol.asClass)
       d.requestParamBindings.length must be(1)
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/stuff/stringnotint"), Map.empty)
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/stuff/stringnotint"), Map.empty, SockoEventType.HttpRequest)
 
       val thrown = intercept[RestBindingException] {
         val req = d.deserialize(ctx).asInstanceOf[PathParamRequest3]
@@ -95,7 +95,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings(3).name must be("exist")
       d.requestParamBindings(4).name must be("notexist")
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json?number=1&string=hello&exist=world"), Map.empty)
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json?number=1&string=hello&exist=world"), Map.empty, SockoEventType.HttpRequest)
       val req = d.deserialize(ctx).asInstanceOf[QueryStringParamRequest1]
       req.number must be(1)
       req.s must be("hello")
@@ -118,7 +118,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings(4).name must be("notexist")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
-        Map("number" -> "1", "string" -> "hello", "exist" -> "world"))
+        Map("number" -> "1", "string" -> "hello", "exist" -> "world"), SockoEventType.HttpRequest)
 
       val req = d.deserialize(ctx).asInstanceOf[HeaderParamRequest1]
       req.number must be(1)
@@ -143,7 +143,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
           "long" -> "10000000",
           "float" -> "1.1",
           "double" -> "2.2",
-          "date" -> "2001-07-04T12:08:56.235-07:00"))
+          "date" -> "2001-07-04T12:08:56.235-07:00"),
+          SockoEventType.HttpRequest)
 
       val req = d.deserialize(ctx).asInstanceOf[AllDataTypeRequest]
       req.string must be("s")
@@ -173,7 +174,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
           "long" -> "10000000",
           "float" -> "1.1",
           "double" -> "2.2",
-          "date" -> "2001-07-04"))
+          "date" -> "2001-07-04"), 
+        SockoEventType.HttpRequest)
 
       val req = d.deserialize(ctx).asInstanceOf[AllOptionalDataTypeRequest]
       req.string must be(Some("s"))
@@ -186,7 +188,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       req.double must be(Some("2.2".toDouble))
       req.date must be(Some(DateUtil.parseISO8601Date("2001-07-04")))
 
-      val ctx2 = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"), Map.empty)
+      val ctx2 = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"), Map.empty, SockoEventType.HttpRequest)
 
       val req2 = d.deserialize(ctx2).asInstanceOf[AllOptionalDataTypeRequest]
       req2.string must be(None)

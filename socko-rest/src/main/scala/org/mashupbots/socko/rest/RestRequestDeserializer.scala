@@ -58,7 +58,7 @@ case class RestRequestDeserializer(
    * @param httpRequestEvent HTTP event
    */
   def deserialize(httpRequestEvent: HttpRequestEvent): RestRequest = {
-    val context = RestRequestContext(httpRequestEvent.endPoint, httpRequestEvent.request.headers)
+    val context = RestRequestContext(httpRequestEvent.endPoint, httpRequestEvent.request.headers, SockoEventType.HttpRequest)
     val params: List[_] = context :: requestParamBindings.map(b => b.extract(context, requestClass, httpRequestEvent))
     requestConstructorMirror(params: _*).asInstanceOf[RestRequest]
   }
@@ -152,7 +152,6 @@ object RequestParamBinding {
   private val optionType = ru.typeOf[Option[_]]
 
   private val bytesType = ru.typeOf[Seq[Byte]]
-  private val httpRequestEventType = ru.typeOf[HttpRequestEvent]
   private val anytRefType = ru.typeOf[AnyRef]
 
   val primitiveTypes: Map[ru.Type, (String) => Any] = Map(
@@ -228,8 +227,6 @@ object RequestParamBinding {
         RequestBodyDataType.Primitive
       } else if (tpe =:= bytesType) {
         RequestBodyDataType.Bytes
-      } else if (tpe =:= httpRequestEventType) {
-        RequestBodyDataType.HttpRequestEvent
       } else if (tpe <:< anytRefType) {
         RequestBodyDataType.Object
       } else {
@@ -536,9 +533,6 @@ case class BodyBinding(
       case RequestBodyDataType.Bytes =>
         httpRequestEvent.request.content.toBytes.toSeq
 
-      case RequestBodyDataType.HttpRequestEvent =>
-        httpRequestEvent
-
       case _ => throw RestBindingException(s"Unsupported request body binding type category: ${tpeCategory}")
     }
   }
@@ -546,6 +540,6 @@ case class BodyBinding(
 
 object RequestBodyDataType extends Enumeration {
   type RequestBodyDataType = Value
-  val Primitive, Object, Bytes, HttpRequestEvent = Value
+  val Primitive, Object, Bytes = Value
 } 
   

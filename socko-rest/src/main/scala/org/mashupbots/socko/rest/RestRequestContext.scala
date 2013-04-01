@@ -30,22 +30,49 @@ import org.mashupbots.socko.events.HttpResponseStatus
 case class RestRequestContext(
   id: UUID,
   endPoint: EndPoint,
-  headers: Map[String, String]) {
+  headers: Map[String, String],
+  eventType: SockoEventType.Value) {
 
+  /**
+   * Alternative constructor that automatically allocates the unique Id
+   *
+   * @param endPoint HTTP URL at which the request was received
+   * @param headers HTTP request headers
+   */
   def this(endPoint: EndPoint,
-    headers: Map[String, String]) =
-    this(UUID.randomUUID(), endPoint, headers)
+    headers: Map[String, String],
+    eventType: SockoEventType.Value) =
+    this(UUID.randomUUID(), endPoint, headers, eventType)
 
+  /**
+   * Builds the [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this
+   * [[org.mashupbots.socko.rest.RestRequestContext]].
+   *
+   * It is assumed that there are no response headers.
+   *
+   * @param status HTTP status of the response
+   * @returns [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this context
+   */
   def responseContext(status: HttpResponseStatus): RestResponseContext = {
     RestResponseContext(this, status, Map.empty)
   }
 
+  /**
+   * Builds the [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this
+   * [[org.mashupbots.socko.rest.RestRequestContext]].
+   *
+   * @param status HTTP status of the response
+   * @param headers HTTP response headers
+   * @returns [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this context
+   */
   def responseContext(status: HttpResponseStatus, headers: Map[String, String]): RestResponseContext = {
     RestResponseContext(this, status, headers)
   }
-
 }
 
+/**
+ * Companion object
+ */
 object RestRequestContext {
 
   /**
@@ -54,8 +81,29 @@ object RestRequestContext {
    *
    * @param endPoint HTTP URL at which the request was received
    * @param headers HTTP request headers
+   * @param eventType Socko Event Type
+   * @returns a new instance of [[org.mashupbots.socko.rest.RestRequestContext]]
    */
-  def apply(endPoint: EndPoint, headers: Map[String, String]): RestRequestContext = {
-    RestRequestContext(UUID.randomUUID(), endPoint, headers)
+  def apply(endPoint: EndPoint, headers: Map[String, String], eventType: SockoEventType.Value): RestRequestContext = {
+    RestRequestContext(UUID.randomUUID(), endPoint, headers, eventType)
   }
 }
+
+/**
+ * Denotes the type of [[org.mashupbots.socko.events.SockoEvent]] that triggered this
+ * REST request
+ */
+object SockoEventType extends Enumeration {
+  type SockoEventType = Value
+
+  /**
+   * HTTP
+   */
+  val HttpRequest = Value
+
+  /**
+   * Web Sockets
+   */
+  val WebSocketFrame = Value
+} 
+  

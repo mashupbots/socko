@@ -218,8 +218,8 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     }
 
 
-    "PUT http request event operations" in {
-      val url = new URL(path + "api/http/200")
+    "PUT custom operations" in {
+      val url = new URL(path + "api/custom/CustomRequestHandling")
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
       sendPutRequest(conn, "text/plain; charset=UTF-8", CharsetUtil.UTF_8, "hello")
       val resp = getResponseContent(conn)
@@ -227,12 +227,6 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       resp.status must equal("200")
       resp.content must be("hello")
 
-      val url2 = new URL(path + "api/http/404")
-      val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
-      sendPutRequest(conn2, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "hello")
-      val resp2 = getResponseContent(conn2)
-
-      resp2.status must equal("404")
     }    
   }
 }

@@ -30,19 +30,22 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 import org.mashupbots.socko.events.HttpRequestEvent
+import org.mashupbots.socko.rest.RestRequestEvents
 
-@RestPut(urlTemplate = "/http/{status}")
-case class PutHttpRequest(context: RestRequestContext, @RestPath() status: Int, @RestBody() http: HttpRequestEvent) extends RestRequest
+@RestPut(urlTemplate = "/custom/{responseType}", accessSockoEvent = true)
+case class PutHttpRequest(context: RestRequestContext, @RestPath() responseType: String) extends RestRequest
 
 case class PutHttpResponse(context: RestResponseContext, data: String) extends RestResponse
 
 class PutHttpProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
     case req: PutHttpRequest =>
-      if (req.status == 200) {
-        sender ! PutHttpResponse(req.context.responseContext(HttpResponseStatus(req.status), Map.empty), req.http.request.content.toString)
+      if (req.responseType == "CustomRequestHandling") {
+        val http = RestRequestEvents.get(req.context).get.asInstanceOf[HttpRequestEvent]
+        sender ! PutHttpResponse(req.context.responseContext(HttpResponseStatus(200), Map.empty), http.request.content.toString)
+      } else if (req.responseType == "CustomResponseHandling") {
       } else {
-        sender ! PutHttpResponse(req.context.responseContext(HttpResponseStatus(req.status)), "")
+        sender ! PutHttpResponse(req.context.responseContext(HttpResponseStatus(400)), "")
       }
       context.stop(self)
   }

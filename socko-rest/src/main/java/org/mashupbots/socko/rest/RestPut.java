@@ -55,6 +55,19 @@ public @interface RestPut {
 	String dispatcherClass() default "";
 	
 	/**
+	 * Flag to indicate the SockoEvent associated with a request is to be
+	 * accessible from <tt>RestRequestEvents</tt>. Defaults to `false`.
+	 * 
+	 * <p>
+	 * Accessing Socko Event is not generally required. However, in cases where
+	 * you need to perform custom deserailization of requests and/or custom
+	 * serialization of responses, the Socko Event can be uses to access the
+	 * network connection.
+	 * </p>
+	 */
+	boolean accessSockoEvent() default false;
+	
+	/**
 	 * Optional name used for the convenience of the UI and client code generator. 
 	 * 
 	 * If empty, the name of the request class without the `Request` suffix 
