@@ -196,11 +196,10 @@ object RequestParamBinding {
     // Check that there is only 1 parameter annotation
     val count = annotations.count(a => validParamAnnotationTypes.contains(a.tpe))
     if (count == 0) {
-      throw RestDefintionException(s"Constructor parameter '${p.name}' of '${requestClass.fullName}' is not annotated." +
-        "Annotated with PathParam, QueryStringParam or HeaderParam.")
+      throw RestDefintionException(s"Constructor parameter '${p.name}' of '${requestClass.fullName}' is not annotated " +
+        "with @RestPath, @RestQuery, @RestHeader or @RestBody")
     } else if (count > 1) {
-      throw RestDefintionException(s"Constructor parameter '${p.name}' of '${requestClass.fullName}' has more than one REST annotation. " +
-        "Only 1 REST annotation is permitted.")
+      throw RestDefintionException(s"Constructor parameter '${p.name}' of '${requestClass.fullName}' has more than one REST annotation")
     }
 
     // Parse annotation

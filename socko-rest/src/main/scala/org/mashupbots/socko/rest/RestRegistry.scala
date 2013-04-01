@@ -96,18 +96,13 @@ object RestRegistry extends Logger {
 
     val restOperations = for (
       cs <- classSymbols;
-      op = findRestOperation(rm, cs, config);
-      resp = findRestResponse(op, cs, classSymbols);
-      dispatcher = findRestDispatcher(rm, op, cs, classSymbols);
-      if (op.isDefined && resp.isDefined && dispatcher.isDefined)
+      op = buildRestOperation(rm, cs, classSymbols, config);
+      if (op.isDefined)
     ) yield {
-      log.debug("Registering {} {} {}", op.get, cs.fullName, resp.get.fullName)
-      val deserializer = RestRequestDeserializer(config, rm, op.get, cs)
-      val serializer = RestResponseSerializer(config, rm, op.get, resp.get)
-      RestOperation(op.get, dispatcher.get, deserializer, serializer)
+      op.get
     }
 
-    // Check for duplicate operation addresses
+    // Check for duplicate operation uri templates
     restOperations.foreach(op => {
       val sameOp = restOperations.find(op2 => System.identityHashCode(op) != System.identityHashCode(op2) &&
         op.definition.compareUrlTemplate(op2.definition))
@@ -120,6 +115,36 @@ object RestRegistry extends Logger {
     })
 
     RestRegistry(restOperations, config)
+  }
+
+  /**
+   * Builds a [[org.mashupbots.socko.rest.RestOperation]] for a specific class symbol `cs`.
+   *
+   * If `cs` is [[org.mashupbots.socko.rest.RestRequest]] correctly annotated, and it has a corresponding
+   * [[org.mashupbots.socko.rest.RestResponse]] and [[org.mashupbots.socko.rest.RestDispatcher]], then
+   * a [[org.mashupbots.socko.rest.RestOperation]] is instanced and returned.
+   *
+   * If not, then `None` is returned.
+   *
+   * @param rm Runtime mirror
+   * @param cs class symbol of class to check
+   * @param classSymbols Collection of class symbols for all classes in the package that `cs` belongs
+   * @param config REST configuration
+   * @returns An instance of the annotation class or `None` if annotation not found
+   */
+  def buildRestOperation(rm: ru.Mirror, cs: ru.ClassSymbol, classSymbols: Seq[ru.ClassSymbol], config: RestConfig): Option[RestOperation] = {
+    val op = findRestOperation(rm, cs, config);
+    val resp = findRestResponse(op, cs, classSymbols);
+    val dispatcher = findRestDispatcher(rm, op, cs, classSymbols);
+
+    if (op.isDefined && resp.isDefined && dispatcher.isDefined) {
+      log.debug("Registering {} {} {}", op.get, cs.fullName, resp.get.fullName)
+      val deserializer = RestRequestDeserializer(config, rm, op.get, cs)
+      val serializer = RestResponseSerializer(config, rm, op.get, resp.get)
+      Some(RestOperation(op.get, dispatcher.get, deserializer, serializer))
+    } else {
+      None
+    }
   }
 
   /**
@@ -136,11 +161,9 @@ object RestRegistry extends Logger {
     if (!isRestRequest && annotationType.isEmpty) {
       None
     } else if (isRestRequest && annotationType.isEmpty) {
-      log.warn("{} extends RestRequest but is not annotated with a Rest operation", cs.fullName)
-      None
+      throw RestDefintionException(s"'${cs.fullName}' extends RestRequest but is not annotated with a REST operation like '@RestGet'")
     } else if (!isRestRequest && annotationType.isDefined) {
-      log.warn("{} does not extend RestRequest but is annotated with a Rest operation", cs.fullName)
-      None
+      throw RestDefintionException(s"'${cs.fullName}' is annotated with '@${annotationType.get.tpe.typeSymbol.name}' but does not extend RestRequest")
     } else {
       Some(RestOperationDef(annotationType.get, config))
     }
@@ -189,8 +212,7 @@ object RestRegistry extends Logger {
 
         val responseClassSymbol = findClassSymbol(responseClassName)
         if (responseClassSymbol.isEmpty) {
-          log.warn("Cannot find corresponding RestResponse '{}' for RestRequest '{}'{}",
-            responseClassName, requestClassName, "")
+          throw RestDefintionException(s"Cannot find corresponding RestResponse '${responseClassName}' for RestRequest '${requestClassName}'")
         }
         responseClassSymbol
       }
@@ -235,8 +257,7 @@ object RestRegistry extends Logger {
         }
       val dispatcherClassSymbol = findClassSymbol(dispatcherClassName)
       if (dispatcherClassSymbol.isEmpty) {
-        log.warn("Cannot find corresponding RestResponse '{}' for RestRequest '{}'{}",
-          dispatcherClassName, requestClassName, "")
+        throw RestDefintionException(s"Cannot find corresponding RestDispatcher '${dispatcherClassName}' for RestRequest '${requestClassName}'")
       }
       dispatcherClassSymbol
     }
@@ -254,9 +275,7 @@ object RestRegistry extends Logger {
         val constructorMethodMirror = classMirror.reflectConstructor(constructorMethodSymbol)
         val x = constructorMethodSymbol.paramss
         if (constructorMethodSymbol.paramss(0).size != 0) {
-          log.warn("RestDispatcher '{}' for RestRequest '{}' does not have a parameterless constructor{}",
-            cs.fullName, requestClassName, "")
-          None
+          throw RestDefintionException(s"RestDispatcher '${cs.fullName}' for RestRequest '${requestClassName}' does not have a parameterless constructor")
         } else {
           val obj = constructorMethodMirror().asInstanceOf[RestDispatcher]
           dispatcherClassCache.put(cs.fullName, obj)
