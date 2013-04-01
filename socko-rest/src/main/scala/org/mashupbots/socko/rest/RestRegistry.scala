@@ -14,7 +14,7 @@
 // limitations under the License.
 package org.mashupbots.socko.rest
 
-import scala.reflect.runtime.{universe => ru}
+import scala.reflect.runtime.{ universe => ru }
 
 import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.infrastructure.Logger
@@ -56,6 +56,7 @@ object RestRegistry extends Logger {
   private val typeRestResponse = ru.typeOf[RestResponse]
   private val typeRestProcessorLocator = ru.typeOf[RestDispatcher]
   private val dispatcherClassCache = scala.collection.mutable.Map.empty[String, RestDispatcher]
+  private val csNoSerializationRestResponse = ru.typeOf[NoSerializationRestResponse].typeSymbol.asClass
 
   /**
    * Instance registry using the classes under the specified package name and
@@ -153,13 +154,16 @@ object RestRegistry extends Logger {
    *
    * If not empty, we will try to find the specified response class
    *
-   * @param op Operation for which a response is to be located
+   * If customSerialization is turned on, the standard `NoSerializationRestResponse` will be returned.
+   * This is just a placeholder and will not be used because the processing actor will handle serialization.
+   *
+   * @param opDef Definition of the operation for which a response is to be located
    * @param requestClassSymbol Class Symbol for the request class
    * @param classSymbols Sequence of class symbols in which to search for the response class
    * @returns the response class symbol or `None` if not found
    */
   def findRestResponse(
-    op: Option[RestOperationDef],
+    opDef: Option[RestOperationDef],
     requestClassSymbol: ru.ClassSymbol,
     classSymbols: Seq[ru.ClassSymbol]): Option[ru.ClassSymbol] = {
 
@@ -168,22 +172,28 @@ object RestRegistry extends Logger {
     def findClassSymbol(fullClassName: String) = classSymbols.find(cs => cs.fullName == fullClassName &&
       cs.toType <:< typeRestResponse)
 
-    if (op.isEmpty) {
+    if (opDef.isEmpty) {
       None
     } else {
-      val responseClassName =
-        if (op.get.responseClass == "") replaceRequestInName(requestClassName, "Response")
-        else if (op.get.responseClass.contains(".")) op.get.responseClass
-        else {
-          val pkgName = requestClassSymbol.fullName.substring(0, requestClassSymbol.fullName.lastIndexOf('.'))
-          pkgName + "." + op.get.responseClass
+      if (opDef.get.customSerialization) {
+        // Return a standard response that will not be used because the processor actor will handle it
+        Some(csNoSerializationRestResponse)
+      } else {
+        val responseClassName =
+          if (opDef.get.responseClass == "") replaceRequestInName(requestClassName, "Response")
+          else if (opDef.get.responseClass.contains(".")) opDef.get.responseClass
+          else {
+            val pkgName = requestClassSymbol.fullName.substring(0, requestClassSymbol.fullName.lastIndexOf('.'))
+            pkgName + "." + opDef.get.responseClass
+          }
+
+        val responseClassSymbol = findClassSymbol(responseClassName)
+        if (responseClassSymbol.isEmpty) {
+          log.warn("Cannot find corresponding RestResponse '{}' for RestRequest '{}'{}",
+            responseClassName, requestClassName, "")
         }
-      val responseClassSymbol = findClassSymbol(responseClassName)
-      if (responseClassSymbol.isEmpty) {
-        log.warn("Cannot find corresponding RestResponse '{}' for RestRequest '{}'{}",
-          responseClassName, requestClassName, "")
+        responseClassSymbol
       }
-      responseClassSymbol
     }
   }
 
@@ -196,14 +206,14 @@ object RestRegistry extends Logger {
    * If not empty, we will try to find the specified dispatcher class
    *
    * @param rm Runtime mirror
-   * @param op Operation for which a response is to be located
+   * @param opDef Definition of the operation for which a response is to be located
    * @param requestClassSymbol Class Symbol for the request class
    * @param classSymbols Sequence of class symbols in which to search for the processor locator class
    * @returns the response class symbol or `None` if not found
    */
   def findRestDispatcher(
     rm: ru.RuntimeMirror,
-    op: Option[RestOperationDef],
+    opDef: Option[RestOperationDef],
     requestClassSymbol: ru.ClassSymbol,
     classSymbols: Seq[ru.ClassSymbol]): Option[RestDispatcher] = {
 
@@ -213,15 +223,15 @@ object RestRegistry extends Logger {
       cs.fullName == fullClassName && cs.toType <:< typeRestProcessorLocator)
 
     // Find
-    val dispatcherClassSymbol = if (op.isEmpty) {
+    val dispatcherClassSymbol = if (opDef.isEmpty) {
       None
     } else {
       val dispatcherClassName =
-        if (op.get.dispatcherClass == "") replaceRequestInName(requestClassName, "Dispatcher")
-        else if (op.get.dispatcherClass.contains(".")) op.get.dispatcherClass
+        if (opDef.get.dispatcherClass == "") replaceRequestInName(requestClassName, "Dispatcher")
+        else if (opDef.get.dispatcherClass.contains(".")) opDef.get.dispatcherClass
         else {
           val pkgName = requestClassSymbol.fullName.substring(0, requestClassSymbol.fullName.lastIndexOf('.'))
-          pkgName + "." + op.get.dispatcherClass
+          pkgName + "." + opDef.get.dispatcherClass
         }
       val dispatcherClassSymbol = findClassSymbol(dispatcherClassName)
       if (dispatcherClassSymbol.isEmpty) {
@@ -266,4 +276,8 @@ object RestRegistry extends Logger {
 
 }
 
-
+/**
+ * Class to denote that no serialization is required because it will be custom handled
+ * by the REST processing actor
+ */
+case class NoSerializationRestResponse(context: RestResponseContext) extends RestResponse

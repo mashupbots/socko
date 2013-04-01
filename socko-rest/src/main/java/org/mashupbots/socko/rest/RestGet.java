@@ -57,17 +57,31 @@ public @interface RestGet {
 	String dispatcherClass() default "";
 	
 	/**
-	 * Flag to indicate the SockoEvent associated with a request is to be
-	 * accessible from <tt>RestRequestEvents</tt>. Defaults to `false`.
-	 * 
+	 * Flag to indicate if the REST processing actor will attempt to 
+	 * deseralize the raw request body.
 	 * <p>
-	 * Accessing Socko Event is not generally required. However, in cases where
-	 * you need to perform custom deserailization of requests and/or custom
-	 * serialization of responses, the Socko Event can be uses to access the
-	 * network connection.
+	 * This is not generally required so it defaults to `false`.
+	 * </p>
+	 * <p>
+	 * If set to `true`, the `SockoEvent` associated with the request will
+	 * be made available in `RestRequestEvents`.
 	 * </p>
 	 */
-	boolean accessSockoEvent() default false;
+	boolean customDeserialization() default false;
+	
+	/**
+	 * Flag to indicate if the REST processing actor will attempt to 
+	 * seralize the response.
+	 * <p>
+	 * This is not generally required so it defaults to `false`.
+	 * </p>
+	 * <p>
+	 * If set to `true`, the `SockoEvent` associated with the request will
+	 * be made available in `RestRequestEvents`. You can use that event
+	 * to write data directly to the caller.
+	 * </p>
+	 */
+	boolean customSerialization() default false;
 	
 	/**
 	 * Optional name used for the convenience of the UI and client code generator. 

@@ -93,22 +93,32 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
   when(DispatchRequest) {
     case Event(msg: Start, data: Data) =>
       log.debug(s"RestHttpWorker start")
+
+      // Gen operation and build request
       val op = registry.findOperation(httpRequestEvent.endPoint)
       val restRequest = op.deserializer.deserialize(httpRequestEvent)
 
+      // Get actor
       val processingActor = op.dispatcher.getActor(context.system, restRequest)
       if (processingActor.isTerminated) {
         throw RestProcessingException(s"Processing actor '${processingActor.path}' for '${op.deserializer.requestClass.fullName}' is terminated")
       }
 
+      // Cache the request event. It will be automatically removed after a period of time (10 seconds)
       if (op.definition.accessSockoEvent) {
         RestRequestEvents.put(restRequest.context, httpRequestEvent)
       }
 
-      val future = ask(processingActor, restRequest)(cfg.requestTimeoutSeconds seconds).mapTo[RestResponse]
-      future pipeTo self
-
-      goto(WaitingForResponse) using Data(op = Some(op), req = Some(restRequest))
+      if (op.definition.customSerialization) {
+        // Custom serialization so no need to wait for a response to serialize
+        processingActor ! restRequest
+        stop(FSM.Normal)
+      } else {
+        // Wait for response to serialize
+        val future = ask(processingActor, restRequest)(cfg.requestTimeoutSeconds seconds).mapTo[RestResponse]
+        future pipeTo self
+        goto(WaitingForResponse) using Data(op = Some(op), req = Some(restRequest))
+      }
 
     case Event(msg: ProcessingError, data: Data) =>
       stop(FSM.Failure(msg.reason))
@@ -133,11 +143,9 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
 
   onTermination {
     case StopEvent(FSM.Normal, state, data: Data) =>
-      clearSockoEventCache(data)
       log.debug(s"Finished in ${data.duration}ms")
 
     case StopEvent(FSM.Failure(cause: Throwable), state, data: Data) =>
-      clearSockoEventCache(data)
       val isHead = httpRequestEvent.endPoint.isHEAD
       cause match {
         case _: RestBindingException =>
@@ -152,20 +160,6 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
 
     case e: Any =>
       log.debug(s"Shutdown " + e)
-  }
-
-  private def clearSockoEventCache(data: Data) = {
-    try {
-      if (data.op.isDefined && data.req.isDefined) {
-        if (data.op.get.definition.accessSockoEvent) {
-          RestRequestEvents.remove(data.req.get.context)
-        }
-      }
-    } catch {
-      // Can ignore the error because the entry should be automatically removed
-      // by the LocalCache.
-      case ex: Throwable => log.error(ex, "Error clearing SockoEvent")
-    }
   }
 
   //*******************************************************************************************************************

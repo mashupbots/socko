@@ -219,7 +219,7 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
 
 
     "PUT custom operations" in {
-      val url = new URL(path + "api/custom/CustomRequestHandling")
+      val url = new URL(path + "api/custom")
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
       sendPutRequest(conn, "text/plain; charset=UTF-8", CharsetUtil.UTF_8, "hello")
       val resp = getResponseContent(conn)

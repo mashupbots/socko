@@ -32,27 +32,22 @@ import akka.actor.Props
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.rest.RestRequestEvents
 
-@RestPut(urlTemplate = "/custom/{responseType}", accessSockoEvent = true)
-case class PutHttpRequest(context: RestRequestContext, @RestPath() responseType: String) extends RestRequest
+@RestPut(urlTemplate = "/custom", customDeserialization = true, customSerialization = true)
+case class PutCustomRequest(context: RestRequestContext) extends RestRequest
 
-case class PutHttpResponse(context: RestResponseContext, data: String) extends RestResponse
+// Note that response is not required because `customSerialization = true`
 
-class PutHttpProcessor() extends Actor with akka.actor.ActorLogging {
+class PutCustomProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
-    case req: PutHttpRequest =>
-      if (req.responseType == "CustomRequestHandling") {
-        val http = RestRequestEvents.get(req.context).get.asInstanceOf[HttpRequestEvent]
-        sender ! PutHttpResponse(req.context.responseContext(HttpResponseStatus(200), Map.empty), http.request.content.toString)
-      } else if (req.responseType == "CustomResponseHandling") {
-      } else {
-        sender ! PutHttpResponse(req.context.responseContext(HttpResponseStatus(400)), "")
-      }
+    case req: PutCustomRequest =>
+      val http = RestRequestEvents.get(req.context).get.asInstanceOf[HttpRequestEvent]
+      http.response.write(http.request.content.toString)
       context.stop(self)
   }
 }
 
-class PutHttpDispatcher extends RestDispatcher {
+class PutCustomDispatcher extends RestDispatcher {
   def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[PutHttpProcessor])
+    actorSystem.actorOf(Props[PutCustomProcessor])
   }
 }

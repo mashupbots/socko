@@ -18,16 +18,15 @@ package org.mashupbots.socko.rest
 import java.io.BufferedInputStream
 import java.net.URL
 import java.util.Date
-
 import scala.reflect.runtime.{ universe => ru }
-
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.json4s.NoTypeHints
-import org.json4s.native.{Serialization => json}
+import org.json4s.native.{ Serialization => json }
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.IOUtil
+import org.mashupbots.socko.infrastructure.Logger
 
 /**
  * Seralized outgoing data from a [[org.mashupbots.socko.rest.RestResposne]]
@@ -48,7 +47,7 @@ case class RestResponseSerializer(
   responseDataType: ResponseDataType.Value,
   responseDataTerm: Option[ru.TermSymbol],
   primitiveSerializer: Option[(Any) => String],
-  rm: ru.Mirror) {
+  rm: ru.Mirror) extends Logger {
 
   /**
    * Returns the data object for an instance of the response
@@ -75,7 +74,9 @@ case class RestResponseSerializer(
    * @param response Response object to serailize
    */
   def serialize(http: HttpRequestEvent, response: RestResponse) {
+    val status = response.context.status
     val dataType = if (http.endPoint.isHEAD) ResponseDataType.Void else responseDataType
+    
     dataType match {
       case ResponseDataType.Object => {
         val data = getData(response).asInstanceOf[AnyRef]
@@ -84,13 +85,13 @@ case class RestResponseSerializer(
           val s = json.write(data)
           s.getBytes(CharsetUtil.UTF_8)
         }
-        http.response.write(response.context.status, bytes, "application/json; charset=UTF-8", response.context.headers)
+        http.response.write(status, bytes, "application/json; charset=UTF-8", response.context.headers)
       }
       case ResponseDataType.Bytes => {
         val data = getData(response).asInstanceOf[Seq[Byte]]
         val bytes: Seq[Byte] = if (data == null) Seq.empty else data
         val contentType = response.context.headers.getOrElse(HttpHeaders.Names.CONTENT_TYPE, "application/octet-string")
-        http.response.write(response.context.status, bytes.toArray, contentType, response.context.headers)
+        http.response.write(status, bytes.toArray, contentType, response.context.headers)
       }
       case ResponseDataType.URL => {
         val data = getData(response)
@@ -102,10 +103,10 @@ case class RestResponseSerializer(
         }
 
         if (url == null) {
-          http.response.write(response.context.status, Array.empty[Byte], "", response.context.headers)
+          http.response.write(status, Array.empty[Byte], "", response.context.headers)
         } else {
           val contentType = response.context.headers.getOrElse(HttpHeaders.Names.CONTENT_TYPE, "application/octet-string")
-          http.response.writeFirstChunk(response.context.status, contentType, response.context.headers)
+          http.response.writeFirstChunk(status, contentType, response.context.headers)
 
           // TO DO use chunk writers to be more efficient and non blocking
           // Look at org.mashupbots.socko.netty.HttpChunkedFile for example
@@ -128,17 +129,18 @@ case class RestResponseSerializer(
       case ResponseDataType.Primitive => {
         val data = getData(response)
         val bytes = primitiveSerializer.get(data).getBytes(CharsetUtil.UTF_8)
-        http.response.write(response.context.status, bytes, "text/plain; charset=UTF-8", response.context.headers)
+        http.response.write(status, bytes, "text/plain; charset=UTF-8", response.context.headers)
       }
       case ResponseDataType.Void => {
-        http.response.write(response.context.status, Array.empty[Byte], "", response.context.headers)
+        http.response.write(status, Array.empty[Byte], "", response.context.headers)
       }
       case _ => {
         throw new IllegalStateException(s"Unsupported ResponseDataType ${responseDataType.toString}")
       }
     }
-  }
-
+  }	//serialize
+  
+  
 }
 
 /**
