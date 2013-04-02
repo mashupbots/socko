@@ -182,7 +182,7 @@ object RestResponseSerializer {
   private val bytesType = ru.typeOf[Seq[Byte]]
   private val urlType = ru.typeOf[URL]
   private val optionalUrlType = ru.typeOf[Option[URL]]
-  private val anytRefType = ru.typeOf[AnyRef]
+  private val anyRefType = ru.typeOf[AnyRef]
 
   /**
    * Factory for RestResponseSerializer
@@ -197,9 +197,9 @@ object RestResponseSerializer {
     val responseConstructorParams: List[ru.TermSymbol] = responseConstructor.paramss(0).map(p => p.asTerm)
 
     if (responseConstructorParams.size == 0) {
-      throw RestDefintionException(s"${responseClassSymbol.fullName} constructor must have parameters.")
+      throw RestDefintionException(s"'${responseClassSymbol.fullName}' constructor must have parameters.")
     } else if (responseConstructorParams(0).name.toString() != "context") {
-      throw RestDefintionException(s"First constructor parameter for ${responseClassSymbol.fullName} must be termed 'context'.")
+      throw RestDefintionException(s"First constructor parameter of '${responseClassSymbol.fullName}' must be called 'context'.")
     }
 
     val responseDataType = if (responseConstructorParams.size == 1) {
@@ -213,7 +213,7 @@ object RestResponseSerializer {
         ResponseDataType.Bytes
       } else if (contentType =:= urlType || contentType =:= optionalUrlType) {
         ResponseDataType.URL
-      } else if (contentType <:< anytRefType) {
+      } else if (contentType <:< anyRefType) {
         ResponseDataType.Object
       } else {
         throw new IllegalArgumentException(s"Unsupported REST response data type ${contentType} in ${responseClassSymbol.fullName}.")

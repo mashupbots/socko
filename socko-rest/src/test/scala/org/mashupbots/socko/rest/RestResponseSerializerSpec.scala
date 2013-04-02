@@ -75,13 +75,13 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
       val response = OptionalIntResponse(responseContext, Some(1))
       val x = s.getData(response)
       x.asInstanceOf[Option[Int]] must be(Some(1))
-      
+
       val response2 = OptionalIntResponse(responseContext, None)
       val x2 = s.getData(response2)
       x2.asInstanceOf[Option[Int]] must be(None)
-      
+
     }
-    
+
     "Serailize primitive date response" in {
       val s = RestResponseSerializer(
         config,
@@ -144,8 +144,31 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
       x.asInstanceOf[URL].toString() must be("file://c://temp//test.txt")
     }
 
+    "throw error for Responses where the 1st parameter is not called 'context'" in {
+      val thrown = intercept[RestDefintionException] {
+        RestResponseSerializer(
+          config,
+          mirror,
+          RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
+          ru.typeOf[FirstParamNotCalledContextResponse].typeSymbol.asClass)
+      }
+      thrown.getMessage must be("First constructor parameter of 'org.mashupbots.socko.rest.FirstParamNotCalledContextResponse' must be called 'context'.")
+    }
+
+    "throw error for Responses with no constructor params" in {
+      val thrown = intercept[RestDefintionException] {
+        RestResponseSerializer(
+          config,
+          mirror,
+          RestOperationDef("PUT", "/api", "/pets/{id}", "/actor/path"),
+          ru.typeOf[NoParamsResponse].typeSymbol.asClass)
+      }
+      thrown.getMessage must be("'org.mashupbots.socko.rest.NoParamsResponse' constructor must have parameters.")
+    }
+    
   }
 }
+
 case class VoidResponse(context: RestResponseContext) extends RestResponse
 
 case class StringResponse(context: RestResponseContext, data: String) extends RestResponse
@@ -158,3 +181,12 @@ case class ObjectResponse(context: RestResponseContext, data: Pet) extends RestR
 
 case class BytesResponse(context: RestResponseContext, data: Seq[Byte]) extends RestResponse
 case class UrlResponse(context: RestResponseContext, data: URL) extends RestResponse
+
+// Error no parameters
+case class NoParamsResponse() extends RestResponse {
+  val context: RestResponseContext = null
+}
+
+// Error first parameter not called context
+case class FirstParamNotCalledContextResponse(id: String, context: RestResponseContext) extends RestResponse
+
