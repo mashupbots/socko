@@ -90,6 +90,9 @@ object RestRequestDeserializer {
     if (requestConstructorParams.head.typeSignature != restRequestContextType) {
       throw RestDefintionException(s"First constructor parameter of '${requestClassSymbol.fullName}' must be of type RestRequestContext.")
     }
+    if (requestConstructorParams.head.name.toString != "context") {
+      throw RestDefintionException(s"First constructor parameter of '${requestClassSymbol.fullName}' must be called 'context'.")
+    }
 
     val params = requestConstructorParams.tail.map(p => RequestParamBinding(config, definition, requestClassSymbol, p))
 
@@ -221,6 +224,10 @@ object RequestParamBinding {
     } else if (a.tpe =:= headerParamAnnotationType) {
       HeaderBinding(config, name, p.typeSignature, description, required)
     } else if (a.tpe =:= bodyParamAnnotationType) {
+      if (opDef.method != "PUT" && opDef.method != "POST") {
+        throw RestDefintionException(s"Constructor parameter '${p.name}' of '${requestClass.fullName}' cannot be bound using @RestBody() for a '${opDef.method}' operation.")        
+      }
+      
       val tpe = p.typeSignature
       val tpeCategory = if (primitiveTypes.exists(t => t._1 =:= tpe)) {
         RequestBodyDataType.Primitive

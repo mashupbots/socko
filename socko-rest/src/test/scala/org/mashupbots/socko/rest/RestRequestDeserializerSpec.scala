@@ -144,7 +144,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
           "float" -> "1.1",
           "double" -> "2.2",
           "date" -> "2001-07-04T12:08:56.235-07:00"),
-          SockoEventType.HttpRequest)
+        SockoEventType.HttpRequest)
 
       val req = d.deserialize(ctx).asInstanceOf[AllDataTypeRequest]
       req.string must be("s")
@@ -174,7 +174,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
           "long" -> "10000000",
           "float" -> "1.1",
           "double" -> "2.2",
-          "date" -> "2001-07-04"), 
+          "date" -> "2001-07-04"),
         SockoEventType.HttpRequest)
 
       val req = d.deserialize(ctx).asInstanceOf[AllOptionalDataTypeRequest]
@@ -201,6 +201,96 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       req2.double must be(None)
       req2.date must be(None)
     }
+
+    "throw error for Requests without annotated bindings" in {
+      val thrown = intercept[RestDefintionException] {
+        RestRequestDeserializer(
+          config,
+          mirror,
+          RestOperationDef("GET", "/api", "/pets/{id}", "/actor/path"),
+          ru.typeOf[NoParameterAnnotationRequest].typeSymbol.asClass)
+      }
+      thrown.getMessage must be("Constructor parameter 'id' of 'org.mashupbots.socko.rest.NoParameterAnnotationRequest' is not annotated with @RestPath, @RestQuery, @RestHeader or @RestBody")
+    }
+
+    "throw error for Requests with multiple annotated bindings" in {
+      val thrown = intercept[RestDefintionException] {
+        RestRequestDeserializer(
+          config,
+          mirror,
+          RestOperationDef("GET", "/api", "/pets/{id}", "/actor/path"),
+          ru.typeOf[MultiParameterAnnotationRequest].typeSymbol.asClass)
+      }
+      thrown.getMessage must be("Constructor parameter 'id' of 'org.mashupbots.socko.rest.MultiParameterAnnotationRequest' has more than one REST annotation")
+    }
+
+    "throw error for Requests with bad path bindings" in {
+      val thrown = intercept[RestDefintionException] {
+        RestRequestDeserializer(
+          config,
+          mirror,
+          RestOperationDef("GET", "/api", "/pets/{format}", "/actor/path"),
+          ru.typeOf[BadPathParameterRequest].typeSymbol.asClass)
+      }
+      thrown.getMessage must be("Constructor parameter 'id' of 'org.mashupbots.socko.rest.BadPathParameterRequest' cannot be bound to the uri template path. '/pets/{format}' does not contain variable named 'id'.")
+    }
+
+    "throw error for Requests with body bindings to non POST or PUT methods" in {
+      val thrown = intercept[RestDefintionException] {
+        RestRequestDeserializer(
+          config,
+          mirror,
+          RestOperationDef("GET", "/api", "/pets/{format}", "/actor/path"),
+          ru.typeOf[BadBodyBindingRequest].typeSymbol.asClass)
+      }
+      thrown.getMessage must be("Constructor parameter 'data' of 'org.mashupbots.socko.rest.BadBodyBindingRequest' cannot be bound using @RestBody() for a 'GET' operation.")
+
+      val thrown2 = intercept[RestDefintionException] {
+        RestRequestDeserializer(
+          config,
+          mirror,
+          RestOperationDef("DELETE", "/api", "/pets/{format}", "/actor/path"),
+          ru.typeOf[BadBodyBindingRequest].typeSymbol.asClass)
+      }
+      thrown2.getMessage must be("Constructor parameter 'data' of 'org.mashupbots.socko.rest.BadBodyBindingRequest' cannot be bound using @RestBody() for a 'DELETE' operation.")
+
+      // OK
+      RestRequestDeserializer(
+        config,
+        mirror,
+        RestOperationDef("POST", "/api", "/pets/{format}", "/actor/path"),
+        ru.typeOf[BadBodyBindingRequest].typeSymbol.asClass)
+
+      // OK
+      RestRequestDeserializer(
+        config,
+        mirror,
+        RestOperationDef("PUT", "/api", "/pets/{format}", "/actor/path"),
+        ru.typeOf[BadBodyBindingRequest].typeSymbol.asClass)
+    }
+
+    "throw error for Requests where the 1st parameter is not of type RestRequestContext" in {
+      val thrown = intercept[RestDefintionException] {
+        RestRequestDeserializer(
+          config,
+          mirror,
+          RestOperationDef("GET", "/api", "/pets/{format}", "/actor/path"),
+          ru.typeOf[FirstParamNotContextRequest].typeSymbol.asClass)
+      }
+      thrown.getMessage must be("First constructor parameter of 'org.mashupbots.socko.rest.FirstParamNotContextRequest' must be of type RestRequestContext.")
+    }
+
+    "throw error for Requests where the 1st parameter is not called 'context'" in {
+      val thrown = intercept[RestDefintionException] {
+        RestRequestDeserializer(
+          config,
+          mirror,
+          RestOperationDef("GET", "/api", "/pets/{format}", "/actor/path"),
+          ru.typeOf[FirstParamNotCalledContextRequest].typeSymbol.asClass)
+      }
+      thrown.getMessage must be("First constructor parameter of 'org.mashupbots.socko.rest.FirstParamNotCalledContextRequest' must be called 'context'.")
+    }
+    
   }
 }
 
@@ -252,5 +342,22 @@ case class AllOptionalDataTypeRequest(context: RestRequestContext,
   @RestHeader() long: Option[Long],
   @RestHeader() float: Option[Float],
   @RestHeader() double: Option[Double],
-  @RestHeader() date: Option[Date]) extends RestRequest 
-    
+  @RestHeader() date: Option[Date]) extends RestRequest
+
+// Error no parameter binding 
+case class NoParameterAnnotationRequest(context: RestRequestContext, id: String) extends RestRequest
+
+// Error multi parameter binding 
+case class MultiParameterAnnotationRequest(context: RestRequestContext, @RestHeader()@RestPath() id: String) extends RestRequest
+
+// Error - id does not existing in path /path/{format} 
+case class BadPathParameterRequest(context: RestRequestContext, @RestPath() id: String) extends RestRequest
+
+// Error - Cannot bind body to any method other than POST or PUT 
+case class BadBodyBindingRequest(context: RestRequestContext, @RestBody() data: String) extends RestRequest
+
+// Error first parameter not context type
+case class FirstParamNotContextRequest(id: String, context: RestRequestContext) extends RestRequest
+
+// Error first parameter not context
+case class FirstParamNotCalledContextRequest(ccc: RestRequestContext, id: String, context: RestRequestContext) extends RestRequest
