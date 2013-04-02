@@ -25,7 +25,8 @@ import org.mashupbots.socko.infrastructure.ConfigUtil
  * @param apiVersion the version of your API
  * @param rootUrl Root url path to your API from an external caller's point of view
  * @param swaggerVersion Swagger definition version
- * @param requestTimeoutSeconds Number of seconds before a request is timed out
+ * @param requestTimeoutSeconds Number of seconds before a request is timed out. Make sure that your processor
+ *   actor responds within this number of seconds or throws an exception.  Defaults to `60` seconds.
  * @param maxWorkerCount Maximum number of workers per [[org.mashupbots.socko.rest.RestHandler]].
  * @param maxWorkerRescheduleMilliSeconds Reschedule a message for processing again using this delay when max worker
  *   count has been reached.
