@@ -58,7 +58,11 @@ case class RestRequestDeserializer(
    * @param httpRequestEvent HTTP event
    */
   def deserialize(httpRequestEvent: HttpRequestEvent): RestRequest = {
-    val context = RestRequestContext(httpRequestEvent.endPoint, httpRequestEvent.request.headers, SockoEventType.HttpRequest)
+    val context = RestRequestContext(
+        httpRequestEvent.endPoint, 
+        httpRequestEvent.request.headers, 
+        SockoEventType.HttpRequest,
+        config.requestTimeoutSeconds)
     val params: List[_] = context :: requestParamBindings.map(b => b.extract(context, requestClass, httpRequestEvent))
     requestConstructorMirror(params: _*).asInstanceOf[RestRequest]
   }

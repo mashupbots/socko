@@ -43,7 +43,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings.length must be(1)
       d.requestParamBindings(0).name must be("id")
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/1234"), Map.empty, SockoEventType.HttpRequest)
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/1234"),
+        Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
       val req = d.deserialize(ctx).asInstanceOf[PathParamRequest1]
       req.id must be("1234")
     }
@@ -59,7 +60,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings(0).description must be("test2")
       d.requestParamBindings(1).name must be("format")
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/5555/stuff/json/1.2/2.2"), Map.empty, SockoEventType.HttpRequest)
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/5555/stuff/json/1.2/2.2"),
+        Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
       val req = d.deserialize(ctx).asInstanceOf[PathParamRequest2]
       req.id must be(5555)
       req.format must be("json")
@@ -73,7 +75,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
         ru.typeOf[PathParamRequest3].typeSymbol.asClass)
       d.requestParamBindings.length must be(1)
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/stuff/stringnotint"), Map.empty, SockoEventType.HttpRequest)
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/stuff/stringnotint"),
+        Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
 
       val thrown = intercept[RestBindingException] {
         val req = d.deserialize(ctx).asInstanceOf[PathParamRequest3]
@@ -95,7 +98,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings(3).name must be("exist")
       d.requestParamBindings(4).name must be("notexist")
 
-      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json?number=1&string=hello&exist=world"), Map.empty, SockoEventType.HttpRequest)
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json?number=1&string=hello&exist=world"),
+        Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
       val req = d.deserialize(ctx).asInstanceOf[QueryStringParamRequest1]
       req.number must be(1)
       req.s must be("hello")
@@ -118,7 +122,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings(4).name must be("notexist")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
-        Map("number" -> "1", "string" -> "hello", "exist" -> "world"), SockoEventType.HttpRequest)
+        Map("number" -> "1", "string" -> "hello", "exist" -> "world"), SockoEventType.HttpRequest, config.requestTimeoutSeconds)
 
       val req = d.deserialize(ctx).asInstanceOf[HeaderParamRequest1]
       req.number must be(1)
@@ -144,7 +148,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
           "float" -> "1.1",
           "double" -> "2.2",
           "date" -> "2001-07-04T12:08:56.235-07:00"),
-        SockoEventType.HttpRequest)
+        SockoEventType.HttpRequest,
+        config.requestTimeoutSeconds)
 
       val req = d.deserialize(ctx).asInstanceOf[AllDataTypeRequest]
       req.string must be("s")
@@ -175,7 +180,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
           "float" -> "1.1",
           "double" -> "2.2",
           "date" -> "2001-07-04"),
-        SockoEventType.HttpRequest)
+        SockoEventType.HttpRequest,
+        config.requestTimeoutSeconds)
 
       val req = d.deserialize(ctx).asInstanceOf[AllOptionalDataTypeRequest]
       req.string must be(Some("s"))
@@ -188,7 +194,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       req.double must be(Some("2.2".toDouble))
       req.date must be(Some(DateUtil.parseISO8601Date("2001-07-04")))
 
-      val ctx2 = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"), Map.empty, SockoEventType.HttpRequest)
+      val ctx2 = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
+        Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
 
       val req2 = d.deserialize(ctx2).asInstanceOf[AllOptionalDataTypeRequest]
       req2.string must be(None)
@@ -202,7 +209,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       req2.date must be(None)
     }
 
-    "throw error for Requests without annotated bindings" in {
+    "Throw error for Requests without annotated bindings" in {
       val thrown = intercept[RestDefintionException] {
         RestRequestDeserializer(
           config,
@@ -213,7 +220,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       thrown.getMessage must be("Constructor parameter 'id' of 'org.mashupbots.socko.rest.NoParameterAnnotationRequest' is not annotated with @RestPath, @RestQuery, @RestHeader or @RestBody")
     }
 
-    "throw error for Requests with multiple annotated bindings" in {
+    "Throw error for Requests with multiple annotated bindings" in {
       val thrown = intercept[RestDefintionException] {
         RestRequestDeserializer(
           config,
@@ -224,7 +231,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       thrown.getMessage must be("Constructor parameter 'id' of 'org.mashupbots.socko.rest.MultiParameterAnnotationRequest' has more than one REST annotation")
     }
 
-    "throw error for Requests with bad path bindings" in {
+    "Throw error for Requests with bad path bindings" in {
       val thrown = intercept[RestDefintionException] {
         RestRequestDeserializer(
           config,
@@ -235,7 +242,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       thrown.getMessage must be("Constructor parameter 'id' of 'org.mashupbots.socko.rest.BadPathParameterRequest' cannot be bound to the uri template path. '/pets/{format}' does not contain variable named 'id'.")
     }
 
-    "throw error for Requests with body bindings to non POST or PUT methods" in {
+    "Throw error for Requests with body bindings to non POST or PUT methods" in {
       val thrown = intercept[RestDefintionException] {
         RestRequestDeserializer(
           config,
@@ -269,7 +276,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
         ru.typeOf[BadBodyBindingRequest].typeSymbol.asClass)
     }
 
-    "throw error for Requests where the 1st parameter is not of type RestRequestContext" in {
+    "Throw error for Requests where the 1st parameter is not of type RestRequestContext" in {
       val thrown = intercept[RestDefintionException] {
         RestRequestDeserializer(
           config,
@@ -280,7 +287,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       thrown.getMessage must be("First constructor parameter of 'org.mashupbots.socko.rest.FirstParamNotContextRequest' must be of type RestRequestContext.")
     }
 
-    "throw error for Requests where the 1st parameter is not called 'context'" in {
+    "Throw error for Requests where the 1st parameter is not called 'context'" in {
       val thrown = intercept[RestDefintionException] {
         RestRequestDeserializer(
           config,
@@ -290,7 +297,14 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       }
       thrown.getMessage must be("First constructor parameter of 'org.mashupbots.socko.rest.FirstParamNotCalledContextRequest' must be called 'context'.")
     }
-    
+
+    "Correctly set the timeout period in the context" in {
+      val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/1234"),
+        Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
+
+      ctx.timeoutSeconds must be (config.requestTimeoutSeconds)
+      (ctx.timeoutTime.getTime - ctx.startTime.getTime)/1000 must be (config.requestTimeoutSeconds)
+    }
   }
 }
 

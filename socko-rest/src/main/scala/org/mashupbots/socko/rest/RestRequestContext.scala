@@ -16,9 +16,9 @@
 package org.mashupbots.socko.rest
 
 import java.util.UUID
-
 import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.events.HttpResponseStatus
+import java.util.Date
 
 /**
  * Context of the rest request
@@ -26,23 +26,30 @@ import org.mashupbots.socko.events.HttpResponseStatus
  * @param id UUID for this rest request/response pair
  * @param endPoint HTTP URL at which the request was received
  * @param headers HTTP request headers
+ * @param timeoutSeconds Number of seconds before this request times out
  */
 case class RestRequestContext(
   id: UUID,
   endPoint: EndPoint,
   headers: Map[String, String],
-  eventType: SockoEventType.Value) {
+  eventType: SockoEventType.Value,
+  timeoutSeconds: Int) {
+
+  val startTime = new Date()
+  val timeoutTime = new Date(startTime.getTime() + (timeoutSeconds * 1000))
 
   /**
    * Alternative constructor that automatically allocates the unique Id
    *
    * @param endPoint HTTP URL at which the request was received
    * @param headers HTTP request headers
+   * @param timeoutSeconds Number of seconds before this request times out
    */
   def this(endPoint: EndPoint,
     headers: Map[String, String],
-    eventType: SockoEventType.Value) =
-    this(UUID.randomUUID(), endPoint, headers, eventType)
+    eventType: SockoEventType.Value,
+    timeoutSeconds: Int) =
+    this(UUID.randomUUID(), endPoint, headers, eventType, timeoutSeconds)
 
   /**
    * Builds the [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this
@@ -82,10 +89,14 @@ object RestRequestContext {
    * @param endPoint HTTP URL at which the request was received
    * @param headers HTTP request headers
    * @param eventType Socko Event Type
+   * @param timeoutSeconds Number of seconds before this request times out
    * @returns a new instance of [[org.mashupbots.socko.rest.RestRequestContext]]
    */
-  def apply(endPoint: EndPoint, headers: Map[String, String], eventType: SockoEventType.Value): RestRequestContext = {
-    RestRequestContext(UUID.randomUUID(), endPoint, headers, eventType)
+  def apply(endPoint: EndPoint,
+    headers: Map[String, String],
+    eventType: SockoEventType.Value,
+    timeoutSeconds: Int): RestRequestContext = {
+    RestRequestContext(UUID.randomUUID(), endPoint, headers, eventType, timeoutSeconds)
   }
 }
 
