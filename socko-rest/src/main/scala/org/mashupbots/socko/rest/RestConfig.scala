@@ -23,8 +23,19 @@ import org.mashupbots.socko.infrastructure.ConfigUtil
  * Configuration for REST handler
  *
  * @param apiVersion the version of your API
- * @param rootUrl Root url path to your API from an external caller's point of view
+ * @param rootUrl Root url path to your API from an external caller's point of view. For example, `/api`.
  * @param swaggerVersion Swagger definition version
+ * @param swaggerApiGroupingPathSegment Path segments to group APIs by. Default is `1` which refers to the first
+ *   path segment.
+ *   
+ *   For example, the following will be grouped under the `/pets` because the the share `pets` in the 1st path 
+ *   segment.
+ *   {{{
+ *   /pets
+ *   /pets/{petId}
+ *   /pets/findById
+ *   }}}
+ *   
  * @param requestTimeoutSeconds Number of seconds before a request is timed out. Make sure that your processor
  *   actor responds within this number of seconds or throws an exception.  Defaults to `60` seconds.
  * @param maxWorkerCount Maximum number of workers per [[org.mashupbots.socko.rest.RestHandler]].
@@ -40,6 +51,7 @@ case class RestConfig(
   apiVersion: String,
   rootUrl: String,
   swaggerVersion: String = "1.1",
+  swaggerApiGroupingPathSegment: Int = 1,
   requestTimeoutSeconds: Int = 60,
   maxWorkerCount: Int = 100,
   maxWorkerRescheduleMilliSeconds: Int = 500,
@@ -52,6 +64,7 @@ case class RestConfig(
     config.getString(prefix + ".api-version"),
     config.getString(prefix + ".root-url"),
     ConfigUtil.getString(config, prefix + ".swagger-version", "1.1"),
+    ConfigUtil.getInt(config, prefix + ".swagger-api-grouping-path-segment", 1),
     ConfigUtil.getInt(config, prefix + ".request-timeout-seconds", 60),
     ConfigUtil.getInt(config, prefix + ".max-worker-count", 100),
     ConfigUtil.getInt(config, prefix + ".max-worker-reschedule-milliseconds", 500),
