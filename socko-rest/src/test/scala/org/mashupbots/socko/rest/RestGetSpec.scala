@@ -251,7 +251,7 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
       val resp = getResponseContent(conn)
 
-      resp.status must equal("400")
+      resp.status must equal("404")
       log.info(s"Error message: ${resp.content}")
 
       // Required query string "sourceURL" not present

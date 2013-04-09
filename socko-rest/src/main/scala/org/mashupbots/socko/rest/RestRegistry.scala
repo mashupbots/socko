@@ -40,11 +40,35 @@ case class RestRegistry(
   def findOperation(endPoint: EndPoint): RestOperation = {
     val op = operations.find(op => op.definition.matchEndPoint(endPoint))
     if (op.isEmpty) {
-      throw RestBindingException(s"Cannot find operation for request to: '${endPoint.method} ${endPoint.path}'")
+      throw RestNotFoundException(s"Cannot find operation for request to: '${endPoint.method} ${endPoint.path}'")
     }
     op.get
   }
-
+  
+  /**
+   * Root path that will trigger the response of api documentation.  For example, `/api/api-docs`.
+   */
+  val rootApiDocsUrl = config.rootUrl + RestApiDocGenerator.urlPath
+    
+  /**
+   * API documentation ready to be served
+   * 
+   * The `key` is the exact path to match, the value is the `UTF-8` encoded response
+   */
+  val apiDocs: Map[String, Array[Byte]] = RestApiDocGenerator.generate(operations, config)
+  
+  /**
+   * Flag to indicate if the path requests api document response.
+   * 
+   * For example, `/api/api-docs.json` and `/api/api-docs.json/pets` will return `true` but
+   * `/api/pets` will return `false`.
+   * 
+   * @param endPoint Endpoint to check
+   * @returns `True` if this endpoint requires api documentation to be returned
+   */
+  def isApiDocRequest(endPoint: EndPoint): Boolean = {
+    endPoint.path.startsWith(rootApiDocsUrl)
+  }
 }
 
 /**

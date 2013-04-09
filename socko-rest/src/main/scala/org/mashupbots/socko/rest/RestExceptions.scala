@@ -25,6 +25,18 @@ object RestDefintionException {
 }
 
 /**
+ * Exception raised during if a matching operation cannot be found
+ * 
+ * @param msg Error message
+ */
+case class RestNotFoundException(msg: String) extends Exception(msg)
+
+object RestNotFoundException {
+  def apply(msg: String, cause: Throwable) = new RestNotFoundException(msg).initCause(cause)
+}
+
+
+/**
  * Exception raised during the process of deserializing and dispatching a request
  * 
  * @param msg Error message

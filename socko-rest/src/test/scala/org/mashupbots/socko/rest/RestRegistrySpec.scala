@@ -16,13 +16,15 @@
 package org.mashupbots.socko.rest
 
 import scala.reflect.runtime.{ universe => ru }
-import org.json4s.NoTypeHints
+import org.json4s._
+import org.json4s.native.{ JsonMethods => jsonMethods }
 import org.json4s.native.{ Serialization => json }
 import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
 import org.mashupbots.socko.infrastructure.ReflectUtil
+import org.mashupbots.socko.infrastructure.CharsetUtil
 
 class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
@@ -34,65 +36,65 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
     val classSymbols = classes.map(clz => rm.classSymbol(clz))
 
     "correctly load a valid request" in {
-      val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.GetPetsRequest"))      
+      val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.GetPetsRequest"))
       val op = RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
-      
-      op.get.definition.method must be ("GET")
-      op.get.definition.urlTemplate must be ("/pets")
-      op.get.definition.dispatcherClass must be ("")
-      op.get.deserializer.requestClass.fullName must be ("org.mashupbots.socko.rest.test1.GetPetsRequest")
-      op.get.serializer.responseClass.fullName must be ("org.mashupbots.socko.rest.test1.GetPetsResponse")
-    } 
-    
+
+      op.get.definition.method must be("GET")
+      op.get.definition.urlTemplate must be("/pets")
+      op.get.definition.dispatcherClass must be("")
+      op.get.deserializer.requestClass.fullName must be("org.mashupbots.socko.rest.test1.GetPetsRequest")
+      op.get.serializer.responseClass.fullName must be("org.mashupbots.socko.rest.test1.GetPetsResponse")
+    }
+
     "correctly load request with shared custom response class name" in {
-      val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.PostDogs1Request"))      
+      val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.PostDogs1Request"))
       val op = RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
-      
-      op.get.definition.method must be ("POST")
-      op.get.definition.urlTemplate must be ("/dogs1")
-      op.get.definition.dispatcherClass must be ("GetPetsDispatcher")
-      op.get.deserializer.requestClass.fullName must be ("org.mashupbots.socko.rest.test1.PostDogs1Request")
-      op.get.serializer.responseClass.fullName must be ("org.mashupbots.socko.rest.test1.FunnyNameDogResponse")
-      
-      val cs2 = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.PutDogs2Request"))      
+
+      op.get.definition.method must be("POST")
+      op.get.definition.urlTemplate must be("/dogs1")
+      op.get.definition.dispatcherClass must be("GetPetsDispatcher")
+      op.get.deserializer.requestClass.fullName must be("org.mashupbots.socko.rest.test1.PostDogs1Request")
+      op.get.serializer.responseClass.fullName must be("org.mashupbots.socko.rest.test1.FunnyNameDogResponse")
+
+      val cs2 = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.PutDogs2Request"))
       val op2 = RestRegistry.buildRestOperation(rm, cs2, classSymbols, cfg)
-      
-      op2.get.definition.method must be ("PUT")
-      op2.get.definition.urlTemplate must be ("/dogs2")
-      op2.get.definition.dispatcherClass must be ("org.mashupbots.socko.rest.test1.GetPetsDispatcher")
-      op2.get.definition.errorResponses.size must be (2)
-      op2.get.deserializer.requestClass.fullName must be ("org.mashupbots.socko.rest.test1.PutDogs2Request")
-      op2.get.serializer.responseClass.fullName must be ("org.mashupbots.socko.rest.test1.FunnyNameDogResponse")      
-    } 
+
+      op2.get.definition.method must be("PUT")
+      op2.get.definition.urlTemplate must be("/dogs2")
+      op2.get.definition.dispatcherClass must be("org.mashupbots.socko.rest.test1.GetPetsDispatcher")
+      op2.get.definition.errorResponses.size must be(2)
+      op2.get.deserializer.requestClass.fullName must be("org.mashupbots.socko.rest.test1.PutDogs2Request")
+      op2.get.serializer.responseClass.fullName must be("org.mashupbots.socko.rest.test1.FunnyNameDogResponse")
+    }
 
     "correctly load a valid request with bindings" in {
-      val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.DeletePetsRequest"))      
+      val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.DeletePetsRequest"))
       val op = RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
-      
-      op.get.definition.method must be ("DELETE")
-      op.get.definition.urlTemplate must be ("/pets/{id}")
-      op.get.definition.dispatcherClass must be ("")
-      op.get.deserializer.requestClass.fullName must be ("org.mashupbots.socko.rest.test1.DeletePetsRequest")
-      op.get.serializer.responseClass.fullName must be ("org.mashupbots.socko.rest.test1.DeletePetsResponse")
-    } 
-    
+
+      op.get.definition.method must be("DELETE")
+      op.get.definition.urlTemplate must be("/pets/{id}")
+      op.get.definition.dispatcherClass must be("")
+      op.get.deserializer.requestClass.fullName must be("org.mashupbots.socko.rest.test1.DeletePetsRequest")
+      op.get.serializer.responseClass.fullName must be("org.mashupbots.socko.rest.test1.DeletePetsResponse")
+    }
+
     "ignore non REST classes" in {
       val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.NotARestClass"))
-      RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg) must be (None)
+      RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg) must be(None)
     }
-    
+
     "throw error for Requests without Responses" in {
       val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.NoResponseRequest"))
-      
+
       val thrown = intercept[RestDefintionException] {
         RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
       }
       thrown.getMessage must be("Cannot find corresponding RestResponse 'org.mashupbots.socko.rest.test1.NoResponseResponse' for RestRequest 'org.mashupbots.socko.rest.test1.NoResponseRequest'")
     }
-    
+
     "throw error for Requests without Annotations" in {
       val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.NoAnnotationRequest"))
-      
+
       val thrown = intercept[RestDefintionException] {
         RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
       }
@@ -101,16 +103,16 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
 
     "throw error for Requests without Annotationed parameters" in {
       val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.NoParameterAnnotationRequest"))
-      
+
       val thrown = intercept[RestDefintionException] {
         RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
       }
       thrown.getMessage must be("Constructor parameter 'id' of 'org.mashupbots.socko.rest.test1.NoParameterAnnotationRequest' is not annotated with @RestPath, @RestQuery, @RestHeader or @RestBody")
     }
-    
+
     "throw error for Requests more than one Annotationed parameters" in {
       val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.MultiParameterAnnotationRequest"))
-      
+
       val thrown = intercept[RestDefintionException] {
         RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
       }
@@ -119,7 +121,7 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
 
     "throw error for Annotationed class that is not a RestRequest" in {
       val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.NotARequest"))
-      
+
       val thrown = intercept[RestDefintionException] {
         RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
       }
@@ -128,7 +130,7 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
 
     "throw error for when there is not a dispatcher" in {
       val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.GetNoDispatcherRequest"))
-      
+
       val thrown = intercept[RestDefintionException] {
         RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
       }
@@ -137,13 +139,13 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
 
     "throw error for when there is not a dispatcher with zero parameter constructor" in {
       val cs = rm.classSymbol(Class.forName("org.mashupbots.socko.rest.test1.GetBadDispatcherRequest"))
-      
+
       val thrown = intercept[RestDefintionException] {
         RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
       }
       thrown.getMessage must be("RestDispatcher 'org.mashupbots.socko.rest.test1.GetBadDispatcherDispatcher' for RestRequest 'org.mashupbots.socko.rest.test1.GetBadDispatcherRequest' does not have a parameterless constructor")
     }
-    
+
     "catch duplcate operation addresses" in {
       val thrown = intercept[RestDefintionException] {
         val r = RestRegistry("org.mashupbots.socko.rest.test2", cfg)
@@ -165,6 +167,38 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
       hh.name must be("Boo")
     }
 
+    "correctly load API DOCS" in {
+      val registry = RestRegistry("org.mashupbots.socko.rest.test3", cfg)
+
+      val resourceListing = registry.apiDocs("/api-docs.json")
+      val resourceListingDoc = """
+        {
+        	"apiVersion":"1.0",
+        	"swaggerVersion":"1.1",
+        	"basePath":"/api",
+        	"apis":[
+        		{
+        			"path":"/api-docs.json/dogs1",
+        			"description":""
+        		},
+        		{
+        			"path":"/api-docs.json/dogs2",
+        			"description":""
+        		},
+        		{
+        			"path":"/api-docs.json/pets",
+        			"description":"" 
+        		}
+        	]
+        }
+        """        
+        log.debug("ResourceListing=" + new String(resourceListing, CharsetUtil.UTF_8))
+        new String(resourceListing, CharsetUtil.UTF_8) must be (compactJson(resourceListingDoc))
+    }
+
+    def compactJson(json: String): String = {
+      jsonMethods.compact(jsonMethods.render(jsonMethods.parse(json, useBigDecimalForDouble = true)))
+    }
   }
 }
 

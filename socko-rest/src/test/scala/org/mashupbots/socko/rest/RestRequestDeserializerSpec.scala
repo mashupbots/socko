@@ -147,7 +147,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
           "long" -> "10000000",
           "float" -> "1.1",
           "double" -> "2.2",
-          "date" -> "2001-07-04T12:08:56.235-07:00"),
+          "date" -> "2001-07-04T12:08:56.235-0700"),
         SockoEventType.HttpRequest,
         config.requestTimeoutSeconds)
 
@@ -160,7 +160,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       req.long must be("10000000".toLong)
       req.float must be("1.1".toFloat)
       req.double must be("2.2".toDouble)
-      req.date must be(DateUtil.parseISO8601Date("2001-07-04T12:08:56.235-07:00"))
+      req.date must be(DateUtil.parseISO8601Date("2001-07-04T12:08:56.235-0700"))
     }
 
     "Parse all optional data types" in {

@@ -23,7 +23,7 @@ import org.mashupbots.socko.infrastructure.ConfigUtil
  * Configuration for REST handler
  *
  * @param apiVersion the version of your API
- * @param rootUrl Root url path to your API from an external caller's point of view. For example, `/api`.
+ * @param rootUrl Root url path to your API without the protocol, domain and port. For example, `/api`.
  * @param swaggerVersion Swagger definition version
  * @param swaggerApiGroupingPathSegment Path segments to group APIs by. Default is `1` which refers to the first
  *   path segment.
@@ -75,7 +75,6 @@ case class RestConfig(
 
   val reportOn500InternalServerError = (reportRuntimeException == ReportRuntimeException.InternalServerErrorOnly ||
     reportRuntimeException == ReportRuntimeException.All)
-
 }
 
 /**

@@ -69,7 +69,12 @@ case class RestOperationDef(
   depreciated: Boolean = false,
   errorResponses: Map[Int, String] = Map.empty) extends Logger {
 
-  private val fullUrlTemplate = if (rootUrl == "/") urlTemplate else rootUrl + urlTemplate
+  /**
+   * Full URL template from combining the `rootUrl` with `urlTemplate`.  The `/` prefix is dropped.
+   */
+  private val fullUrlTemplate = if (rootUrl == "/") urlTemplate else {
+    rootUrl + (if (urlTemplate.startsWith("/")) "" else "/") + urlTemplate
+  }
 
   /**
    * Denotes if [[org.mashupbots.socko.events.SockoEvent]] is to be made
@@ -81,16 +86,17 @@ case class RestOperationDef(
    * The full URL template split into path segments for ease of matching
    *
    * ==Example Usage==
+   * If urlTemplate = `/user/{Id}` and rootUrl in the config is `/api`, the full path segment are
+   *
    * {{{
-   * // '/user/{Id}'
    * List(
+   *   PathSegment("api", false),
    *   PathSegment("user", false),
    *   PathSegment("Id", true)
    * )
    * }}}
-   *
    */
-  val pathSegments: List[PathSegment] = {
+  val fullPathSegments: List[PathSegment] = {
     if (urlTemplate == null || urlTemplate.length == 0)
       throw new IllegalArgumentException("URI cannot be null or empty")
 
@@ -100,6 +106,29 @@ case class RestOperationDef(
     segments
   }
 
+  /**
+   * The relative URL template split into path segments for ease of matching
+   *
+   * ==Example Usage==
+   * If urlTemplate = `/user/{Id}` and rootUrl in the config is `/api`, the relative path segment are
+   *
+   * {{{
+   * List(
+   *   PathSegment("user", false),
+   *   PathSegment("Id", true)
+   * )
+   * }}}  
+   */
+  val relativePathSegments:  List[PathSegment] = {
+    if (urlTemplate == null || urlTemplate.length == 0)
+      throw new IllegalArgumentException("URI cannot be null or empty")
+
+    val s = if (urlTemplate.startsWith("/")) urlTemplate.substring(1) else urlTemplate
+    val ss = s.split("/").toList
+    val segments = ss.map(s => PathSegment(s))
+    segments
+  }
+  
   /**
    * Compares the URL of this operation to another.
    *
@@ -121,7 +150,7 @@ case class RestOperationDef(
     if (method != opDef.method) {
       // If different methods, then cannot be the same
       false
-    } else if (pathSegments.length != opDef.pathSegments.length) {
+    } else if (fullPathSegments.length != opDef.fullPathSegments.length) {
       // If different number of segments, then cannot be the same
       return false
     } else {
@@ -140,7 +169,7 @@ case class RestOperationDef(
           }
         }
       }
-      comparePathSegment(pathSegments.zip(opDef.pathSegments))
+      comparePathSegment(fullPathSegments.zip(opDef.fullPathSegments))
     }
   }
 
@@ -158,7 +187,7 @@ case class RestOperationDef(
 
     if (method != endpointMethod) {
       false
-    } else if (pathSegments.length != endpoint.pathSegments.length) {
+    } else if (fullPathSegments.length != endpoint.pathSegments.length) {
       return false
     } else {
       // Compare paths
@@ -176,7 +205,7 @@ case class RestOperationDef(
           }
         }
       }
-      comparePathSegment(pathSegments.zip(endpoint.pathSegments))
+      comparePathSegment(fullPathSegments.zip(endpoint.pathSegments))
     }
   }
 
@@ -245,7 +274,7 @@ object RestOperationDef extends Logger {
     }
 
     RestOperationDef(method, config.rootUrl, urlTemplate, responseClass, dispatcherClass,
-      customDeserialization, customSerialization, name, description, notes, depreciated, 
+      customDeserialization, customSerialization, name, description, notes, depreciated,
       errorResponsesMap)
   }
 

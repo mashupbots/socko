@@ -50,11 +50,11 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
   private val cfg = registry.config
 
   //*******************************************************************************************************************
-  // Message
+  // Messages
   //*******************************************************************************************************************
-  private case class Start()
-
-  private case class ProcessingError(reason: Throwable)
+  private case class ProcessApiDocRequest()
+  private case class ProcessRestRequest()
+  private case class ProcessError(reason: Throwable)
 
   //*******************************************************************************************************************
   // State
@@ -62,7 +62,7 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
   /**
    * Locate processing actor, deserialize request and send it to the actor
    */
-  case object DispatchRequest extends RestHttpWorkerState
+  case object DispatchingRequest extends RestHttpWorkerState
 
   /**
    * Wait for response to arrive from the actor; and when it does, serialize it back to the caller
@@ -88,10 +88,10 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
   //*******************************************************************************************************************
   // Transitions
   //*******************************************************************************************************************
-  startWith(DispatchRequest, Data())
+  startWith(DispatchingRequest, Data())
 
-  when(DispatchRequest) {
-    case Event(msg: Start, data: Data) =>
+  when(DispatchingRequest) {
+    case Event(msg: ProcessRestRequest, data: Data) =>
       log.debug(s"RestHttpWorker start")
 
       // Gen operation and build request
@@ -120,11 +120,20 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
         goto(WaitingForResponse) using Data(op = Some(op), req = Some(restRequest))
       }
 
-    case Event(msg: ProcessingError, data: Data) =>
+    case Event(msg: ProcessApiDocRequest, data: Data) =>
+      val docs = registry.apiDocs.get(httpRequestEvent.endPoint.path)
+      if (docs.isDefined) {
+        httpRequestEvent.response.write(docs.get, "application/json;charset=UTF-8")
+      } else {
+        throw RestNotFoundException(s"Cannot find documentation for endpoint: ${httpRequestEvent.endPoint.path}")
+      }
+      stop(FSM.Normal)
+
+    case Event(msg: ProcessError, data: Data) =>
       stop(FSM.Failure(msg.reason))
 
     case unknown =>
-      log.debug("Received unknown message while DispatchRequest: {}", unknown.toString)
+      log.debug("Received unknown message while DispatchingRequest: {}", unknown.toString)
       stay
   }
 
@@ -148,6 +157,8 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
     case StopEvent(FSM.Failure(cause: Throwable), state, data: Data) =>
       val isHead = httpRequestEvent.endPoint.isHEAD
       cause match {
+        case _: RestNotFoundException =>
+          httpRequestEvent.response.write(HttpResponseStatus(404))
         case _: RestBindingException =>
           val msg = if (!isHead && cfg.reportOn400BadRequests) cause.getMessage else ""
           httpRequestEvent.response.write(HttpResponseStatus(400), msg)
@@ -169,14 +180,17 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
    * Kick start processing with a message to ourself
    */
   override def preStart {
-    self ! Start()
+    if (registry.isApiDocRequest(httpRequestEvent.endPoint))
+      self ! ProcessApiDocRequest()
+    else
+      self ! ProcessRestRequest()
   }
 
   /**
-   * Start with a ProcessingError so that we record the unhandled exception during processing and stop
+   * Start with a ProcessError so that we record the unhandled exception during processing and stop
    */
   override def postRestart(reason: Throwable) {
-    self ! ProcessingError(reason)
+    self ! ProcessError(reason)
   }
 
 } // end class
