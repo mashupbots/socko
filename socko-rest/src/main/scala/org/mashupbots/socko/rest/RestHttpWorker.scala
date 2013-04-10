@@ -52,8 +52,7 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
   //*******************************************************************************************************************
   // Messages
   //*******************************************************************************************************************
-  private case class ProcessApiDocRequest()
-  private case class ProcessRestRequest()
+  private case class Start()
   private case class ProcessError(reason: Throwable)
 
   //*******************************************************************************************************************
@@ -91,45 +90,53 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
   startWith(DispatchingRequest, Data())
 
   when(DispatchingRequest) {
-    case Event(msg: ProcessRestRequest, data: Data) =>
+    case Event(msg: Start, data: Data) =>
       log.debug(s"RestHttpWorker start")
 
-      // Gen operation and build request
+      // Find operation
       val op = registry.findOperation(httpRequestEvent.endPoint)
-      val restRequest = op.deserializer.deserialize(httpRequestEvent)
-
-      // Get actor
-      val processingActor = op.dispatcher.getActor(context.system, restRequest)
-      if (processingActor.isTerminated) {
-        throw RestProcessingException(s"Processing actor '${processingActor.path}' for '${op.deserializer.requestClass.fullName}' is terminated")
-      }
-
-      // Cache the request event. It will be automatically removed after a period of time (10 seconds)
-      if (op.definition.accessSockoEvent) {
-        RestRequestEvents.put(restRequest.context, httpRequestEvent)
-      }
-
-      if (op.definition.customSerialization) {
-        // Custom serialization so no need to wait for a response to serialize
-        processingActor ! restRequest
-        stop(FSM.Normal)
+      if (op.isEmpty) {
+        // Operation not found. See if this is a request for api-docs 
+        // More efficient to do this after op lookup rather than take a hit on every request 
+        val docs = registry.apiDocs.get(httpRequestEvent.endPoint.path)
+        if (docs.isDefined) {
+          httpRequestEvent.response.write(docs.get, "application/json;charset=UTF-8")
+          stop(FSM.Normal)
+        } else {
+          throw RestNotFoundException(s"Cannot find operation for request to: '${httpRequestEvent.endPoint.method} ${httpRequestEvent.endPoint.path}'")
+        }
       } else {
-        // Wait for response to serialize
-        val future = ask(processingActor, restRequest)(cfg.requestTimeoutSeconds seconds).mapTo[RestResponse]
-        future pipeTo self
-        goto(WaitingForResponse) using Data(op = Some(op), req = Some(restRequest))
-      }
+        // Found operation so build request and dispatch
+        val opDeserializer = op.get.deserializer
+        val opDefinition = op.get.definition
+        val restRequest = opDeserializer.deserialize(httpRequestEvent)
 
-    case Event(msg: ProcessApiDocRequest, data: Data) =>
-      val docs = registry.apiDocs.get(httpRequestEvent.endPoint.path)
-      if (docs.isDefined) {
-        httpRequestEvent.response.write(docs.get, "application/json;charset=UTF-8")
-      } else {
-        throw RestNotFoundException(s"Cannot find documentation for endpoint: ${httpRequestEvent.endPoint.path}")
+        // Get actor
+        val processingActor = op.get.dispatcher.getActor(context.system, restRequest)
+        if (processingActor.isTerminated) {
+          throw RestProcessingException(s"Processing actor '${processingActor.path}' for '${opDeserializer.requestClass.fullName}' is terminated")
+        }
+
+        // Cache the request event. It will be automatically removed after a period of time (10 seconds)
+        if (opDefinition.accessSockoEvent) {
+          RestRequestEvents.put(restRequest.context, httpRequestEvent)
+        }
+
+        if (opDefinition.customSerialization) {
+          // Custom serialization so no need to wait for a response to serialize
+          processingActor ! restRequest
+          stop(FSM.Normal)
+        } else {
+          // Wait for response to serialize
+          val future = ask(processingActor, restRequest)(cfg.requestTimeoutSeconds seconds).mapTo[RestResponse]
+          future pipeTo self
+          goto(WaitingForResponse) using Data(op = op, req = Some(restRequest))
+        }
       }
-      stop(FSM.Normal)
 
     case Event(msg: ProcessError, data: Data) =>
+      // Error raised from unhandled exception after this actor restarts
+      // We don't want to process again so just stop and record the error
       stop(FSM.Failure(msg.reason))
 
     case unknown =>
@@ -139,10 +146,12 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
 
   when(WaitingForResponse) {
     case Event(response: RestResponse, data: Data) =>
+      // We got a response from the actor so serialize and stop
       data.op.get.serializer.serialize(httpRequestEvent, response)
       stop(FSM.Normal)
 
     case Event(msg: akka.actor.Status.Failure, data: Data) =>
+      // Actor error or timed out so stop and report the error
       stop(FSM.Failure((msg.cause)))
 
     case unknown =>
@@ -180,10 +189,7 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
    * Kick start processing with a message to ourself
    */
   override def preStart {
-    if (registry.isApiDocRequest(httpRequestEvent.endPoint))
-      self ! ProcessApiDocRequest()
-    else
-      self ! ProcessRestRequest()
+    self ! Start()
   }
 
   /**

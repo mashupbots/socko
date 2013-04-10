@@ -35,14 +35,11 @@ case class RestRegistry(
    * Finds the operation that matches the specified end point
    *
    * @param endPoint Endpoint to match
-   * @returns Matching [[org.mashupbots.socko.rest.RestOperation]]
+   * @returns Matching [[org.mashupbots.socko.rest.RestOperation]] or `None` if not found
    */
-  def findOperation(endPoint: EndPoint): RestOperation = {
+  def findOperation(endPoint: EndPoint): Option[RestOperation] = {
     val op = operations.find(op => op.definition.matchEndPoint(endPoint))
-    if (op.isEmpty) {
-      throw RestNotFoundException(s"Cannot find operation for request to: '${endPoint.method} ${endPoint.path}'")
-    }
-    op.get
+    op
   }
   
   /**
