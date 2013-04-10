@@ -15,16 +15,15 @@
 //
 package org.mashupbots.socko.rest
 
-import scala.reflect.runtime.{ universe => ru }
-import org.json4s._
-import org.json4s.native.{ JsonMethods => jsonMethods }
-import org.json4s.native.{ Serialization => json }
+import scala.reflect.runtime.{universe => ru}
+
+import org.json4s.NoTypeHints
+import org.json4s.native.{Serialization => json}
 import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.infrastructure.ReflectUtil
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
-import org.mashupbots.socko.infrastructure.ReflectUtil
-import org.mashupbots.socko.infrastructure.CharsetUtil
 
 class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
@@ -165,39 +164,6 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
 
       val hh = x.asInstanceOf[Horse]
       hh.name must be("Boo")
-    }
-
-    "correctly load API DOCS" in {
-      val registry = RestRegistry("org.mashupbots.socko.rest.test3", cfg)
-
-      val resourceListing = registry.apiDocs("/api-docs.json")
-      val resourceListingDoc = """
-        {
-        	"apiVersion":"1.0",
-        	"swaggerVersion":"1.1",
-        	"basePath":"/api",
-        	"apis":[
-        		{
-        			"path":"/api-docs.json/dogs1",
-        			"description":""
-        		},
-        		{
-        			"path":"/api-docs.json/dogs2",
-        			"description":""
-        		},
-        		{
-        			"path":"/api-docs.json/pets",
-        			"description":"" 
-        		}
-        	]
-        }
-        """        
-        log.debug("ResourceListing=" + new String(resourceListing, CharsetUtil.UTF_8))
-        new String(resourceListing, CharsetUtil.UTF_8) must be (compactJson(resourceListingDoc))
-    }
-
-    def compactJson(json: String): String = {
-      jsonMethods.compact(jsonMethods.render(jsonMethods.parse(json, useBigDecimalForDouble = true)))
     }
   }
 }
