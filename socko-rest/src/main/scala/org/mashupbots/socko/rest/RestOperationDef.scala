@@ -107,6 +107,11 @@ case class RestOperationDef(
   }
 
   /**
+   * Number of static path segments. Used to determine best match
+   */
+  val staticPathSegementsCount: Int = fullPathSegments.count(ps => !ps.isVariable)
+
+  /**
    * The relative URL template split into path segments for ease of matching
    *
    * ==Example Usage==
@@ -117,9 +122,9 @@ case class RestOperationDef(
    *   PathSegment("user", false),
    *   PathSegment("Id", true)
    * )
-   * }}}  
+   * }}}
    */
-  val relativePathSegments:  List[PathSegment] = {
+  val relativePathSegments: List[PathSegment] = {
     if (urlTemplate == null || urlTemplate.length == 0)
       throw new IllegalArgumentException("URI cannot be null or empty")
 
@@ -128,7 +133,7 @@ case class RestOperationDef(
     val segments = ss.map(s => PathSegment(s))
     segments
   }
-  
+
   /**
    * Compares the URL of this operation to another.
    *
@@ -164,7 +169,11 @@ case class RestOperationDef(
           if (!l.isVariable && !r.isVariable && l.name != r.name) {
             // If static segments are different, then cannot be the same
             false
+          } else if ((l.isVariable && !r.isVariable) || (!l.isVariable && r.isVariable)) {
+            // If mix of static and variable, then assume different. The static will take precedence
+            false
           } else {
+            // If both variable, then assume same so go to the next level
             comparePathSegment(segments.tail)
           }
         }

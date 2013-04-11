@@ -50,11 +50,11 @@ case class CreatePetResponse(context: RestResponseContext) extends RestResponse
 case class UpdatePetRequest(context: RestRequestContext, @RestBody() pet: Pet) extends RestRequest
 case class UpdatePetResponse(context: RestResponseContext) extends RestResponse
 
-@RestPut(urlTemplate = "/pet.json.findByStatus", dispatcherClass = "PetDispatcher")
+@RestPut(urlTemplate = "/pet.json/findByStatus", dispatcherClass = "PetDispatcher")
 case class FindPetByStatusRequest(context: RestRequestContext, @RestQuery() status: String) extends RestRequest
 case class FindPetByStatusResponse(context: RestResponseContext, pet: Seq[Pet]) extends RestResponse
 
-@RestPut(urlTemplate = "/pet.json.findByTags", dispatcherClass = "PetDispatcher")
+@RestPut(urlTemplate = "/pet.json/findByTags", dispatcherClass = "PetDispatcher")
 case class FindPetByTagsRequest(context: RestRequestContext, @RestQuery() tags: String) extends RestRequest
 case class FindPetByTagsResponse(context: RestResponseContext, pet: Seq[Pet]) extends RestResponse
 

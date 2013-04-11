@@ -32,34 +32,52 @@ case class RestRegistry(
   config: RestConfig) {
 
   /**
-   * Finds the operation that matches the specified end point
+   * Finds the operation that matches the specified end point.
+   *
+   * If more than one operation matches, the one with the most number of static path segments
+   * will be used.  If there is not a distinct operation with the most number of status path segments,
+   * `None` will be returned because an exact match cannot be found.
    *
    * @param endPoint Endpoint to match
    * @returns Matching [[org.mashupbots.socko.rest.RestOperation]] or `None` if not found
    */
   def findOperation(endPoint: EndPoint): Option[RestOperation] = {
-    val op = operations.find(op => op.definition.matchEndPoint(endPoint))
-    op
+    val ops = operations.filter(op => op.definition.matchEndPoint(endPoint))
+    if (ops.size == 1) Some(ops(0))
+    else if (ops.size == 0) None
+    else {
+      // 2 or more matches
+      val sorted = ops.sortBy(op => op.definition.staticPathSegementsCount * -1) // Sort descending order
+      val first = sorted.head
+      val second = sorted.tail.head
+      if (first.definition.staticPathSegementsCount != second.definition.staticPathSegementsCount) {
+        // Distinct match with the max static path segment
+        Some(first)
+      } else {
+        // No distinct matches for the max static path segment
+        None
+      }
+    }
   }
-  
+
   /**
    * Root path that will trigger the response of api documentation.  For example, `/api/api-docs`.
    */
   val rootApiDocsUrl = config.rootUrl + RestApiDocGenerator.urlPath
-    
+
   /**
    * API documentation ready to be served
-   * 
+   *
    * The `key` is the exact path to match, the value is the `UTF-8` encoded response
    */
   val apiDocs: Map[String, Array[Byte]] = RestApiDocGenerator.generate(operations, config)
-  
+
   /**
    * Flag to indicate if the path requests api document response.
-   * 
+   *
    * For example, `/api/api-docs.json` and `/api/api-docs.json/pets` will return `true` but
    * `/api/pets` will return `false`.
-   * 
+   *
    * @param endPoint Endpoint to check
    * @returns `True` if this endpoint requires api documentation to be returned
    */

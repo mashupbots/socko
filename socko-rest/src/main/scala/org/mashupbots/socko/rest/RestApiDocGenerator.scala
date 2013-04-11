@@ -43,14 +43,14 @@ object RestApiDocGenerator extends Logger {
 
     // Split into apis based on path segments
     val apisMap: Map[String, Seq[RestOperation]] = operations.groupBy(o => {
-      // Get number of path segements specified in config
-      val pathSegements = if (o.definition.fullPathSegments.size <= config.swaggerApiGroupingPathSegment) {
-        o.definition.relativePathSegments.take(config.swaggerApiGroupingPathSegment)
-      } else {
+      // Get number of path segments specified in config for grouping
+      val pathSegements = if (o.definition.relativePathSegments.size <= config.swaggerApiGroupingPathSegment) {
         o.definition.relativePathSegments
+      } else {
+        o.definition.relativePathSegments.take(config.swaggerApiGroupingPathSegment)
       }
 
-      // Only use static, non-variable, segments as the group by key
+      // Only use static, non-variable, segments as the groupby key
       val staticPathSegements: List[PathSegment] = pathSegements.takeWhile(ps => !ps.isVariable)      
       staticPathSegements.map(ps => ps.name).mkString("/")
     })

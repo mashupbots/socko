@@ -42,16 +42,16 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
         	"basePath":"/api",
         	"apis":[
         		{
-        			"path":"/api-docs.json/pet",
+        			"path":"/api-docs.json/pet.json",
         			"description":""
         		},
         		{
-        			"path":"/api-docs.json/store",
+        			"path":"/api-docs.json/store.json",
         			"description":""
         		},
         		{
-        			"path":"/api-docs.json/user",
-        			"description":"" 
+        			"path":"/api-docs.json/user.json",
+        			"description":""
         		}
         	]
         }
