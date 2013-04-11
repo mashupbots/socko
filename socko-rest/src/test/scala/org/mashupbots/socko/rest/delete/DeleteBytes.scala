@@ -30,7 +30,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestDelete(urlTemplate = "/bytes/{status}")
+@RestDelete(path = "/bytes/{status}")
 case class DeleteBytesRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
 
 case class DeleteBytesResponse(context: RestResponseContext, data: Seq[Byte]) extends RestResponse

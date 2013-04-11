@@ -29,7 +29,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import org.mashupbots.socko.rest.RestDispatcher
 
-@RestGet(urlTemplate = "/pets")
+@RestGet(path = "/pets")
 case class GetPetsRequest(context: RestRequestContext) extends RestRequest
 case class GetPetsResponse(context: RestResponseContext) extends RestResponse
 class GetPetsDispatcher extends RestDispatcher {
@@ -37,13 +37,13 @@ class GetPetsDispatcher extends RestDispatcher {
 }
 
 @RestPost(
-  urlTemplate = "/dogs1",
+  path = "/dogs1",
   responseClass = "FunnyNameDogResponse",
   dispatcherClass = "GetPetsDispatcher")
 case class PostDogs1Request(context: RestRequestContext) extends RestRequest
 
 @RestPut(
-  urlTemplate = "/dogs2",
+  path = "/dogs2",
   responseClass = "org.mashupbots.socko.rest.test1.FunnyNameDogResponse",
   dispatcherClass = "org.mashupbots.socko.rest.test1.GetPetsDispatcher",
   errorResponses = Array("400=username not found", "401=yet another error"))
@@ -51,7 +51,7 @@ case class PutDogs2Request(context: RestRequestContext) extends RestRequest
 
 case class FunnyNameDogResponse(context: RestResponseContext) extends RestResponse
 
-@RestDelete(urlTemplate = "/pets/{id}")
+@RestDelete(path = "/pets/{id}")
 case class DeletePetsRequest(context: RestRequestContext, @RestPath() id: String) extends RestRequest
 case class DeletePetsResponse(context: RestResponseContext, message: String) extends RestResponse
 class DeletePetsDispatcher extends RestDispatcher {
@@ -59,14 +59,14 @@ class DeletePetsDispatcher extends RestDispatcher {
 }
 
 // Error because there is no corresponding response class
-@RestGet(urlTemplate = "/noresponse", dispatcherClass = "GetPetsProcessorLocator")
+@RestGet(path = "/noresponse", dispatcherClass = "GetPetsProcessorLocator")
 case class NoResponseRequest(context: RestRequestContext) extends RestRequest
 
 // Error because this does not have a @RestGet
 case class NoAnnotationRequest(context: RestRequestContext) extends RestRequest
 
 // Error because parameter binding not annotated
-@RestDelete(urlTemplate = "/pets/{id}")
+@RestDelete(path = "/pets/{id}")
 case class NoParameterAnnotationRequest(context: RestRequestContext, id: String) extends RestRequest
 case class NoParameterAnnotationResponse(context: RestResponseContext) extends RestResponse
 class NoParameterAnnotationDispatcher extends RestDispatcher {
@@ -74,7 +74,7 @@ class NoParameterAnnotationDispatcher extends RestDispatcher {
 }
 
 // Error because parameter binding annotated more than one
-@RestDelete(urlTemplate = "/pets/{id}")
+@RestDelete(path = "/pets/{id}")
 case class MultiParameterAnnotationRequest(context: RestRequestContext, @RestPath()@RestQuery() id: String) extends RestRequest
 case class MultiParameterAnnotationResponse(context: RestResponseContext) extends RestResponse
 class MultiParameterAnnotationDispatcher extends RestDispatcher {
@@ -82,16 +82,16 @@ class MultiParameterAnnotationDispatcher extends RestDispatcher {
 }
 
 // Error because there is no corresponding response class
-@RestGet(urlTemplate = "/noresponse", dispatcherClass = "GetPetsProcessorLocator")
+@RestGet(path = "/noresponse", dispatcherClass = "GetPetsProcessorLocator")
 case class NotARequest(context: RestRequestContext)
 
 // Error no dispathcer
-@RestGet(urlTemplate = "/pets")
+@RestGet(path = "/pets")
 case class GetNoDispatcherRequest(context: RestRequestContext) extends RestRequest
 case class GetNoDispatcherResponse(context: RestResponseContext) extends RestResponse
 
 // Error bad dispathcer because the dispatcher has parameters in the constructor
-@RestGet(urlTemplate = "/pets")
+@RestGet(path = "/pets")
 case class GetBadDispatcherRequest(context: RestRequestContext) extends RestRequest
 case class GetBadDispatcherResponse(context: RestResponseContext) extends RestResponse
 class GetBadDispatcherDispatcher(param1: String) extends RestDispatcher {

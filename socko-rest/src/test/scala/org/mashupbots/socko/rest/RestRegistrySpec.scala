@@ -39,7 +39,7 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
       val op = RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
 
       op.get.definition.method must be("GET")
-      op.get.definition.urlTemplate must be("/pets")
+      op.get.definition.path must be("/pets")
       op.get.definition.dispatcherClass must be("")
       op.get.deserializer.requestClass.fullName must be("org.mashupbots.socko.rest.test1.GetPetsRequest")
       op.get.serializer.responseClass.fullName must be("org.mashupbots.socko.rest.test1.GetPetsResponse")
@@ -50,7 +50,7 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
       val op = RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
 
       op.get.definition.method must be("POST")
-      op.get.definition.urlTemplate must be("/dogs1")
+      op.get.definition.path must be("/dogs1")
       op.get.definition.dispatcherClass must be("GetPetsDispatcher")
       op.get.deserializer.requestClass.fullName must be("org.mashupbots.socko.rest.test1.PostDogs1Request")
       op.get.serializer.responseClass.fullName must be("org.mashupbots.socko.rest.test1.FunnyNameDogResponse")
@@ -59,7 +59,7 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
       val op2 = RestRegistry.buildRestOperation(rm, cs2, classSymbols, cfg)
 
       op2.get.definition.method must be("PUT")
-      op2.get.definition.urlTemplate must be("/dogs2")
+      op2.get.definition.path must be("/dogs2")
       op2.get.definition.dispatcherClass must be("org.mashupbots.socko.rest.test1.GetPetsDispatcher")
       op2.get.definition.errorResponses.size must be(2)
       op2.get.deserializer.requestClass.fullName must be("org.mashupbots.socko.rest.test1.PutDogs2Request")
@@ -71,7 +71,7 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
       val op = RestRegistry.buildRestOperation(rm, cs, classSymbols, cfg)
 
       op.get.definition.method must be("DELETE")
-      op.get.definition.urlTemplate must be("/pets/{id}")
+      op.get.definition.path must be("/pets/{id}")
       op.get.definition.dispatcherClass must be("")
       op.get.deserializer.requestClass.fullName must be("org.mashupbots.socko.rest.test1.DeletePetsRequest")
       op.get.serializer.responseClass.fullName must be("org.mashupbots.socko.rest.test1.DeletePetsResponse")

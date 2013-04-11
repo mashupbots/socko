@@ -29,7 +29,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestDelete(urlTemplate = "/void/{status}")
+@RestDelete(path = "/void/{status}")
 case class DeleteVoidRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
 
 case class DeleteVoidResponse(context: RestResponseContext) extends RestResponse

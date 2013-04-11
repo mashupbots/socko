@@ -42,15 +42,15 @@ class StoreDispatcher extends RestDispatcher {
   def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
-@RestGet(urlTemplate = "/store/order/{orderId}", dispatcherClass = "UserDispatcher")
+@RestGet(path = "/store/order/{orderId}", dispatcherClass = "UserDispatcher")
 case class GetOrderRequest(context: RestRequestContext, @RestPath() orderId: String) extends RestRequest
 case class GetOrderResponse(context: RestResponseContext, order: Option[Order]) extends RestResponse
 
-@RestDelete(urlTemplate = "/store/order/{orderId}", dispatcherClass = "StoreDispatcher")
+@RestDelete(path = "/store/order/{orderId}", dispatcherClass = "StoreDispatcher")
 case class DeleteOrderRequest(context: RestRequestContext, @RestPath() orderId: String) extends RestRequest
 case class DeleteOrderResponse(context: RestResponseContext) extends RestResponse
 
-@RestPost(urlTemplate = "/store/order", dispatcherClass = "StoreDispatcher")
+@RestPost(path = "/store/order", dispatcherClass = "StoreDispatcher")
 case class PlaceOrderRequest(context: RestRequestContext, @RestBody() order: Order) extends RestRequest
 case class PlaceOrderResponse(context: RestResponseContext) extends RestResponse    
 

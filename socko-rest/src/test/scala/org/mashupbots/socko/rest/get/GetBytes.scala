@@ -30,7 +30,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(urlTemplate = "/bytes/{status}")
+@RestGet(path = "/bytes/{status}")
 case class GetBytesRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
 
 case class GetBytesResponse(context: RestResponseContext, data: Seq[Byte]) extends RestResponse

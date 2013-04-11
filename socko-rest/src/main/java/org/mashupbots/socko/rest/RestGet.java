@@ -31,7 +31,7 @@ public @interface RestGet {
 	/**
 	 * Template URL to use for matching to this request
 	 */
-	String urlTemplate();
+	String path();
 
 	/**
 	 * Class path of the response class. If a package name is not provided, the class is assumed

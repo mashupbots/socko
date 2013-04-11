@@ -30,7 +30,7 @@ object RestApiDocGenerator extends Logger {
    * URL path relative to the config `rootUrl` that will trigger the return of the API documentation
    */
   val urlPath = "/api-docs"
-    
+
   /**
    * Generates a Map of URL paths and the associated API documentation to be returned for these paths
    *
@@ -50,8 +50,8 @@ object RestApiDocGenerator extends Logger {
         o.definition.relativePathSegments.take(config.swaggerApiGroupingPathSegment)
       }
 
-      // Only use static, non-variable, segments as the groupby key
-      val staticPathSegements: List[PathSegment] = pathSegements.takeWhile(ps => !ps.isVariable)      
+      // Only use static, non-variable, segments as the group by key
+      val staticPathSegements: List[PathSegment] = pathSegements.takeWhile(ps => !ps.isVariable)
       staticPathSegements.map(ps => ps.name).mkString("/")
     })
 
@@ -67,6 +67,11 @@ object RestApiDocGenerator extends Logger {
     result.put(urlPath + ".json", jsonify(resourceListing))
 
     // API Declarations
+    val apiDeclarations: Map[String, Seq[APIDeclaration]] = apisMap.map(f => {
+      val (path, ops) = f
+
+      (path, List.empty)
+    })
 
     // Finish
     result.toMap
@@ -97,4 +102,50 @@ case class ResourceListingApi(
   path: String,
   description: String)
 
+/**
+ * Swagger API declaration
+ */
+case class APIDeclaration(
+  apiVersion: String,
+  swaggerVersion: String,
+  basePath: String,
+  resourcePath: String,
+  apis: Seq[ApiDef]) extends ApiDoc
 
+object APIDeclaration {
+
+  def apply(resourcePath: String, ops: Seq[RestOperation], config: RestConfig): APIDeclaration = {
+
+    ops.groupBy(op => op.definition.path)
+    
+    APIDeclaration(
+      config.apiVersion,
+      config.swaggerVersion,
+      config.rootUrl,
+      resourcePath,
+      List.empty)
+  }
+}
+
+case class ApiDef(
+  path: String,
+  description: String,
+  operations: Seq[ApiOperation])
+
+case class ApiOperation(
+  httpMethod: String,
+  nickname: String,
+  responseClass: String,
+  parameters: Seq[ApiParameter],
+  summary: String,
+  notes: String)
+
+case class ApiParameter(
+  paramType: String,
+  name: String,
+  description: String,
+  dataType: String,
+  required: String //allowableValues: String,
+  //allowMultiple: String
+  )
+  

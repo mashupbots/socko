@@ -29,7 +29,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(urlTemplate = "/void/{status}")
+@RestGet(path = "/void/{status}")
 case class GetVoidRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
 
 case class GetVoidResponse(context: RestResponseContext) extends RestResponse

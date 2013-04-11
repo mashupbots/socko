@@ -24,7 +24,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import org.mashupbots.socko.rest.RestDispatcher
 
-@RestGet(urlTemplate = "/pets")
+@RestGet(path = "/pets")
 case class GetPets1Request(context: RestRequestContext) extends RestRequest
 
 case class GetPets1Response(context: RestResponseContext) extends RestResponse
@@ -34,7 +34,7 @@ case class GetPets1Dispatcher() extends RestDispatcher {
 }
 
 // A duplicate of the above end point address
-@RestGet(urlTemplate = "/pets")
+@RestGet(path = "/pets")
 case class GetPets2Request(context: RestRequestContext) extends RestRequest 
 
 case class GetPets2Response(context: RestResponseContext) extends RestResponse 

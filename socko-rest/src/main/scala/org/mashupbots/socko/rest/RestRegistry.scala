@@ -144,11 +144,11 @@ object RestRegistry extends Logger {
     // Check for duplicate operation uri templates
     restOperations.foreach(op => {
       val sameOp = restOperations.find(op2 => System.identityHashCode(op) != System.identityHashCode(op2) &&
-        op.definition.compareUrlTemplate(op2.definition))
+        op.definition.comparePath(op2.definition))
       if (sameOp.isDefined) {
         val msg = "Operation '%s %s' for '%s' resolves to the same address as '%s %s' for '%s'".format(
-          op.definition.method, op.definition.urlTemplate, op.deserializer.requestClass.fullName,
-          sameOp.get.definition.method, sameOp.get.definition.urlTemplate, sameOp.get.deserializer.requestClass.fullName)
+          op.definition.method, op.definition.path, op.deserializer.requestClass.fullName,
+          sameOp.get.definition.method, sameOp.get.definition.path, sameOp.get.deserializer.requestClass.fullName)
         throw RestDefintionException(msg)
       }
     })

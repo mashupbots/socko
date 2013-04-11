@@ -29,7 +29,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestDelete(urlTemplate = "/object/{status}")
+@RestDelete(path = "/object/{status}")
 case class DeleteObjectRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
 
 case class Pet(name: String, age: Int)

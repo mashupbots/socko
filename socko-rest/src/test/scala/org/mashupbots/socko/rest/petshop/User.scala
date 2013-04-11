@@ -45,35 +45,35 @@ class UserDispatcher extends RestDispatcher {
   def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
-@RestPost(urlTemplate = "/user/createWithArray", dispatcherClass = "UserDispatcher")
+@RestPost(path = "/user/createWithArray", dispatcherClass = "UserDispatcher")
 case class CreateUserWithArrayRequest(context: RestRequestContext, @RestBody() users: Array[User]) extends RestRequest
 case class CreateUserWithArrayResponse(context: RestResponseContext) extends RestResponse
 
-@RestPost(urlTemplate = "/user", dispatcherClass = "UserDispatcher")
+@RestPost(path = "/user", dispatcherClass = "UserDispatcher")
 case class CreateUserRequest(context: RestRequestContext, @RestBody() user: User) extends RestRequest
 case class CreateUserResponse(context: RestResponseContext) extends RestResponse
 
-@RestPost(urlTemplate = "/user/createWithList", dispatcherClass = "UserDispatcher")
+@RestPost(path = "/user/createWithList", dispatcherClass = "UserDispatcher")
 case class CreateUserWithListRequest(context: RestRequestContext, @RestBody() users: Seq[User]) extends RestRequest
 case class CreateUserWithListResponse(context: RestResponseContext) extends RestResponse
 
-@RestPut(urlTemplate = "/user/{username}", dispatcherClass = "UserDispatcher")
+@RestPut(path = "/user/{username}", dispatcherClass = "UserDispatcher")
 case class UpdateUserRequest(context: RestRequestContext, @RestPath() username: String, @RestBody() user: User) extends RestRequest
 case class UpdateUserResponse(context: RestResponseContext) extends RestResponse
 
-@RestDelete(urlTemplate = "/user/{username}", dispatcherClass = "UserDispatcher")
+@RestDelete(path = "/user/{username}", dispatcherClass = "UserDispatcher")
 case class DeleteUserRequest(context: RestRequestContext, @RestPath() username: String) extends RestRequest
 case class DeleteUserResponse(context: RestResponseContext) extends RestResponse
 
-@RestGet(urlTemplate = "/user/{username}", dispatcherClass = "UserDispatcher")
+@RestGet(path = "/user/{username}", dispatcherClass = "UserDispatcher")
 case class GetUserRequest(context: RestRequestContext, @RestPath() username: String) extends RestRequest
 case class GetUserResponse(context: RestResponseContext, user: Option[User]) extends RestResponse
 
-@RestGet(urlTemplate = "/user/login", dispatcherClass = "UserDispatcher")
+@RestGet(path = "/user/login", dispatcherClass = "UserDispatcher")
 case class LoginRequest(context: RestRequestContext, @RestQuery() username: String, @RestQuery() password: String) extends RestRequest
 case class LoginResponse(context: RestResponseContext, result: String) extends RestResponse
 
-@RestGet(urlTemplate = "/user/logout", dispatcherClass = "UserDispatcher")
+@RestGet(path = "/user/logout", dispatcherClass = "UserDispatcher")
 case class LogoutRequest(context: RestRequestContext) extends RestRequest
 case class LogoutResponse(context: RestResponseContext) extends RestResponse
 

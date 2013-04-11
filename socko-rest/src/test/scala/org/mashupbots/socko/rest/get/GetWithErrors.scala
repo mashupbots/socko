@@ -31,7 +31,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(urlTemplate = "/error/{error}")
+@RestGet(path = "/error/{error}")
 case class GetWithErrorsRequest(context: RestRequestContext, @RestPath() error: String) extends RestRequest
 
 case class GetWithErrorsResponse(context: RestResponseContext, data: Option[Date]) extends RestResponse

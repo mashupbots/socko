@@ -31,7 +31,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(urlTemplate = "/primitive/{status}")
+@RestGet(path = "/primitive/{status}")
 case class GetPrimitiveRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
 
 case class GetPrimitiveResponse(context: RestResponseContext, data: Option[Date]) extends RestResponse

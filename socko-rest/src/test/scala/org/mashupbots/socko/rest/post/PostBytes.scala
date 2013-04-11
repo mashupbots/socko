@@ -31,7 +31,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestPost(urlTemplate = "/bytes/{status}")
+@RestPost(path = "/bytes/{status}")
 case class PostBytesRequest(context: RestRequestContext, @RestPath() status: Int, @RestBody() bytes: Seq[Byte]) extends RestRequest
 
 case class PostBytesResponse(context: RestResponseContext, data: Seq[Byte]) extends RestResponse

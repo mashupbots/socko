@@ -31,7 +31,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestDelete(urlTemplate = "/primitive/{status}")
+@RestDelete(path = "/primitive/{status}")
 case class DeletePrimitiveRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
 
 case class DeletePrimitiveResponse(context: RestResponseContext, data: Option[Date]) extends RestResponse

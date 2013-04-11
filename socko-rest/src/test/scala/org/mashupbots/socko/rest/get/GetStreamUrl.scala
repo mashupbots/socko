@@ -32,7 +32,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(urlTemplate = "/streamurl/{status}")
+@RestGet(path = "/streamurl/{status}")
 case class GetStreamUrlRequest(context: RestRequestContext,
   @RestPath() status: Int,
   @RestQuery() sourceURL: String) extends RestRequest

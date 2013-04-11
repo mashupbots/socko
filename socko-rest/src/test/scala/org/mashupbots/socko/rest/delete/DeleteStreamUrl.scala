@@ -32,7 +32,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestDelete(urlTemplate = "/streamurl/{status}")
+@RestDelete(path = "/streamurl/{status}")
 case class DeleteStreamUrlRequest(context: RestRequestContext,
   @RestPath() status: Int,
   @RestQuery() sourceURL: String) extends RestRequest

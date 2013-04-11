@@ -27,7 +27,7 @@ import org.mashupbots.socko.infrastructure.ReflectUtil
  *
  * @param method HTTP method
  * @param rootUrl Root URL
- * @param urlTemplate relative URL template used for matching incoming REST requests
+ * @param path relative URL template used for matching incoming REST requests
  *  - The template can be an exact match like `/pets`.
  *  - The template can have a path variable like `/pets/{petId}`. In this case, the template
  *    will match all paths with 2 segments and the first segment being `pets`. The second
@@ -58,7 +58,7 @@ import org.mashupbots.socko.infrastructure.ReflectUtil
 case class RestOperationDef(
   method: String,
   rootUrl: String,
-  urlTemplate: String,
+  path: String,
   responseClass: String = "",
   dispatcherClass: String = "",
   customDeserialization: Boolean = false,
@@ -70,10 +70,10 @@ case class RestOperationDef(
   errorResponses: Map[Int, String] = Map.empty) extends Logger {
 
   /**
-   * Full URL template from combining the `rootUrl` with `urlTemplate`.  The `/` prefix is dropped.
+   * Full URL template from combining the `rootUrl` with `path`.  The `/` prefix is dropped.
    */
-  private val fullUrlTemplate = if (rootUrl == "/") urlTemplate else {
-    rootUrl + (if (urlTemplate.startsWith("/")) "" else "/") + urlTemplate
+  private val fullpath = if (rootUrl == "/") path else {
+    rootUrl + (if (path.startsWith("/")) "" else "/") + path
   }
 
   /**
@@ -86,7 +86,7 @@ case class RestOperationDef(
    * The full URL template split into path segments for ease of matching
    *
    * ==Example Usage==
-   * If urlTemplate = `/user/{Id}` and rootUrl in the config is `/api`, the full path segment are
+   * If path = `/user/{Id}` and rootUrl in the config is `/api`, the full path segment are
    *
    * {{{
    * List(
@@ -97,10 +97,10 @@ case class RestOperationDef(
    * }}}
    */
   val fullPathSegments: List[PathSegment] = {
-    if (urlTemplate == null || urlTemplate.length == 0)
+    if (path == null || path.length == 0)
       throw new IllegalArgumentException("URI cannot be null or empty")
 
-    val s = if (fullUrlTemplate.startsWith("/")) fullUrlTemplate.substring(1) else fullUrlTemplate
+    val s = if (fullpath.startsWith("/")) fullpath.substring(1) else fullpath
     val ss = s.split("/").toList
     val segments = ss.map(s => PathSegment(s))
     segments
@@ -115,7 +115,7 @@ case class RestOperationDef(
    * The relative URL template split into path segments for ease of matching
    *
    * ==Example Usage==
-   * If urlTemplate = `/user/{Id}` and rootUrl in the config is `/api`, the relative path segment are
+   * If path = `/user/{Id}` and rootUrl in the config is `/api`, the relative path segment are
    *
    * {{{
    * List(
@@ -125,10 +125,10 @@ case class RestOperationDef(
    * }}}
    */
   val relativePathSegments: List[PathSegment] = {
-    if (urlTemplate == null || urlTemplate.length == 0)
+    if (path == null || path.length == 0)
       throw new IllegalArgumentException("URI cannot be null or empty")
 
-    val s = if (urlTemplate.startsWith("/")) urlTemplate.substring(1) else urlTemplate
+    val s = if (path.startsWith("/")) path.substring(1) else path
     val ss = s.split("/").toList
     val segments = ss.map(s => PathSegment(s))
     segments
@@ -150,7 +150,7 @@ case class RestOperationDef(
    * @returns `True` if the URI templates are ambiguous and 2 or more unique end points can resolve to
    *   either URI templates.  `False` otherwise..
    */
-  def compareUrlTemplate(opDef: RestOperationDef): Boolean = {
+  def comparePath(opDef: RestOperationDef): Boolean = {
 
     if (method != opDef.method) {
       // If different methods, then cannot be the same
@@ -234,7 +234,7 @@ object RestOperationDef extends Logger {
     restGetType -> "GET", restDeleteType -> "DELETE",
     restPostType -> "POST", restPutType -> "PUT")
 
-  private val urlTemplateName = ru.newTermName("urlTemplate")
+  private val pathName = ru.newTermName("path")
   private val responseClassName = ru.newTermName("responseClass")
   private val dispatcherClassName = ru.newTermName("dispatcherClass")
   private val customDeserializationName = ru.newTermName("customDeserialization")
@@ -259,7 +259,7 @@ object RestOperationDef extends Logger {
       else throw new IllegalStateException("Unknonw REST operation annotation type " + a.tpe.toString)
     }
 
-    val urlTemplate = ReflectUtil.getAnnotationJavaLiteralArg(a, urlTemplateName, "")
+    val path = ReflectUtil.getAnnotationJavaLiteralArg(a, pathName, "")
     val responseClass = ReflectUtil.getAnnotationJavaLiteralArg(a, responseClassName, "")
     val dispatcherClass = ReflectUtil.getAnnotationJavaLiteralArg(a, dispatcherClassName, "")
     val customDeserialization = ReflectUtil.getAnnotationJavaLiteralArg(a, customDeserializationName, false)
@@ -277,12 +277,12 @@ object RestOperationDef extends Logger {
     } catch {
       case ex: Throwable => {
         log.error("Error '%s' parsing error response map for '%s %s': (%s). All error responses for this operation will be ignored.".format(
-          ex.getMessage, method, urlTemplate, errorResponses.mkString(",")), ex)
+          ex.getMessage, method, path, errorResponses.mkString(",")), ex)
         Map.empty
       }
     }
 
-    RestOperationDef(method, config.rootUrl, urlTemplate, responseClass, dispatcherClass,
+    RestOperationDef(method, config.rootUrl, path, responseClass, dispatcherClass,
       customDeserialization, customSerialization, name, description, notes, depreciated,
       errorResponsesMap)
   }

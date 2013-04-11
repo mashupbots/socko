@@ -29,7 +29,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(urlTemplate = "/object/{status}")
+@RestGet(path = "/object/{status}")
 case class GetObjectRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
 
 case class Pet(name: String, age: Int)

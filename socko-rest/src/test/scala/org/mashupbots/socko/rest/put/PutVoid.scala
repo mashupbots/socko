@@ -30,7 +30,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestPut(urlTemplate = "/void/{status}")
+@RestPut(path = "/void/{status}")
 case class PutVoidRequest(context: RestRequestContext, @RestPath() status: Int, @RestBody() pet: Pet) extends RestRequest
 
 case class PutVoidResponse(context: RestResponseContext) extends RestResponse

@@ -220,7 +220,7 @@ object RequestParamBinding {
       val idx = opDef.fullPathSegments.indexWhere(ps => ps.name == name && ps.isVariable)
       if (idx == -1) {
         throw RestDefintionException(s"Constructor parameter '${p.name}' of '${requestClass.fullName}' cannot be bound to the uri template path. " +
-          s"'${opDef.urlTemplate}' does not contain variable named '${name}'.")
+          s"'${opDef.path}' does not contain variable named '${name}'.")
       }
       PathBinding(config, name, p.typeSignature, description, idx)
     } else if (a.tpe =:= queryStringParamAnnotationType) {

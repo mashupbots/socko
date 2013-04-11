@@ -32,7 +32,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestPut(urlTemplate = "/primitive/{status}")
+@RestPut(path = "/primitive/{status}")
 case class PutPrimitiveRequest(context: RestRequestContext, @RestPath() status: Int, @RestBody() double: Double) extends RestRequest
 
 case class PutPrimitiveResponse(context: RestResponseContext, data: Double) extends RestResponse

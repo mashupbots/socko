@@ -32,7 +32,7 @@ import akka.actor.Props
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.rest.RestRequestEvents
 
-@RestPost(urlTemplate = "/custom", customDeserialization = true, customSerialization = true)
+@RestPost(path = "/custom", customDeserialization = true, customSerialization = true)
 case class PostCustomRequest(context: RestRequestContext) extends RestRequest
 
 // Note that response is not required because `customSerialization = true`

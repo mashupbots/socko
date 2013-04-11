@@ -30,7 +30,7 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import java.util.Date
 
-@RestPost(urlTemplate = "/object/{status}")
+@RestPost(path = "/object/{status}")
 case class PostObjectRequest(context: RestRequestContext, @RestPath() status: Int, @RestBody() fish: Fish) extends RestRequest
 
 case class Event(date: Date, description: String)
