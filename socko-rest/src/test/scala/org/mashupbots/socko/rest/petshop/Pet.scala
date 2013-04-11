@@ -38,23 +38,23 @@ class PetDispatcher extends RestDispatcher {
   def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
-@RestGet(urlTemplate = "/pet.json/{petId}", dispatcherClass = "PetDispatcher")
+@RestGet(urlTemplate = "/pet/{petId}", dispatcherClass = "PetDispatcher")
 case class GetPetRequest(context: RestRequestContext, @RestPath() petId: String) extends RestRequest
 case class GetPetResponse(context: RestResponseContext, pet: Option[Pet]) extends RestResponse
 
-@RestPost(urlTemplate = "/pet.json", dispatcherClass = "PetDispatcher")
+@RestPost(urlTemplate = "/pet", dispatcherClass = "PetDispatcher")
 case class CreatePetRequest(context: RestRequestContext, @RestBody() pet: Pet) extends RestRequest
 case class CreatePetResponse(context: RestResponseContext) extends RestResponse
 
-@RestPut(urlTemplate = "/pet.json", dispatcherClass = "PetDispatcher")
+@RestPut(urlTemplate = "/pet", dispatcherClass = "PetDispatcher")
 case class UpdatePetRequest(context: RestRequestContext, @RestBody() pet: Pet) extends RestRequest
 case class UpdatePetResponse(context: RestResponseContext) extends RestResponse
 
-@RestPut(urlTemplate = "/pet.json/findByStatus", dispatcherClass = "PetDispatcher")
+@RestPut(urlTemplate = "/pet/findByStatus", dispatcherClass = "PetDispatcher")
 case class FindPetByStatusRequest(context: RestRequestContext, @RestQuery() status: String) extends RestRequest
 case class FindPetByStatusResponse(context: RestResponseContext, pet: Seq[Pet]) extends RestResponse
 
-@RestPut(urlTemplate = "/pet.json/findByTags", dispatcherClass = "PetDispatcher")
+@RestPut(urlTemplate = "/pet/findByTags", dispatcherClass = "PetDispatcher")
 case class FindPetByTagsRequest(context: RestRequestContext, @RestQuery() tags: String) extends RestRequest
 case class FindPetByTagsResponse(context: RestResponseContext, pet: Seq[Pet]) extends RestResponse
 

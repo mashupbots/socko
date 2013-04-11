@@ -26,7 +26,7 @@ import org.mashupbots.socko.infrastructure.ConfigUtil
  * @param rootUrl Root url path to your API without the protocol, domain and port. For example, `/api`.
  * @param swaggerVersion Swagger definition version
  * @param swaggerApiGroupingPathSegment Path segments to group APIs by. Default is `1` which refers to the first
- *   path segment.
+ *   relative path segment.
  *   
  *   For example, the following will be grouped under the `/pets` because the the share `pets` in the 1st path 
  *   segment.
