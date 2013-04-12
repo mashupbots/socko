@@ -29,7 +29,7 @@ object RestApiDocGenerator extends Logger {
   /**
    * URL path relative to the config `rootUrl` that will trigger the return of the API documentation
    */
-  val urlPath = "/api-docs"
+  val urlPath = "/api-docs.json"
 
   /**
    * Generates a Map of URL paths and the associated API documentation to be returned for these paths
@@ -41,7 +41,7 @@ object RestApiDocGenerator extends Logger {
   def generate(operations: Seq[RestOperation], config: RestConfig): Map[String, Array[Byte]] = {
     val result: HashMap[String, Array[Byte]] = new HashMap[String, Array[Byte]]()
 
-    // Split into apis based on path segments
+    // Group operations into resources based on path segments
     val apisMap: Map[String, Seq[RestOperation]] = operations.groupBy(o => {
       // Get number of path segments specified in config for grouping
       val pathSegements = if (o.definition.relativePathSegments.size <= config.swaggerApiGroupingPathSegment) {
@@ -52,26 +52,22 @@ object RestApiDocGenerator extends Logger {
 
       // Only use static, non-variable, segments as the group by key
       val staticPathSegements: List[PathSegment] = pathSegements.takeWhile(ps => !ps.isVariable)
-      staticPathSegements.map(ps => ps.name).mkString("/")
+      staticPathSegements.map(ps => ps.name).mkString("/", "/", "")
     })
 
     // Resource Listing
-    val resourceListingApiPaths: Seq[String] = apisMap.keys.toSeq.sortBy(s => s)
-    val resourceListingApis: Seq[ResourceListingApi] = resourceListingApiPaths.map(s => ResourceListingApi("/api-docs.json/" + s, ""))
-    val resourceListing = ResourceListing(
-      config.apiVersion,
-      config.swaggerVersion,
-      config.rootUrl,
-      resourceListingApis)
-
-    result.put(urlPath + ".json", jsonify(resourceListing))
+    val resourceListing = ResourceListing(apisMap, config)
+    result.put(urlPath, jsonify(resourceListing))
 
     // API Declarations
-    val apiDeclarations: Map[String, Seq[APIDeclaration]] = apisMap.map(f => {
+    val apiDeclarations: Map[String, APIDeclaration] = apisMap.map(f => {
       val (path, ops) = f
-
-      (path, List.empty)
+      val apiDec = APIDeclaration(path, ops, config)
+      result.put(urlPath + path, jsonify(apiDec))
+      (path, apiDec)
     })
+
+    // Model
 
     // Finish
     result.toMap
@@ -98,6 +94,43 @@ case class ResourceListing(
   basePath: String,
   apis: Seq[ResourceListingApi]) extends ApiDoc
 
+/**
+ * Companion object
+ */
+object ResourceListing {
+
+  /**
+   * Creates a new [[org.mashupbots.socko.rest.ResourceListing]] for a group of APIs
+   *
+   * For example, the following operations are assumed to be in 2 resource groups: `/users` and `/pets`.
+   * {{{
+   * GET /users
+   *
+   * GET /pets
+   * POST /pets/{id}
+   * PUT /pets/{id}
+   * }}}
+   *
+   * @param resources Operations grouped by their path. The grouping is specified in the key. For example,
+   *   `/users` and `/pets`.
+   * @param config Rest configuration
+   */
+  def apply(resources: Map[String, Seq[RestOperation]], config: RestConfig): ResourceListing = {
+    val resourceListingApiPaths: Seq[String] = resources.keys.toSeq.sortBy(s => s)
+    val resourceListingApis: Seq[ResourceListingApi] = resourceListingApiPaths.map(s => ResourceListingApi(RestApiDocGenerator.urlPath + s, ""))
+    val resourceListing = ResourceListing(
+      config.apiVersion,
+      config.swaggerVersion,
+      config.rootUrl,
+      resourceListingApis)
+
+    resourceListing
+  }
+}
+
+/**
+ * Describes a specific resource in the resource listing
+ */
 case class ResourceListingApi(
   path: String,
   description: String)
@@ -110,42 +143,155 @@ case class APIDeclaration(
   swaggerVersion: String,
   basePath: String,
   resourcePath: String,
-  apis: Seq[ApiDef]) extends ApiDoc
+  apis: Seq[ApiPath]) extends ApiDoc
 
+/**
+ * Companion object
+ */
 object APIDeclaration {
 
+  /**
+   * Creates a new [[org.mashupbots.socko.rest.APIDeclaration]] for a resource path as listed in the
+   * resource listing.
+   *
+   * For example, the following operations
+   * {{{
+   * POST /pets/{id}
+   * PUT /pets/{id}
+   * }}}
+   *
+   * maps to 1 ApiPath `/pets` with 2 operations: `POST` and `PUT`
+   *
+   * @param path Unique path. In the above example, it is `/pets/{id}`
+   * @param ops HTTP method operations for that unique path
+   * @param config Rest configuration
+   */
   def apply(resourcePath: String, ops: Seq[RestOperation], config: RestConfig): APIDeclaration = {
+    // Group by path so we can list the operations
+    val pathGrouping: Map[String, Seq[RestOperation]] = ops.groupBy(op => op.definition.path)
 
-    ops.groupBy(op => op.definition.path)
-    
+    // Map group to ApiPaths
+    val apiPathsMap: Map[String, ApiPath] = pathGrouping.map(f => {
+      val (path, ops) = f
+      (path, ApiPath(path, ops, config))
+    })
+
+    // Convert to list and sort
+    val apiPaths: Seq[ApiPath] = apiPathsMap.values.toSeq.sortBy(p => p.path)
+
+    // Build declaration
     APIDeclaration(
       config.apiVersion,
       config.swaggerVersion,
       config.rootUrl,
       resourcePath,
-      List.empty)
+      apiPaths)
   }
 }
 
-case class ApiDef(
+/**
+ * API path refers to a specific path and all the operations for that path
+ */
+case class ApiPath(
   path: String,
-  description: String,
   operations: Seq[ApiOperation])
 
+/**
+ * Companion object
+ */
+object ApiPath {
+
+  /**
+   * Creates a new [[org.mashupbots.socko.rest.ApiPath]] for a given path
+   *
+   * For example, the following operations:
+   * {{{
+   * GET /pets/{id}
+   * POST /pets/{id}
+   * PUT /pets/{id}
+   * }}}
+   *
+   * maps to 1 ApiPath `/pets` with 3 operations: `GET`, `POST` and `PUT`
+   *
+   * @param path Unique path
+   * @param ops HTTP method operations for that unique path
+   * @param config Rest configuration
+   */
+  def apply(path: String, ops: Seq[RestOperation], config: RestConfig): ApiPath = {
+    val apiOps: Seq[ApiOperation] = ops.map(op => ApiOperation(op, config))
+
+    ApiPath(
+      path,
+      apiOps.sortBy(f => f.httpMethod))
+  }
+}
+
+/**
+ * API operation refers to a specific HTTP operation that can be performed
+ * for a path
+ */
 case class ApiOperation(
   httpMethod: String,
-  nickname: String,
-  responseClass: String,
-  parameters: Seq[ApiParameter],
   summary: String,
-  notes: String)
+  notes: String,
+  responseClass: String,
+  nickname: String,
+  parameters: Seq[ApiParameter])
 
+/**
+ * Companion object
+ */
+object ApiOperation {
+
+  /**
+   * Creates a new [[org.mashupbots.socko.rest.ApiOperation]] from a [[org.mashupbots.socko.rest.RestOperation]]
+   *
+   * @param op Rest operation to document
+   * @param config Rest configuration
+   */
+  def apply(op: RestOperation, config: RestConfig): ApiOperation = {
+    val params: Seq[ApiParameter] = op.deserializer.requestParamBindings.map(b => ApiParameter(b, config))
+
+    ApiOperation(
+      op.definition.method,
+      op.definition.description,
+      op.definition.notes,
+      op.serializer.swaggerDataType,
+      op.definition.name,
+      params)
+  }
+}
+
+/**
+ * API parameter refers to a path, body, query string or header parameter in
+ * a [[org.mashupbots.socko.rest.ApiOperation]]
+ */
 case class ApiParameter(
-  paramType: String,
   name: String,
   description: String,
+  paramType: String,
   dataType: String,
-  required: String //allowableValues: String,
+  required: Boolean //allowableValues: String,
   //allowMultiple: String
   )
-  
+
+/**
+ * Companion object
+ */
+object ApiParameter {
+
+  /**
+   * Creates a new [[org.mashupbots.socko.rest.ApiParameter]] for a [[org.mashupbots.socko.rest.ApiParameter]]
+   *
+   * @param binding parameter binding
+   * @param config Configuration
+   */
+  def apply(binding: RequestParamBinding, config: RestConfig): ApiParameter = {
+    ApiParameter(
+      binding.name,
+      binding.description,
+      binding.swaggerParamType,
+      binding.swaggerDataType,
+      binding.required)
+  }
+}

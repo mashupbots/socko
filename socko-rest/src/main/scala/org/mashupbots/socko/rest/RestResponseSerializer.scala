@@ -39,6 +39,7 @@ import org.mashupbots.socko.infrastructure.Logger
  *   the term is `data`.
  * @param primitiveSerializer Function to use to convert a primitive response data type to
  *   a string for returning to the client. Only applicable if `responseDataType` is `ResponseDataType.Primitive`.
+ * @param swaggerDataType Data type as specified by Swagger
  * @param rm Mirror used to extract the value of `responseDataTerm` from the response object
  */
 case class RestResponseSerializer(
@@ -47,6 +48,7 @@ case class RestResponseSerializer(
   responseDataType: ResponseDataType.Value,
   responseDataTerm: Option[ru.TermSymbol],
   primitiveSerializer: Option[(Any) => String],
+  swaggerDataType: String,
   rm: ru.Mirror) extends Logger {
 
   /**
@@ -76,7 +78,7 @@ case class RestResponseSerializer(
   def serialize(http: HttpRequestEvent, response: RestResponse) {
     val status = response.context.status
     val dataType = if (http.endPoint.isHEAD) ResponseDataType.Void else responseDataType
-    
+
     dataType match {
       case ResponseDataType.Object => {
         val data = getData(response).asInstanceOf[AnyRef]
@@ -138,9 +140,8 @@ case class RestResponseSerializer(
         throw new IllegalStateException(s"Unsupported ResponseDataType ${responseDataType.toString}")
       }
     }
-  }	//serialize
-  
-  
+  } //serialize
+
 }
 
 /**
@@ -179,6 +180,26 @@ object RestResponseSerializer {
     (ru.typeOf[Date], (s: Any) => DateUtil.formatISO8601UTCDateTime(s.asInstanceOf[Date])),
     (ru.typeOf[Option[Date]], (s: Any) => optionDateToString(s)))
 
+  private val swaggerPrimitiveTypes: Map[ru.Type, String] = Map(
+    (ru.typeOf[String], "string"),
+    (ru.typeOf[Option[String]], "string"),
+    (ru.typeOf[Int], "int"),
+    (ru.typeOf[Option[Int]], "int"),
+    (ru.typeOf[Boolean], "boolean"),
+    (ru.typeOf[Option[Boolean]], "boolean"),
+    (ru.typeOf[Byte], "byte"),
+    (ru.typeOf[Option[Byte]], "byte"),
+    (ru.typeOf[Short], "short"),
+    (ru.typeOf[Option[Short]], "short"),
+    (ru.typeOf[Long], "long"),
+    (ru.typeOf[Option[Long]], "long"),
+    (ru.typeOf[Double], "double"),
+    (ru.typeOf[Option[Double]], "double"),
+    (ru.typeOf[Float], "float"),
+    (ru.typeOf[Option[Float]], "float"),
+    (ru.typeOf[Date], "Date"),
+    (ru.typeOf[Option[Date]], "Date"))
+
   private val bytesType = ru.typeOf[Seq[Byte]]
   private val urlType = ru.typeOf[URL]
   private val optionalUrlType = ru.typeOf[Option[URL]]
@@ -202,12 +223,12 @@ object RestResponseSerializer {
       throw RestDefintionException(s"First constructor parameter of '${responseClassSymbol.fullName}' must be called 'context'.")
     }
 
-    val responseDataType = if (responseConstructorParams.size == 1) {
-      ResponseDataType.Void
+    val (responseDataType, contentTerm, contentType) = if (responseConstructorParams.size == 1) {
+      (ResponseDataType.Void, None, None)
     } else {
       val contentTerm = responseConstructorParams(1)
       val contentType = contentTerm.typeSignature
-      if (primitiveTypes.exists(t => t._1 =:= contentType)) {
+      val dataType = if (primitiveTypes.exists(t => t._1 =:= contentType)) {
         ResponseDataType.Primitive
       } else if (contentType =:= bytesType) {
         ResponseDataType.Bytes
@@ -218,23 +239,31 @@ object RestResponseSerializer {
       } else {
         throw new IllegalArgumentException(s"Unsupported REST response data type ${contentType} in ${responseClassSymbol.fullName}.")
       }
+      (dataType, Some(contentTerm), Some(contentType))
     }
 
     // The data term name assumed to be in the constructor of a "case class"
     // Get the term name and reflect it as a field in order to read its value
     val responseDataTerm: Option[ru.TermSymbol] = if (responseDataType == ResponseDataType.Void) None else {
-      val contentTerm = responseConstructorParams(1)
-      Some(responseClassSymbol.toType.declaration(contentTerm.name).asTerm.accessed.asTerm)
+      Some(responseClassSymbol.toType.declaration(contentTerm.get.name).asTerm.accessed.asTerm)
     }
 
-    val primitiveSerializer = if (responseDataType != ResponseDataType.Primitive) None
-    else {
-      val contentTerm = responseConstructorParams(1)
-      val contentType = contentTerm.typeSignature
-      Some(primitiveTypes.find(e => e._1 =:= contentType).get._2)
+    // Cache primitive serializer so we don't have to lookup all the time
+    val primitiveSerializer =
+      if (responseDataType != ResponseDataType.Primitive) None
+      else Some(primitiveTypes.find(e => e._1 =:= contentType.get).get._2)
+
+    // Set the swagger data type
+    val swaggerDataType: String = responseDataType match {
+      case ResponseDataType.Void => "void"
+      case ResponseDataType.Primitive => swaggerPrimitiveTypes.find(e => e._1 =:= contentType.get).get._2
+      case ResponseDataType.Object => contentType.get.toString
+      case ResponseDataType.Bytes => "bytes" //not strictly supported      
+      case _ => throw new IllegalStateException(s"Unrecognised ResponseDataType '${responseDataType}'")
     }
 
-    RestResponseSerializer(config, responseClassSymbol, responseDataType, responseDataTerm, primitiveSerializer, rm)
+    // Finish up
+    RestResponseSerializer(config, responseClassSymbol, responseDataType, responseDataTerm, primitiveSerializer, swaggerDataType, rm)
   }
 
 }

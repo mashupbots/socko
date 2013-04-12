@@ -56,10 +56,23 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
         	]
         }
         """
-      log.debug("ResourceListing=" + new String(resourceListing, CharsetUtil.UTF_8))
+      log.debug("ResourceListing=" + pettyJson(new String(resourceListing, CharsetUtil.UTF_8)))
       new String(resourceListing, CharsetUtil.UTF_8) must be(compactJson(resourceListingDoc))
     }
 
+    "correctly produce pets API declaration" in {
+      val api = registry.apiDocs("/api-docs.json/pet")
+      val apiDoc = """
+
+        """
+      log.debug("Pets API declaration=" + pettyJson(new String(api, CharsetUtil.UTF_8)))
+      new String(api, CharsetUtil.UTF_8) must be(compactJson(apiDoc))
+    }
+
+    def pettyJson(json: String): String = {
+      jsonMethods.pretty(jsonMethods.render(jsonMethods.parse(json, useBigDecimalForDouble = true)))
+    }
+    
     def compactJson(json: String): String = {
       jsonMethods.compact(jsonMethods.render(jsonMethods.parse(json, useBigDecimalForDouble = true)))
     }

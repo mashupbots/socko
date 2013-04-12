@@ -59,10 +59,10 @@ case class RestRequestDeserializer(
    */
   def deserialize(httpRequestEvent: HttpRequestEvent): RestRequest = {
     val context = RestRequestContext(
-        httpRequestEvent.endPoint, 
-        httpRequestEvent.request.headers, 
-        SockoEventType.HttpRequest,
-        config.requestTimeoutSeconds)
+      httpRequestEvent.endPoint,
+      httpRequestEvent.request.headers,
+      SockoEventType.HttpRequest,
+      config.requestTimeoutSeconds)
     val params: List[_] = context :: requestParamBindings.map(b => b.extract(context, requestClass, httpRequestEvent))
     requestConstructorMirror(params: _*).asInstanceOf[RestRequest]
   }
@@ -136,6 +136,18 @@ trait RequestParamBinding {
   def required: Boolean
 
   /**
+   * Swagger parameter type: path, query, body, or header.
+   */
+  def swaggerParamType: String
+
+  /**
+   * Swagger data type.
+   *
+   * For path, query, and header paramTypes, this field must be a primitive. For body, this can be a complex or container datatype.
+   */
+  def swaggerDataType: String
+
+  /**
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
    *
    * @param context Request context
@@ -144,6 +156,7 @@ trait RequestParamBinding {
    * @returns a value for passing to the constructor
    */
   def extract(context: RestRequestContext, requestClass: ru.ClassSymbol, httpRequestEvent: HttpRequestEvent): Any
+
 }
 
 /**
@@ -181,6 +194,26 @@ object RequestParamBinding {
     (ru.typeOf[Date], (s: String) => DateUtil.parseISO8601Date(s)),
     (ru.typeOf[Option[Date]], (s: String) => if (s == null || s.isEmpty()) None else Some(DateUtil.parseISO8601Date(s))))
 
+  val swaggerPrimitiveTypes: Map[ru.Type, String] = Map(
+    (ru.typeOf[String], "string"),
+    (ru.typeOf[Option[String]], "string"),
+    (ru.typeOf[Int], "int"),
+    (ru.typeOf[Option[Int]], "int"),
+    (ru.typeOf[Boolean], "boolean"),
+    (ru.typeOf[Option[Boolean]], "boolean"),
+    (ru.typeOf[Byte], "byte"),
+    (ru.typeOf[Option[Byte]], "byte"),
+    (ru.typeOf[Short], "short"),
+    (ru.typeOf[Option[Short]], "short"),
+    (ru.typeOf[Long], "long"),
+    (ru.typeOf[Option[Long]], "long"),
+    (ru.typeOf[Double], "double"),
+    (ru.typeOf[Option[Double]], "double"),
+    (ru.typeOf[Float], "float"),
+    (ru.typeOf[Option[Float]], "float"),
+    (ru.typeOf[Date], "Date"),
+    (ru.typeOf[Option[Date]], "Date"))
+
   private val nameName = ru.newTermName("name")
   private val descriptionName = ru.newTermName("description")
 
@@ -216,6 +249,8 @@ object RequestParamBinding {
     val required = !(p.typeSignature <:< optionType)
 
     // Instance our binding class
+    //
+    //RequestParamBinding.swaggerPrimitiveTypes.find(e => e._1 =:= tpe).get._2
     if (a.tpe =:= pathParamAnnotationType) {
       val idx = opDef.fullPathSegments.indexWhere(ps => ps.name == name && ps.isVariable)
       if (idx == -1) {
@@ -229,9 +264,9 @@ object RequestParamBinding {
       HeaderBinding(config, name, p.typeSignature, description, required)
     } else if (a.tpe =:= bodyParamAnnotationType) {
       if (opDef.method != "PUT" && opDef.method != "POST") {
-        throw RestDefintionException(s"Constructor parameter '${p.name}' of '${requestClass.fullName}' cannot be bound using @RestBody() for a '${opDef.method}' operation.")        
+        throw RestDefintionException(s"Constructor parameter '${p.name}' of '${requestClass.fullName}' cannot be bound using @RestBody() for a '${opDef.method}' operation.")
       }
-      
+
       val tpe = p.typeSignature
       val tpeCategory = if (primitiveTypes.exists(t => t._1 =:= tpe)) {
         RequestBodyDataType.Primitive
@@ -241,6 +276,12 @@ object RequestParamBinding {
         RequestBodyDataType.Object
       } else {
         throw new IllegalArgumentException(s"Unsupported REST request body data type ${tpe} in ${requestClass.fullName}.")
+      }
+
+      val swaggerDataType: String = tpeCategory match {
+        case RequestBodyDataType.Primitive => RequestParamBinding.swaggerPrimitiveTypes.find(e => e._1 =:= tpe).get._2
+        case RequestBodyDataType.Bytes => "bytes"
+        case RequestBodyDataType.Object => tpe.toString()
       }
 
       val objectClass = if (tpeCategory == RequestBodyDataType.Object) {
@@ -255,7 +296,7 @@ object RequestParamBinding {
         None
       }
 
-      BodyBinding(config, name, tpeCategory, tpe, objectClass, description, required)
+      BodyBinding(config, name, tpeCategory, tpe, swaggerDataType, objectClass, description, required)
     } else {
       throw new IllegalStateException("Unsupported annotation: " + a.tpe)
     }
@@ -281,6 +322,11 @@ trait PrimitiveParamBinding extends RequestParamBinding {
       throw new RestBindingException("Unsupported type: " + tpe)
     }
   }
+
+  /**
+   * Swagger data type for primitives: string, byte, int, etc.
+   */
+  val swaggerDataType = RequestParamBinding.swaggerPrimitiveTypes.find(e => e._1 =:= tpe).get._2
 
 }
 
@@ -311,6 +357,8 @@ case class PathBinding(
   pathIndex: Int) extends PrimitiveParamBinding {
 
   val required = true
+
+  val swaggerParamType = "path"
 
   /**
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
@@ -359,6 +407,8 @@ case class QueryStringBinding(
   tpe: ru.Type,
   description: String,
   required: Boolean) extends PrimitiveParamBinding {
+
+  val swaggerParamType = "query"
 
   /**
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
@@ -413,6 +463,8 @@ case class HeaderBinding(
   description: String,
   required: Boolean) extends PrimitiveParamBinding {
 
+  val swaggerParamType = "header"
+
   /**
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
    *
@@ -458,6 +510,7 @@ case class HeaderBinding(
  * @param name Name of the field in the [[org.mashupbots.socko.rest.RestRequest]] to bind data to
  * @param tpeCategory Our categorization of the type of the field
  * @param tpe Type of the field
+ * @param swaggerDataType This can be a complex or container datatype.
  * @param objectClass For object fields that needs to be deserialized, this is the Java class of the field.
  *   For other categories of deserialization (primitive, bytes, etc) this is set to `None` and not used.
  * @param description Description of the field
@@ -468,9 +521,12 @@ case class BodyBinding(
   name: String,
   tpeCategory: RequestBodyDataType.Value,
   tpe: ru.Type,
+  swaggerDataType: String,
   objectClass: Option[Class[_]],
   description: String,
   required: Boolean) extends RequestParamBinding {
+
+  val swaggerParamType = "body"
 
   /**
    * Parse a string into the specified

@@ -38,23 +38,46 @@ class PetDispatcher extends RestDispatcher {
   def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
-@RestGet(path = "/pet/{petId}", dispatcherClass = "PetDispatcher")
-case class GetPetRequest(context: RestRequestContext, @RestPath() petId: String) extends RestRequest
+@RestGet(path = "/pet/{petId}",
+  dispatcherClass = "PetDispatcher",
+  name = "getPetById",
+  description = "Find pet by ID",
+  notes = "Returns a pet based on ID")
+case class GetPetRequest(context: RestRequestContext,
+  @RestPath(description = "ID of pet that needs to be fetched") petId: String) extends RestRequest
 case class GetPetResponse(context: RestResponseContext, pet: Option[Pet]) extends RestResponse
 
-@RestPost(path = "/pet", dispatcherClass = "PetDispatcher")
-case class CreatePetRequest(context: RestRequestContext, @RestBody() pet: Pet) extends RestRequest
+@RestPost(path = "/pet",
+  dispatcherClass = "PetDispatcher",
+  name = "addPet",
+  description = "Add a new pet to the store")
+case class CreatePetRequest(context: RestRequestContext,
+  @RestBody(description = "Pet object that needs to be added to the store") pet: Pet) extends RestRequest
 case class CreatePetResponse(context: RestResponseContext) extends RestResponse
 
-@RestPut(path = "/pet", dispatcherClass = "PetDispatcher")
-case class UpdatePetRequest(context: RestRequestContext, @RestBody() pet: Pet) extends RestRequest
+@RestPut(path = "/pet",
+  dispatcherClass = "PetDispatcher",
+  name = "updatePet",
+  description = "Update an existing pet")
+case class UpdatePetRequest(context: RestRequestContext,
+  @RestBody(description = "Pet object that needs to be updated in the store") pet: Pet) extends RestRequest
 case class UpdatePetResponse(context: RestResponseContext) extends RestResponse
 
-@RestPut(path = "/pet/findByStatus", dispatcherClass = "PetDispatcher")
-case class FindPetByStatusRequest(context: RestRequestContext, @RestQuery() status: String) extends RestRequest
+@RestPut(path = "/pet/findByStatus",
+  dispatcherClass = "PetDispatcher",
+  name = "findPetsByStatus",
+  description = "Finds Pets by status",
+  notes = "Multiple status values can be provided with comma seperated strings")
+case class FindPetByStatusRequest(context: RestRequestContext,
+  @RestQuery(description = "Status values that need to be considered for filter") status: String) extends RestRequest
 case class FindPetByStatusResponse(context: RestResponseContext, pet: Seq[Pet]) extends RestResponse
 
-@RestPut(path = "/pet/findByTags", dispatcherClass = "PetDispatcher")
-case class FindPetByTagsRequest(context: RestRequestContext, @RestQuery() tags: String) extends RestRequest
+@RestPut(path = "/pet/findByTags",
+  dispatcherClass = "PetDispatcher",
+  name = "findPetsByTags",
+  description = "Finds Pets by tags",
+  notes = "Muliple tags can be provided with comma seperated strings. Use tag1, tag2, tag3 for testing.")
+case class FindPetByTagsRequest(context: RestRequestContext, 
+    @RestQuery(description = "Tags to filter by") tags: String) extends RestRequest
 case class FindPetByTagsResponse(context: RestResponseContext, pet: Seq[Pet]) extends RestResponse
 
