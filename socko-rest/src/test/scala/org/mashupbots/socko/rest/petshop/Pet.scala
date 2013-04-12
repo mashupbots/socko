@@ -76,7 +76,8 @@ case class FindPetByStatusResponse(context: RestResponseContext, pet: Seq[Pet]) 
   dispatcherClass = "PetDispatcher",
   name = "findPetsByTags",
   description = "Finds Pets by tags",
-  notes = "Muliple tags can be provided with comma seperated strings. Use tag1, tag2, tag3 for testing.")
+  notes = "Muliple tags can be provided with comma seperated strings. Use tag1, tag2, tag3 for testing.",
+  depreciated = true)
 case class FindPetByTagsRequest(context: RestRequestContext, 
     @RestQuery(description = "Tags to filter by") tags: String) extends RestRequest
 case class FindPetByTagsResponse(context: RestResponseContext, pet: Seq[Pet]) extends RestResponse

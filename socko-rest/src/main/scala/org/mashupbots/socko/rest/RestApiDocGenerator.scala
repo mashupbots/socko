@@ -234,6 +234,7 @@ case class ApiOperation(
   httpMethod: String,
   summary: String,
   notes: String,
+  deprecated: Boolean,
   responseClass: String,
   nickname: String,
   parameters: Seq[ApiParameter])
@@ -256,6 +257,7 @@ object ApiOperation {
       op.definition.method,
       op.definition.description,
       op.definition.notes,
+      op.definition.depreciated,
       op.serializer.swaggerDataType,
       op.definition.name,
       params)
