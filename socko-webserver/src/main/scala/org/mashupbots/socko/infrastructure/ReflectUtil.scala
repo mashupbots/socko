@@ -118,21 +118,4 @@ object ReflectUtil extends Logger {
       defaultValue
     }
   }
-
-  /**
-   * Retrieves the value of an argument in an annotation as a string array
-   *
-   * @param a Annotation
-   * @param n Name of annotation parameter
-   * @param defaultValue value to return if `n` is not found
-   * @returns Value of the annotation if found, `defaultValue` otherwise
-   */
-  def getAnnotationJavaStringArrayArg(a: ru.Annotation, n: ru.Name, defaultValue: Array[String]): Array[String] = {
-    if (a.javaArgs.contains(n)) {
-      val aa = a.javaArgs(n).asInstanceOf[ru.ArrayArgument].args
-      aa.map(l => l.asInstanceOf[ru.LiteralArgument].value.value.asInstanceOf[String]);
-    } else {
-      defaultValue
-    }
-  }
 } 

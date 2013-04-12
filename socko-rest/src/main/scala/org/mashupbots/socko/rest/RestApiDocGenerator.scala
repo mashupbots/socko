@@ -237,7 +237,8 @@ case class ApiOperation(
   deprecated: Boolean,
   responseClass: String,
   nickname: String,
-  parameters: Seq[ApiParameter])
+  parameters: Seq[ApiParameter],
+  errorResponses: Seq[ApiError])
 
 /**
  * Companion object
@@ -252,6 +253,7 @@ object ApiOperation {
    */
   def apply(op: RestOperation, config: RestConfig): ApiOperation = {
     val params: Seq[ApiParameter] = op.deserializer.requestParamBindings.map(b => ApiParameter(b, config))
+    val errors: Seq[ApiError] = op.definition.errorResponses.map(e => ApiError(e._1, e._2)).toSeq
 
     ApiOperation(
       op.definition.method,
@@ -260,7 +262,8 @@ object ApiOperation {
       op.definition.depreciated,
       op.serializer.swaggerDataType,
       op.definition.name,
-      params)
+      params,
+      errors.sortBy(e => e.code))
   }
 }
 
@@ -297,3 +300,9 @@ object ApiParameter {
       binding.required)
   }
 }
+
+/**
+ * API error refers to the HTTP response status code and its description
+ */
+case class ApiError(code: Int, reason: String)
+

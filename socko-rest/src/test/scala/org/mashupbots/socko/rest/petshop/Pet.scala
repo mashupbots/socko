@@ -26,9 +26,9 @@ import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
-
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
+import org.mashupbots.socko.rest.RestError
 
 case class Tag(id: Long, name: String)
 case class Category(id: Long, name: String)
@@ -42,7 +42,10 @@ class PetDispatcher extends RestDispatcher {
   dispatcherClass = "PetDispatcher",
   name = "getPetById",
   description = "Find pet by ID",
-  notes = "Returns a pet based on ID")
+  notes = "Returns a pet based on ID",
+  errorResponses = Array(
+    new RestError(code = 400, reason = "Invalid ID supplied"),
+    new RestError(code = 401, reason = "Pet not found")))
 case class GetPetRequest(context: RestRequestContext,
   @RestPath(description = "ID of pet that needs to be fetched") petId: String) extends RestRequest
 case class GetPetResponse(context: RestResponseContext, pet: Option[Pet]) extends RestResponse
@@ -50,7 +53,9 @@ case class GetPetResponse(context: RestResponseContext, pet: Option[Pet]) extend
 @RestPost(path = "/pet",
   dispatcherClass = "PetDispatcher",
   name = "addPet",
-  description = "Add a new pet to the store")
+  description = "Add a new pet to the store",
+  errorResponses = Array(
+    new RestError(code = 405, reason = "Invalid input")))
 case class CreatePetRequest(context: RestRequestContext,
   @RestBody(description = "Pet object that needs to be added to the store") pet: Pet) extends RestRequest
 case class CreatePetResponse(context: RestResponseContext) extends RestResponse
@@ -58,7 +63,11 @@ case class CreatePetResponse(context: RestResponseContext) extends RestResponse
 @RestPut(path = "/pet",
   dispatcherClass = "PetDispatcher",
   name = "updatePet",
-  description = "Update an existing pet")
+  description = "Update an existing pet",
+  errorResponses = Array(
+    new RestError(code = 400, reason = "Invalid ID supplied"),
+    new RestError(code = 404, reason = "Pet not found"),
+    new RestError(code = 405, reason = "Validation exception")))
 case class UpdatePetRequest(context: RestRequestContext,
   @RestBody(description = "Pet object that needs to be updated in the store") pet: Pet) extends RestRequest
 case class UpdatePetResponse(context: RestResponseContext) extends RestResponse
@@ -67,7 +76,8 @@ case class UpdatePetResponse(context: RestResponseContext) extends RestResponse
   dispatcherClass = "PetDispatcher",
   name = "findPetsByStatus",
   description = "Finds Pets by status",
-  notes = "Multiple status values can be provided with comma seperated strings")
+  notes = "Multiple status values can be provided with comma seperated strings",
+  errorResponses = Array(new RestError(code = 400, reason = "Invalid staus value")))
 case class FindPetByStatusRequest(context: RestRequestContext,
   @RestQuery(description = "Status values that need to be considered for filter") status: String) extends RestRequest
 case class FindPetByStatusResponse(context: RestResponseContext, pet: Seq[Pet]) extends RestResponse
@@ -77,8 +87,9 @@ case class FindPetByStatusResponse(context: RestResponseContext, pet: Seq[Pet]) 
   name = "findPetsByTags",
   description = "Finds Pets by tags",
   notes = "Muliple tags can be provided with comma seperated strings. Use tag1, tag2, tag3 for testing.",
-  depreciated = true)
-case class FindPetByTagsRequest(context: RestRequestContext, 
-    @RestQuery(description = "Tags to filter by") tags: String) extends RestRequest
+  depreciated = true,
+  errorResponses = Array(new RestError(code = 405, reason = "Invalid tag value")))
+case class FindPetByTagsRequest(context: RestRequestContext,
+  @RestQuery(description = "Tags to filter by") tags: String) extends RestRequest
 case class FindPetByTagsResponse(context: RestResponseContext, pet: Seq[Pet]) extends RestResponse
 

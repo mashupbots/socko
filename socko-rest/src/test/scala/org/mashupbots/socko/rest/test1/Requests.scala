@@ -28,6 +28,7 @@ import org.mashupbots.socko.rest.RestResponseContext
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import org.mashupbots.socko.rest.RestDispatcher
+import org.mashupbots.socko.rest.RestError
 
 @RestGet(path = "/pets")
 case class GetPetsRequest(context: RestRequestContext) extends RestRequest
@@ -46,7 +47,9 @@ case class PostDogs1Request(context: RestRequestContext) extends RestRequest
   path = "/dogs2",
   responseClass = "org.mashupbots.socko.rest.test1.FunnyNameDogResponse",
   dispatcherClass = "org.mashupbots.socko.rest.test1.GetPetsDispatcher",
-  errorResponses = Array("400=username not found", "401=yet another error"))
+  errorResponses = Array(
+    new RestError(code = 400, reason = "username not found"),
+    new RestError(code = 401, reason = "yet another error")))
 case class PutDogs2Request(context: RestRequestContext) extends RestRequest
 
 case class FunnyNameDogResponse(context: RestResponseContext) extends RestResponse

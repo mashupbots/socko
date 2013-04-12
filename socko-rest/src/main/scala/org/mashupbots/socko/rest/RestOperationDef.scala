@@ -245,6 +245,9 @@ object RestOperationDef extends Logger {
   private val depreciatedName = ru.newTermName("depreciated")
   private val errorResponsesName = ru.newTermName("errorResponses")
 
+  private val codeName = ru.newTermName("code")
+  private val reasonName = ru.newTermName("reason")
+
   /**
    * Instance a `RestDeclaration` using information of an annotation
    *
@@ -268,23 +271,34 @@ object RestOperationDef extends Logger {
     val description = ReflectUtil.getAnnotationJavaLiteralArg(a, descriptionName, "")
     val notes = ReflectUtil.getAnnotationJavaLiteralArg(a, notesName, "")
     val depreciated = ReflectUtil.getAnnotationJavaLiteralArg(a, depreciatedName, false)
-    val errorResponses = ReflectUtil.getAnnotationJavaStringArrayArg(a, errorResponsesName, Array.empty[String])
-    val errorResponsesMap: Map[Int, String] = try {
-      errorResponses.map(e => {
-        val s = e.split("=")
-        (Integer.parseInt(s(0).trim()), s(1).trim())
-      }).toMap
-    } catch {
-      case ex: Throwable => {
-        log.error("Error '%s' parsing error response map for '%s %s': (%s). All error responses for this operation will be ignored.".format(
-          ex.getMessage, method, path, errorResponses.mkString(",")), ex)
-        Map.empty
-      }
-    }
+    val errorResponses = getErrorResponsesArg(a)
 
     RestOperationDef(method, config.rootUrl, path, responseClass, dispatcherClass,
       customDeserialization, customSerialization, name, description, notes, depreciated,
-      errorResponsesMap)
+      errorResponses)
+  }
+
+  /**
+   * Retrieves the error response map
+   *
+   * @param a Error response annotation
+   * @returns Map of HTTP response status and their meanings
+   */
+  private def getErrorResponsesArg(a: ru.Annotation): Map[Int, String] = {
+    if (a.javaArgs.contains(errorResponsesName)) {
+      val argArray = a.javaArgs(errorResponsesName).asInstanceOf[ru.ArrayArgument].args
+
+      val x = argArray.map(item => {
+        val annotation = item.asInstanceOf[ru.NestedArgument].annotation
+        val code = ReflectUtil.getAnnotationJavaLiteralArg(annotation, codeName, 0)
+        val reason = ReflectUtil.getAnnotationJavaLiteralArg(annotation, reasonName, "")
+        (code, reason)
+      })
+
+      x.toMap
+    } else {
+      Map.empty
+    }
   }
 
   /**

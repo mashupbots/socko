@@ -107,9 +107,7 @@ public @interface RestDelete {
 	boolean depreciated() default false;
 
 	/**
-	 * Array of error responses in the format <tt>code=reason</tt>
-	 * 
-	 * For example: <tt>400=Username not found</tt>.
+	 * Describes error responses 
 	 */
-	String[] errorResponses() default {};
+	public RestError[] errorResponses() default {};
 }

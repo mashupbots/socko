@@ -23,10 +23,11 @@ import java.lang.annotation.Target;
 /**
  * HTTP GET REST end point annotation.
  * 
- * Note that HEAD requests will be mapped to GETs. However, no content will be returned.
+ * Note that HEAD requests will be mapped to GETs. However, no content will be
+ * returned.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 public @interface RestGet {
 	/**
 	 * Template URL to use for matching to this request
@@ -34,60 +35,65 @@ public @interface RestGet {
 	String path();
 
 	/**
-	 * Class path of the response class. If a package name is not provided, the class is assumed
-	 * to be in the same package as the request.
+	 * Class path of the response class. If a package name is not provided, the
+	 * class is assumed to be in the same package as the request.
 	 * 
 	 * If empty, the assumed response class has the same class path and name as
-	 * the request class; but with <tt>Request</tt> suffix replaced with <tt>Response</tt>.
+	 * the request class; but with <tt>Request</tt> suffix replaced with
+	 * <tt>Response</tt>.
 	 * 
-	 * For <tt>MyRestRequest</tt>, the default response class would be <tt>MyRestResponse</tt>.
+	 * For <tt>MyRestRequest</tt>, the default response class would be
+	 * <tt>MyRestResponse</tt>.
 	 */
 	String responseClass() default "";
 
 	/**
-	 * Class path of the class that will locate the actor to dispatch a request for processing.
-	 * If a package name is not provided, the class is assumed to be in the same package as the 
-	 * request.
+	 * Class path of the class that will locate the actor to dispatch a request
+	 * for processing. If a package name is not provided, the class is assumed
+	 * to be in the same package as the request.
 	 * 
 	 * If empty, the assumed response class has the same class path and name as
-	 * the request class; but with <tt>Request</tt> suffix replaced with <tt>Dispatcher</tt>.
+	 * the request class; but with <tt>Request</tt> suffix replaced with
+	 * <tt>Dispatcher</tt>.
 	 * 
-	 * For <tt>MyRestRequest</tt>, the default response class would be <tt>MyRestDispatcher</tt>.
+	 * For <tt>MyRestRequest</tt>, the default response class would be
+	 * <tt>MyRestDispatcher</tt>.
 	 */
 	String dispatcherClass() default "";
-	
+
 	/**
-	 * Flag to indicate if the REST processing actor will attempt to 
-	 * deseralize the raw request body.
+	 * Flag to indicate if the REST processing actor will attempt to deseralize
+	 * the raw request body.
 	 * <p>
 	 * This is not generally required so it defaults to `false`.
 	 * </p>
 	 * <p>
-	 * If set to `true`, the `SockoEvent` associated with the request will
-	 * be made available in `RestRequestEvents`.
+	 * If set to `true`, the `SockoEvent` associated with the request will be
+	 * made available in `RestRequestEvents`.
 	 * </p>
 	 */
 	boolean customDeserialization() default false;
-	
+
 	/**
-	 * Flag to indicate if the REST processing actor will attempt to 
-	 * seralize the response.
+	 * Flag to indicate if the REST processing actor will attempt to seralize
+	 * the response.
 	 * <p>
 	 * This is not generally required so it defaults to `false`.
 	 * </p>
 	 * <p>
-	 * If set to `true`, the `SockoEvent` associated with the request will
-	 * be made available in `RestRequestEvents`. You can use that event
-	 * to write data directly to the caller.
+	 * If set to `true`, the `SockoEvent` associated with the request will be
+	 * made available in `RestRequestEvents`. You can use that event to write
+	 * data directly to the caller.
 	 * </p>
 	 */
 	boolean customSerialization() default false;
-	
+
 	/**
-	 * Optional name used for the convenience of the UI and client code generator. 
+	 * Optional name used for the convenience of the UI and client code
+	 * generator.
 	 * 
-	 * If empty, the name of the request class without the `Request` suffix 
-	 * will be used.
+	 * If empty, the name of the request class without the `Request` suffix will
+	 * be used.
 	 */
 	String name() default "";
 
@@ -102,16 +108,14 @@ public @interface RestGet {
 	String notes() default "";
 
 	/**
-	 * Flag to indicate if this operation is depreciated or not. 
+	 * Flag to indicate if this operation is depreciated or not.
 	 * 
 	 * Defaults to <tt>false</tt>.
 	 */
 	boolean depreciated() default false;
 
 	/**
-	 * Array of error responses in the format <tt>code=reason</tt>
-	 * 
-	 * For example: <tt>400=Username not found</tt>.
+	 * Describes error responses 
 	 */
-	String[] errorResponses() default {};
+	public RestError[] errorResponses() default {};
 }
