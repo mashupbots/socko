@@ -16,20 +16,20 @@
 package org.mashupbots.socko.rest
 
 import java.util.Date
-
 import scala.reflect.runtime.{ universe => ru }
-
 import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
+import akka.actor.ActorSystem
+import akka.actor.ActorRef
 
 class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
   "RestRequestDeserializerSpec" must {
-/*
+    /*
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
     val config = RestConfig("1.0", "/api")
 
@@ -312,72 +312,179 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
   }
 }
 
-  /*
-case class PathParamRequest1(context: RestRequestContext,
-  @RestPath() id: String) extends RestRequest
+case class PathParam1Request(context: RestRequestContext, id: String) extends RestRequest
+object PathParam1RequestDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/pets/{id}"
+  val requestParams = Seq(PathParam("id"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
-case class PathParamRequest2(context: RestRequestContext,
-  @RestPath(name = "aaa", description = "test2") id: Int,
-  @RestPath() format: String) extends RestRequest
+case class PathParam2Request(context: RestRequestContext, id: Int, format: String) extends RestRequest
+object PathParam2RequestDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/pets/{id}/{format}"
+  val requestParams = Seq(PathParam("id", "test2"), PathParam("format"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
-case class PathParamRequest3(context: RestRequestContext,
-  @RestPath() id: Int) extends RestRequest
+case class PathParam3Request(context: RestRequestContext, id: Int) extends RestRequest
+object PathParam3RequestDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/pets/{id}"
+  val requestParams = Seq(PathParam("id", "test2"), PathParam("format"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
-case class QueryStringParamRequest1(context: RestRequestContext,
-  @RestPath() format: String,
-  @RestQuery() number: Int,
-  @RestQuery(name = "string", description = "hello") s: String,
-  @RestQuery() exist: Option[String],
-  @RestQuery() notexist: Option[Int]) extends RestRequest
+case class QueryStringParam1Request(context: RestRequestContext,
+  format: String,
+  number: Int,
+  s: String,
+  exist: Option[String],
+  notexist: Option[Int]) extends RestRequest
+object QueryStringParam1Declaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/pets/{format}"
+  val requestParams = Seq(PathParam("format"),
+    QueryParam("number"),
+    QueryParam("s", "hello", "string"),
+    QueryParam("exist"),
+    QueryParam("notexist"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
-case class HeaderParamRequest1(context: RestRequestContext,
-  @RestPath() format: String,
-  @RestHeader() number: Int,
-  @RestHeader(name = "string", description = "hello") s: String,
-  @RestHeader() exist: Option[String],
-  @RestHeader() notexist: Option[Int]) extends RestRequest
+case class HeaderParam1Request(context: RestRequestContext,
+  format: String,
+  number: Int,
+  s: String,
+  exist: Option[String],
+  notexist: Option[Int]) extends RestRequest
+object HeaderParam1Declaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/pets/{format}"
+  val requestParams = Seq(PathParam("format"),
+    HeaderParam("number"),
+    HeaderParam("s", "hello", "string"),
+    HeaderParam("exist"),
+    HeaderParam("notexist"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
 case class Fish(name: String, age: Int)
-case class BodyParamRequest1(context: RestRequestContext,
-  @RestBody() fish: Option[Fish]) extends RestRequest
+case class BodyParam1Request(context: RestRequestContext, fish: Option[Fish]) extends RestRequest
+object BodyParam1Declaration extends RestDeclaration {
+  val method = Method.PUT
+  val path = "/pets/{format}"
+  val requestParams = Seq(BodyParam("fist"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
 case class AllDataTypeRequest(context: RestRequestContext,
-  @RestHeader() string: String,
-  @RestHeader() int: Int,
-  @RestHeader() byte: Byte,
-  @RestHeader() bool: Boolean,
-  @RestHeader() short: Short,
-  @RestHeader() long: Long,
-  @RestHeader() float: Float,
-  @RestHeader() double: Double,
-  @RestHeader() date: Date) extends RestRequest
+  string: String,
+  int: Int,
+  byte: Byte,
+  bool: Boolean,
+  short: Short,
+  long: Long,
+  float: Float,
+  double: Double,
+  date: Date) extends RestRequest
+object AllDataTypeDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/pets"
+  val requestParams = Seq(
+    HeaderParam("string"),
+    HeaderParam("int"),
+    HeaderParam("byte"),
+    HeaderParam("bool"),
+    HeaderParam("short"),
+    HeaderParam("long"),
+    HeaderParam("float"),
+    HeaderParam("double"),
+    HeaderParam("date"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
 case class AllOptionalDataTypeRequest(context: RestRequestContext,
-  @RestHeader() string: Option[String],
-  @RestHeader() int: Option[Int],
-  @RestHeader() byte: Option[Byte],
-  @RestHeader() bool: Option[Boolean],
-  @RestHeader() short: Option[Short],
-  @RestHeader() long: Option[Long],
-  @RestHeader() float: Option[Float],
-  @RestHeader() double: Option[Double],
-  @RestHeader() date: Option[Date]) extends RestRequest
+  string: Option[String],
+  int: Option[Int],
+  byte: Option[Byte],
+  bool: Option[Boolean],
+  short: Option[Short],
+  long: Option[Long],
+  float: Option[Float],
+  double: Option[Double],
+  date: Option[Date]) extends RestRequest
+object AllOptionalDataTypeDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/pets"
+  val requestParams = Seq(
+    HeaderParam("string"),
+    HeaderParam("int"),
+    HeaderParam("byte"),
+    HeaderParam("bool"),
+    HeaderParam("short"),
+    HeaderParam("long"),
+    HeaderParam("float"),
+    HeaderParam("double"),
+    HeaderParam("date"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
 // Error no parameter binding 
-case class NoParameterAnnotationRequest(context: RestRequestContext, id: String) extends RestRequest
+case class NoParameterRequest(context: RestRequestContext, id: String) extends RestRequest
+object NoParameterDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/pets/{id}"
+  val requestParams = Seq.empty
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
 // Error multi parameter binding 
-case class MultiParameterAnnotationRequest(context: RestRequestContext, @RestHeader()@RestPath() id: String) extends RestRequest
+case class MultiParameterRequest(context: RestRequestContext, id: String) extends RestRequest
+object MultiParameterDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/pets/{id}"
+  val requestParams = Seq(
+    PathParam("id"),
+    HeaderParam("id"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
 // Error - id does not existing in path /path/{format} 
-case class BadPathParameterRequest(context: RestRequestContext, @RestPath() id: String) extends RestRequest
+case class BadPathParameterRequest(context: RestRequestContext, id: String) extends RestRequest
+object BadPathParameterDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/path/{format}"
+  val requestParams = Seq(
+    PathParam("id"),
+    HeaderParam("id"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
 // Error - Cannot bind body to any method other than POST or PUT 
-case class BadBodyBindingRequest(context: RestRequestContext, @RestBody() data: String) extends RestRequest
+case class BadBodyBindingRequest(context: RestRequestContext, data: String) extends RestRequest
+object BadBodyBindingDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/path"
+  val requestParams = Seq(BodyParam("data"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
 // Error first parameter not context type
 case class FirstParamNotContextRequest(id: String, context: RestRequestContext) extends RestRequest
+object FirstParamNotContextDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/path/{id}"
+  val requestParams = Seq(BodyParam("id"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
 // Error first parameter not context
 case class FirstParamNotCalledContextRequest(ccc: RestRequestContext, id: String, context: RestRequestContext) extends RestRequest
-*/
+object FirstParamNotCalledContextDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/path/{id}"
+  val requestParams = Seq(PathParam("id"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}

@@ -239,6 +239,7 @@ object RestResponseSerializer {
       case ResponseDataType.Void => "void"
       case ResponseDataType.Primitive => primitiveTypes.find(e => e._1 =:= contentType.get).get._2.swaggerType
       case ResponseDataType.Object => contentType.get.toString	// TODO fix 
+      case ResponseDataType.URL => "bytes" //not strictly supported      
       case ResponseDataType.Bytes => "bytes" //not strictly supported      
       case _ => throw new IllegalStateException(s"Unrecognised ResponseDataType '${responseDataType}'")
     }
