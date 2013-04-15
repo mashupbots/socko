@@ -15,13 +15,10 @@
 //
 package org.mashupbots.socko.rest.post
 
-import java.util.Date
-
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.rest.RestBody
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestPost
-import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.rest.BodyParam
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -32,8 +29,15 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestPost(path = "/primitive/{status}")
-case class PostPrimitiveRequest(context: RestRequestContext, @RestPath() status: Int, @RestBody() double: Double) extends RestRequest
+object PostPrimitiveDeclaration extends RestDeclaration {
+  val method = Method.POST
+  val path = "/primitive/{status}"
+  val requestParams = Seq(PathParam("status"), BodyParam("double"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[PostPrimitiveProcessor])
+}
+
+case class PostPrimitiveRequest(context: RestRequestContext, status: Int, double: Double) extends RestRequest
 
 case class PostPrimitiveResponse(context: RestResponseContext, data: Double) extends RestResponse
 
@@ -42,18 +46,12 @@ class PostPrimitiveProcessor() extends Actor with akka.actor.ActorLogging {
     case req: PostPrimitiveRequest =>
       if (req.status == 200) {
         sender ! PostPrimitiveResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)),
+          req.context.responseContext(req.status),
           req.double)
       } else {
         sender ! PostPrimitiveResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)), 0)
+          req.context.responseContext(req.status), 0)
       }
       context.stop(self)
-  }
-}
-
-class PostPrimitiveDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[PostPrimitiveProcessor])
   }
 }

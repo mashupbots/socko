@@ -107,22 +107,22 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
         }
       } else {
         // Found operation so build request and dispatch
-        val opDeserializer = op.get.deserializer
-        val opDefinition = op.get.definition
+        val op1 = op.get
+        val opDeserializer = op1.deserializer
         val restRequest = opDeserializer.deserialize(httpRequestEvent)
 
         // Get actor
-        val processingActor = op.get.dispatcher.getActor(context.system, restRequest)
+        val processingActor = op1.declaration.processorActor(context.system, restRequest)
         if (processingActor.isTerminated) {
           throw RestProcessingException(s"Processing actor '${processingActor.path}' for '${opDeserializer.requestClass.fullName}' is terminated")
         }
 
         // Cache the request event. It will be automatically removed after a period of time (10 seconds)
-        if (opDefinition.accessSockoEvent) {
+        if (op1.accessSockoEvent) {
           RestRequestEvents.put(restRequest.context, httpRequestEvent)
         }
 
-        if (opDefinition.customSerialization) {
+        if (op1.declaration.customSerialization) {
           // Custom serialization so no need to wait for a response to serialize
           processingActor ! restRequest
           stop(FSM.Normal)

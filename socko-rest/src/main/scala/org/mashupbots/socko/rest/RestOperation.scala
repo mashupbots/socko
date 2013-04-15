@@ -17,6 +17,7 @@ package org.mashupbots.socko.rest
 
 import org.mashupbots.socko.infrastructure.Logger
 import scala.reflect.runtime.{ universe => ru }
+import org.mashupbots.socko.events.EndPoint
 
 /**
  * A REST operation processes data in the following manner:
@@ -25,17 +26,22 @@ import scala.reflect.runtime.{ universe => ru }
  *  - actor returns a [[org.mashupbots.socko.rest.RestResponse]]
  *  - serializes [[org.mashupbots.socko.rest.RestResponse]] and returns the result to the caller
  *
- * @param definition Meta data describing the operation
- * @param dispatcher Locates the actor to which a [[org.mashupbots.socko.rest.RestRequest]] will be sent 
- *   for processing
+ * @param declaration Meta data describing the operation
+ * @param endPoint HTTP method and path unique to this operation
  * @param deserializer Deserializes incoming data into a [[org.mashupbots.socko.rest.RestRequest]]
  * @param serializer Serializes a [[org.mashupbots.socko.rest.RestResponse]] class to send to the client
  */
 case class RestOperation(
-  definition: RestOperationDef,
-  dispatcher: RestDispatcher,
+  declaration: RestDeclaration,
+  endPoint: RestEndPoint,
   deserializer: RestRequestDeserializer,
   serializer: RestResponseSerializer) {
+
+  /**
+   * Denotes if [[org.mashupbots.socko.events.SockoEvent]] is to be made
+   * accessible from [[org.mashupbots.socko.rest.RestRequestEvents]].
+   */
+  val accessSockoEvent = declaration.customDeserialization || declaration.customSerialization
 
 }
 

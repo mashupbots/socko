@@ -17,10 +17,9 @@ package org.mashupbots.socko.rest.get
 
 import java.util.Date
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestGet
-import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -31,8 +30,15 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(path = "/error/{error}")
-case class GetWithErrorsRequest(context: RestRequestContext, @RestPath() error: String) extends RestRequest
+object GetWithErrorsDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/error/{error}"
+  val requestParams = Seq(PathParam("error"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[GetWithErrorsProcessor])
+}
+
+case class GetWithErrorsRequest(context: RestRequestContext, error: String) extends RestRequest
 
 case class GetWithErrorsResponse(context: RestResponseContext, data: Option[Date]) extends RestResponse
 
@@ -44,11 +50,5 @@ class GetWithErrorsProcessor() extends Actor with akka.actor.ActorLogging {
         case "timeout" => log.debug("do nothing so we timeout")
       }
       context.stop(self)
-  }
-}
-
-class GetWithErrorsDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[GetWithErrorsProcessor])
   }
 }

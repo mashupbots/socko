@@ -15,14 +15,11 @@
 //
 package org.mashupbots.socko.rest.petshop
 
-import org.mashupbots.socko.rest.RestBody
-import org.mashupbots.socko.rest.RestDelete
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestGet
-import org.mashupbots.socko.rest.RestPath
-import org.mashupbots.socko.rest.RestPost
-import org.mashupbots.socko.rest.RestPut
-import org.mashupbots.socko.rest.RestQuery
+import org.mashupbots.socko.rest.BodyParam
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.QueryParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -41,40 +38,76 @@ case class User(
   firstName: String,
   password: String)
 
-class UserDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+case class CreateUserWithArrayRequest(context: RestRequestContext, users: Array[User]) extends RestRequest
+case class CreateUserWithArrayResponse(context: RestResponseContext) extends RestResponse
+object CreateUserWithArrayDeclaration extends RestDeclaration {
+  val method = Method.POST
+  val path = "/user/createWithArray"
+  val requestParams = Seq(PathParam("users"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
-@RestPost(path = "/user/createWithArray", dispatcherClass = "UserDispatcher")
-case class CreateUserWithArrayRequest(context: RestRequestContext, @RestBody() users: Array[User]) extends RestRequest
-case class CreateUserWithArrayResponse(context: RestResponseContext) extends RestResponse
-
-@RestPost(path = "/user", dispatcherClass = "UserDispatcher")
-case class CreateUserRequest(context: RestRequestContext, @RestBody() user: User) extends RestRequest
+case class CreateUserRequest(context: RestRequestContext, user: User) extends RestRequest
 case class CreateUserResponse(context: RestResponseContext) extends RestResponse
+object CreateUserDeclaration extends RestDeclaration {
+  val method = Method.POST
+  val path = "/user"
+  val requestParams = Seq(PathParam("user"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
-@RestPost(path = "/user/createWithList", dispatcherClass = "UserDispatcher")
-case class CreateUserWithListRequest(context: RestRequestContext, @RestBody() users: Seq[User]) extends RestRequest
+case class CreateUserWithListRequest(context: RestRequestContext, users: Seq[User]) extends RestRequest
 case class CreateUserWithListResponse(context: RestResponseContext) extends RestResponse
+object CreateUserWithListDeclaration extends RestDeclaration {
+  val method = Method.POST
+  val path = "/user/createWithList"
+  val requestParams = Seq(PathParam("users"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
-@RestPut(path = "/user/{username}", dispatcherClass = "UserDispatcher")
-case class UpdateUserRequest(context: RestRequestContext, @RestPath() username: String, @RestBody() user: User) extends RestRequest
+case class UpdateUserRequest(context: RestRequestContext, username: String, user: User) extends RestRequest
 case class UpdateUserResponse(context: RestResponseContext) extends RestResponse
+object UpdateUserDeclaration extends RestDeclaration {
+  val method = Method.PUT
+  val path = "/user/{username}"
+  val requestParams = Seq(PathParam("username"), BodyParam("user"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
-@RestDelete(path = "/user/{username}", dispatcherClass = "UserDispatcher")
-case class DeleteUserRequest(context: RestRequestContext, @RestPath() username: String) extends RestRequest
+case class DeleteUserRequest(context: RestRequestContext, username: String) extends RestRequest
 case class DeleteUserResponse(context: RestResponseContext) extends RestResponse
+object DeleteUserDeclaration extends RestDeclaration {
+  val method = Method.DELETE
+  val path = "/user/{username}"
+  val requestParams = Seq(PathParam("username"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
-@RestGet(path = "/user/{username}", dispatcherClass = "UserDispatcher")
-case class GetUserRequest(context: RestRequestContext, @RestPath() username: String) extends RestRequest
+case class GetUserRequest(context: RestRequestContext, username: String) extends RestRequest
 case class GetUserResponse(context: RestResponseContext, user: Option[User]) extends RestResponse
+object GetUserDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/user/{username}"
+  val requestParams = Seq(PathParam("username"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
-@RestGet(path = "/user/login", dispatcherClass = "UserDispatcher")
-case class LoginRequest(context: RestRequestContext, @RestQuery() username: String, @RestQuery() password: String) extends RestRequest
+case class LoginRequest(context: RestRequestContext, username: String, password: String) extends RestRequest
 case class LoginResponse(context: RestResponseContext, result: String) extends RestResponse
+object LoginDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/user/login"
+  val requestParams = Seq(QueryParam("username"), QueryParam("password"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
-@RestGet(path = "/user/logout", dispatcherClass = "UserDispatcher")
 case class LogoutRequest(context: RestRequestContext) extends RestRequest
 case class LogoutResponse(context: RestResponseContext) extends RestResponse
+object LogoutDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/user/logout"
+  val requestParams = Seq.empty
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
 

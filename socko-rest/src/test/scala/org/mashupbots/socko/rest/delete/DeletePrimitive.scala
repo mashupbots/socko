@@ -17,10 +17,9 @@ package org.mashupbots.socko.rest.delete
 
 import java.util.Date
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestDelete
-import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -31,8 +30,15 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestDelete(path = "/primitive/{status}")
-case class DeletePrimitiveRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
+object DeletePrimitiveDeclaration extends RestDeclaration {
+  val method = Method.PUT
+  val path = "/primitive/{status}"
+  val requestParams = Seq(PathParam("status"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[DeletePrimitiveProcessor])
+}
+
+case class DeletePrimitiveRequest(context: RestRequestContext, status: Int) extends RestRequest
 
 case class DeletePrimitiveResponse(context: RestResponseContext, data: Option[Date]) extends RestResponse
 
@@ -41,18 +47,13 @@ class DeletePrimitiveProcessor() extends Actor with akka.actor.ActorLogging {
     case req: DeletePrimitiveRequest =>
       if (req.status == 200) {
         sender ! DeletePrimitiveResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)),
+          req.context.responseContext(req.status),
           Some(new Date()))
       } else {
         sender ! DeletePrimitiveResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)), None)
+          req.context.responseContext(req.status), None)
       }
       context.stop(self)
   }
 }
 
-class DeletePrimitiveDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[DeletePrimitiveProcessor])
-  }
-}

@@ -23,7 +23,7 @@ import org.mashupbots.socko.infrastructure.ConfigUtil
  * Configuration for REST handler
  *
  * @param apiVersion the version of your API
- * @param rootUrl Root url path to your API without the protocol, domain and port. For example, `/api`.
+ * @param rootPath Root path to your API without the protocol, domain and port. For example, `/api`.
  * @param swaggerVersion Swagger definition version
  * @param swaggerApiGroupingPathSegment Path segments to group APIs by. Default is `1` which refers to the first
  *   relative path segment.
@@ -49,7 +49,7 @@ import org.mashupbots.socko.infrastructure.ConfigUtil
  */
 case class RestConfig(
   apiVersion: String,
-  rootUrl: String,
+  rootPath: String,
   swaggerVersion: String = "1.1",
   swaggerApiGroupingPathSegment: Int = 1,
   requestTimeoutSeconds: Int = 60,
@@ -62,7 +62,7 @@ case class RestConfig(
    */
   def this(config: Config, prefix: String) = this(
     config.getString(prefix + ".api-version"),
-    config.getString(prefix + ".root-url"),
+    config.getString(prefix + ".root-path"),
     ConfigUtil.getString(config, prefix + ".swagger-version", "1.1"),
     ConfigUtil.getInt(config, prefix + ".swagger-api-grouping-path-segment", 1),
     ConfigUtil.getInt(config, prefix + ".request-timeout-seconds", 60),

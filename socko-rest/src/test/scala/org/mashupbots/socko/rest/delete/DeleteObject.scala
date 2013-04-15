@@ -15,10 +15,10 @@
 //
 package org.mashupbots.socko.rest.delete
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestDelete
-import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.rest.BodyParam
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -29,8 +29,15 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestDelete(path = "/object/{status}")
-case class DeleteObjectRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
+object DeleteObjectDeclaration extends RestDeclaration {
+  val method = Method.DELETE
+  val path = "/object/{status}"
+  val requestParams = Seq(PathParam("status"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[DeleteObjectProcessor])
+}
+
+case class DeleteObjectRequest(context: RestRequestContext, status: Int) extends RestRequest
 
 case class Pet(name: String, age: Int)
 case class DeleteObjectResponse(context: RestResponseContext, pet: Option[Pet]) extends RestResponse
@@ -40,19 +47,13 @@ class DeleteObjectProcessor() extends Actor with akka.actor.ActorLogging {
     case req: DeleteObjectRequest =>
       if (req.status == 200) {
         sender ! DeleteObjectResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)),
+          req.context.responseContext(req.status),
           Some(Pet("Boo", 5)))
       } else {
         sender ! DeleteObjectResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)),
+          req.context.responseContext(req.status),
           None)
       }
       context.stop(self)
-  }
-}
-
-class DeleteObjectDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[DeleteObjectProcessor])
   }
 }

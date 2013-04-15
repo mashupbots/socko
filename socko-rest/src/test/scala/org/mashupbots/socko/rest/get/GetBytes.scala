@@ -15,11 +15,10 @@
 //
 package org.mashupbots.socko.rest.get
 
-import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.infrastructure.CharsetUtil
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestGet
-import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -30,8 +29,15 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(path = "/bytes/{status}")
-case class GetBytesRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
+object GetBytesDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/bytes/{status}"
+  val requestParams = Seq(PathParam("status"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[GetBytesProcessor])
+}
+
+case class GetBytesRequest(context: RestRequestContext, status: Int) extends RestRequest
 
 case class GetBytesResponse(context: RestResponseContext, data: Seq[Byte]) extends RestResponse
 
@@ -40,18 +46,12 @@ class GetBytesProcessor() extends Actor with akka.actor.ActorLogging {
     case req: GetBytesRequest =>
       if (req.status == 200) {
         sender ! GetBytesResponse(
-          req.context.responseContext(HttpResponseStatus(req.status), Map("Content-Type" -> "text/plain; charset=UTF-8")),
+          req.context.responseContext(req.status, Map("Content-Type" -> "text/plain; charset=UTF-8")),
           "hello everybody".getBytes(CharsetUtil.UTF_8))
       } else {
         sender ! GetBytesResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)), Seq.empty)
+          req.context.responseContext(req.status), Seq.empty)
       }
       context.stop(self)
-  }
-}
-
-class GetBytesDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[GetBytesProcessor])
   }
 }

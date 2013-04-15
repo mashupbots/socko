@@ -60,8 +60,8 @@ case class RestRequestContext(
    * @param status HTTP status of the response
    * @returns [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this context
    */
-  def responseContext(status: HttpResponseStatus): RestResponseContext = {
-    RestResponseContext(this, status, Map.empty)
+  def responseContext(status: Int): RestResponseContext = {
+    RestResponseContext(this, HttpResponseStatus(status), Map.empty)
   }
 
   /**
@@ -72,9 +72,10 @@ case class RestRequestContext(
    * @param headers HTTP response headers
    * @returns [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this context
    */
-  def responseContext(status: HttpResponseStatus, headers: Map[String, String]): RestResponseContext = {
-    RestResponseContext(this, status, headers)
-  }
+  def responseContext(status: Int, headers: Map[String, String]): RestResponseContext = {
+    RestResponseContext(this, HttpResponseStatus(status), headers)
+  } 
+  
 }
 
 /**

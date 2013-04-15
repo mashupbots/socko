@@ -15,10 +15,9 @@
 //
 package org.mashupbots.socko.rest.get
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestGet
-import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -29,22 +28,23 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(path = "/void/{status}")
-case class GetVoidRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
+object GetVoidDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/void/{status}"
+  val requestParams = Seq(PathParam("status"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[GetVoidProcessor])
+}
+
+case class GetVoidRequest(context: RestRequestContext, status: Int) extends RestRequest
 
 case class GetVoidResponse(context: RestResponseContext) extends RestResponse
 
 class GetVoidProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
     case req: GetVoidRequest =>
-      sender ! GetVoidResponse(req.context.responseContext(HttpResponseStatus(req.status)))
+      sender ! GetVoidResponse(req.context.responseContext(req.status))
       context.stop(self)
   }
-}
-
-class GetVoidDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[GetVoidProcessor])
-  }  
 }
 

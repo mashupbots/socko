@@ -31,7 +31,7 @@ import org.scalatest.matchers.MustMatchers
 class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
   "RestResponseSerializerSpec" must {
-
+/*
     val config = RestConfig("1.0", "/api")
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
     val requestContext = RestRequestContext(EndPoint("GET", "localhost", "/path/1234"), Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
@@ -167,8 +167,13 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
     }
     
   }
+  * 
+  * 
+  */
+  }
 }
 
+  /*
 case class VoidResponse(context: RestResponseContext) extends RestResponse
 
 case class StringResponse(context: RestResponseContext, data: String) extends RestResponse
@@ -190,3 +195,4 @@ case class NoParamsResponse() extends RestResponse {
 // Error first parameter not called context
 case class FirstParamNotCalledContextResponse(id: String, context: RestResponseContext) extends RestResponse
 
+*/

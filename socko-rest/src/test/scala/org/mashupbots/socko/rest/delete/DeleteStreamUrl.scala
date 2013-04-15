@@ -17,11 +17,10 @@ package org.mashupbots.socko.rest.delete
 
 import java.net.URL
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestDelete
-import org.mashupbots.socko.rest.RestPath
-import org.mashupbots.socko.rest.RestQuery
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.QueryParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -32,10 +31,17 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestDelete(path = "/streamurl/{status}")
+object DeleteStreamDeclaration extends RestDeclaration {
+  val method = Method.DELETE
+  val path = "/streamurl/{status}"
+  val requestParams = Seq(PathParam("status"), QueryParam("sourceURL"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[DeleteStreamUrlProcessor])
+}
+
 case class DeleteStreamUrlRequest(context: RestRequestContext,
-  @RestPath() status: Int,
-  @RestQuery() sourceURL: String) extends RestRequest
+  status: Int,
+  sourceURL: String) extends RestRequest
 
 case class DeleteStreamUrlResponse(context: RestResponseContext, data: URL) extends RestResponse
 
@@ -44,18 +50,12 @@ class DeleteStreamUrlProcessor() extends Actor with akka.actor.ActorLogging {
     case req: DeleteStreamUrlRequest =>
       if (req.status == 200) {
         sender ! DeleteStreamUrlResponse(
-          req.context.responseContext(HttpResponseStatus(req.status), Map("Content-Type" -> "text/plain; charset=UTF-8")),
+          req.context.responseContext(req.status, Map("Content-Type" -> "text/plain; charset=UTF-8")),
           new URL(req.sourceURL))
       } else {
         sender ! DeleteStreamUrlResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)), null)
+          req.context.responseContext(req.status), null)
       }
       context.stop(self)
-  }
-}
-
-class DeleteStreamUrlDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[DeleteStreamUrlProcessor])
   }
 }

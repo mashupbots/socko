@@ -15,30 +15,35 @@
 //
 package org.mashupbots.socko.rest.test2
 
-import org.mashupbots.socko.rest.RestGet
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
+
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
-import org.mashupbots.socko.rest.RestDispatcher
 
-@RestGet(path = "/pets")
 case class GetPets1Request(context: RestRequestContext) extends RestRequest
 
 case class GetPets1Response(context: RestResponseContext) extends RestResponse
 
-case class GetPets1Dispatcher() extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+object GetPets1Declaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/pets"
+  val requestParams = Seq.empty
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
 // A duplicate of the above end point address
-@RestGet(path = "/pets")
-case class GetPets2Request(context: RestRequestContext) extends RestRequest 
+case class GetPets2Request(context: RestRequestContext) extends RestRequest
 
-case class GetPets2Response(context: RestResponseContext) extends RestResponse 
+case class GetPets2Response(context: RestResponseContext) extends RestResponse
 
-class GetPets2Dispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+object GetPets2Declaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/pets"
+  val requestParams = Seq.empty
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }

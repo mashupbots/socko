@@ -15,12 +15,10 @@
 //
 package org.mashupbots.socko.rest.put
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.infrastructure.CharsetUtil
-import org.mashupbots.socko.rest.RestBody
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestPut
-import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.rest.BodyParam
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -31,8 +29,15 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestPut(path = "/bytes/{status}")
-case class PutBytesRequest(context: RestRequestContext, @RestPath() status: Int, @RestBody() bytes: Seq[Byte]) extends RestRequest
+object PutBytesDeclaration extends RestDeclaration {
+  val method = Method.PUT
+  val path = "/bytes/{status}"
+  val requestParams = Seq(PathParam("status"), BodyParam("bytes"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[PutBytesProcessor])
+}
+
+case class PutBytesRequest(context: RestRequestContext, status: Int, bytes: Seq[Byte]) extends RestRequest
 
 case class PutBytesResponse(context: RestResponseContext, data: Seq[Byte]) extends RestResponse
 
@@ -40,16 +45,10 @@ class PutBytesProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
     case req: PutBytesRequest =>
       if (req.status == 200) {
-        sender ! PutBytesResponse(req.context.responseContext(HttpResponseStatus(req.status), Map.empty), req.bytes)
+        sender ! PutBytesResponse(req.context.responseContext(req.status, Map.empty), req.bytes)
       } else {
-        sender ! PutBytesResponse(req.context.responseContext(HttpResponseStatus(req.status)), Seq.empty)
+        sender ! PutBytesResponse(req.context.responseContext(req.status), Seq.empty)
       }
       context.stop(self)
-  }
-}
-
-class PutBytesDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[PutBytesProcessor])
   }
 }

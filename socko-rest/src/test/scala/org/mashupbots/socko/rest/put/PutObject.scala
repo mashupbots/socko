@@ -15,23 +15,31 @@
 //
 package org.mashupbots.socko.rest.put
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.rest.RestBody
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestPut
-import org.mashupbots.socko.rest.RestPath
+import java.util.Date
+
+import org.mashupbots.socko.rest.BodyParam
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
+
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
-import java.util.Date
 
-@RestPut(path = "/object/{status}")
-case class PutObjectRequest(context: RestRequestContext, @RestPath() status: Int, @RestBody() fish: Fish) extends RestRequest
+object PutObjectDeclaration extends RestDeclaration {
+  val method = Method.PUT
+  val path = "/object/{status}"
+  val requestParams = Seq(PathParam("status"), BodyParam("fish"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[PutObjectProcessor])
+}
+
+case class PutObjectRequest(context: RestRequestContext, status: Int, fish: Fish) extends RestRequest
 
 case class Event(date: Date, description: String)
 case class Fish(name: String, age: Int, history: List[Event])
@@ -43,19 +51,14 @@ class PutObjectProcessor() extends Actor with akka.actor.ActorLogging {
     case req: PutObjectRequest =>
       if (req.status == 200) {
         sender ! PutObjectResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)),
+          req.context.responseContext(req.status),
           req.fish)
       } else {
         sender ! PutObjectResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)),
+          req.context.responseContext(req.status),
           null)
       }
       context.stop(self)
   }
 }
 
-class PutObjectDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[PutObjectProcessor])
-  }
-}

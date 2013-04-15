@@ -29,7 +29,7 @@ import org.scalatest.matchers.MustMatchers
 class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
   "RestRequestDeserializerSpec" must {
-
+/*
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
     val config = RestConfig("1.0", "/api")
 
@@ -306,8 +306,13 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       (ctx.timeoutTime.getTime - ctx.startTime.getTime)/1000 must be (config.requestTimeoutSeconds)
     }
   }
+  * 
+  * 
+  */
+  }
 }
 
+  /*
 case class PathParamRequest1(context: RestRequestContext,
   @RestPath() id: String) extends RestRequest
 
@@ -375,3 +380,4 @@ case class FirstParamNotContextRequest(id: String, context: RestRequestContext) 
 
 // Error first parameter not context
 case class FirstParamNotCalledContextRequest(ccc: RestRequestContext, id: String, context: RestRequestContext) extends RestRequest
+*/

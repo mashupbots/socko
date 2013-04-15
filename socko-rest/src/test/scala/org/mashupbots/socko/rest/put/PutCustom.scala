@@ -15,24 +15,28 @@
 //
 package org.mashupbots.socko.rest.put
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.infrastructure.CharsetUtil
-import org.mashupbots.socko.rest.RestBody
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestPut
-import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.events.HttpRequestEvent
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
-import org.mashupbots.socko.rest.RestResponse
-import org.mashupbots.socko.rest.RestResponseContext
+import org.mashupbots.socko.rest.RestRequestEvents
+
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
-import org.mashupbots.socko.events.HttpRequestEvent
-import org.mashupbots.socko.rest.RestRequestEvents
 
-@RestPut(path = "/custom", customDeserialization = true, customSerialization = true)
+object PutCustomDeclaration extends RestDeclaration {
+  val method = Method.PUT
+  val path = "/custom"
+  val requestParams = Seq.empty
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[PutCustomProcessor])
+  override val customDeserialization = true
+  override val customSerialization = true
+}
+
 case class PutCustomRequest(context: RestRequestContext) extends RestRequest
 
 // Note that response is not required because `customSerialization = true`
@@ -46,8 +50,3 @@ class PutCustomProcessor() extends Actor with akka.actor.ActorLogging {
   }
 }
 
-class PutCustomDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[PutCustomProcessor])
-  }
-}

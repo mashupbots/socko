@@ -15,21 +15,19 @@
 //
 package org.mashupbots.socko.rest.petshop
 
-import org.mashupbots.socko.rest.RestBody
-import org.mashupbots.socko.rest.RestDelete
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestGet
-import org.mashupbots.socko.rest.RestPath
-import org.mashupbots.socko.rest.RestPost
-import org.mashupbots.socko.rest.RestPut
-import org.mashupbots.socko.rest.RestQuery
+import java.util.Date
+
+import org.mashupbots.socko.rest.BodyParam
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
+
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
-import java.util.Date
 
 case class Order(
   id: Long,
@@ -38,20 +36,31 @@ case class Order(
   quantity: Int,
   shipDate: Date)
 
-class StoreDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+case class GetOrderRequest(context: RestRequestContext, orderId: String) extends RestRequest
+case class GetOrderResponse(context: RestResponseContext, order: Option[Order]) extends RestResponse
+object GetOrderDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/store/order/{orderId}"
+  val requestParams = Seq(PathParam("orderId"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
-@RestGet(path = "/store/order/{orderId}", dispatcherClass = "UserDispatcher")
-case class GetOrderRequest(context: RestRequestContext, @RestPath() orderId: String) extends RestRequest
-case class GetOrderResponse(context: RestResponseContext, order: Option[Order]) extends RestResponse
-
-@RestDelete(path = "/store/order/{orderId}", dispatcherClass = "StoreDispatcher")
-case class DeleteOrderRequest(context: RestRequestContext, @RestPath() orderId: String) extends RestRequest
+case class DeleteOrderRequest(context: RestRequestContext, orderId: String) extends RestRequest
 case class DeleteOrderResponse(context: RestResponseContext) extends RestResponse
+object DeleteOrderDeclaration extends RestDeclaration {
+  val method = Method.DELETE
+  val path = "/store/order/{orderId}"
+  val requestParams = Seq(PathParam("orderId"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
-@RestPost(path = "/store/order", dispatcherClass = "StoreDispatcher")
-case class PlaceOrderRequest(context: RestRequestContext, @RestBody() order: Order) extends RestRequest
-case class PlaceOrderResponse(context: RestResponseContext) extends RestResponse    
+case class PlaceOrderRequest(context: RestRequestContext, order: Order) extends RestRequest
+case class PlaceOrderResponse(context: RestResponseContext) extends RestResponse
+object PostOrderDeclaration extends RestDeclaration {
+  val method = Method.POST
+  val path = "/store/order"
+  val requestParams = Seq(BodyParam("order"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
 
 

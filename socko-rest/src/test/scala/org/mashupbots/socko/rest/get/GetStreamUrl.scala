@@ -17,11 +17,10 @@ package org.mashupbots.socko.rest.get
 
 import java.net.URL
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestGet
-import org.mashupbots.socko.rest.RestPath
-import org.mashupbots.socko.rest.RestQuery
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.QueryParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -32,11 +31,17 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(path = "/streamurl/{status}")
-case class GetStreamUrlRequest(context: RestRequestContext,
-  @RestPath() status: Int,
-  @RestQuery() sourceURL: String) extends RestRequest
+object GetStreamDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/streamurl/{status}"
+  val requestParams = Seq(PathParam("status"), QueryParam("sourceURL"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[GetStreamUrlProcessor])
+}
 
+case class GetStreamUrlRequest(context: RestRequestContext,
+  status: Int,
+  sourceURL: String) extends RestRequest
 case class GetStreamUrlResponse(context: RestResponseContext, data: URL) extends RestResponse
 
 class GetStreamUrlProcessor() extends Actor with akka.actor.ActorLogging {
@@ -44,18 +49,13 @@ class GetStreamUrlProcessor() extends Actor with akka.actor.ActorLogging {
     case req: GetStreamUrlRequest =>
       if (req.status == 200) {
         sender ! GetStreamUrlResponse(
-          req.context.responseContext(HttpResponseStatus(req.status), Map("Content-Type" -> "text/plain; charset=UTF-8")),
+          req.context.responseContext(req.status, Map("Content-Type" -> "text/plain; charset=UTF-8")),
           new URL(req.sourceURL))
       } else {
         sender ! GetStreamUrlResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)), null)
+          req.context.responseContext(req.status), null)
       }
       context.stop(self)
   }
 }
 
-class GetStreamUrlDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[GetStreamUrlProcessor])
-  }
-}

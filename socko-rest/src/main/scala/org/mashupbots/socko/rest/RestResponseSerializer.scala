@@ -160,45 +160,26 @@ object RestResponseSerializer {
     else DateUtil.formatISO8601UTCDateTime(ss.get)
   }
 
-  private val primitiveTypes: Map[ru.Type, (Any) => String] = Map(
-    (ru.typeOf[String], (s: Any) => s.toString),
-    (ru.typeOf[Option[String]], (s: Any) => optionToString(s)),
-    (ru.typeOf[Int], (s: Any) => s.toString),
-    (ru.typeOf[Option[Int]], (s: Any) => optionToString(s)),
-    (ru.typeOf[Boolean], (s: Any) => s.toString),
-    (ru.typeOf[Option[Boolean]], (s: Any) => optionToString(s)),
-    (ru.typeOf[Byte], (s: Any) => s.toString),
-    (ru.typeOf[Option[Byte]], (s: Any) => optionToString(s)),
-    (ru.typeOf[Short], (s: Any) => s.toString),
-    (ru.typeOf[Option[Short]], (s: Any) => optionToString(s)),
-    (ru.typeOf[Long], (s: Any) => s.toString),
-    (ru.typeOf[Option[Long]], (s: Any) => optionToString(s)),
-    (ru.typeOf[Double], (s: Any) => s.toString),
-    (ru.typeOf[Option[Double]], (s: Any) => optionToString(s)),
-    (ru.typeOf[Float], (s: Any) => s.toString),
-    (ru.typeOf[Option[Float]], (s: Any) => optionToString(s)),
-    (ru.typeOf[Date], (s: Any) => DateUtil.formatISO8601UTCDateTime(s.asInstanceOf[Date])),
-    (ru.typeOf[Option[Date]], (s: Any) => optionDateToString(s)))
-
-  private val swaggerPrimitiveTypes: Map[ru.Type, String] = Map(
-    (ru.typeOf[String], "string"),
-    (ru.typeOf[Option[String]], "string"),
-    (ru.typeOf[Int], "int"),
-    (ru.typeOf[Option[Int]], "int"),
-    (ru.typeOf[Boolean], "boolean"),
-    (ru.typeOf[Option[Boolean]], "boolean"),
-    (ru.typeOf[Byte], "byte"),
-    (ru.typeOf[Option[Byte]], "byte"),
-    (ru.typeOf[Short], "short"),
-    (ru.typeOf[Option[Short]], "short"),
-    (ru.typeOf[Long], "long"),
-    (ru.typeOf[Option[Long]], "long"),
-    (ru.typeOf[Double], "double"),
-    (ru.typeOf[Option[Double]], "double"),
-    (ru.typeOf[Float], "float"),
-    (ru.typeOf[Option[Float]], "float"),
-    (ru.typeOf[Date], "Date"),
-    (ru.typeOf[Option[Date]], "Date"))
+  case class PrimitiveDetails(serializer: (Any) => String, swaggerType: String)
+  private val primitiveTypes: Map[ru.Type, PrimitiveDetails] = Map(
+    (ru.typeOf[String], PrimitiveDetails((s: Any) => s.toString, "string")),
+    (ru.typeOf[Option[String]], PrimitiveDetails((s: Any) => optionToString(s), "string")),
+    (ru.typeOf[Int], PrimitiveDetails((s: Any) => s.toString, "int")),
+    (ru.typeOf[Option[Int]], PrimitiveDetails((s: Any) => optionToString(s), "int")),
+    (ru.typeOf[Boolean], PrimitiveDetails((s: Any) => s.toString, "boolean")),
+    (ru.typeOf[Option[Boolean]], PrimitiveDetails((s: Any) => optionToString(s), "boolean")),
+    (ru.typeOf[Byte], PrimitiveDetails((s: Any) => s.toString, "byte")),
+    (ru.typeOf[Option[Byte]], PrimitiveDetails((s: Any) => optionToString(s), "byte")),
+    (ru.typeOf[Short], PrimitiveDetails((s: Any) => s.toString, "short")),
+    (ru.typeOf[Option[Short]], PrimitiveDetails((s: Any) => optionToString(s), "short")),
+    (ru.typeOf[Long], PrimitiveDetails((s: Any) => s.toString, "long")),
+    (ru.typeOf[Option[Long]], PrimitiveDetails((s: Any) => optionToString(s), "long")),
+    (ru.typeOf[Double], PrimitiveDetails((s: Any) => s.toString, "double")),
+    (ru.typeOf[Option[Double]], PrimitiveDetails((s: Any) => optionToString(s), "double")),
+    (ru.typeOf[Float], PrimitiveDetails((s: Any) => s.toString, "float")),
+    (ru.typeOf[Option[Float]], PrimitiveDetails((s: Any) => optionToString(s), "float")),
+    (ru.typeOf[Date], PrimitiveDetails((s: Any) => DateUtil.formatISO8601UTCDateTime(s.asInstanceOf[Date]), "date")),
+    (ru.typeOf[Option[Date]], PrimitiveDetails((s: Any) => optionDateToString(s), "date")))
 
   private val bytesType = ru.typeOf[Seq[Byte]]
   private val urlType = ru.typeOf[URL]
@@ -210,10 +191,10 @@ object RestResponseSerializer {
    *
    * @param config REST config
    * @param rm Runtime Mirror with the same class loaders as the specified request class
-   * @param definition Definition of the operation
+   * @param declaration REST declaration
    * @param responseClassSymbol Response class symbol
    */
-  def apply(config: RestConfig, rm: ru.Mirror, definition: RestOperationDef, responseClassSymbol: ru.ClassSymbol): RestResponseSerializer = {
+  def apply(config: RestConfig, rm: ru.Mirror, declaration: RestDeclaration, responseClassSymbol: ru.ClassSymbol): RestResponseSerializer = {
     val responseConstructor: ru.MethodSymbol = responseClassSymbol.toType.declaration(ru.nme.CONSTRUCTOR).asMethod
     val responseConstructorParams: List[ru.TermSymbol] = responseConstructor.paramss(0).map(p => p.asTerm)
 
@@ -251,13 +232,13 @@ object RestResponseSerializer {
     // Cache primitive serializer so we don't have to lookup all the time
     val primitiveSerializer =
       if (responseDataType != ResponseDataType.Primitive) None
-      else Some(primitiveTypes.find(e => e._1 =:= contentType.get).get._2)
+      else Some(primitiveTypes.find(e => e._1 =:= contentType.get).get._2.serializer)
 
     // Set the swagger data type
     val swaggerDataType: String = responseDataType match {
       case ResponseDataType.Void => "void"
-      case ResponseDataType.Primitive => swaggerPrimitiveTypes.find(e => e._1 =:= contentType.get).get._2
-      case ResponseDataType.Object => contentType.get.toString
+      case ResponseDataType.Primitive => primitiveTypes.find(e => e._1 =:= contentType.get).get._2.swaggerType
+      case ResponseDataType.Object => contentType.get.toString	// TODO fix 
       case ResponseDataType.Bytes => "bytes" //not strictly supported      
       case _ => throw new IllegalStateException(s"Unrecognised ResponseDataType '${responseDataType}'")
     }

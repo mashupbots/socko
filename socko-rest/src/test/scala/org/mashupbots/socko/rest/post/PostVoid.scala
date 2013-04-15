@@ -15,11 +15,10 @@
 //
 package org.mashupbots.socko.rest.post
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.rest.RestBody
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestPath
-import org.mashupbots.socko.rest.RestPost
+import org.mashupbots.socko.rest.BodyParam
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -30,22 +29,23 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestPost(path = "/void/{status}")
-case class PostVoidRequest(context: RestRequestContext, @RestPath() status: Int, @RestBody() pet: Pet) extends RestRequest
+object PostVoidDeclaration extends RestDeclaration {
+  val method = Method.POST
+  val path = "/void/{status}"
+  val requestParams = Seq(PathParam("status"), BodyParam("pet"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[PostVoidProcessor])
+}
+
+case class PostVoidRequest(context: RestRequestContext, status: Int, pet: Pet) extends RestRequest
 
 case class PostVoidResponse(context: RestResponseContext) extends RestResponse
 
 class PostVoidProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
     case req: PostVoidRequest =>
-      sender ! PostVoidResponse(req.context.responseContext(HttpResponseStatus(req.status)))
+      sender ! PostVoidResponse(req.context.responseContext(req.status))
       context.stop(self)
-  }
-}
-
-class PostVoidDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[PostVoidProcessor])
   }
 }
 

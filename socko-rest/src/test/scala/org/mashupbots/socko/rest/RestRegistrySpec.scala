@@ -29,6 +29,7 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
 
   "RestRegistry" must {
 
+    /*
     val cfg = RestConfig("1.0", "/api")
     val rm = ru.runtimeMirror(getClass().getClassLoader())
     val classes = ReflectUtil.getClasses(rm.classLoader, "org.mashupbots.socko.rest.test1")
@@ -165,7 +166,35 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
       val hh = x.asInstanceOf[Horse]
       hh.name must be("Boo")
     }
+    */
+    
+    "reflect object" in {
+    	val clz = Class.forName("org.mashupbots.socko.rest.MyObject")
+    	val rm = ru.runtimeMirror(getClass.getClassLoader)
+    	val module = rm.moduleSymbol(clz)
+    	val x = module.isModule
+    	val moduleMirror = rm.reflectModule(module)
+    	
+    	val obj = moduleMirror.instance
+    	
+    	
+    	module.typeSignature <:< ru.typeOf[MyTest] must be (true)
+    	(obj.asInstanceOf[MyTest]).a must be (1)
+    	(obj.asInstanceOf[MyTest]).b must be (3)
+    }
   }
 }
 
 case class Horse(name: String, age: Int)
+
+abstract class MyTest {
+  def a: Int
+  val b = 2
+}
+
+object MyObject extends MyTest {
+  val a = 1
+  override val b = 3
+}
+
+case class MyObject (b: Int)

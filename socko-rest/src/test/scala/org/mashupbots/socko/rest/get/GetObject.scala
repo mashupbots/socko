@@ -15,10 +15,9 @@
 //
 package org.mashupbots.socko.rest.get
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestGet
-import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -29,8 +28,15 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestGet(path = "/object/{status}")
-case class GetObjectRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
+object GetObjectDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/object/{status}"
+  val requestParams = Seq(PathParam("status"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[GetObjectProcessor])
+}
+
+case class GetObjectRequest(context: RestRequestContext, status: Int) extends RestRequest
 
 case class Pet(name: String, age: Int)
 case class GetObjectResponse(context: RestResponseContext, pet: Option[Pet]) extends RestResponse
@@ -40,19 +46,14 @@ class GetObjectProcessor() extends Actor with akka.actor.ActorLogging {
     case req: GetObjectRequest =>
       if (req.status == 200) {
         sender ! GetObjectResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)),
+          req.context.responseContext(req.status),
           Some(Pet("Boo", 5)))
       } else {
         sender ! GetObjectResponse(
-          req.context.responseContext(HttpResponseStatus(req.status)),
+          req.context.responseContext(req.status),
           None)
       }
       context.stop(self)
   }
 }
 
-class GetObjectDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[GetObjectProcessor])
-  }
-}

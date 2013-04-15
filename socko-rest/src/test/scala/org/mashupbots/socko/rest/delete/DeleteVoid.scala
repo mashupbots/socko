@@ -15,10 +15,9 @@
 //
 package org.mashupbots.socko.rest.delete
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestDelete
-import org.mashupbots.socko.rest.RestPath
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -29,22 +28,23 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-@RestDelete(path = "/void/{status}")
-case class DeleteVoidRequest(context: RestRequestContext, @RestPath() status: Int) extends RestRequest
+object DeleteVoidDeclaration extends RestDeclaration {
+  val method = Method.DELETE
+  val path = "/void/{status}"
+  val requestParams = Seq(PathParam("status"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[DeleteVoidProcessor])
+}
+
+case class DeleteVoidRequest(context: RestRequestContext, status: Int) extends RestRequest
 
 case class DeleteVoidResponse(context: RestResponseContext) extends RestResponse
 
 class DeleteVoidProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
     case req: DeleteVoidRequest =>
-      sender ! DeleteVoidResponse(req.context.responseContext(HttpResponseStatus(req.status)))
+      sender ! DeleteVoidResponse(req.context.responseContext(req.status))
       context.stop(self)
   }
-}
-
-class DeleteVoidDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = {
-    actorSystem.actorOf(Props[DeleteVoidProcessor])
-  }  
 }
 

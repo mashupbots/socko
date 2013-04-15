@@ -44,10 +44,10 @@ object RestApiDocGenerator extends Logger {
     // Group operations into resources based on path segments
     val apisMap: Map[String, Seq[RestOperation]] = operations.groupBy(o => {
       // Get number of path segments specified in config for grouping
-      val pathSegements = if (o.definition.relativePathSegments.size <= config.swaggerApiGroupingPathSegment) {
-        o.definition.relativePathSegments
+      val pathSegements = if (o.endPoint.relativePathSegments.size <= config.swaggerApiGroupingPathSegment) {
+        o.endPoint.relativePathSegments
       } else {
-        o.definition.relativePathSegments.take(config.swaggerApiGroupingPathSegment)
+        o.endPoint.relativePathSegments.take(config.swaggerApiGroupingPathSegment)
       }
 
       // Only use static, non-variable, segments as the group by key
@@ -121,7 +121,7 @@ object ResourceListing {
     val resourceListing = ResourceListing(
       config.apiVersion,
       config.swaggerVersion,
-      config.rootUrl,
+      config.rootPath,
       resourceListingApis)
 
     resourceListing
@@ -168,7 +168,7 @@ object APIDeclaration {
    */
   def apply(resourcePath: String, ops: Seq[RestOperation], config: RestConfig): APIDeclaration = {
     // Group by path so we can list the operations
-    val pathGrouping: Map[String, Seq[RestOperation]] = ops.groupBy(op => op.definition.path)
+    val pathGrouping: Map[String, Seq[RestOperation]] = ops.groupBy(op => op.declaration.path)
 
     // Map group to ApiPaths
     val apiPathsMap: Map[String, ApiPath] = pathGrouping.map(f => {
@@ -183,7 +183,7 @@ object APIDeclaration {
     APIDeclaration(
       config.apiVersion,
       config.swaggerVersion,
-      config.rootUrl,
+      config.rootPath,
       resourcePath,
       apiPaths)
   }
@@ -253,15 +253,15 @@ object ApiOperation {
    */
   def apply(op: RestOperation, config: RestConfig): ApiOperation = {
     val params: Seq[ApiParameter] = op.deserializer.requestParamBindings.map(b => ApiParameter(b, config))
-    val errors: Seq[ApiError] = op.definition.errorResponses.map(e => ApiError(e._1, e._2)).toSeq
+    val errors: Seq[ApiError] = op.declaration.errors.map(e => ApiError(e.code, e.reason)).toSeq
 
     ApiOperation(
-      op.definition.method,
-      op.definition.description,
-      op.definition.notes,
-      op.definition.depreciated,
+      op.declaration.method.toString,
+      op.declaration.description,
+      op.declaration.notes,
+      op.declaration.deprecated,
       op.serializer.swaggerDataType,
-      op.definition.name,
+      op.declaration.name,
       params,
       errors.sortBy(e => e.code))
   }
@@ -293,8 +293,8 @@ object ApiParameter {
    */
   def apply(binding: RequestParamBinding, config: RestConfig): ApiParameter = {
     ApiParameter(
-      binding.name,
-      binding.description,
+      binding.declaration.name,
+      binding.declaration.description,
       binding.swaggerParamType,
       binding.swaggerDataType,
       binding.required)

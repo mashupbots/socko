@@ -34,10 +34,10 @@ class RestConfigSpec extends WordSpec with MustMatchers with GivenWhenThen with 
   "RestConfig" must {
 
     "correctly load defaults" in {
-      val cfg = RestConfig(apiVersion = "1", rootUrl = "/api")
+      val cfg = RestConfig(apiVersion = "1", rootPath = "/api")
 
       cfg.apiVersion must be("1")
-      cfg.rootUrl must be("/api")
+      cfg.rootPath must be("/api")
       cfg.swaggerVersion must be("1.1")
       cfg.swaggerApiGroupingPathSegment must be(1)
       cfg.requestTimeoutSeconds must be(60)
@@ -50,7 +50,7 @@ class RestConfigSpec extends WordSpec with MustMatchers with GivenWhenThen with 
       val actorConfig = """
 		my-rest-config {
 		  api-version = "1"
-		  root-url = "/api"
+		  root-path = "/api"
 		  swagger-version = "2"
           swagger-api-grouping-path-segment = 3 
           request-timeout-seconds= 4
@@ -63,7 +63,7 @@ class RestConfigSpec extends WordSpec with MustMatchers with GivenWhenThen with 
       val cfg = MyRestConfig(actorSystem)
 
       cfg.apiVersion must be("1")
-      cfg.rootUrl must be("/api")
+      cfg.rootPath must be("/api")
       cfg.swaggerVersion must be("2")
       cfg.swaggerApiGroupingPathSegment must be(3)
       cfg.requestTimeoutSeconds must be(4)

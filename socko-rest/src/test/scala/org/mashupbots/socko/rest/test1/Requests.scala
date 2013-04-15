@@ -15,90 +15,87 @@
 //
 package org.mashupbots.socko.rest.test1
 
-import org.mashupbots.socko.rest.RestQuery
-import org.mashupbots.socko.rest.RestPath
-import org.mashupbots.socko.rest.RestDelete
-import org.mashupbots.socko.rest.RestGet
-import org.mashupbots.socko.rest.RestPost
-import org.mashupbots.socko.rest.RestPut
+import scala.reflect.runtime.{ universe => ru }
+
+import org.mashupbots.socko.rest.Error
+import org.mashupbots.socko.rest.Method
+import org.mashupbots.socko.rest.PathParam
+import org.mashupbots.socko.rest.QueryParam
+import org.mashupbots.socko.rest.RestDeclaration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
+
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
-import org.mashupbots.socko.rest.RestDispatcher
-import org.mashupbots.socko.rest.RestError
 
-@RestGet(path = "/pets")
 case class GetPetsRequest(context: RestRequestContext) extends RestRequest
 case class GetPetsResponse(context: RestResponseContext) extends RestResponse
-class GetPetsDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+object GetPetsDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/pets"
+  val requestParams = Seq.empty
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
-@RestPost(
-  path = "/dogs1",
-  responseClass = "FunnyNameDogResponse",
-  dispatcherClass = "GetPetsDispatcher")
 case class PostDogs1Request(context: RestRequestContext) extends RestRequest
+object PostDogs1Declaration extends RestDeclaration {
+  val method = Method.POST
+  val path = "/dogs1"
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  val requestParams = Seq.empty
+  override val response = Some(ru.typeOf[FunnyNameDogResponse])
+}
 
-@RestPut(
-  path = "/dogs2",
-  responseClass = "org.mashupbots.socko.rest.test1.FunnyNameDogResponse",
-  dispatcherClass = "org.mashupbots.socko.rest.test1.GetPetsDispatcher",
-  errorResponses = Array(
-    new RestError(code = 400, reason = "username not found"),
-    new RestError(code = 401, reason = "yet another error")))
 case class PutDogs2Request(context: RestRequestContext) extends RestRequest
+object PostDogs2Declaration extends RestDeclaration {
+  val method = Method.PUT
+  val path = "/dogs2"
+  val requestParams = Seq.empty
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  override val response = Some(ru.typeOf[FunnyNameDogResponse])
+  override val errors = Seq(Error(400, "username not found"), Error(401, "yet another error"))
+}
 
 case class FunnyNameDogResponse(context: RestResponseContext) extends RestResponse
 
-@RestDelete(path = "/pets/{id}")
-case class DeletePetsRequest(context: RestRequestContext, @RestPath() id: String) extends RestRequest
+case class DeletePetsRequest(context: RestRequestContext, id: String) extends RestRequest
 case class DeletePetsResponse(context: RestResponseContext, message: String) extends RestResponse
-class DeletePetsDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+object DeletePetsDeclaration extends RestDeclaration {
+  val method = Method.DELETE
+  val path = "/pets/{id}"
+  val requestParams = Seq(PathParam("id"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
 // Error because there is no corresponding response class
-@RestGet(path = "/noresponse", dispatcherClass = "GetPetsProcessorLocator")
 case class NoResponseRequest(context: RestRequestContext) extends RestRequest
-
-// Error because this does not have a @RestGet
-case class NoAnnotationRequest(context: RestRequestContext) extends RestRequest
-
-// Error because parameter binding not annotated
-@RestDelete(path = "/pets/{id}")
-case class NoParameterAnnotationRequest(context: RestRequestContext, id: String) extends RestRequest
-case class NoParameterAnnotationResponse(context: RestResponseContext) extends RestResponse
-class NoParameterAnnotationDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+object NoResponseDeclaration extends RestDeclaration {
+  val method = Method.GET
+  val path = "/noresponse"
+  val requestParams = Seq.empty
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
-// Error because parameter binding annotated more than one
-@RestDelete(path = "/pets/{id}")
-case class MultiParameterAnnotationRequest(context: RestRequestContext, @RestPath()@RestQuery() id: String) extends RestRequest
+// Error because parameter binding specified
+case class NoParameterRequest(context: RestRequestContext, id: String) extends RestRequest
+case class NoParameterResponse(context: RestResponseContext) extends RestResponse
+object NoParameterDeclaration extends RestDeclaration {
+  val method = Method.DELETE
+  val path = "/pets/{id}"
+  val requestParams = Seq.empty
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+}
+
+// Error because parameter bound more than one
+case class MultiParameterAnnotationRequest(context: RestRequestContext, id: String) extends RestRequest
 case class MultiParameterAnnotationResponse(context: RestResponseContext) extends RestResponse
-class MultiParameterAnnotationDispatcher extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
-}
-
-// Error because there is no corresponding response class
-@RestGet(path = "/noresponse", dispatcherClass = "GetPetsProcessorLocator")
-case class NotARequest(context: RestRequestContext)
-
-// Error no dispathcer
-@RestGet(path = "/pets")
-case class GetNoDispatcherRequest(context: RestRequestContext) extends RestRequest
-case class GetNoDispatcherResponse(context: RestResponseContext) extends RestResponse
-
-// Error bad dispathcer because the dispatcher has parameters in the constructor
-@RestGet(path = "/pets")
-case class GetBadDispatcherRequest(context: RestRequestContext) extends RestRequest
-case class GetBadDispatcherResponse(context: RestResponseContext) extends RestResponse
-class GetBadDispatcherDispatcher(param1: String) extends RestDispatcher {
-  def getActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+object MultiParameterDeclaration extends RestDeclaration {
+  val method = Method.DELETE
+  val path = "/pets/{id}"
+  val requestParams = Seq(PathParam("id"), QueryParam("id"))
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
 // Ignored because not a RestRequest
