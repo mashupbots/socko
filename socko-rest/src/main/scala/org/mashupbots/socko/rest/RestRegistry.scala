@@ -176,10 +176,10 @@ object RestRegistry extends Logger {
     val resp = findRestResponse(declaration, rm, clz, classes);
 
     if (declaration.isDefined && req.isDefined && resp.isDefined) {
-      val endPoint = RestEndPoint(declaration.get.method.toString, config.rootPath, declaration.get.path) 
-      val deserializer = RestRequestDeserializer(config, rm, declaration.get, endPoint, req.get.termSymbol.asClass)
-      val serializer = RestResponseSerializer(config, rm, declaration.get, resp.get.termSymbol.asClass)
-      log.debug("Registering {}", clz.getName)
+      val endPoint = RestEndPoint(config, declaration.get) 
+      val deserializer = RestRequestDeserializer(config, rm, declaration.get, endPoint, req.get.typeSymbol.asClass)
+      val serializer = RestResponseSerializer(config, rm, declaration.get, resp.get.typeSymbol.asClass)
+      log.info("Registering {} {} {}", endPoint.method, endPoint.fullPath, clz.getName)
 
       Some(RestOperation(declaration.get, endPoint, deserializer, serializer))
     } else {
@@ -273,9 +273,9 @@ object RestRegistry extends Logger {
         Some(typeNoSerializationRestResponse)
       } else if (declaration.get.response.isEmpty) {
         val responseClassName = replaceDeclarationInName(clz.getName, "Response")
-        val responseClass = classes.find(c => c.getName == responseClassName && rm.classSymbol(c).toType <:< typeRestRequest)
+        val responseClass = classes.find(c => c.getName == responseClassName && rm.classSymbol(c).toType <:< typeRestResponse)
         if (responseClass.isEmpty) {
-          throw RestDefintionException(s"Cannot find corresponding RestRequest '${responseClassName}' for RestDeclaration '${clz.getName}'")
+          throw RestDefintionException(s"Cannot find corresponding RestResponse '${responseClassName}' for RestDeclaration '${clz.getName}'")
         }
         Some(rm.classSymbol(responseClass.get).toType)
       } else {
@@ -286,7 +286,7 @@ object RestRegistry extends Logger {
 
   private def replaceDeclarationInName(requestClassName: String, newSuffix: String): String = {
     if (requestClassName.endsWith("Declaration")) {
-      requestClassName.substring(0, requestClassName.length - 7) + newSuffix
+      requestClassName.substring(0, requestClassName.length - 11) + newSuffix
     } else {
       requestClassName + newSuffix
     }

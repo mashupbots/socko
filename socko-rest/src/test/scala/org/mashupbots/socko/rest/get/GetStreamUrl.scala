@@ -31,7 +31,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-object GetStreamDeclaration extends RestDeclaration {
+object GetStreamUrlDeclaration extends RestDeclaration {
   val method = Method.GET
   val path = "/streamurl/{status}"
   val requestParams = Seq(PathParam("status"), QueryParam("sourceURL"))

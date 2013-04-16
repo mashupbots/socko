@@ -31,7 +31,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-object DeleteStreamDeclaration extends RestDeclaration {
+object DeleteStreamUrlDeclaration extends RestDeclaration {
   val method = Method.DELETE
   val path = "/streamurl/{status}"
   val requestParams = Seq(PathParam("status"), QueryParam("sourceURL"))

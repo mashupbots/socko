@@ -17,10 +17,10 @@ package org.mashupbots.socko.rest
 
 import java.util.Date
 
-import scala.reflect.runtime.{universe => ru}
+import scala.reflect.runtime.{ universe => ru }
 
 import org.json4s.NoTypeHints
-import org.json4s.native.{Serialization => json}
+import org.json4s.native.{ Serialization => json }
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.infrastructure.DateUtil
 
@@ -210,10 +210,11 @@ object RequestParamBinding {
 
     // Check that there is only declaration for the term
     val count = declaration.requestParams.count(p => p.name == paramName)
+    val declarationClassName = declaration.getClass.getName.replace("$", "")
     if (count == 0) {
-      throw RestDefintionException(s"Constructor parameter '${param.name}' of '${requestClassName}' has not bee declared")
+      throw RestDefintionException(s"'${param.name}' in '${requestClassName}' has not been declared in '${declarationClassName}'")
     } else if (count > 1) {
-      throw RestDefintionException(s"Constructor parameter '${param.name}' of '${requestClassName}' has been declared more than once")
+      throw RestDefintionException(s"'${param.name}' in '${requestClassName}' has been declared more than once in '${declarationClassName}'")
     }
 
     val paramDeclaration: RequestParam = declaration.requestParams.find(p => p.name == paramName).get
@@ -224,7 +225,7 @@ object RequestParamBinding {
       case pathParm: PathParam =>
         val idx = endPoint.fullPathSegments.indexWhere(ps => ps.name == paramName && ps.isVariable)
         if (idx == -1) {
-          throw RestDefintionException(s"Constructor parameter '${paramName}' of '${requestClassName}' is not in the path. " +
+          throw RestDefintionException(s"'${paramName}' in '${requestClassName}' is not in the path. " +
             s"'${endPoint.fullPath}' does not contain a variable named '${paramName}'.")
         }
         PathBinding(config, pathParm, param.typeSignature, idx)
@@ -237,7 +238,7 @@ object RequestParamBinding {
 
       case bodyParam: BodyParam =>
         if (endPoint.method != "PUT" && endPoint.method != "POST") {
-          throw RestDefintionException(s"Constructor parameter '${paramName}' of '${requestClassName}' cannot be bound to the request body using a '${endPoint.method}' operation.")
+          throw RestDefintionException(s"'${paramName}' in '${requestClassName}' cannot be bound to the request body using a '${endPoint.method}' operation.")
         }
         val tpe = param.typeSignature
         val tpeCategory = if (primitiveTypes.exists(t => t._1 =:= tpe)) {

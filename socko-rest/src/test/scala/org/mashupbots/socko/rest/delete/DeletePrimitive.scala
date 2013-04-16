@@ -31,7 +31,7 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 
 object DeletePrimitiveDeclaration extends RestDeclaration {
-  val method = Method.PUT
+  val method = Method.DELETE
   val path = "/primitive/{status}"
   val requestParams = Seq(PathParam("status"))
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =

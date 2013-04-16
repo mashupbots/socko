@@ -175,6 +175,21 @@ case class RestEndPoint(
 }
 
 /**
+ * Companion object
+ */
+object RestEndPoint {
+
+  /**
+   * Alternative constructor using configuration and declaration
+   *
+   * @param config REST configuration
+   * @param declaration REST declaration
+   */
+  def apply(config: RestConfig, declaration: RestDeclaration): RestEndPoint =
+    RestEndPoint(declaration.method.toString, config.rootPath, declaration.path)
+}
+
+/**
  * Encapsulates a path segment
  *
  * ==Example Usage==

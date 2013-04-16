@@ -49,7 +49,7 @@ object PostDogs1Declaration extends RestDeclaration {
 }
 
 case class PutDogs2Request(context: RestRequestContext) extends RestRequest
-object PostDogs2Declaration extends RestDeclaration {
+object PutDogs2Declaration extends RestDeclaration {
   val method = Method.PUT
   val path = "/dogs2"
   val requestParams = Seq.empty
@@ -89,8 +89,8 @@ object NoParameterDeclaration extends RestDeclaration {
 }
 
 // Error because parameter bound more than one
-case class MultiParameterAnnotationRequest(context: RestRequestContext, id: String) extends RestRequest
-case class MultiParameterAnnotationResponse(context: RestResponseContext) extends RestResponse
+case class MultiParameterRequest(context: RestRequestContext, id: String) extends RestRequest
+case class MultiParameterResponse(context: RestResponseContext) extends RestResponse
 object MultiParameterDeclaration extends RestDeclaration {
   val method = Method.DELETE
   val path = "/pets/{id}"
