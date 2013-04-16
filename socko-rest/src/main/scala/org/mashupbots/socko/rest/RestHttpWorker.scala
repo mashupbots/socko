@@ -112,7 +112,7 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
         val restRequest = opDeserializer.deserialize(httpRequestEvent)
 
         // Get actor
-        val processingActor = op1.declaration.processorActor(context.system, restRequest)
+        val processingActor = op1.registration.processorActor(context.system, restRequest)
         if (processingActor.isTerminated) {
           throw RestProcessingException(s"Processing actor '${processingActor.path}' for '${opDeserializer.requestClass.fullName}' is terminated")
         }
@@ -122,7 +122,7 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
           RestRequestEvents.put(restRequest.context, httpRequestEvent)
         }
 
-        if (op1.declaration.customSerialization) {
+        if (op1.registration.customSerialization) {
           // Custom serialization so no need to wait for a response to serialize
           processingActor ! restRequest
           stop(FSM.Normal)

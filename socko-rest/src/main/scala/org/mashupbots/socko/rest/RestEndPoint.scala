@@ -180,13 +180,13 @@ case class RestEndPoint(
 object RestEndPoint {
 
   /**
-   * Alternative constructor using configuration and declaration
+   * Alternative constructor using configuration and registration
    *
    * @param config REST configuration
-   * @param declaration REST declaration
+   * @param registration REST registration details
    */
-  def apply(config: RestConfig, declaration: RestDeclaration): RestEndPoint =
-    RestEndPoint(declaration.method.toString, config.rootPath, declaration.path)
+  def apply(config: RestConfig, registration: RestRegistration): RestEndPoint =
+    RestEndPoint(registration.method.toString, config.rootPath, registration.path)
 }
 
 /**

@@ -41,7 +41,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
       val s = RestResponseSerializer(
         config,
         mirror,
-        SerializerGenericDeclaration,
+        SerializerGenericRegistration,
         ru.typeOf[VoidResponse].typeSymbol.asClass)
 
       s.responseDataType must be(ResponseDataType.Void)
@@ -52,7 +52,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
       val s = RestResponseSerializer(
         config,
         mirror,
-        SerializerGenericDeclaration,
+        SerializerGenericRegistration,
         ru.typeOf[StringResponse].typeSymbol.asClass)
 
       s.responseDataType must be(ResponseDataType.Primitive)
@@ -67,7 +67,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
       val s = RestResponseSerializer(
         config,
         mirror,
-        SerializerGenericDeclaration,
+        SerializerGenericRegistration,
         ru.typeOf[OptionalIntResponse].typeSymbol.asClass)
 
       s.responseDataType must be(ResponseDataType.Primitive)
@@ -86,7 +86,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
       val s = RestResponseSerializer(
         config,
         mirror,
-        SerializerGenericDeclaration,
+        SerializerGenericRegistration,
         ru.typeOf[DateResponse].typeSymbol.asClass)
 
       s.responseDataType must be(ResponseDataType.Primitive)
@@ -102,7 +102,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
       val s = RestResponseSerializer(
         config,
         mirror,
-        SerializerGenericDeclaration,
+        SerializerGenericRegistration,
         ru.typeOf[ObjectResponse].typeSymbol.asClass)
 
       s.responseDataType must be(ResponseDataType.Object)
@@ -118,7 +118,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
       val s = RestResponseSerializer(
         config,
         mirror,
-        SerializerGenericDeclaration,
+        SerializerGenericRegistration,
         ru.typeOf[BytesResponse].typeSymbol.asClass)
 
       s.responseDataType must be(ResponseDataType.Bytes)
@@ -133,7 +133,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
       val s = RestResponseSerializer(
         config,
         mirror,
-        SerializerGenericDeclaration,
+        SerializerGenericRegistration,
         ru.typeOf[UrlResponse].typeSymbol.asClass)
 
       s.responseDataType must be(ResponseDataType.URL)
@@ -149,7 +149,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         RestResponseSerializer(
           config,
           mirror,
-          SerializerGenericDeclaration,
+          SerializerGenericRegistration,
           ru.typeOf[FirstParamNotCalledContextResponse].typeSymbol.asClass)
       }
       thrown.getMessage must be("First constructor parameter of 'org.mashupbots.socko.rest.FirstParamNotCalledContextResponse' must be called 'context'.")
@@ -160,7 +160,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         RestResponseSerializer(
           config,
           mirror,
-          SerializerGenericDeclaration,
+          SerializerGenericRegistration,
           ru.typeOf[NoParamsResponse].typeSymbol.asClass)
       }
       thrown.getMessage must be("'org.mashupbots.socko.rest.NoParamsResponse' constructor must have parameters.")
@@ -170,7 +170,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
 
 }
 
-object SerializerGenericDeclaration extends RestDeclaration {
+object SerializerGenericRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pets"
   val requestParams = Seq.empty

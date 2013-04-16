@@ -17,7 +17,7 @@ package org.mashupbots.socko.rest.post
 
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.rest.Method
-import org.mashupbots.socko.rest.RestDeclaration
+import org.mashupbots.socko.rest.RestRegistration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestRequestEvents
@@ -27,7 +27,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-object PostCustomDeclaration extends RestDeclaration {
+object PostCustomRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/custom"
   val requestParams = Seq.empty

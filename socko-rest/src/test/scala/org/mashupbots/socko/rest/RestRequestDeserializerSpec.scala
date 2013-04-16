@@ -36,12 +36,12 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       val d = RestRequestDeserializer(
         config,
         mirror,
-        PathParam1RequestDeclaration,
-        RestEndPoint(config, PathParam1RequestDeclaration),
+        PathParam1RequestRegistration,
+        RestEndPoint(config, PathParam1RequestRegistration),
         ru.typeOf[PathParam1Request].typeSymbol.asClass)
 
       d.requestParamBindings.length must be(1)
-      d.requestParamBindings(0).declaration.name must be("id")
+      d.requestParamBindings(0).registration.name must be("id")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/1234"),
         Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
@@ -53,14 +53,14 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       val d = RestRequestDeserializer(
         config,
         mirror,
-        PathParam2RequestDeclaration,
-        RestEndPoint(config, PathParam2RequestDeclaration),
+        PathParam2RequestRegistration,
+        RestEndPoint(config, PathParam2RequestRegistration),
         ru.typeOf[PathParam2Request].typeSymbol.asClass)
 
       d.requestParamBindings.length must be(2)
-      d.requestParamBindings(0).declaration.name must be("id")
-      d.requestParamBindings(0).declaration.description must be("test2")
-      d.requestParamBindings(1).declaration.name must be("format")
+      d.requestParamBindings(0).registration.name must be("id")
+      d.requestParamBindings(0).registration.description must be("test2")
+      d.requestParamBindings(1).registration.name must be("format")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/5555/stuff/json/1.2/2.2"),
         Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
@@ -73,8 +73,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       val d = RestRequestDeserializer(
         config,
         mirror,
-        PathParam3RequestDeclaration,
-        RestEndPoint(config, PathParam3RequestDeclaration),
+        PathParam3RequestRegistration,
+        RestEndPoint(config, PathParam3RequestRegistration),
         ru.typeOf[PathParam3Request].typeSymbol.asClass)
       d.requestParamBindings.length must be(1)
 
@@ -91,18 +91,18 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       val d = RestRequestDeserializer(
         config,
         mirror,
-        QueryStringParam1Declaration,
-        RestEndPoint(config, QueryStringParam1Declaration),
+        QueryStringParam1Registration,
+        RestEndPoint(config, QueryStringParam1Registration),
         ru.typeOf[QueryStringParam1Request].typeSymbol.asClass)
       d.requestParamBindings.length must be(5)
-      d.requestParamBindings(0).declaration.name must be("format")
-      d.requestParamBindings(1).declaration.name must be("number")
+      d.requestParamBindings(0).registration.name must be("format")
+      d.requestParamBindings(1).registration.name must be("number")
       d.requestParamBindings(1).asInstanceOf[QueryStringBinding].queryFieldName must be("number")
-      d.requestParamBindings(2).declaration.name must be("s")
+      d.requestParamBindings(2).registration.name must be("s")
       d.requestParamBindings(2).asInstanceOf[QueryStringBinding].queryFieldName must be("string")
-      d.requestParamBindings(2).declaration.description must be("hello")
-      d.requestParamBindings(3).declaration.name must be("exist")
-      d.requestParamBindings(4).declaration.name must be("notexist")
+      d.requestParamBindings(2).registration.description must be("hello")
+      d.requestParamBindings(3).registration.name must be("exist")
+      d.requestParamBindings(4).registration.name must be("notexist")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json?number=1&string=hello&exist=world"),
         Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
@@ -117,18 +117,18 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       val d = RestRequestDeserializer(
         config,
         mirror,
-        HeaderParam1Declaration,
-        RestEndPoint(config, HeaderParam1Declaration),
+        HeaderParam1Registration,
+        RestEndPoint(config, HeaderParam1Registration),
         ru.typeOf[HeaderParam1Request].typeSymbol.asClass)
       d.requestParamBindings.length must be(5)
-      d.requestParamBindings(0).declaration.name must be("format")
-      d.requestParamBindings(1).declaration.name must be("number")
+      d.requestParamBindings(0).registration.name must be("format")
+      d.requestParamBindings(1).registration.name must be("number")
       d.requestParamBindings(1).asInstanceOf[HeaderBinding].headerFieldName must be("number")
-      d.requestParamBindings(2).declaration.name must be("s")
+      d.requestParamBindings(2).registration.name must be("s")
       d.requestParamBindings(2).asInstanceOf[HeaderBinding].headerFieldName must be("string")
-      d.requestParamBindings(2).declaration.description must be("hello")
-      d.requestParamBindings(3).declaration.name must be("exist")
-      d.requestParamBindings(4).declaration.name must be("notexist")
+      d.requestParamBindings(2).registration.description must be("hello")
+      d.requestParamBindings(3).registration.name must be("exist")
+      d.requestParamBindings(4).registration.name must be("notexist")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
         Map("number" -> "1", "string" -> "hello", "exist" -> "world"), SockoEventType.HttpRequest, config.requestTimeoutSeconds)
@@ -144,8 +144,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       val d = RestRequestDeserializer(
         config,
         mirror,
-        AllDataTypeDeclaration,
-        RestEndPoint(config, AllDataTypeDeclaration),
+        AllDataTypeRegistration,
+        RestEndPoint(config, AllDataTypeRegistration),
         ru.typeOf[AllDataTypeRequest].typeSymbol.asClass)
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
@@ -177,8 +177,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       val d = RestRequestDeserializer(
         config,
         mirror,
-        AllOptionalDataTypeDeclaration,
-        RestEndPoint(config, AllOptionalDataTypeDeclaration),
+        AllOptionalDataTypeRegistration,
+        RestEndPoint(config, AllOptionalDataTypeRegistration),
         ru.typeOf[AllOptionalDataTypeRequest].typeSymbol.asClass)
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
@@ -225,11 +225,11 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
         RestRequestDeserializer(
           config,
           mirror,
-          NoParameterDeclaration,
-          RestEndPoint(config, NoParameterDeclaration),
+          NoParameterRegistration,
+          RestEndPoint(config, NoParameterRegistration),
           ru.typeOf[NoParameterRequest].typeSymbol.asClass)
       }
-      thrown.getMessage must be("'id' in 'org.mashupbots.socko.rest.NoParameterRequest' has not been declared in 'org.mashupbots.socko.rest.NoParameterDeclaration'")
+      thrown.getMessage must be("'id' in 'org.mashupbots.socko.rest.NoParameterRequest' has not been declared in 'org.mashupbots.socko.rest.NoParameterRegistration'")
     }
 
     "Throw error for Requests with multiple bindings" in {
@@ -237,11 +237,11 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
         RestRequestDeserializer(
           config,
           mirror,
-          MultiParameterDeclaration,
-          RestEndPoint(config, MultiParameterDeclaration),
+          MultiParameterRegistration,
+          RestEndPoint(config, MultiParameterRegistration),
           ru.typeOf[MultiParameterRequest].typeSymbol.asClass)
       }
-      thrown.getMessage must be("'id' in 'org.mashupbots.socko.rest.MultiParameterRequest' has been declared more than once in 'org.mashupbots.socko.rest.MultiParameterDeclaration'")
+      thrown.getMessage must be("'id' in 'org.mashupbots.socko.rest.MultiParameterRequest' has been declared more than once in 'org.mashupbots.socko.rest.MultiParameterRegistration'")
     }
 
     "Throw error for Requests with path bindings not defined" in {
@@ -249,8 +249,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
         RestRequestDeserializer(
           config,
           mirror,
-          BadPathParameterDeclaration,
-          RestEndPoint(config, BadPathParameterDeclaration),
+          BadPathParameterRegistration,
+          RestEndPoint(config, BadPathParameterRegistration),
           ru.typeOf[BadPathParameterRequest].typeSymbol.asClass)
       }
       thrown.getMessage must be("'id' in 'org.mashupbots.socko.rest.BadPathParameterRequest' is not in the path. '/api/path/{format}' does not contain a variable named 'id'.")
@@ -261,8 +261,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
         RestRequestDeserializer(
           config,
           mirror,
-          GetBodyBindingDeclaration,
-          RestEndPoint(config, GetBodyBindingDeclaration),
+          GetBodyBindingRegistration,
+          RestEndPoint(config, GetBodyBindingRegistration),
           ru.typeOf[BadBodyBindingRequest].typeSymbol.asClass)
       }
       thrown.getMessage must be("'data' in 'org.mashupbots.socko.rest.BadBodyBindingRequest' cannot be bound to the request body using a 'GET' operation.")
@@ -271,8 +271,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
         RestRequestDeserializer(
           config,
           mirror,
-          DeleteBodyBindingDeclaration,
-          RestEndPoint(config, DeleteBodyBindingDeclaration),
+          DeleteBodyBindingRegistration,
+          RestEndPoint(config, DeleteBodyBindingRegistration),
           ru.typeOf[BadBodyBindingRequest].typeSymbol.asClass)
       }
       thrown2.getMessage must be("'data' in 'org.mashupbots.socko.rest.BadBodyBindingRequest' cannot be bound to the request body using a 'DELETE' operation.")
@@ -281,16 +281,16 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       RestRequestDeserializer(
         config,
         mirror,
-        PutBodyBindingDeclaration,
-        RestEndPoint(config, PutBodyBindingDeclaration),
+        PutBodyBindingRegistration,
+        RestEndPoint(config, PutBodyBindingRegistration),
         ru.typeOf[BadBodyBindingRequest].typeSymbol.asClass)
 
       // OK
       RestRequestDeserializer(
         config,
         mirror,
-        PostBodyBindingDeclaration,
-        RestEndPoint(config, PostBodyBindingDeclaration),
+        PostBodyBindingRegistration,
+        RestEndPoint(config, PostBodyBindingRegistration),
         ru.typeOf[BadBodyBindingRequest].typeSymbol.asClass)
     }
 
@@ -299,8 +299,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
         RestRequestDeserializer(
           config,
           mirror,
-          FirstParamNotContextDeclaration,
-          RestEndPoint(config, FirstParamNotContextDeclaration),
+          FirstParamNotContextRegistration,
+          RestEndPoint(config, FirstParamNotContextRegistration),
           ru.typeOf[FirstParamNotContextRequest].typeSymbol.asClass)
       }
       thrown.getMessage must be("First constructor parameter of 'org.mashupbots.socko.rest.FirstParamNotContextRequest' must be of type RestRequestContext.")
@@ -311,8 +311,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
         RestRequestDeserializer(
           config,
           mirror,
-          FirstParamNotCalledContextDeclaration,
-          RestEndPoint(config, FirstParamNotCalledContextDeclaration),
+          FirstParamNotCalledContextRegistration,
+          RestEndPoint(config, FirstParamNotCalledContextRegistration),
           ru.typeOf[FirstParamNotCalledContextRequest].typeSymbol.asClass)
       }
       thrown.getMessage must be("First constructor parameter of 'org.mashupbots.socko.rest.FirstParamNotCalledContextRequest' must be called 'context'.")
@@ -324,7 +324,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
 
 case class PathParam1Request(context: RestRequestContext, id: String) extends RestRequest
 
-object PathParam1RequestDeclaration extends RestDeclaration {
+object PathParam1RequestRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pets/{id}"
   val requestParams = Seq(PathParam("id"))
@@ -332,7 +332,7 @@ object PathParam1RequestDeclaration extends RestDeclaration {
 }
 
 case class PathParam2Request(context: RestRequestContext, id: Int, format: String) extends RestRequest
-object PathParam2RequestDeclaration extends RestDeclaration {
+object PathParam2RequestRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pets/{id}/stuff/{format}"
   val requestParams = Seq(PathParam("id", "test2"), PathParam("format"))
@@ -340,7 +340,7 @@ object PathParam2RequestDeclaration extends RestDeclaration {
 }
 
 case class PathParam3Request(context: RestRequestContext, id: Int) extends RestRequest
-object PathParam3RequestDeclaration extends RestDeclaration {
+object PathParam3RequestRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/path/stuff/{id}"
   val requestParams = Seq(PathParam("id", "test2"), PathParam("format"))
@@ -353,7 +353,7 @@ case class QueryStringParam1Request(context: RestRequestContext,
   s: String,
   exist: Option[String],
   notexist: Option[Int]) extends RestRequest
-object QueryStringParam1Declaration extends RestDeclaration {
+object QueryStringParam1Registration extends RestRegistration {
   val method = Method.GET
   val path = "/pets/{format}"
   val requestParams = Seq(PathParam("format"),
@@ -370,7 +370,7 @@ case class HeaderParam1Request(context: RestRequestContext,
   s: String,
   exist: Option[String],
   notexist: Option[Int]) extends RestRequest
-object HeaderParam1Declaration extends RestDeclaration {
+object HeaderParam1Registration extends RestRegistration {
   val method = Method.GET
   val path = "/pets/{format}"
   val requestParams = Seq(PathParam("format"),
@@ -383,7 +383,7 @@ object HeaderParam1Declaration extends RestDeclaration {
 
 case class Fish(name: String, age: Int)
 case class BodyParam1Request(context: RestRequestContext, fish: Option[Fish]) extends RestRequest
-object BodyParam1Declaration extends RestDeclaration {
+object BodyParam1Registration extends RestRegistration {
   val method = Method.PUT
   val path = "/pets/{format}"
   val requestParams = Seq(BodyParam("fist"))
@@ -400,7 +400,7 @@ case class AllDataTypeRequest(context: RestRequestContext,
   float: Float,
   double: Double,
   date: Date) extends RestRequest
-object AllDataTypeDeclaration extends RestDeclaration {
+object AllDataTypeRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pets"
   val requestParams = Seq(
@@ -426,7 +426,7 @@ case class AllOptionalDataTypeRequest(context: RestRequestContext,
   float: Option[Float],
   double: Option[Double],
   date: Option[Date]) extends RestRequest
-object AllOptionalDataTypeDeclaration extends RestDeclaration {
+object AllOptionalDataTypeRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pets"
   val requestParams = Seq(
@@ -444,7 +444,7 @@ object AllOptionalDataTypeDeclaration extends RestDeclaration {
 
 // Error no parameter binding 
 case class NoParameterRequest(context: RestRequestContext, id: String) extends RestRequest
-object NoParameterDeclaration extends RestDeclaration {
+object NoParameterRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pets/{id}"
   val requestParams = Seq.empty
@@ -453,7 +453,7 @@ object NoParameterDeclaration extends RestDeclaration {
 
 // Error multi parameter binding 
 case class MultiParameterRequest(context: RestRequestContext, id: String) extends RestRequest
-object MultiParameterDeclaration extends RestDeclaration {
+object MultiParameterRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pets/{id}"
   val requestParams = Seq(
@@ -464,7 +464,7 @@ object MultiParameterDeclaration extends RestDeclaration {
 
 // Error - id does not existing in path /path/{format} 
 case class BadPathParameterRequest(context: RestRequestContext, id: String) extends RestRequest
-object BadPathParameterDeclaration extends RestDeclaration {
+object BadPathParameterRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/path/{format}"
   val requestParams = Seq(PathParam("id"))
@@ -473,28 +473,28 @@ object BadPathParameterDeclaration extends RestDeclaration {
 
 // Error - Cannot bind body to any method other than POST or PUT 
 case class BadBodyBindingRequest(context: RestRequestContext, data: Fish) extends RestRequest
-object GetBodyBindingDeclaration extends RestDeclaration {
+object GetBodyBindingRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/path"
   override val request = Some(ru.typeOf[BadBodyBindingRequest])
   val requestParams = Seq(BodyParam("data"))
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
-object DeleteBodyBindingDeclaration extends RestDeclaration {
+object DeleteBodyBindingRegistration extends RestRegistration {
   val method = Method.DELETE
   val path = "/path"
   override val request = Some(ru.typeOf[BadBodyBindingRequest])
   val requestParams = Seq(BodyParam("data"))
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
-object PutBodyBindingDeclaration extends RestDeclaration {
+object PutBodyBindingRegistration extends RestRegistration {
   val method = Method.PUT
   val path = "/path"
   override val request = Some(ru.typeOf[BadBodyBindingRequest])
   val requestParams = Seq(BodyParam("data"))
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
-object PostBodyBindingDeclaration extends RestDeclaration {
+object PostBodyBindingRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/path"
   override val request = Some(ru.typeOf[BadBodyBindingRequest])
@@ -504,7 +504,7 @@ object PostBodyBindingDeclaration extends RestDeclaration {
 
 // Error first parameter not context type
 case class FirstParamNotContextRequest(id: String, context: RestRequestContext) extends RestRequest
-object FirstParamNotContextDeclaration extends RestDeclaration {
+object FirstParamNotContextRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/path/{id}"
   val requestParams = Seq(BodyParam("id"))
@@ -513,7 +513,7 @@ object FirstParamNotContextDeclaration extends RestDeclaration {
 
 // Error first parameter not context
 case class FirstParamNotCalledContextRequest(ccc: RestRequestContext, id: String, context: RestRequestContext) extends RestRequest
-object FirstParamNotCalledContextDeclaration extends RestDeclaration {
+object FirstParamNotCalledContextRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/path/{id}"
   val requestParams = Seq(PathParam("id"))

@@ -18,7 +18,7 @@ package org.mashupbots.socko.rest.get
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.rest.Method
 import org.mashupbots.socko.rest.PathParam
-import org.mashupbots.socko.rest.RestDeclaration
+import org.mashupbots.socko.rest.RestRegistration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -29,7 +29,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-object GetBytesDeclaration extends RestDeclaration {
+object GetBytesRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/bytes/{status}"
   val requestParams = Seq(PathParam("status"))

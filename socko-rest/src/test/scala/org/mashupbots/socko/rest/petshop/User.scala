@@ -19,7 +19,7 @@ import org.mashupbots.socko.rest.BodyParam
 import org.mashupbots.socko.rest.Method
 import org.mashupbots.socko.rest.PathParam
 import org.mashupbots.socko.rest.QueryParam
-import org.mashupbots.socko.rest.RestDeclaration
+import org.mashupbots.socko.rest.RestRegistration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -40,7 +40,7 @@ case class User(
 
 case class CreateUserWithArrayRequest(context: RestRequestContext, users: Array[User]) extends RestRequest
 case class CreateUserWithArrayResponse(context: RestResponseContext) extends RestResponse
-object CreateUserWithArrayDeclaration extends RestDeclaration {
+object CreateUserWithArrayRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/user/createWithArray"
   val requestParams = Seq(PathParam("users"))
@@ -49,7 +49,7 @@ object CreateUserWithArrayDeclaration extends RestDeclaration {
 
 case class CreateUserRequest(context: RestRequestContext, user: User) extends RestRequest
 case class CreateUserResponse(context: RestResponseContext) extends RestResponse
-object CreateUserDeclaration extends RestDeclaration {
+object CreateUserRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/user"
   val requestParams = Seq(PathParam("user"))
@@ -58,7 +58,7 @@ object CreateUserDeclaration extends RestDeclaration {
 
 case class CreateUserWithListRequest(context: RestRequestContext, users: Seq[User]) extends RestRequest
 case class CreateUserWithListResponse(context: RestResponseContext) extends RestResponse
-object CreateUserWithListDeclaration extends RestDeclaration {
+object CreateUserWithListRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/user/createWithList"
   val requestParams = Seq(PathParam("users"))
@@ -67,7 +67,7 @@ object CreateUserWithListDeclaration extends RestDeclaration {
 
 case class UpdateUserRequest(context: RestRequestContext, username: String, user: User) extends RestRequest
 case class UpdateUserResponse(context: RestResponseContext) extends RestResponse
-object UpdateUserDeclaration extends RestDeclaration {
+object UpdateUserRegistration extends RestRegistration {
   val method = Method.PUT
   val path = "/user/{username}"
   val requestParams = Seq(PathParam("username"), BodyParam("user"))
@@ -76,7 +76,7 @@ object UpdateUserDeclaration extends RestDeclaration {
 
 case class DeleteUserRequest(context: RestRequestContext, username: String) extends RestRequest
 case class DeleteUserResponse(context: RestResponseContext) extends RestResponse
-object DeleteUserDeclaration extends RestDeclaration {
+object DeleteUserRegistration extends RestRegistration {
   val method = Method.DELETE
   val path = "/user/{username}"
   val requestParams = Seq(PathParam("username"))
@@ -85,7 +85,7 @@ object DeleteUserDeclaration extends RestDeclaration {
 
 case class GetUserRequest(context: RestRequestContext, username: String) extends RestRequest
 case class GetUserResponse(context: RestResponseContext, user: Option[User]) extends RestResponse
-object GetUserDeclaration extends RestDeclaration {
+object GetUserRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/user/{username}"
   val requestParams = Seq(PathParam("username"))
@@ -94,7 +94,7 @@ object GetUserDeclaration extends RestDeclaration {
 
 case class LoginRequest(context: RestRequestContext, username: String, password: String) extends RestRequest
 case class LoginResponse(context: RestResponseContext, result: String) extends RestResponse
-object LoginDeclaration extends RestDeclaration {
+object LoginRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/user/login"
   val requestParams = Seq(QueryParam("username"), QueryParam("password"))
@@ -103,7 +103,7 @@ object LoginDeclaration extends RestDeclaration {
 
 case class LogoutRequest(context: RestRequestContext) extends RestRequest
 case class LogoutResponse(context: RestResponseContext) extends RestResponse
-object LogoutDeclaration extends RestDeclaration {
+object LogoutRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/user/logout"
   val requestParams = Seq.empty

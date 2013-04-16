@@ -26,13 +26,13 @@ import org.mashupbots.socko.events.EndPoint
  *  - actor returns a [[org.mashupbots.socko.rest.RestResponse]]
  *  - serializes [[org.mashupbots.socko.rest.RestResponse]] and returns the result to the caller
  *
- * @param declaration Meta data describing the operation
+ * @param registration Meta data describing the bindings
  * @param endPoint HTTP method and path unique to this operation
  * @param deserializer Deserializes incoming data into a [[org.mashupbots.socko.rest.RestRequest]]
  * @param serializer Serializes a [[org.mashupbots.socko.rest.RestResponse]] class to send to the client
  */
 case class RestOperation(
-  declaration: RestDeclaration,
+  registration: RestRegistration,
   endPoint: RestEndPoint,
   deserializer: RestRequestDeserializer,
   serializer: RestResponseSerializer) {
@@ -41,7 +41,7 @@ case class RestOperation(
    * Denotes if [[org.mashupbots.socko.events.SockoEvent]] is to be made
    * accessible from [[org.mashupbots.socko.rest.RestRequestEvents]].
    */
-  val accessSockoEvent = declaration.customDeserialization || declaration.customSerialization
+  val accessSockoEvent = registration.customDeserialization || registration.customSerialization
 
 }
 

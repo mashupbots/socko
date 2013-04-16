@@ -91,7 +91,7 @@ case class RestRegistry(
  */
 object RestRegistry extends Logger {
 
-  private val typeRestDeclaration = ru.typeOf[RestDeclaration]
+  private val typeRestRegistration = ru.typeOf[RestRegistration]
   private val typeRestRequest = ru.typeOf[RestRequest]
   private val typeRestResponse = ru.typeOf[RestResponse]
   private val typeRestProcessorLocator = ru.typeOf[RestDispatcher]
@@ -158,7 +158,7 @@ object RestRegistry extends Logger {
   /**
    * Builds a [[org.mashupbots.socko.rest.RestOperation]] for a specific class `clz`.
    *
-   * If `clz` is a child of [[org.mashupbots.socko.rest.RestDeclaration]], and it has a corresponding
+   * If `clz` is a child of [[org.mashupbots.socko.rest.RestRegistration]], and it has a corresponding
    * [[org.mashupbots.socko.rest.RestRequest]] and [[org.mashupbots.socko.rest.RestResponse]], then
    * a [[org.mashupbots.socko.rest.RestOperation]] is instanced and returned.
    *
@@ -171,17 +171,17 @@ object RestRegistry extends Logger {
    * @returns An instance of the annotation class or `None` if annotation not found
    */
   def buildRestOperation(rm: ru.Mirror, clz: Class[_], classes: Seq[Class[_]], config: RestConfig): Option[RestOperation] = {
-    val declaration = findRestDeclaration(rm, clz, config);
-    val req = findRestRequest(declaration, rm, clz, classes)
-    val resp = findRestResponse(declaration, rm, clz, classes);
+    val registration = findRestRegistration(rm, clz, config);
+    val req = findRestRequest(registration, rm, clz, classes)
+    val resp = findRestResponse(registration, rm, clz, classes);
 
-    if (declaration.isDefined && req.isDefined && resp.isDefined) {
-      val endPoint = RestEndPoint(config, declaration.get) 
-      val deserializer = RestRequestDeserializer(config, rm, declaration.get, endPoint, req.get.typeSymbol.asClass)
-      val serializer = RestResponseSerializer(config, rm, declaration.get, resp.get.typeSymbol.asClass)
+    if (registration.isDefined && req.isDefined && resp.isDefined) {
+      val endPoint = RestEndPoint(config, registration.get) 
+      val deserializer = RestRequestDeserializer(config, rm, registration.get, endPoint, req.get.typeSymbol.asClass)
+      val serializer = RestResponseSerializer(config, rm, registration.get, resp.get.typeSymbol.asClass)
       log.info("Registering {} {} {}", endPoint.method, endPoint.fullPath, clz.getName)
 
-      Some(RestOperation(declaration.get, endPoint, deserializer, serializer))
+      Some(RestOperation(registration.get, endPoint, deserializer, serializer))
     } else {
       None
     }
@@ -195,98 +195,98 @@ object RestRegistry extends Logger {
    * @param config REST configuration
    * @returns An instance of the annotation class or `None` if annotation not found
    */
-  def findRestDeclaration(rm: ru.RuntimeMirror, clz: Class[_], config: RestConfig): Option[RestDeclaration] = {
+  def findRestRegistration(rm: ru.RuntimeMirror, clz: Class[_], config: RestConfig): Option[RestRegistration] = {
     val moduleSymbol = rm.moduleSymbol(clz)
     val moduleType = moduleSymbol.typeSignature
-    if (moduleType <:< typeRestDeclaration) {
+    if (moduleType <:< typeRestRegistration) {
       val moduleMirror = rm.reflectModule(moduleSymbol)
       val obj = moduleMirror.instance
-      Some(obj.asInstanceOf[RestDeclaration])
+      Some(obj.asInstanceOf[RestRegistration])
     } else {
       None
     }
   }
 
   /**
-   * Finds a corresponding request class given the declaration
+   * Finds a corresponding request class given the registration
    *
-   * If declaration `requestClass` field is empty, the assumed request class is the same class path
-   * and name as the declaration class; but with `Declaration` suffix replaced with `Request`.
+   * If registration `requestClass` field is empty, the assumed request class is the same class path
+   * and name as the registration class; but with `registration` suffix replaced with `Request`.
    *
    * If not empty, the specified request type will be used
    *
-   * @param declaration Declaration of the operation
+   * @param registration REST operation registration details
    * @param rm Mirror
-   * @param clz Declaration class
+   * @param clz registration class
    * @param classes Sequence of classes in which to search for the request class
    * @returns the request type or `None` if not found
    */
   def findRestRequest(
-    declaration: Option[RestDeclaration],
+    registration: Option[RestRegistration],
     rm: ru.RuntimeMirror,
     clz: Class[_],
     classes: Seq[Class[_]]): Option[ru.Type] = {
 
-    if (declaration.isEmpty) {
+    if (registration.isEmpty) {
       None
     } else {
-      if (declaration.get.request.isEmpty) {
-        val requestClassName = replaceDeclarationInName(clz.getName, "Request")
+      if (registration.get.request.isEmpty) {
+        val requestClassName = replaceRegistrationInName(clz.getName, "Request")
         val requestClass = classes.find(c => c.getName == requestClassName && rm.classSymbol(c).toType <:< typeRestRequest)
         if (requestClass.isEmpty) {
-          throw RestDefintionException(s"Cannot find corresponding RestRequest '${requestClassName}' for RestDeclaration '${clz.getName}'")
+          throw RestDefintionException(s"Cannot find corresponding RestRequest '${requestClassName}' for RestRegistration '${clz.getName}'")
         }
         Some(rm.classSymbol(requestClass.get).toType)
       } else {
-        Some(declaration.get.request.get)
+        Some(registration.get.request.get)
       }
     }
   }
 
   /**
-   * Finds a corresponding response class given the declaration
+   * Finds a corresponding response class given the registration
    *
-   * If declaration `responseClass` field is empty, the assumed response class is the same class path
-   * and name as the declaration class; but with `Declaration` suffix replaced with `Response`.
+   * If registration `responseClass` field is empty, the assumed response class is the same class path
+   * and name as the registration class; but with `registration` suffix replaced with `Response`.
    *
-   * If declaration `responseClass` field is not empty, the specified response type will be used
+   * If registration `responseClass` field is not empty, the specified response type will be used
    *
    * If `customSerialization` is declared, the standard `NoSerializationRestResponse` will be returned.
    * This is just a placeholder and will not be used because the processing actor will handle serialization.
    *
-   * @param declaration Declaration of the operation
+   * @param registration REST operation registration details
    * @param rm Mirror
-   * @param clz Declaration class
+   * @param clz registration class
    * @param classes Sequence of classes in which to search for the request class
    * @returns the response type or `None` if not found
    */
   def findRestResponse(
-    declaration: Option[RestDeclaration],
+    registration: Option[RestRegistration],
     rm: ru.RuntimeMirror,
     clz: Class[_],
     classes: Seq[Class[_]]): Option[ru.Type] = {
 
-    if (declaration.isEmpty) {
+    if (registration.isEmpty) {
       None
     } else {
-      if (declaration.get.customSerialization) {
+      if (registration.get.customSerialization) {
         Some(typeNoSerializationRestResponse)
-      } else if (declaration.get.response.isEmpty) {
-        val responseClassName = replaceDeclarationInName(clz.getName, "Response")
+      } else if (registration.get.response.isEmpty) {
+        val responseClassName = replaceRegistrationInName(clz.getName, "Response")
         val responseClass = classes.find(c => c.getName == responseClassName && rm.classSymbol(c).toType <:< typeRestResponse)
         if (responseClass.isEmpty) {
-          throw RestDefintionException(s"Cannot find corresponding RestResponse '${responseClassName}' for RestDeclaration '${clz.getName}'")
+          throw RestDefintionException(s"Cannot find corresponding RestResponse '${responseClassName}' for RestRegistration '${clz.getName}'")
         }
         Some(rm.classSymbol(responseClass.get).toType)
       } else {
-        Some(declaration.get.response.get)
+        Some(registration.get.response.get)
       }
     }
   }
 
-  private def replaceDeclarationInName(requestClassName: String, newSuffix: String): String = {
-    if (requestClassName.endsWith("Declaration")) {
-      requestClassName.substring(0, requestClassName.length - 11) + newSuffix
+  private def replaceRegistrationInName(requestClassName: String, newSuffix: String): String = {
+    if (requestClassName.endsWith("Registration")) {
+      requestClassName.substring(0, requestClassName.length - 12) + newSuffix
     } else {
       requestClassName + newSuffix
     }

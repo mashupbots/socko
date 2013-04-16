@@ -59,10 +59,10 @@ object RestApiDocGenerator extends Logger {
     val resourceListing = ResourceListing(apisMap, config)
     result.put(urlPath, jsonify(resourceListing))
 
-    // API Declarations
-    val apiDeclarations: Map[String, APIDeclaration] = apisMap.map(f => {
+    // API registrations
+    val apiregistrations: Map[String, APIregistration] = apisMap.map(f => {
       val (path, ops) = f
-      val apiDec = APIDeclaration(path, ops, config)
+      val apiDec = APIregistration(path, ops, config)
       result.put(urlPath + path, jsonify(apiDec))
       (path, apiDec)
     })
@@ -136,9 +136,9 @@ case class ResourceListingApi(
   description: String)
 
 /**
- * Swagger API declaration
+ * Swagger API registration
  */
-case class APIDeclaration(
+case class APIregistration(
   apiVersion: String,
   swaggerVersion: String,
   basePath: String,
@@ -148,10 +148,10 @@ case class APIDeclaration(
 /**
  * Companion object
  */
-object APIDeclaration {
+object APIregistration {
 
   /**
-   * Creates a new [[org.mashupbots.socko.rest.APIDeclaration]] for a resource path as listed in the
+   * Creates a new [[org.mashupbots.socko.rest.APIregistration]] for a resource path as listed in the
    * resource listing.
    *
    * For example, the following operations
@@ -166,9 +166,9 @@ object APIDeclaration {
    * @param ops HTTP method operations for that unique path
    * @param config Rest configuration
    */
-  def apply(resourcePath: String, ops: Seq[RestOperation], config: RestConfig): APIDeclaration = {
+  def apply(resourcePath: String, ops: Seq[RestOperation], config: RestConfig): APIregistration = {
     // Group by path so we can list the operations
-    val pathGrouping: Map[String, Seq[RestOperation]] = ops.groupBy(op => op.declaration.path)
+    val pathGrouping: Map[String, Seq[RestOperation]] = ops.groupBy(op => op.registration.path)
 
     // Map group to ApiPaths
     val apiPathsMap: Map[String, ApiPath] = pathGrouping.map(f => {
@@ -179,8 +179,8 @@ object APIDeclaration {
     // Convert to list and sort
     val apiPaths: Seq[ApiPath] = apiPathsMap.values.toSeq.sortBy(p => p.path)
 
-    // Build declaration
-    APIDeclaration(
+    // Build registration
+    APIregistration(
       config.apiVersion,
       config.swaggerVersion,
       config.rootPath,
@@ -253,15 +253,15 @@ object ApiOperation {
    */
   def apply(op: RestOperation, config: RestConfig): ApiOperation = {
     val params: Seq[ApiParameter] = op.deserializer.requestParamBindings.map(b => ApiParameter(b, config))
-    val errors: Seq[ApiError] = op.declaration.errors.map(e => ApiError(e.code, e.reason)).toSeq
+    val errors: Seq[ApiError] = op.registration.errors.map(e => ApiError(e.code, e.reason)).toSeq
 
     ApiOperation(
-      op.declaration.method.toString,
-      op.declaration.description,
-      op.declaration.notes,
-      op.declaration.deprecated,
+      op.registration.method.toString,
+      op.registration.description,
+      op.registration.notes,
+      op.registration.deprecated,
       op.serializer.swaggerDataType,
-      op.declaration.name,
+      op.registration.name,
       params,
       errors.sortBy(e => e.code))
   }
@@ -293,8 +293,8 @@ object ApiParameter {
    */
   def apply(binding: RequestParamBinding, config: RestConfig): ApiParameter = {
     ApiParameter(
-      binding.declaration.name,
-      binding.declaration.description,
+      binding.registration.name,
+      binding.registration.description,
       binding.swaggerParamType,
       binding.swaggerDataType,
       binding.required)

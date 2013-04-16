@@ -21,7 +21,7 @@ import org.mashupbots.socko.rest.Error
 import org.mashupbots.socko.rest.Method
 import org.mashupbots.socko.rest.PathParam
 import org.mashupbots.socko.rest.QueryParam
-import org.mashupbots.socko.rest.RestDeclaration
+import org.mashupbots.socko.rest.RestRegistration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -32,7 +32,7 @@ import akka.actor.ActorSystem
 
 case class GetPetsRequest(context: RestRequestContext) extends RestRequest
 case class GetPetsResponse(context: RestResponseContext) extends RestResponse
-object GetPetsDeclaration extends RestDeclaration {
+object GetPetsRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pets"
   val requestParams = Seq.empty
@@ -40,7 +40,7 @@ object GetPetsDeclaration extends RestDeclaration {
 }
 
 case class PostDogs1Request(context: RestRequestContext) extends RestRequest
-object PostDogs1Declaration extends RestDeclaration {
+object PostDogs1Registration extends RestRegistration {
   val method = Method.POST
   val path = "/dogs1"
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
@@ -49,7 +49,7 @@ object PostDogs1Declaration extends RestDeclaration {
 }
 
 case class PutDogs2Request(context: RestRequestContext) extends RestRequest
-object PutDogs2Declaration extends RestDeclaration {
+object PutDogs2Registration extends RestRegistration {
   val method = Method.PUT
   val path = "/dogs2"
   val requestParams = Seq.empty
@@ -62,7 +62,7 @@ case class FunnyNameDogResponse(context: RestResponseContext) extends RestRespon
 
 case class DeletePetsRequest(context: RestRequestContext, id: String) extends RestRequest
 case class DeletePetsResponse(context: RestResponseContext, message: String) extends RestResponse
-object DeletePetsDeclaration extends RestDeclaration {
+object DeletePetsRegistration extends RestRegistration {
   val method = Method.DELETE
   val path = "/pets/{id}"
   val requestParams = Seq(PathParam("id"))
@@ -71,7 +71,7 @@ object DeletePetsDeclaration extends RestDeclaration {
 
 // Error because there is no corresponding response class
 case class NoResponseRequest(context: RestRequestContext) extends RestRequest
-object NoResponseDeclaration extends RestDeclaration {
+object NoResponseRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/noresponse"
   val requestParams = Seq.empty
@@ -81,7 +81,7 @@ object NoResponseDeclaration extends RestDeclaration {
 // Error because parameter binding specified
 case class NoParameterRequest(context: RestRequestContext, id: String) extends RestRequest
 case class NoParameterResponse(context: RestResponseContext) extends RestResponse
-object NoParameterDeclaration extends RestDeclaration {
+object NoParameterRegistration extends RestRegistration {
   val method = Method.DELETE
   val path = "/pets/{id}"
   val requestParams = Seq.empty
@@ -91,7 +91,7 @@ object NoParameterDeclaration extends RestDeclaration {
 // Error because parameter bound more than one
 case class MultiParameterRequest(context: RestRequestContext, id: String) extends RestRequest
 case class MultiParameterResponse(context: RestResponseContext) extends RestResponse
-object MultiParameterDeclaration extends RestDeclaration {
+object MultiParameterRegistration extends RestRegistration {
   val method = Method.DELETE
   val path = "/pets/{id}"
   val requestParams = Seq(PathParam("id"), QueryParam("id"))

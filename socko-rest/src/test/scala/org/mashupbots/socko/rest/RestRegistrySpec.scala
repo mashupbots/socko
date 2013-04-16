@@ -34,7 +34,7 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
     val classes = ReflectUtil.getClasses(rm.classLoader, "org.mashupbots.socko.rest.test1")
 
     "correctly load a valid request" in {
-      val clz = Class.forName("org.mashupbots.socko.rest.test1.GetPetsDeclaration")
+      val clz = Class.forName("org.mashupbots.socko.rest.test1.GetPetsRegistration")
       val op = RestRegistry.buildRestOperation(rm, clz, classes, cfg)
 
       op.get.endPoint.method must be("GET")
@@ -44,7 +44,7 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
     }
 
     "correctly load request with shared custom response class name" in {
-      val clz = Class.forName("org.mashupbots.socko.rest.test1.PostDogs1Declaration")
+      val clz = Class.forName("org.mashupbots.socko.rest.test1.PostDogs1Registration")
       val op = RestRegistry.buildRestOperation(rm, clz, classes, cfg)
 
       op.get.endPoint.method must be("POST")
@@ -52,18 +52,18 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
       op.get.deserializer.requestClass.fullName must be("org.mashupbots.socko.rest.test1.PostDogs1Request")
       op.get.serializer.responseClass.fullName must be("org.mashupbots.socko.rest.test1.FunnyNameDogResponse")
 
-      val clz2 = Class.forName("org.mashupbots.socko.rest.test1.PutDogs2Declaration")
+      val clz2 = Class.forName("org.mashupbots.socko.rest.test1.PutDogs2Registration")
       val op2 = RestRegistry.buildRestOperation(rm, clz2, classes, cfg)
 
       op2.get.endPoint.method must be("PUT")
       op2.get.endPoint.relativePath must be("/dogs2")
-      op2.get.declaration.errors.size must be(2)
+      op2.get.registration.errors.size must be(2)
       op2.get.deserializer.requestClass.fullName must be("org.mashupbots.socko.rest.test1.PutDogs2Request")
       op2.get.serializer.responseClass.fullName must be("org.mashupbots.socko.rest.test1.FunnyNameDogResponse")
     }
 
     "correctly load a valid request with bindings" in {
-      val clz = Class.forName("org.mashupbots.socko.rest.test1.DeletePetsDeclaration")
+      val clz = Class.forName("org.mashupbots.socko.rest.test1.DeletePetsRegistration")
       val op = RestRegistry.buildRestOperation(rm, clz, classes, cfg)
 
       op.get.endPoint.method must be("DELETE")
@@ -78,30 +78,30 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
     }
 
     "throw error for Requests without Responses" in {
-      val clz = Class.forName("org.mashupbots.socko.rest.test1.NoResponseDeclaration")
+      val clz = Class.forName("org.mashupbots.socko.rest.test1.NoResponseRegistration")
 
       val thrown = intercept[RestDefintionException] {
         RestRegistry.buildRestOperation(rm, clz, classes, cfg)
       }
-      thrown.getMessage must be("Cannot find corresponding RestResponse 'org.mashupbots.socko.rest.test1.NoResponseResponse' for RestDeclaration 'org.mashupbots.socko.rest.test1.NoResponseDeclaration'")
+      thrown.getMessage must be("Cannot find corresponding RestResponse 'org.mashupbots.socko.rest.test1.NoResponseResponse' for RestRegistration 'org.mashupbots.socko.rest.test1.NoResponseRegistration'")
     }
 
-    "throw error for Requests without parameter binding in declaration" in {
-      val clz = Class.forName("org.mashupbots.socko.rest.test1.NoParameterDeclaration")
+    "throw error for Requests without parameter binding in registration" in {
+      val clz = Class.forName("org.mashupbots.socko.rest.test1.NoParameterRegistration")
 
       val thrown = intercept[RestDefintionException] {
         RestRegistry.buildRestOperation(rm, clz, classes, cfg)
       }
-      thrown.getMessage must be("'id' in 'org.mashupbots.socko.rest.test1.NoParameterRequest' has not been declared in 'org.mashupbots.socko.rest.test1.NoParameterDeclaration'")
+      thrown.getMessage must be("'id' in 'org.mashupbots.socko.rest.test1.NoParameterRequest' has not been declared in 'org.mashupbots.socko.rest.test1.NoParameterRegistration'")
     }
 
-    "throw error for Requests more than one parameter binding specified in declaration" in {
-      val clz = Class.forName("org.mashupbots.socko.rest.test1.MultiParameterDeclaration")
+    "throw error for Requests more than one parameter binding specified in registration" in {
+      val clz = Class.forName("org.mashupbots.socko.rest.test1.MultiParameterRegistration")
 
       val thrown = intercept[RestDefintionException] {
         RestRegistry.buildRestOperation(rm, clz, classes, cfg)
       }
-      thrown.getMessage must be("'id' in 'org.mashupbots.socko.rest.test1.MultiParameterRequest' has been declared more than once in 'org.mashupbots.socko.rest.test1.MultiParameterDeclaration'")
+      thrown.getMessage must be("'id' in 'org.mashupbots.socko.rest.test1.MultiParameterRequest' has been declared more than once in 'org.mashupbots.socko.rest.test1.MultiParameterRegistration'")
     }
 
     "catch duplcate operation addresses" in {

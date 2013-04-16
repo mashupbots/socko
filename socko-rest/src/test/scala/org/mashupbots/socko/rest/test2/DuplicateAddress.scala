@@ -16,7 +16,7 @@
 package org.mashupbots.socko.rest.test2
 
 import org.mashupbots.socko.rest.Method
-import org.mashupbots.socko.rest.RestDeclaration
+import org.mashupbots.socko.rest.RestRegistration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -29,7 +29,7 @@ case class GetPets1Request(context: RestRequestContext) extends RestRequest
 
 case class GetPets1Response(context: RestResponseContext) extends RestResponse
 
-object GetPets1Declaration extends RestDeclaration {
+object GetPets1Registration extends RestRegistration {
   val method = Method.GET
   val path = "/pets"
   val requestParams = Seq.empty
@@ -41,7 +41,7 @@ case class GetPets2Request(context: RestRequestContext) extends RestRequest
 
 case class GetPets2Response(context: RestResponseContext) extends RestResponse
 
-object GetPets2Declaration extends RestDeclaration {
+object GetPets2Registration extends RestRegistration {
   val method = Method.GET
   val path = "/pets"
   val requestParams = Seq.empty

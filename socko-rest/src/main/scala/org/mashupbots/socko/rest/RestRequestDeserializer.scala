@@ -80,13 +80,13 @@ object RestRequestDeserializer {
    *
    * @param config Rest configuration
    * @param rm Runtime Mirror with the same class loaders as the specified request class
-   * @param declaration Declaration of the REST operation
+   * @param registration REST operation registration details
    * @param endPoint End point for the REST operation
    * @param requestClassSymbol Request class symbol
    */
   def apply(config: RestConfig,
     rm: ru.Mirror,
-    declaration: RestDeclaration,
+    registration: RestRegistration,
     endPoint: RestEndPoint,
     requestClassSymbol: ru.ClassSymbol): RestRequestDeserializer = {
 
@@ -104,7 +104,7 @@ object RestRequestDeserializer {
       throw RestDefintionException(s"First constructor parameter of '${requestClassSymbol.fullName}' must be called 'context'.")
     }
 
-    val params = requestConstructorParams.tail.map(p => RequestParamBinding(config, declaration, endPoint, requestClassName, p))
+    val params = requestConstructorParams.tail.map(p => RequestParamBinding(config, registration, endPoint, requestClassName, p))
 
     RestRequestDeserializer(config, requestClassSymbol, requestConstructorMirror, params)
   }
@@ -119,7 +119,7 @@ trait RequestParamBinding {
   /**
    * Parameter meta data
    */
-  def declaration: RequestParam
+  def registration: RequestParam
 
   /**
    * REST configuration
@@ -194,30 +194,30 @@ object RequestParamBinding {
    * Factory to create a parameter binding for a specific parameter in the constructor
    *
    * @param config REST configuration
-   * @param declaration Declaration of the REST operation
+   * @param registration Declaration of the REST operation
    * @param endPoint End point address for the REST operation
    * @param requestClass Class to bind request data
    * @param param Parameter in the constructor of `requestClass`
    */
   def apply(
     config: RestConfig,
-    declaration: RestDeclaration,
+    registration: RestRegistration,
     endPoint: RestEndPoint,
     requestClassName: String,
     param: ru.TermSymbol): RequestParamBinding = {
 
     val paramName = param.name.toString
 
-    // Check that there is only declaration for the term
-    val count = declaration.requestParams.count(p => p.name == paramName)
-    val declarationClassName = declaration.getClass.getName.replace("$", "")
+    // Check that there is only registration for the term
+    val count = registration.requestParams.count(p => p.name == paramName)
+    val registrationClassName = registration.getClass.getName.replace("$", "")
     if (count == 0) {
-      throw RestDefintionException(s"'${param.name}' in '${requestClassName}' has not been declared in '${declarationClassName}'")
+      throw RestDefintionException(s"'${param.name}' in '${requestClassName}' has not been declared in '${registrationClassName}'")
     } else if (count > 1) {
-      throw RestDefintionException(s"'${param.name}' in '${requestClassName}' has been declared more than once in '${declarationClassName}'")
+      throw RestDefintionException(s"'${param.name}' in '${requestClassName}' has been declared more than once in '${registrationClassName}'")
     }
 
-    val paramDeclaration: RequestParam = declaration.requestParams.find(p => p.name == paramName).get
+    val paramDeclaration: RequestParam = registration.requestParams.find(p => p.name == paramName).get
     val required = !(param.typeSignature <:< optionType)
 
     // Instance our binding class
@@ -272,7 +272,7 @@ object RequestParamBinding {
         BodyBinding(config, bodyParam, tpeCategory, tpe, swaggerDataType, objectClass, required)
 
       case _ =>
-        throw new IllegalStateException("Unsupported parameter declaration: " + paramDeclaration.toString)
+        throw new IllegalStateException("Unsupported parameter registration: " + paramDeclaration.toString)
     }
 
   }
@@ -321,13 +321,13 @@ trait PrimitiveParamBinding extends RequestParamBinding {
  *  - pathIndex = 1
  *
  * @param config REST configuration
- * @param declaration Parameter meta data
+ * @param registration Parameter meta data
  * @param tpe Type of the field
  * @param pathIndex Index of the value of the field in array of path segments
  */
 case class PathBinding(
   config: RestConfig,
-  declaration: PathParam,
+  registration: PathParam,
   tpe: ru.Type,
   pathIndex: Int) extends PrimitiveParamBinding {
 
@@ -346,13 +346,13 @@ case class PathBinding(
   def extract(context: RestRequestContext, requestClassName: String, httpRequestEvent: HttpRequestEvent): Any = {
     val s = context.endPoint.pathSegments(pathIndex)
     if (s.isEmpty) {
-      throw new RestBindingException(s"Cannot find path variable '${declaration.name}' in '${context.endPoint.path}' for request '${requestClassName}'")
+      throw new RestBindingException(s"Cannot find path variable '${registration.name}' in '${context.endPoint.path}' for request '${requestClassName}'")
     }
     try {
       primitiveParser(s)
     } catch {
       case e: Throwable =>
-        throw RestBindingException(s"Cannot parse '${s}' for path variable '${declaration.name}' in '${context.endPoint.path}' for request '${requestClassName}'", e)
+        throw RestBindingException(s"Cannot parse '${s}' for path variable '${registration.name}' in '${context.endPoint.path}' for request '${requestClassName}'", e)
     }
   }
 }
@@ -371,18 +371,18 @@ case class PathBinding(
  *  - required = false
  *
  * @param config REST config
- * @param declaration Parameter meta data
+ * @param registration Parameter meta data
  * @param tpe Type of the field
  * @param required Flag to indicate if this field is required or not. If not, it must be of type `Option[_]`
  */
 case class QueryStringBinding(
   config: RestConfig,
-  declaration: QueryParam,
+  registration: QueryParam,
   tpe: ru.Type,
   required: Boolean) extends PrimitiveParamBinding {
 
   val swaggerParamType = "query"
-  val queryFieldName = if (declaration.queryName.isEmpty()) declaration.name else declaration.queryName
+  val queryFieldName = if (registration.queryName.isEmpty()) registration.name else registration.queryName
 
   /**
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
@@ -425,18 +425,18 @@ case class QueryStringBinding(
  *  - required = true
  *
  * @param config REST config
- * @param declaration Parameter meta data
+ * @param registration Parameter meta data
  * @param tpe Type of the field
  * @param required Flag to indicate if this field is required or not. If not, it must be of type `Option[_]`
  */
 case class HeaderBinding(
   config: RestConfig,
-  declaration: HeaderParam,
+  registration: HeaderParam,
   tpe: ru.Type,
   required: Boolean) extends PrimitiveParamBinding {
 
   val swaggerParamType = "header"
-  val headerFieldName = if (declaration.headerName.isEmpty()) declaration.name else declaration.headerName
+  val headerFieldName = if (registration.headerName.isEmpty()) registration.name else registration.headerName
 
   /**
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
@@ -480,7 +480,7 @@ case class HeaderBinding(
  *  - required = true
  *
  * @param config REST config
- * @param declaration Parameter meta data
+ * @param registration Parameter meta data
  * @param tpeCategory Our categorization of the type of the field
  * @param tpe Type of the field
  * @param swaggerDataType This can be a complex or container datatype.
@@ -491,7 +491,7 @@ case class HeaderBinding(
  */
 case class BodyBinding(
   config: RestConfig,
-  declaration: BodyParam,
+  registration: BodyParam,
   tpeCategory: RequestBodyDataType.Value,
   tpe: ru.Type,
   swaggerDataType: String,
@@ -548,7 +548,7 @@ case class BodyBinding(
             else Some(data)
           } catch {
             case e: Throwable =>
-              throw RestBindingException(s"Cannot parse '${s}' for body '${declaration.name}' for request '${requestClassName}'", e)
+              throw RestBindingException(s"Cannot parse '${s}' for body '${registration.name}' for request '${requestClassName}'", e)
           }
         }
       case RequestBodyDataType.Primitive =>

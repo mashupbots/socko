@@ -20,12 +20,13 @@ import akka.actor.ActorSystem
 import akka.actor.ActorRef
 
 /**
- * Specifies the configuration of a REST operation.
+ * Binds a [[org.mashupbots.socko.rest.RestRequest]], [[org.mashupbots.socko.rest.RestResponse]] and 
+ * a processor actor to an end point. 
  *
  * This is implemented as an abstract class rather than a trait so that it is easier
  * to override methods and values.
  */
-abstract class RestDeclaration {
+abstract class RestRegistration {
 
   /**
    * HTTP method associated with this operation

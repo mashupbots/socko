@@ -18,7 +18,7 @@ package org.mashupbots.socko.rest.post
 import org.mashupbots.socko.rest.BodyParam
 import org.mashupbots.socko.rest.Method
 import org.mashupbots.socko.rest.PathParam
-import org.mashupbots.socko.rest.RestDeclaration
+import org.mashupbots.socko.rest.RestRegistration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -29,7 +29,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-object PostVoidDeclaration extends RestDeclaration {
+object PostVoidRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/void/{status}"
   val requestParams = Seq(PathParam("status"), BodyParam("pet"))

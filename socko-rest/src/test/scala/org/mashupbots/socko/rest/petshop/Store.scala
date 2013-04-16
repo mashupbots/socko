@@ -20,7 +20,7 @@ import java.util.Date
 import org.mashupbots.socko.rest.BodyParam
 import org.mashupbots.socko.rest.Method
 import org.mashupbots.socko.rest.PathParam
-import org.mashupbots.socko.rest.RestDeclaration
+import org.mashupbots.socko.rest.RestRegistration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -38,7 +38,7 @@ case class Order(
 
 case class GetOrderRequest(context: RestRequestContext, orderId: String) extends RestRequest
 case class GetOrderResponse(context: RestResponseContext, order: Option[Order]) extends RestResponse
-object GetOrderDeclaration extends RestDeclaration {
+object GetOrderRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/store/order/{orderId}"
   val requestParams = Seq(PathParam("orderId"))
@@ -47,7 +47,7 @@ object GetOrderDeclaration extends RestDeclaration {
 
 case class DeleteOrderRequest(context: RestRequestContext, orderId: String) extends RestRequest
 case class DeleteOrderResponse(context: RestResponseContext) extends RestResponse
-object DeleteOrderDeclaration extends RestDeclaration {
+object DeleteOrderRegistration extends RestRegistration {
   val method = Method.DELETE
   val path = "/store/order/{orderId}"
   val requestParams = Seq(PathParam("orderId"))
@@ -56,7 +56,7 @@ object DeleteOrderDeclaration extends RestDeclaration {
 
 case class PlaceOrderRequest(context: RestRequestContext, order: Order) extends RestRequest
 case class PlaceOrderResponse(context: RestResponseContext) extends RestResponse
-object PostOrderDeclaration extends RestDeclaration {
+object PostOrderRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/store/order"
   val requestParams = Seq(BodyParam("order"))

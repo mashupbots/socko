@@ -29,9 +29,9 @@ import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.Logger
 
 /**
- * Seralized outgoing data from a [[org.mashupbots.socko.rest.RestResposne]]
+ * Serialized outgoing data from a [[org.mashupbots.socko.rest.RestResposne]]
  *
- * @param config REST config
+ * @param config REST configuration
  * @param responseClass Response class symbol
  * @param responseDataType Data type of the field use to store the response data
  * @param responseDataTerm Name of field used to store response data.
@@ -191,10 +191,10 @@ object RestResponseSerializer {
    *
    * @param config REST config
    * @param rm Runtime Mirror with the same class loaders as the specified request class
-   * @param declaration REST declaration
+   * @param registration REST operation registration details
    * @param responseClassSymbol Response class symbol
    */
-  def apply(config: RestConfig, rm: ru.Mirror, declaration: RestDeclaration, responseClassSymbol: ru.ClassSymbol): RestResponseSerializer = {
+  def apply(config: RestConfig, rm: ru.Mirror, registration: RestRegistration, responseClassSymbol: ru.ClassSymbol): RestResponseSerializer = {
     val responseConstructor: ru.MethodSymbol = responseClassSymbol.toType.declaration(ru.nme.CONSTRUCTOR).asMethod
     val responseConstructorParams: List[ru.TermSymbol] = responseConstructor.paramss(0).map(p => p.asTerm)
 

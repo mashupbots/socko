@@ -20,7 +20,7 @@ import org.mashupbots.socko.rest.Error
 import org.mashupbots.socko.rest.Method
 import org.mashupbots.socko.rest.PathParam
 import org.mashupbots.socko.rest.QueryParam
-import org.mashupbots.socko.rest.RestDeclaration
+import org.mashupbots.socko.rest.RestRegistration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
@@ -35,7 +35,7 @@ case class Pet(tags: Seq[Tag], id: Long, category: Category, status: String, nam
 
 case class GetPetRequest(context: RestRequestContext, petId: String) extends RestRequest
 case class GetPetResponse(context: RestResponseContext, pet: Option[Pet]) extends RestResponse
-object GetPetDeclaration extends RestDeclaration {
+object GetPetRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pet/{petId}"
   val requestParams = Seq(PathParam("petId", "ID of pet that needs to be fetched"))
@@ -48,7 +48,7 @@ object GetPetDeclaration extends RestDeclaration {
 
 case class CreatePetRequest(context: RestRequestContext, pet: Pet) extends RestRequest
 case class CreatePetResponse(context: RestResponseContext) extends RestResponse
-object CreatePetDeclaration extends RestDeclaration {
+object CreatePetRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/pet"
   val requestParams = Seq(BodyParam("pet", "Pet object that needs to be added to the store"))
@@ -60,7 +60,7 @@ object CreatePetDeclaration extends RestDeclaration {
 
 case class UpdatePetRequest(context: RestRequestContext, pet: Pet) extends RestRequest
 case class UpdatePetResponse(context: RestResponseContext) extends RestResponse
-object UpdatePetDeclaration extends RestDeclaration {
+object UpdatePetRegistration extends RestRegistration {
   val method = Method.PUT
   val path = "/pet"
   val requestParams = Seq(BodyParam("pet", "Pet object that needs to be updated in the store"))
@@ -72,7 +72,7 @@ object UpdatePetDeclaration extends RestDeclaration {
 
 case class FindPetByStatusRequest(context: RestRequestContext, status: String) extends RestRequest
 case class FindPetByStatusResponse(context: RestResponseContext, pet: Seq[Pet]) extends RestResponse
-object FindPetByStatusDeclaration extends RestDeclaration {
+object FindPetByStatusRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pet/findByStatus"
   val requestParams = Seq(QueryParam("status", "Status values that need to be considered for filter"))
@@ -85,7 +85,7 @@ object FindPetByStatusDeclaration extends RestDeclaration {
 
 case class FindPetByTagsRequest(context: RestRequestContext, tags: String) extends RestRequest
 case class FindPetByTagsResponse(context: RestResponseContext, pet: Seq[Pet]) extends RestResponse
-object FindPetByTagsDeclaration extends RestDeclaration {
+object FindPetByTagsRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pet/findPetsByTags"
   val requestParams = Seq(BodyParam("tags", "Tags to filter by"))
