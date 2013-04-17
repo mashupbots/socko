@@ -58,8 +58,6 @@ class RestDeleteSpec(_system: ActorSystem) extends TestKit(_system) with Implici
 
   def this() = this(ActorSystem("HttpSpec", ConfigFactory.parseString(RestDeleteSpec.cfg)))
 
-  var tempDir: File = null
-
   var webServer: WebServer = null
   val port = 9021
   val path = "http://localhost:" + port + "/"
@@ -82,21 +80,12 @@ class RestDeleteSpec(_system: ActorSystem) extends TestKit(_system) with Implici
     val webLogConfig = Some(WebLogConfig(None, WebLogFormat.Common))
     val config = WebServerConfig(port = port, webLog = webLogConfig, http = httpConfig)
 
-    tempDir = File.createTempFile("Temp_", "")
-    tempDir.delete()
-    tempDir.mkdir()
-
     webServer = new WebServer(config, routes, system)
     webServer.start()
   }
 
   override def afterAll(configMap: Map[String, Any]) {
     webServer.stop()
-
-    if (tempDir != null) {
-      IOUtil.deleteDir(tempDir)
-      tempDir = null
-    }
   }
 
   "RestDeleteSpec" should {
@@ -173,36 +162,10 @@ class RestDeleteSpec(_system: ActorSystem) extends TestKit(_system) with Implici
       val resp = getResponseContent(conn)
 
       resp.status must equal("200")
-      DateUtil.parseISO8601Date(resp.content)
-      resp.headers.getOrElse("Content-Type", "") must be("text/plain; charset=UTF-8")
+      DateUtil.parseISO8601Date(resp.content.replace("\"", ""))
+      resp.headers.getOrElse("Content-Type", "") must be("application/json; charset=UTF-8")
 
       val url2 = new URL(path + "api/bytes/404")
-      val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
-      conn2.setRequestMethod("DELETE")
-      val resp2 = getResponseContent(conn2)
-
-      resp2.status must equal("404")
-      resp2.content.length must be(0)
-    }
-
-    "DELETE and return stream URL operations" in {
-      val sb = new StringBuilder
-      for (i <- 1 to 1000) sb.append("abc")
-      val content = sb.toString
-
-      val file = new File(tempDir, "streamurl.txt")
-      IOUtil.writeTextFile(file, content, CharsetUtil.UTF_8)
-
-      val url = new URL(path + "api/streamurl/200?sourceURL=" + URLEncoder.encode(file.toURI().toURL().toString(), "UTF-8"))
-      val conn = url.openConnection().asInstanceOf[HttpURLConnection]
-      conn.setRequestMethod("DELETE")
-      val resp = getResponseContent(conn)
-
-      resp.status must equal("200")
-      resp.content must equal(content)
-      resp.headers.getOrElse("Content-Type", "") must be("text/plain; charset=UTF-8")
-
-      val url2 = new URL(path + "api/streamurl/404?sourceURL=notrequired")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       conn2.setRequestMethod("DELETE")
       val resp2 = getResponseContent(conn2)

@@ -59,8 +59,6 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
 
   def this() = this(ActorSystem("HttpSpec", ConfigFactory.parseString(RestPutSpec.cfg)))
 
-  var tempDir: File = null
-
   var webServer: WebServer = null
   val port = 9022
   val path = "http://localhost:" + port + "/"
@@ -83,21 +81,12 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     val webLogConfig = Some(WebLogConfig(None, WebLogFormat.Common))
     val config = WebServerConfig(port = port, webLog = webLogConfig, http = httpConfig)
 
-    tempDir = File.createTempFile("Temp_", "")
-    tempDir.delete()
-    tempDir.mkdir()
-
     webServer = new WebServer(config, routes, system)
     webServer.start()
   }
 
   override def afterAll(configMap: Map[String, Any]) {
     webServer.stop()
-
-    if (tempDir != null) {
-      IOUtil.deleteDir(tempDir)
-      tempDir = null
-    }
   }
 
   "RestPutSpec" should {

@@ -50,13 +50,9 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
 
       s.dataSerializer.isInstanceOf[VoidDataSerializer] must be(true)
 
-      intercept[IllegalStateException] {
-        s.dataSerializer.getData(null)
-      }
+      s.dataSerializer.getData(null) == null must be (true)
 
-      intercept[IllegalStateException] {
-        s.dataSerializer.serialize(null)
-      }
+      s.dataSerializer.serialize(null) must be (Array.empty)      
     }
 
     "Serailize primitive string response" in {

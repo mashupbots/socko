@@ -191,13 +191,9 @@ abstract class NonVoidDataSerializer() extends DataSerializer {
  */
 case class VoidDataSerializer() extends DataSerializer {
 
-  def getData(response: RestResponse): Any = {
-    throw new IllegalStateException("getData() not supported for VoidDataSerializer")
-  }
+  def getData(response: RestResponse): Any = null
 
-  def serialize(data: Any): Array[Byte] = {
-    throw new IllegalStateException("serialize() not supported for VoidDataSerializer")
-  }
+  def serialize(data: Any): Array[Byte] = Array.empty
 
   val swaggerType = "void"
 
@@ -268,7 +264,7 @@ case class PrimitiveDataSerializer(
   def serialize(data: Any): Array[Byte] = {
     details.serializer(data)
   }
-  
+
   val swaggerType = details.swaggerType
 
   val contentType = "application/json; charset=UTF-8"
