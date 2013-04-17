@@ -260,7 +260,7 @@ object ApiOperation {
       op.registration.description,
       op.registration.notes,
       op.registration.deprecated,
-      op.serializer.swaggerDataType,
+      op.serializer.dataSerializer.swaggerType,
       op.registration.name,
       params,
       errors.sortBy(e => e.code))

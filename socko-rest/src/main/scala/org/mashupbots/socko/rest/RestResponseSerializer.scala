@@ -33,37 +33,12 @@ import org.mashupbots.socko.infrastructure.Logger
  *
  * @param config REST configuration
  * @param responseClass Response class symbol
- * @param responseDataType Data type of the field use to store the response data
- * @param responseDataTerm Name of field used to store response data.
- *   For `case class StringResponse(context: RestResponseContext, data: String) extends RestResponse`,
- *   the term is `data`.
- * @param primitiveSerializer Function to use to convert a primitive response data type to
- *   a string for returning to the client. Only applicable if `responseDataType` is `ResponseDataType.Primitive`.
- * @param swaggerDataType Data type as specified by Swagger
- * @param rm Mirror used to extract the value of `responseDataTerm` from the response object
+ * @param dataSerializer Data type specific serializer
  */
 case class RestResponseSerializer(
   config: RestConfig,
   responseClass: ru.ClassSymbol,
-  responseDataType: ResponseDataType.Value,
-  responseDataTerm: Option[ru.TermSymbol],
-  primitiveSerializer: Option[(Any) => Array[Byte]],
-  swaggerDataType: String,
-  rm: ru.Mirror) extends Logger {
-
-  /**
-   * Returns the data object for an instance of the response
-   *
-   * @returns `None` if the response data type is void, else the value of the data field
-   */
-  def getData(response: RestResponse): Any = {
-    if (responseDataType == ResponseDataType.Void) null
-    else {
-      val instanceMirror = rm.reflect(response)
-      val fieldMirror = instanceMirror.reflectField(responseDataTerm.get)
-      fieldMirror.get
-    }
-  }
+  dataSerializer: DataSerializer) extends Logger {
 
   /**
    * Serialize the data to a HTTP response
@@ -77,81 +52,13 @@ case class RestResponseSerializer(
    */
   def serialize(http: HttpRequestEvent, response: RestResponse) {
     val status = response.context.status
-    val dataType = if (http.endPoint.isHEAD) ResponseDataType.Void else responseDataType
-
-    dataType match {
-      case ResponseDataType.Object => {
-        val data = getData(response).asInstanceOf[AnyRef]
-        val bytes = objectSerializer(data)
-        http.response.write(status, bytes, "application/json; charset=UTF-8", response.context.headers)
-      }
-      case ResponseDataType.Bytes => {
-        val data = getData(response).asInstanceOf[Seq[Byte]]
-        val bytes: Seq[Byte] = if (data == null) Seq.empty else data
-        val contentType = response.context.headers.getOrElse(HttpHeaders.Names.CONTENT_TYPE, "application/octet-string")
-        http.response.write(status, bytes.toArray, contentType, response.context.headers)
-      }
-      case ResponseDataType.URL => {
-        // Return binary data in chunks
-        val data = getData(response)
-        val url: URL = if (data == null) null else {
-          data match {
-            case u: URL => u
-            case ou: Option[_] => if (ou.isEmpty) null else ou.get.asInstanceOf[URL]
-          }
-        }
-
-        if (url == null) {
-          http.response.write(status, Array.empty[Byte], "", response.context.headers)
-        } else {
-          val contentType = response.context.headers.getOrElse(HttpHeaders.Names.CONTENT_TYPE, "application/octet-string")
-          http.response.writeFirstChunk(status, contentType, response.context.headers)
-
-          // TO DO use chunk writers to be more efficient and non blocking
-          // Look at org.mashupbots.socko.netty.HttpChunkedFile for example
-          val buf = new Array[Byte](8192)
-          IOUtil.using(new BufferedInputStream(url.openStream())) { r =>
-            def doPipe(): Unit = {
-              val bytesRead = r.read(buf)
-              if (bytesRead > 0) {
-                val w = if (bytesRead == buf.length) buf else buf.slice(0, bytesRead)
-                http.response.writeChunk(w)
-                doPipe()
-              }
-            }
-            doPipe()
-          }
-
-          http.response.writeLastChunk()
-        }
-      }
-      case ResponseDataType.Primitive => {
-        val data = getData(response)
-        val bytes = primitiveSerializer.get(data)
-        http.response.write(status, bytes, "application/json; charset=UTF-8", response.context.headers)
-      }
-      case ResponseDataType.Void => {
-        http.response.write(status, Array.empty[Byte], "", response.context.headers)
-      }
-      case _ => {
-        throw new IllegalStateException(s"Unsupported ResponseDataType ${responseDataType.toString}")
-      }
+    val data = dataSerializer.getData(response)
+    val bytes = dataSerializer.serialize(data)
+    val contentType = {
+      if (dataSerializer.forceContentType) dataSerializer.contentType
+      else response.context.headers.getOrElse(HttpHeaders.Names.CONTENT_TYPE, dataSerializer.contentType)
     }
-  } //serialize
-
-  /**
-   * Converts an object into JSON encoded in UTF-8
-   *
-   * @param data Data to serialize
-   * @return Array of bytes representing the serialized data
-   */
-  def objectSerializer(data: AnyRef): Array[Byte] = {
-    if (data == null) Array.empty
-    else {
-      implicit val formats = json.formats(NoTypeHints)
-      val s = json.write(data)
-      s.getBytes(CharsetUtil.UTF_8)
-    }
+    http.response.write(status, bytes, contentType, response.context.headers)
   }
 }
 
@@ -160,57 +67,8 @@ case class RestResponseSerializer(
  */
 object RestResponseSerializer {
 
-  private def jsonifyString(s: Any): Array[Byte] = {
-    implicit val formats = json.formats(NoTypeHints)
-    json.write(s.asInstanceOf[String]).getBytes(CharsetUtil.UTF_8)
-  }
-  private def jsonifyOptionString(s: Any): Array[Byte] = {
-    val ss = s.asInstanceOf[Option[String]]
-    if (ss.isEmpty) Array.empty
-    else jsonifyString(ss.get)
-  }
-  private def jsonifyVal(a: Any): Array[Byte] = {
-    a.toString.getBytes(CharsetUtil.UTF_8)
-  }
-  private def jsonifyOptionVal(a: Any): Array[Byte] = {
-    val ss = a.asInstanceOf[Option[_]]
-    if (ss.isEmpty) Array.empty
-    else ss.get.toString.getBytes(CharsetUtil.UTF_8)
-  }
-  private def jsonifyDate(d: Any): Array[Byte] = {
-    implicit val formats = json.formats(NoTypeHints)
-    json.write(d.asInstanceOf[Date]).getBytes(CharsetUtil.UTF_8)
-  }  
-  private def jsonifyOptionDate(a: Any): Array[Byte] = {
-    val ss = a.asInstanceOf[Option[Date]]
-    if (ss.isEmpty) Array.empty
-    else jsonifyDate(ss.get)
-  }
-
-  case class PrimitiveDetails(serializer: (Any) => Array[Byte], swaggerType: String)
-  private val primitiveTypes: Map[ru.Type, PrimitiveDetails] = Map(
-    (ru.typeOf[String], PrimitiveDetails((s: Any) => jsonifyString(s), "string")),
-    (ru.typeOf[Option[String]], PrimitiveDetails((s: Any) => jsonifyOptionString(s), "string")),
-    (ru.typeOf[Int], PrimitiveDetails((s: Any) => jsonifyVal(s), "int")),
-    (ru.typeOf[Option[Int]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "int")),
-    (ru.typeOf[Boolean], PrimitiveDetails((s: Any) => jsonifyVal(s), "boolean")),
-    (ru.typeOf[Option[Boolean]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "boolean")),
-    (ru.typeOf[Byte], PrimitiveDetails((s: Any) => jsonifyVal(s), "byte")),
-    (ru.typeOf[Option[Byte]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "byte")),
-    (ru.typeOf[Short], PrimitiveDetails((s: Any) => jsonifyVal(s), "short")),
-    (ru.typeOf[Option[Short]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "short")),
-    (ru.typeOf[Long], PrimitiveDetails((s: Any) => jsonifyVal(s), "long")),
-    (ru.typeOf[Option[Long]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "long")),
-    (ru.typeOf[Double], PrimitiveDetails((s: Any) => jsonifyVal(s), "double")),
-    (ru.typeOf[Option[Double]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "double")),
-    (ru.typeOf[Float], PrimitiveDetails((s: Any) => jsonifyVal(s), "float")),
-    (ru.typeOf[Option[Float]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "float")),
-    (ru.typeOf[Date], PrimitiveDetails((s: Any) => jsonifyDate(s), "date")),
-    (ru.typeOf[Option[Date]], PrimitiveDetails((s: Any) => jsonifyOptionDate(s), "date")))
-
-  private val bytesType = ru.typeOf[Seq[Byte]]
-  private val urlType = ru.typeOf[URL]
-  private val optionalUrlType = ru.typeOf[Option[URL]]
+  private val byteArrayType = ru.typeOf[Array[Byte]]
+  private val byteSeqType = ru.typeOf[Seq[Byte]]
   private val anyRefType = ru.typeOf[AnyRef]
 
   /**
@@ -231,55 +89,291 @@ object RestResponseSerializer {
       throw RestDefintionException(s"First constructor parameter of '${responseClassSymbol.fullName}' must be called 'context'.")
     }
 
-    val (responseDataType, contentTerm, contentType) = if (responseConstructorParams.size == 1) {
-      (ResponseDataType.Void, None, None)
+    val dataSerializer = if (responseConstructorParams.size == 1) {
+      VoidDataSerializer()
     } else {
-      val contentTerm = responseConstructorParams(1)
-      val contentType = contentTerm.typeSignature
-      val dataType = if (primitiveTypes.exists(t => t._1 =:= contentType)) {
-        ResponseDataType.Primitive
-      } else if (contentType =:= bytesType) {
-        ResponseDataType.Bytes
-      } else if (contentType =:= urlType || contentType =:= optionalUrlType) {
-        ResponseDataType.URL
-      } else if (contentType <:< anyRefType) {
-        ResponseDataType.Object
+      // Instance the correct data serializer
+      val paramDataTerm = responseConstructorParams(1)
+      val paramDataType = paramDataTerm.typeSignature
+
+      // The data term name assumed to be in the constructor of a "case class"
+      // Get the term name and reflect it as a field in order to read its value in getData()
+      val responseDataTerm = responseClassSymbol.toType.declaration(paramDataTerm.name).asTerm.accessed.asTerm
+
+      val dataSerializer = if (PrimitiveDataSerializer.IsPrimitiveDataType(paramDataType)) {
+        PrimitiveDataSerializer(paramDataType, responseDataTerm, rm)
+      } else if (paramDataType <:< byteSeqType) {
+        ByteSeqDataSerializer(responseDataTerm, rm)
+      } else if (paramDataType =:= byteArrayType) {
+        ByteArrayDataSerializer(responseDataTerm, rm)
+      } else if (paramDataType <:< anyRefType) {
+        ObjectDataSerializer(paramDataType, responseDataTerm, rm)
       } else {
-        throw new IllegalArgumentException(s"Unsupported REST response data type ${contentType} in ${responseClassSymbol.fullName}.")
+        throw new IllegalArgumentException(s"Unsupported REST response data type ${paramDataType} in ${responseClassSymbol.fullName}.")
       }
-      (dataType, Some(contentTerm), Some(contentType))
-    }
 
-    // The data term name assumed to be in the constructor of a "case class"
-    // Get the term name and reflect it as a field in order to read its value
-    val responseDataTerm: Option[ru.TermSymbol] = if (responseDataType == ResponseDataType.Void) None else {
-      Some(responseClassSymbol.toType.declaration(contentTerm.get.name).asTerm.accessed.asTerm)
-    }
-
-    // Cache primitive serializer so we don't have to lookup all the time
-    val primitiveSerializer =
-      if (responseDataType != ResponseDataType.Primitive) None
-      else Some(primitiveTypes.find(e => e._1 =:= contentType.get).get._2.serializer)
-
-    // Set the swagger data type
-    val swaggerDataType: String = responseDataType match {
-      case ResponseDataType.Void => "void"
-      case ResponseDataType.Primitive => primitiveTypes.find(e => e._1 =:= contentType.get).get._2.swaggerType
-      case ResponseDataType.Object => contentType.get.toString // TODO fix 
-      case ResponseDataType.URL => "bytes" // TODO not strictly supported      
-      case ResponseDataType.Bytes => "bytes" // TODO not strictly supported      
-      case _ => throw new IllegalStateException(s"Unrecognised ResponseDataType '${responseDataType}'")
+      dataSerializer
     }
 
     // Finish up
-    RestResponseSerializer(config, responseClassSymbol, responseDataType, responseDataTerm, primitiveSerializer, swaggerDataType, rm)
+    RestResponseSerializer(config, responseClassSymbol, dataSerializer)
   }
 
 }
 
-object ResponseDataType extends Enumeration {
-  type ResponseDataType = Value
-  val Void, Primitive, Object, Bytes, URL = Value
-} 
+/**
+ * Serializes data into a byte array
+ */
+abstract class DataSerializer {
+  /**
+   * Converts an object into JSON encoded in UTF-8
+   *
+   * @param data Data to serialize
+   * @return Array of bytes representing the serialized data
+   */
+  def serialize(data: Any): Array[Byte]
 
+  /**
+   * Swagger data type for the `responseClass` in an API declaration
+   */
+  def swaggerType: String
+
+  /**
+   * Content MIME Type
+   */
+  def contentType: String
+
+  /**
+   * Force the use of `ContentType` even if it is specified in the headers
+   */
+  def forceContentType: Boolean
+
+  /**
+   * Returns the data object for an instance of the response
+   *
+   * @returns `None` if the response data type is void, else the value of the data field
+   */
+  def getData(response: RestResponse): Any
+}
+
+/**
+ * Encapsulates common aspects of non void serializers
+ */
+abstract class NonVoidDataSerializer() extends DataSerializer {
+  /**
+   * Name of field used to store response data.
+   * For `case class StringResponse(context: RestResponseContext, data: String) extends RestResponse`,
+   * the term is `data`.
+   */
+  val responseDataTerm: ru.TermSymbol
+
+  /**
+   * Mirror used to extract the value of `responseDataTerm` from the response object
+   */
+  val rm: ru.Mirror
+
+  /**
+   * Returns the data object for an instance of the response
+   *
+   * @returns `None` if the response data type is void, else the value of the data field
+   */
+  def getData(response: RestResponse): Any = {
+    val instanceMirror = rm.reflect(response)
+    val fieldMirror = instanceMirror.reflectField(responseDataTerm)
+    fieldMirror.get
+  }
+}
+
+/**
+ * Serializes a void response.
+ *
+ * This is a placeholder because with `void`, there is no data to serialize.
+ */
+case class VoidDataSerializer() extends DataSerializer {
+
+  def getData(response: RestResponse): Any = {
+    throw new IllegalStateException("getData() not supported for VoidDataSerializer")
+  }
+
+  def serialize(data: Any): Array[Byte] = {
+    throw new IllegalStateException("serialize() not supported for VoidDataSerializer")
+  }
+
+  val swaggerType = "void"
+
+  val contentType = ""
+
+  val forceContentType = false
+}
+
+/**
+ * Serialize an object into a UTF-8 JSON byte array
+ *
+ * If the data is of type `Option[]` and the value is None, an empty array will be returned.
+ *
+ * @param tpe Type of the data to serialize
+ * @param responseDataTerm Name of field used to store response data.
+ *   For `case class StringResponse(context: RestResponseContext, data: String) extends RestResponse`,
+ *   the term is `data`.
+ * @param rm Mirror used to extract the value of `responseDataTerm` from the response object
+ */
+case class ObjectDataSerializer(
+  tpe: ru.Type,
+  responseDataTerm: ru.TermSymbol,
+  rm: ru.Mirror) extends NonVoidDataSerializer {
+
+  def serialize(data: Any): Array[Byte] = {
+    if (data == null) Array.empty
+    else {
+      implicit val formats = json.formats(NoTypeHints)
+      val s = json.write(data.asInstanceOf[AnyRef])
+      s.getBytes(CharsetUtil.UTF_8)
+    }
+  }
+
+  val swaggerType = "TODO"
+
+  val contentType = "application/json; charset=UTF-8"
+
+  val forceContentType = true
+}
+
+/**
+ * Details for a specific primitive type
+ *
+ * @param tpe Primitive type, for example `Int`
+ * @param serializer Converts data of type `tpe` into a byte array
+ * @param swaggerType Swagger `responseClass`
+ */
+case class PrimitiveType(tpe: ru.Type, serializer: (Any) => Array[Byte], swaggerType: String)
+
+/**
+ * Serialize a primitive into a UTF-8 JSON byte array
+ *
+ * If the data is of type `Option[]` and the value is None, an empty array will be returned.
+ *
+ * @param tpe Type of the data to serialize
+ * @param responseDataTerm Name of field used to store response data.
+ *   For `case class StringResponse(context: RestResponseContext, data: String) extends RestResponse`,
+ *   the term is `data`.
+ * @param rm Mirror used to extract the value of `responseDataTerm` from the response object
+ */
+case class PrimitiveDataSerializer(
+  tpe: ru.Type,
+  responseDataTerm: ru.TermSymbol,
+  rm: ru.Mirror) extends NonVoidDataSerializer {
+
+  private val details: PrimitiveType = PrimitiveDataSerializer.primitiveTypes.find(t => t.tpe =:= tpe).get
+
+  def serialize(data: Any): Array[Byte] = {
+    details.serializer(data)
+  }
   
+  val swaggerType = details.swaggerType
+
+  val contentType = "application/json; charset=UTF-8"
+
+  val forceContentType = true
+}
+
+/**
+ * Companion class
+ */
+object PrimitiveDataSerializer {
+  private def jsonifyString(s: Any): Array[Byte] = {
+    implicit val formats = json.formats(NoTypeHints)
+    json.write(s.asInstanceOf[String]).getBytes(CharsetUtil.UTF_8)
+  }
+  private def jsonifyOptionString(s: Any): Array[Byte] = {
+    val ss = s.asInstanceOf[Option[String]]
+    if (ss.isEmpty) Array.empty
+    else jsonifyString(ss.get)
+  }
+  private def jsonifyVal(a: Any): Array[Byte] = {
+    a.toString.getBytes(CharsetUtil.UTF_8)
+  }
+  private def jsonifyOptionVal(a: Any): Array[Byte] = {
+    val ss = a.asInstanceOf[Option[_]]
+    if (ss.isEmpty) Array.empty
+    else ss.get.toString.getBytes(CharsetUtil.UTF_8)
+  }
+  private def jsonifyDate(d: Any): Array[Byte] = {
+    implicit val formats = json.formats(NoTypeHints)
+    json.write(d.asInstanceOf[Date]).getBytes(CharsetUtil.UTF_8)
+  }
+  private def jsonifyOptionDate(a: Any): Array[Byte] = {
+    val ss = a.asInstanceOf[Option[Date]]
+    if (ss.isEmpty) Array.empty
+    else jsonifyDate(ss.get)
+  }
+
+  val primitiveTypes: Seq[PrimitiveType] = Seq(
+    PrimitiveType(ru.typeOf[String], (s: Any) => jsonifyString(s), "string"),
+    PrimitiveType(ru.typeOf[Option[String]], (s: Any) => jsonifyOptionString(s), "string"),
+    PrimitiveType(ru.typeOf[Int], (s: Any) => jsonifyVal(s), "int"),
+    PrimitiveType(ru.typeOf[Option[Int]], (s: Any) => jsonifyOptionVal(s), "int"),
+    PrimitiveType(ru.typeOf[Boolean], (s: Any) => jsonifyVal(s), "boolean"),
+    PrimitiveType(ru.typeOf[Option[Boolean]], (s: Any) => jsonifyOptionVal(s), "boolean"),
+    PrimitiveType(ru.typeOf[Byte], (s: Any) => jsonifyVal(s), "byte"),
+    PrimitiveType(ru.typeOf[Option[Byte]], (s: Any) => jsonifyOptionVal(s), "byte"),
+    PrimitiveType(ru.typeOf[Short], (s: Any) => jsonifyVal(s), "short"),
+    PrimitiveType(ru.typeOf[Option[Short]], (s: Any) => jsonifyOptionVal(s), "short"),
+    PrimitiveType(ru.typeOf[Long], (s: Any) => jsonifyVal(s), "long"),
+    PrimitiveType(ru.typeOf[Option[Long]], (s: Any) => jsonifyOptionVal(s), "long"),
+    PrimitiveType(ru.typeOf[Double], (s: Any) => jsonifyVal(s), "double"),
+    PrimitiveType(ru.typeOf[Option[Double]], (s: Any) => jsonifyOptionVal(s), "double"),
+    PrimitiveType(ru.typeOf[Float], (s: Any) => jsonifyVal(s), "float"),
+    PrimitiveType(ru.typeOf[Option[Float]], (s: Any) => jsonifyOptionVal(s), "float"),
+    PrimitiveType(ru.typeOf[Date], (s: Any) => jsonifyDate(s), "date"),
+    PrimitiveType(ru.typeOf[Option[Date]], (s: Any) => jsonifyOptionDate(s), "date"))
+
+  def IsPrimitiveDataType(tpe: ru.Type): Boolean = {
+    primitiveTypes.exists(p => p.tpe =:= tpe)
+  }
+}
+
+/**
+ * Serialize a byte array (hint: this does not do much!)
+ *
+ * @param responseDataTerm Name of field used to store response data.
+ *   For `case class StringResponse(context: RestResponseContext, data: String) extends RestResponse`,
+ *   the term is `data`.
+ * @param rm Mirror used to extract the value of `responseDataTerm` from the response object
+ */
+case class ByteArrayDataSerializer(
+  responseDataTerm: ru.TermSymbol,
+  rm: ru.Mirror) extends NonVoidDataSerializer {
+
+  def serialize(data: Any): Array[Byte] = {
+    if (data == null) Array.empty else data.asInstanceOf[Array[Byte]]
+  }
+
+  val swaggerType = "bytes" // TODO this is not supported by swagger at the moment
+
+  val contentType = "application/octet-string"
+
+  val forceContentType = false
+}
+
+/**
+ * Serialize a byte sequence (hint: this does not do much!)
+ *
+ * @param responseDataTerm Name of field used to store response data.
+ *   For `case class StringResponse(context: RestResponseContext, data: String) extends RestResponse`,
+ *   the term is `data`.
+ * @param rm Mirror used to extract the value of `responseDataTerm` from the response object
+ */
+case class ByteSeqDataSerializer(
+  responseDataTerm: ru.TermSymbol,
+  rm: ru.Mirror) extends NonVoidDataSerializer {
+
+  def serialize(data: Any): Array[Byte] = {
+    if (data == null) Array.empty else (data.asInstanceOf[Seq[Byte]].toArray)
+  }
+
+  val swaggerType = "bytes" // TODO this is not supported by swagger at the moment
+
+  val contentType = "application/octet-string"
+
+  val forceContentType = false
+}
