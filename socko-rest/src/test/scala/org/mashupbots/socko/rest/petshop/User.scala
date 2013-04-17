@@ -43,7 +43,7 @@ case class CreateUserWithArrayResponse(context: RestResponseContext) extends Res
 object CreateUserWithArrayRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/user/createWithArray"
-  val requestParams = Seq(PathParam("users"))
+  val requestParams = Seq(BodyParam("users"))
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
@@ -52,7 +52,7 @@ case class CreateUserResponse(context: RestResponseContext) extends RestResponse
 object CreateUserRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/user"
-  val requestParams = Seq(PathParam("user"))
+  val requestParams = Seq(BodyParam("user"))
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 
@@ -61,7 +61,7 @@ case class CreateUserWithListResponse(context: RestResponseContext) extends Rest
 object CreateUserWithListRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/user/createWithList"
-  val requestParams = Seq(PathParam("users"))
+  val requestParams = Seq(BodyParam("users"))
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
 }
 

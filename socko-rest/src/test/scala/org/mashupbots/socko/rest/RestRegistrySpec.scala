@@ -125,6 +125,15 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
       hh.name must be("Boo")
     }
 
+    "test serialize" in {
+    	 implicit val formats = json.formats(NoTypeHints)
+         val s = json.write("test")         
+         s must be ("\"test\"")
+    	     	 
+         val s2 = json.write("")         
+         s2 must be ("\"\"")
+    }
+    
     "reflect object" in {
       val clz = Class.forName("org.mashupbots.socko.rest.MyObject")
       val rm = ru.runtimeMirror(getClass.getClassLoader)

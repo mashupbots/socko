@@ -56,7 +56,7 @@ object DeleteOrderRegistration extends RestRegistration {
 
 case class PlaceOrderRequest(context: RestRequestContext, order: Order) extends RestRequest
 case class PlaceOrderResponse(context: RestResponseContext) extends RestResponse
-object PostOrderRegistration extends RestRegistration {
+object PlaceOrderRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/store/order"
   val requestParams = Seq(BodyParam("order"))

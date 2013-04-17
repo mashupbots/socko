@@ -88,7 +88,7 @@ case class FindPetByTagsResponse(context: RestResponseContext, pet: Seq[Pet]) ex
 object FindPetByTagsRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pet/findPetsByTags"
-  val requestParams = Seq(BodyParam("tags", "Tags to filter by"))
+  val requestParams = Seq(QueryParam("tags", "Tags to filter by"))
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
   override val name = "findPetsByTags"
   override val description = "Finds Pets by tags"

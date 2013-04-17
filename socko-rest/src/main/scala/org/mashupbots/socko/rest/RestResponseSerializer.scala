@@ -47,7 +47,7 @@ case class RestResponseSerializer(
   responseClass: ru.ClassSymbol,
   responseDataType: ResponseDataType.Value,
   responseDataTerm: Option[ru.TermSymbol],
-  primitiveSerializer: Option[(Any) => String],
+  primitiveSerializer: Option[(Any) => Array[Byte]],
   swaggerDataType: String,
   rm: ru.Mirror) extends Logger {
 
@@ -82,11 +82,7 @@ case class RestResponseSerializer(
     dataType match {
       case ResponseDataType.Object => {
         val data = getData(response).asInstanceOf[AnyRef]
-        val bytes: Array[Byte] = if (data == null) Array.empty else {
-          implicit val formats = json.formats(NoTypeHints)
-          val s = json.write(data)
-          s.getBytes(CharsetUtil.UTF_8)
-        }
+        val bytes = objectSerializer(data)
         http.response.write(status, bytes, "application/json; charset=UTF-8", response.context.headers)
       }
       case ResponseDataType.Bytes => {
@@ -96,6 +92,7 @@ case class RestResponseSerializer(
         http.response.write(status, bytes.toArray, contentType, response.context.headers)
       }
       case ResponseDataType.URL => {
+        // Return binary data in chunks
         val data = getData(response)
         val url: URL = if (data == null) null else {
           data match {
@@ -130,8 +127,8 @@ case class RestResponseSerializer(
       }
       case ResponseDataType.Primitive => {
         val data = getData(response)
-        val bytes = primitiveSerializer.get(data).getBytes(CharsetUtil.UTF_8)
-        http.response.write(status, bytes, "text/plain; charset=UTF-8", response.context.headers)
+        val bytes = primitiveSerializer.get(data)
+        http.response.write(status, bytes, "application/json; charset=UTF-8", response.context.headers)
       }
       case ResponseDataType.Void => {
         http.response.write(status, Array.empty[Byte], "", response.context.headers)
@@ -142,6 +139,20 @@ case class RestResponseSerializer(
     }
   } //serialize
 
+  /**
+   * Converts an object into JSON encoded in UTF-8
+   *
+   * @param data Data to serialize
+   * @return Array of bytes representing the serialized data
+   */
+  def objectSerializer(data: AnyRef): Array[Byte] = {
+    if (data == null) Array.empty
+    else {
+      implicit val formats = json.formats(NoTypeHints)
+      val s = json.write(data)
+      s.getBytes(CharsetUtil.UTF_8)
+    }
+  }
 }
 
 /**
@@ -149,37 +160,53 @@ case class RestResponseSerializer(
  */
 object RestResponseSerializer {
 
-  private def optionToString(s: Any): String = {
-    val ss = s.asInstanceOf[Option[_]]
-    if (ss.isEmpty) ""
-    else ss.get.toString
+  private def jsonifyString(s: Any): Array[Byte] = {
+    implicit val formats = json.formats(NoTypeHints)
+    json.write(s.asInstanceOf[String]).getBytes(CharsetUtil.UTF_8)
   }
-  private def optionDateToString(s: Any): String = {
-    val ss = s.asInstanceOf[Option[Date]]
-    if (ss.isEmpty) ""
-    else DateUtil.formatISO8601UTCDateTime(ss.get)
+  private def jsonifyOptionString(s: Any): Array[Byte] = {
+    val ss = s.asInstanceOf[Option[String]]
+    if (ss.isEmpty) Array.empty
+    else jsonifyString(ss.get)
+  }
+  private def jsonifyVal(a: Any): Array[Byte] = {
+    a.toString.getBytes(CharsetUtil.UTF_8)
+  }
+  private def jsonifyOptionVal(a: Any): Array[Byte] = {
+    val ss = a.asInstanceOf[Option[_]]
+    if (ss.isEmpty) Array.empty
+    else ss.get.toString.getBytes(CharsetUtil.UTF_8)
+  }
+  private def jsonifyDate(d: Any): Array[Byte] = {
+    implicit val formats = json.formats(NoTypeHints)
+    json.write(d.asInstanceOf[Date]).getBytes(CharsetUtil.UTF_8)
+  }  
+  private def jsonifyOptionDate(a: Any): Array[Byte] = {
+    val ss = a.asInstanceOf[Option[Date]]
+    if (ss.isEmpty) Array.empty
+    else jsonifyDate(ss.get)
   }
 
-  case class PrimitiveDetails(serializer: (Any) => String, swaggerType: String)
+  case class PrimitiveDetails(serializer: (Any) => Array[Byte], swaggerType: String)
   private val primitiveTypes: Map[ru.Type, PrimitiveDetails] = Map(
-    (ru.typeOf[String], PrimitiveDetails((s: Any) => s.toString, "string")),
-    (ru.typeOf[Option[String]], PrimitiveDetails((s: Any) => optionToString(s), "string")),
-    (ru.typeOf[Int], PrimitiveDetails((s: Any) => s.toString, "int")),
-    (ru.typeOf[Option[Int]], PrimitiveDetails((s: Any) => optionToString(s), "int")),
-    (ru.typeOf[Boolean], PrimitiveDetails((s: Any) => s.toString, "boolean")),
-    (ru.typeOf[Option[Boolean]], PrimitiveDetails((s: Any) => optionToString(s), "boolean")),
-    (ru.typeOf[Byte], PrimitiveDetails((s: Any) => s.toString, "byte")),
-    (ru.typeOf[Option[Byte]], PrimitiveDetails((s: Any) => optionToString(s), "byte")),
-    (ru.typeOf[Short], PrimitiveDetails((s: Any) => s.toString, "short")),
-    (ru.typeOf[Option[Short]], PrimitiveDetails((s: Any) => optionToString(s), "short")),
-    (ru.typeOf[Long], PrimitiveDetails((s: Any) => s.toString, "long")),
-    (ru.typeOf[Option[Long]], PrimitiveDetails((s: Any) => optionToString(s), "long")),
-    (ru.typeOf[Double], PrimitiveDetails((s: Any) => s.toString, "double")),
-    (ru.typeOf[Option[Double]], PrimitiveDetails((s: Any) => optionToString(s), "double")),
-    (ru.typeOf[Float], PrimitiveDetails((s: Any) => s.toString, "float")),
-    (ru.typeOf[Option[Float]], PrimitiveDetails((s: Any) => optionToString(s), "float")),
-    (ru.typeOf[Date], PrimitiveDetails((s: Any) => DateUtil.formatISO8601UTCDateTime(s.asInstanceOf[Date]), "date")),
-    (ru.typeOf[Option[Date]], PrimitiveDetails((s: Any) => optionDateToString(s), "date")))
+    (ru.typeOf[String], PrimitiveDetails((s: Any) => jsonifyString(s), "string")),
+    (ru.typeOf[Option[String]], PrimitiveDetails((s: Any) => jsonifyOptionString(s), "string")),
+    (ru.typeOf[Int], PrimitiveDetails((s: Any) => jsonifyVal(s), "int")),
+    (ru.typeOf[Option[Int]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "int")),
+    (ru.typeOf[Boolean], PrimitiveDetails((s: Any) => jsonifyVal(s), "boolean")),
+    (ru.typeOf[Option[Boolean]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "boolean")),
+    (ru.typeOf[Byte], PrimitiveDetails((s: Any) => jsonifyVal(s), "byte")),
+    (ru.typeOf[Option[Byte]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "byte")),
+    (ru.typeOf[Short], PrimitiveDetails((s: Any) => jsonifyVal(s), "short")),
+    (ru.typeOf[Option[Short]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "short")),
+    (ru.typeOf[Long], PrimitiveDetails((s: Any) => jsonifyVal(s), "long")),
+    (ru.typeOf[Option[Long]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "long")),
+    (ru.typeOf[Double], PrimitiveDetails((s: Any) => jsonifyVal(s), "double")),
+    (ru.typeOf[Option[Double]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "double")),
+    (ru.typeOf[Float], PrimitiveDetails((s: Any) => jsonifyVal(s), "float")),
+    (ru.typeOf[Option[Float]], PrimitiveDetails((s: Any) => jsonifyOptionVal(s), "float")),
+    (ru.typeOf[Date], PrimitiveDetails((s: Any) => jsonifyDate(s), "date")),
+    (ru.typeOf[Option[Date]], PrimitiveDetails((s: Any) => jsonifyOptionDate(s), "date")))
 
   private val bytesType = ru.typeOf[Seq[Byte]]
   private val urlType = ru.typeOf[URL]
@@ -238,9 +265,9 @@ object RestResponseSerializer {
     val swaggerDataType: String = responseDataType match {
       case ResponseDataType.Void => "void"
       case ResponseDataType.Primitive => primitiveTypes.find(e => e._1 =:= contentType.get).get._2.swaggerType
-      case ResponseDataType.Object => contentType.get.toString	// TODO fix 
-      case ResponseDataType.URL => "bytes" //not strictly supported      
-      case ResponseDataType.Bytes => "bytes" //not strictly supported      
+      case ResponseDataType.Object => contentType.get.toString // TODO fix 
+      case ResponseDataType.URL => "bytes" // TODO not strictly supported      
+      case ResponseDataType.Bytes => "bytes" // TODO not strictly supported      
       case _ => throw new IllegalStateException(s"Unrecognised ResponseDataType '${responseDataType}'")
     }
 
