@@ -18,10 +18,11 @@ package org.mashupbots.socko.rest
 import scala.reflect.runtime.{ universe => ru }
 import akka.actor.ActorSystem
 import akka.actor.ActorRef
+import java.util.Date
 
 /**
- * Binds a [[org.mashupbots.socko.rest.RestRequest]], [[org.mashupbots.socko.rest.RestResponse]] and 
- * a processor actor to an end point. 
+ * Binds a [[org.mashupbots.socko.rest.RestRequest]], [[org.mashupbots.socko.rest.RestResponse]] and
+ * a processor actor to an end point.
  *
  * This is implemented as an abstract class rather than a trait so that it is easier
  * to override methods and values.
@@ -55,12 +56,12 @@ abstract class RestRegistration {
 
   /**
    * Request parameter bindings.
-   * 
-   * You can specify [[org.mashupbots.socko.rest.PathParam]], [[org.mashupbots.socko.rest.QueryParam]], 
+   *
+   * You can specify [[org.mashupbots.socko.rest.PathParam]], [[org.mashupbots.socko.rest.QueryParam]],
    * [[org.mashupbots.socko.rest.HeaderParam]] and/or [[org.mashupbots.socko.rest.BodyParam]].
    */
   def requestParams: Seq[RequestParam]
-  
+
   /**
    * The type of the [[org.mashupbots.socko.rest.RestResponse]].
    *
@@ -149,7 +150,7 @@ case class Error(code: Int, reason: String)
 
 /**
  * Identifies a [[org.mashupbots.socko.rest.RestRequest]] parameter binding
- * 
+ *
  * @param name Name of the request parameter
  * @param description Short description of the parameter
  * @param allowMultiple Specifies that a comma-separated list of values can be passed
@@ -232,7 +233,7 @@ case class BodyParam(
   name: String,
   description: String = "") extends RequestParam {
 
-  val paramType = "bpdy"
+  val paramType = "body"
   val allowableValues: Option[AllowableValues] = None
   val allowMultiple: Boolean = false
 }
@@ -242,21 +243,17 @@ case class BodyParam(
  */
 trait AllowableValues
 
-/**
- * Specifies the minimum and maximum values for a [[org.mashupbots.socko.rest.RestRequest]] parameter.
- *
- * The data type must match the type of the bound request variable
- *
- * @param min Minimum value
- * @param max Maximum value
- */
-case class AllowableRange(min: Any, max: Any) extends AllowableValues
+case class AllowableValuesRange[T](min: T, max: T) extends AllowableValues {
+  val valueType = "RANGE"
+}
+case class AllowableValuesList[T](values: List[T]) extends AllowableValues {
+  val valueType = "LIST"
+}
 
 /**
- * A list of allowable values for a [[org.mashupbots.socko.rest.RestRequest]] parameter.
- *
- * The data type must match the type of the bound request variable
- *
- * @param values Values in this list are acceptable
+ * Companion object
  */
-case class AllowableList(values: Seq[Any]) extends AllowableValues
+object AllowableValues {
+  def apply[T](min: T, max: T): AllowableValues = AllowableValuesRange(min, max)
+  def apply[T](values: List[T]): AllowableValues = AllowableValuesList(values)
+}

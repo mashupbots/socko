@@ -276,9 +276,9 @@ case class ApiParameter(
   description: String,
   paramType: String,
   dataType: String,
-  required: Boolean //allowableValues: String,
-  //allowMultiple: String
-  )
+  required: Boolean,
+  allowableValues: Option[AllowableValues],
+  allowMultiple: Boolean)
 
 /**
  * Companion object
@@ -297,7 +297,9 @@ object ApiParameter {
       binding.registration.description,
       binding.swaggerParamType,
       binding.swaggerDataType,
-      binding.required)
+      binding.required,
+      binding.registration.allowableValues,
+      binding.registration.allowMultiple)
   }
 }
 

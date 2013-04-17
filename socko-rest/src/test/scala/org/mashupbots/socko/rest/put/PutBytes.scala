@@ -39,15 +39,15 @@ object PutBytesRegistration extends RestRegistration {
 
 case class PutBytesRequest(context: RestRequestContext, status: Int, bytes: Seq[Byte]) extends RestRequest
 
-case class PutBytesResponse(context: RestResponseContext, data: Seq[Byte]) extends RestResponse
+case class PutBytesResponse(context: RestResponseContext, data: Array[Byte]) extends RestResponse
 
 class PutBytesProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
     case req: PutBytesRequest =>
       if (req.status == 200) {
-        sender ! PutBytesResponse(req.context.responseContext(req.status, Map.empty), req.bytes)
+        sender ! PutBytesResponse(req.context.responseContext(req.status, Map.empty), req.bytes.toArray)
       } else {
-        sender ! PutBytesResponse(req.context.responseContext(req.status), Seq.empty)
+        sender ! PutBytesResponse(req.context.responseContext(req.status), Array.empty)
       }
       context.stop(self)
   }
