@@ -61,16 +61,16 @@ case class RestRegistry(
   }
 
   /**
-   * Root path that will trigger the response of api documentation.  For example, `/api/api-docs`.
+   * Root path that will trigger the response of API documentation.  For example, `/api/api-docs.json`.
    */
-  val rootApiDocsUrl = config.rootPath + RestApiDocGenerator.urlPath
+  val rootApiDocsUrl = config.rootPath + SwaggerDocGenerator.urlPath
 
   /**
-   * API documentation ready to be served
+   * Swagger API documentation ready to be served
    *
    * The `key` is the exact path to match, the value is the `UTF-8` encoded response
    */
-  val apiDocs: Map[String, Array[Byte]] = RestApiDocGenerator.generate(operations, config)
+  val apiDocs: Map[String, Array[Byte]] = SwaggerDocGenerator.generate(operations, config)
 
   /**
    * Flag to indicate if the path requests api document response.

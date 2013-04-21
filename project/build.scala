@@ -21,7 +21,7 @@ object SockoBuild extends Build {
     // Info
     organization := "org.mashupbots.socko",
     version      := "0.2.4",
-    scalaVersion := "2.10.0",
+    scalaVersion := "2.10.1",
     organizationHomepage := Some(url("http://www.sockoweb.org")),
 
     // Repositories
@@ -131,6 +131,7 @@ object Dependencies {
   import Dependency._
 
   val webserver = Seq(
+    Dependency.scalaReflect,
     Dependency.akkaActor, Dependency.akkaSlf4j, Dependency.akkaTestKit,
     Dependency.netty, Dependency.concurrentmap, Dependency.nextProtoNeg,
     Dependency.logback, Dependency.scalatest
@@ -155,6 +156,7 @@ object Dependency {
     val Akka        = "2.1.0"
   }
 
+  val scalaReflect  = "org.scala-lang"                          % "scala-reflect"                % "2.10.1"
   val akkaActor     = "com.typesafe.akka"                       %% "akka-actor"                  % V.Akka
   val akkaSlf4j     = "com.typesafe.akka"                       %% "akka-slf4j"                  % V.Akka
   val akkaTestKit   = "com.typesafe.akka"                       %% "akka-testkit"                % V.Akka % "test"

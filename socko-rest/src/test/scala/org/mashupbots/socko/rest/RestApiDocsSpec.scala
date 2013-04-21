@@ -33,6 +33,7 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
     val cfg = RestConfig("1.0", "/api")
     val registry = RestRegistry("org.mashupbots.socko.rest.petshop", cfg)
     
+    /*
     "correctly produce resource listing" in {
       val resourceListing = registry.apiDocs("/api-docs.json")
       val resourceListingDoc = """
@@ -68,7 +69,23 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
       log.debug("Pets API declaration=" + pettyJson(new String(api, CharsetUtil.UTF_8)))
       new String(api, CharsetUtil.UTF_8) must be(compactJson(apiDoc))
     }
-
+    */
+    
+    "Identify swagger types" in {
+      SwaggerReflector.dataType(ru.typeOf[String]) must be ("string")
+      SwaggerReflector.dataType(ru.typeOf[Int]) must be ("int")
+      
+      SwaggerReflector.dataType(ru.typeOf[List[Int]]) must be ("List[int]")
+      SwaggerReflector.dataType(ru.typeOf[Array[String]]) must be ("Array[string]")
+      SwaggerReflector.dataType(ru.typeOf[Set[Float]]) must be ("Set[float]")
+     
+      SwaggerReflector.dataType(ru.typeOf[Cow]) must be ("Cow")
+      SwaggerReflector.dataType(ru.typeOf[Option[Cow]]) must be ("Cow")
+      SwaggerReflector.dataType(ru.typeOf[List[Cow]]) must be ("List[Cow]")
+      SwaggerReflector.dataType(ru.typeOf[Array[Cow]]) must be ("Array[Cow]")
+      SwaggerReflector.dataType(ru.typeOf[Set[Cow]]) must be ("Set[Cow]")
+    }
+    
     def pettyJson(json: String): String = {
       jsonMethods.pretty(jsonMethods.render(jsonMethods.parse(json, useBigDecimalForDouble = true)))
     }
@@ -80,3 +97,4 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 }
 
 
+case class Cow(moo: String)

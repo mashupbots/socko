@@ -15,16 +15,18 @@
 //
 package org.mashupbots.socko.rest
 
-import org.mashupbots.socko.infrastructure.Logger
 import scala.collection.mutable.HashMap
-import org.json4s.native.{ Serialization => json }
+import scala.reflect.runtime.{ universe => ru }
 import org.json4s.NoTypeHints
+import org.json4s.native.{ Serialization => json }
 import org.mashupbots.socko.infrastructure.CharsetUtil
+import org.mashupbots.socko.infrastructure.Logger
+import java.util.Date
 
 /**
- * Generates API documentation
+ * Generates [[https://developers.helloreverb.com/swagger/ Swagger]] API documentation
  */
-object RestApiDocGenerator extends Logger {
+object SwaggerDocGenerator extends Logger {
 
   /**
    * URL path relative to the config `rootUrl` that will trigger the return of the API documentation
@@ -56,13 +58,13 @@ object RestApiDocGenerator extends Logger {
     })
 
     // Resource Listing
-    val resourceListing = ResourceListing(apisMap, config)
+    val resourceListing = SwaggerResourceListing(apisMap, config)
     result.put(urlPath, jsonify(resourceListing))
 
     // API registrations
-    val apiregistrations: Map[String, APIregistration] = apisMap.map(f => {
+    val apiregistrations: Map[String, SwaggerApiDeclaration] = apisMap.map(f => {
       val (path, ops) = f
-      val apiDec = APIregistration(path, ops, config)
+      val apiDec = SwaggerApiDeclaration(path, ops, config)
       result.put(urlPath + path, jsonify(apiDec))
       (path, apiDec)
     })
@@ -83,21 +85,21 @@ object RestApiDocGenerator extends Logger {
   }
 }
 
-trait ApiDoc
+trait SwaggerDoc
 
 /**
- * Swagger resource listing
+ * Swagger [[https://github.com/wordnik/swagger-core/wiki/Resource-Listing resource listing]]
  */
-case class ResourceListing(
+case class SwaggerResourceListing(
   apiVersion: String,
   swaggerVersion: String,
   basePath: String,
-  apis: Seq[ResourceListingApi]) extends ApiDoc
+  apis: Seq[SwaggerResourceListingApi]) extends SwaggerDoc
 
 /**
  * Companion object
  */
-object ResourceListing {
+object SwaggerResourceListing {
 
   /**
    * Creates a new [[org.mashupbots.socko.rest.ResourceListing]] for a group of APIs
@@ -115,10 +117,11 @@ object ResourceListing {
    *   `/users` and `/pets`.
    * @param config Rest configuration
    */
-  def apply(resources: Map[String, Seq[RestOperation]], config: RestConfig): ResourceListing = {
-    val resourceListingApiPaths: Seq[String] = resources.keys.toSeq.sortBy(s => s)
-    val resourceListingApis: Seq[ResourceListingApi] = resourceListingApiPaths.map(s => ResourceListingApi(RestApiDocGenerator.urlPath + s, ""))
-    val resourceListing = ResourceListing(
+  def apply(resources: Map[String, Seq[RestOperation]], config: RestConfig): SwaggerResourceListing = {
+    val resourceListingSwaggerApiPaths: Seq[String] = resources.keys.toSeq.sortBy(s => s)
+    val resourceListingApis: Seq[SwaggerResourceListingApi] = 
+      resourceListingSwaggerApiPaths.map(s => SwaggerResourceListingApi(SwaggerDocGenerator.urlPath + s, ""))
+    val resourceListing = SwaggerResourceListing(
       config.apiVersion,
       config.swaggerVersion,
       config.rootPath,
@@ -131,27 +134,27 @@ object ResourceListing {
 /**
  * Describes a specific resource in the resource listing
  */
-case class ResourceListingApi(
+case class SwaggerResourceListingApi(
   path: String,
   description: String)
 
 /**
- * Swagger API registration
+ * Swagger [[https://github.com/wordnik/swagger-core/wiki/API-Declaration API declaration]]
  */
-case class APIregistration(
+case class SwaggerApiDeclaration(
   apiVersion: String,
   swaggerVersion: String,
   basePath: String,
   resourcePath: String,
-  apis: Seq[ApiPath]) extends ApiDoc
+  apis: Seq[SwaggerApiPath]) extends SwaggerDoc
 
 /**
  * Companion object
  */
-object APIregistration {
+object SwaggerApiDeclaration {
 
   /**
-   * Creates a new [[org.mashupbots.socko.rest.APIregistration]] for a resource path as listed in the
+   * Creates a new [[org.mashupbots.socko.rest.SwaggerApiDeclaration]] for a resource path as listed in the
    * resource listing.
    *
    * For example, the following operations
@@ -160,27 +163,27 @@ object APIregistration {
    * PUT /pets/{id}
    * }}}
    *
-   * maps to 1 ApiPath `/pets` with 2 operations: `POST` and `PUT`
+   * maps to 1 SwaggerApiPath `/pets` with 2 operations: `POST` and `PUT`
    *
    * @param path Unique path. In the above example, it is `/pets/{id}`
    * @param ops HTTP method operations for that unique path
    * @param config Rest configuration
    */
-  def apply(resourcePath: String, ops: Seq[RestOperation], config: RestConfig): APIregistration = {
+  def apply(resourcePath: String, ops: Seq[RestOperation], config: RestConfig): SwaggerApiDeclaration = {
     // Group by path so we can list the operations
     val pathGrouping: Map[String, Seq[RestOperation]] = ops.groupBy(op => op.registration.path)
 
-    // Map group to ApiPaths
-    val apiPathsMap: Map[String, ApiPath] = pathGrouping.map(f => {
+    // Map group to SwaggerApiPaths
+    val apiPathsMap: Map[String, SwaggerApiPath] = pathGrouping.map(f => {
       val (path, ops) = f
-      (path, ApiPath(path, ops, config))
+      (path, SwaggerApiPath(path, ops, config))
     })
 
     // Convert to list and sort
-    val apiPaths: Seq[ApiPath] = apiPathsMap.values.toSeq.sortBy(p => p.path)
+    val apiPaths: Seq[SwaggerApiPath] = apiPathsMap.values.toSeq.sortBy(p => p.path)
 
     // Build registration
-    APIregistration(
+    SwaggerApiDeclaration(
       config.apiVersion,
       config.swaggerVersion,
       config.rootPath,
@@ -192,17 +195,17 @@ object APIregistration {
 /**
  * API path refers to a specific path and all the operations for that path
  */
-case class ApiPath(
+case class SwaggerApiPath(
   path: String,
-  operations: Seq[ApiOperation])
+  operations: Seq[SwaggerApiOperation])
 
 /**
  * Companion object
  */
-object ApiPath {
+object SwaggerApiPath {
 
   /**
-   * Creates a new [[org.mashupbots.socko.rest.ApiPath]] for a given path
+   * Creates a new [[org.mashupbots.socko.rest.SwaggerApiPath]] for a given path
    *
    * For example, the following operations:
    * {{{
@@ -211,16 +214,16 @@ object ApiPath {
    * PUT /pets/{id}
    * }}}
    *
-   * maps to 1 ApiPath `/pets` with 3 operations: `GET`, `POST` and `PUT`
+   * maps to 1 SwaggerApiPath `/pets` with 3 operations: `GET`, `POST` and `PUT`
    *
    * @param path Unique path
    * @param ops HTTP method operations for that unique path
    * @param config Rest configuration
    */
-  def apply(path: String, ops: Seq[RestOperation], config: RestConfig): ApiPath = {
-    val apiOps: Seq[ApiOperation] = ops.map(op => ApiOperation(op, config))
+  def apply(path: String, ops: Seq[RestOperation], config: RestConfig): SwaggerApiPath = {
+    val apiOps: Seq[SwaggerApiOperation] = ops.map(op => SwaggerApiOperation(op, config))
 
-    ApiPath(
+    SwaggerApiPath(
       path,
       apiOps.sortBy(f => f.httpMethod))
   }
@@ -230,32 +233,32 @@ object ApiPath {
  * API operation refers to a specific HTTP operation that can be performed
  * for a path
  */
-case class ApiOperation(
+case class SwaggerApiOperation(
   httpMethod: String,
   summary: String,
   notes: String,
   deprecated: Boolean,
   responseClass: String,
   nickname: String,
-  parameters: Seq[ApiParameter],
-  errorResponses: Seq[ApiError])
+  parameters: Seq[SwaggerApiParameter],
+  errorResponses: Seq[SwaggerApiError])
 
 /**
  * Companion object
  */
-object ApiOperation {
+object SwaggerApiOperation {
 
   /**
-   * Creates a new [[org.mashupbots.socko.rest.ApiOperation]] from a [[org.mashupbots.socko.rest.RestOperation]]
+   * Creates a new [[org.mashupbots.socko.rest.SwaggerApiOperation]] from a [[org.mashupbots.socko.rest.RestOperation]]
    *
    * @param op Rest operation to document
    * @param config Rest configuration
    */
-  def apply(op: RestOperation, config: RestConfig): ApiOperation = {
-    val params: Seq[ApiParameter] = op.deserializer.requestParamBindings.map(b => ApiParameter(b, config))
-    val errors: Seq[ApiError] = op.registration.errors.map(e => ApiError(e.code, e.reason)).toSeq
+  def apply(op: RestOperation, config: RestConfig): SwaggerApiOperation = {
+    val params: Seq[SwaggerApiParameter] = op.deserializer.requestParamBindings.map(b => SwaggerApiParameter(b, config))
+    val errors: Seq[SwaggerApiError] = op.registration.errors.map(e => SwaggerApiError(e.code, e.reason)).toSeq
 
-    ApiOperation(
+    SwaggerApiOperation(
       op.registration.method.toString,
       op.registration.description,
       op.registration.notes,
@@ -268,10 +271,10 @@ object ApiOperation {
 }
 
 /**
- * API parameter refers to a path, body, query string or header parameter in
- * a [[org.mashupbots.socko.rest.ApiOperation]]
+ * API [[https://github.com/wordnik/swagger-core/wiki/Parameters parameter]] refers to a path, body, query string or 
+ * header parameter in a [[org.mashupbots.socko.rest.SwaggerApiOperation]]
  */
-case class ApiParameter(
+case class SwaggerApiParameter(
   name: String,
   description: String,
   paramType: String,
@@ -283,16 +286,16 @@ case class ApiParameter(
 /**
  * Companion object
  */
-object ApiParameter {
+object SwaggerApiParameter {
 
   /**
-   * Creates a new [[org.mashupbots.socko.rest.ApiParameter]] for a [[org.mashupbots.socko.rest.ApiParameter]]
+   * Creates a new [[org.mashupbots.socko.rest.SwaggerApiParameter]] for a [[org.mashupbots.socko.rest.SwaggerApiParameter]]
    *
    * @param binding parameter binding
    * @param config Configuration
    */
-  def apply(binding: RequestParamBinding, config: RestConfig): ApiParameter = {
-    ApiParameter(
+  def apply(binding: RequestParamBinding, config: RestConfig): SwaggerApiParameter = {
+    SwaggerApiParameter(
       binding.registration.name,
       binding.registration.description,
       binding.swaggerParamType,
@@ -306,5 +309,5 @@ object ApiParameter {
 /**
  * API error refers to the HTTP response status code and its description
  */
-case class ApiError(code: Int, reason: String)
+case class SwaggerApiError(code: Int, reason: String)
 
