@@ -22,41 +22,39 @@ import java.util.Date
  * Scala to Swagger conversion
  */
 object SwaggerReflector {
-  private val stringType = ru.typeOf[String]
-  private val optionStringType = ru.typeOf[Option[String]]
+  val stringType = ru.typeOf[String]
+  val optionStringType = ru.typeOf[Option[String]]
 
-  private val intType = ru.typeOf[Int]
-  private val optionIntType = ru.typeOf[Option[Int]]
+  val intType = ru.typeOf[Int]
+  val optionIntType = ru.typeOf[Option[Int]]
 
-  private val booleanType = ru.typeOf[Boolean]
-  private val optionBooleanType = ru.typeOf[Option[Boolean]]
+  val booleanType = ru.typeOf[Boolean]
+  val optionBooleanType = ru.typeOf[Option[Boolean]]
 
-  private val byteType = ru.typeOf[Byte]
-  private val optionByteType = ru.typeOf[Option[Byte]]
+  val byteType = ru.typeOf[Byte]
+  val optionByteType = ru.typeOf[Option[Byte]]
 
-  private val shortType = ru.typeOf[Short]
-  private val optionShortType = ru.typeOf[Option[Short]]
+  val shortType = ru.typeOf[Short]
+  val optionShortType = ru.typeOf[Option[Short]]
 
-  private val longType = ru.typeOf[Long]
-  private val optionLongType = ru.typeOf[Option[Long]]
+  val longType = ru.typeOf[Long]
+  val optionLongType = ru.typeOf[Option[Long]]
 
-  private val doubleType = ru.typeOf[Double]
-  private val optionDoubleType = ru.typeOf[Option[Double]]
+  val doubleType = ru.typeOf[Double]
+  val optionDoubleType = ru.typeOf[Option[Double]]
 
-  private val floatType = ru.typeOf[Float]
-  private val optionFloatType = ru.typeOf[Option[Float]]
+  val floatType = ru.typeOf[Float]
+  val optionFloatType = ru.typeOf[Option[Float]]
 
-  private val dateType = ru.typeOf[Date]
-  private val optionDateType = ru.typeOf[Option[Date]]
+  val dateType = ru.typeOf[Date]
+  val optionDateType = ru.typeOf[Option[Date]]
 
-  private val anyRefType = ru.typeOf[AnyRef]
-  private val optionAnyRefType = ru.typeOf[Option[AnyRef]]
+  val anyRefType = ru.typeOf[AnyRef]
+  val optionAnyRefType = ru.typeOf[Option[AnyRef]]
 
-  private val arrayType = ru.typeOf[Array[_]]
-  private val seqType = ru.typeOf[Seq[_]]
-  private val setType = ru.typeOf[Set[_]]
-
-  private val headTerm = ru.newTermName("head")
+  val arrayType = ru.typeOf[Array[_]]
+  val seqType = ru.typeOf[Seq[_]]
+  val setType = ru.typeOf[Set[_]]
 
   /**
    * Converts a scala type of a swagger type

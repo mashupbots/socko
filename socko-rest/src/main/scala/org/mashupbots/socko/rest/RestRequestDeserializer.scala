@@ -132,11 +132,6 @@ trait RequestParamBinding {
   def tpe: ru.Type
 
   /**
-   * Flag to denote if this parameter is required
-   */
-  def required: Boolean
-
-  /**
    * Swagger parameter type: path, query, body, or header.
    */
   def swaggerParamType: String
@@ -146,7 +141,12 @@ trait RequestParamBinding {
    *
    * For path, query, and header paramTypes, this field must be a primitive. For body, this can be a complex or container datatype.
    */
-  def swaggerDataType: String
+  val swaggerDataType: String = SwaggerReflector.dataType(tpe)
+
+  /**
+   * Flag to denote if this parameter is required
+   */
+  def required: Boolean
 
   /**
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
@@ -160,6 +160,7 @@ trait RequestParamBinding {
 
 }
 
+
 /**
  * Companion object
  */
@@ -168,27 +169,25 @@ object RequestParamBinding {
   private val bytesType = ru.typeOf[Seq[Byte]]
   private val anytRefType = ru.typeOf[AnyRef]
 
-  case class PrimitiveDetails(deserializer: (String) => Any, swaggerType: String)
-
-  val primitiveTypes: Map[ru.Type, PrimitiveDetails] = Map(
-    (ru.typeOf[String], PrimitiveDetails((s: String) => s, "string")),
-    (ru.typeOf[Option[String]], PrimitiveDetails((s: String) => Some(s), "string")),
-    (ru.typeOf[Int], PrimitiveDetails((s: String) => s.toInt, "int")),
-    (ru.typeOf[Option[Int]], PrimitiveDetails((s: String) => Some(s.toInt), "int")),
-    (ru.typeOf[Boolean], PrimitiveDetails((s: String) => s.toBoolean, "boolean")),
-    (ru.typeOf[Option[Boolean]], PrimitiveDetails((s: String) => Some(s.toBoolean), "boolean")),
-    (ru.typeOf[Byte], PrimitiveDetails((s: String) => s.toByte, "byte")),
-    (ru.typeOf[Option[Byte]], PrimitiveDetails((s: String) => Some(s.toByte), "byte")),
-    (ru.typeOf[Short], PrimitiveDetails((s: String) => s.toShort, "short")),
-    (ru.typeOf[Option[Short]], PrimitiveDetails((s: String) => Some(s.toShort), "short")),
-    (ru.typeOf[Long], PrimitiveDetails((s: String) => s.toLong, "long")),
-    (ru.typeOf[Option[Long]], PrimitiveDetails((s: String) => Some(s.toLong), "long")),
-    (ru.typeOf[Double], PrimitiveDetails((s: String) => s.toDouble, "double")),
-    (ru.typeOf[Option[Double]], PrimitiveDetails((s: String) => Some(s.toDouble), "double")),
-    (ru.typeOf[Float], PrimitiveDetails((s: String) => s.toFloat, "float")),
-    (ru.typeOf[Option[Float]], PrimitiveDetails((s: String) => Some(s.toFloat), "float")),
-    (ru.typeOf[Date], PrimitiveDetails((s: String) => DateUtil.parseISO8601Date(s), "date")),
-    (ru.typeOf[Option[Date]], PrimitiveDetails((s: String) => if (s == null || s.isEmpty()) None else Some(DateUtil.parseISO8601Date(s)), "date")))
+  val primitiveTypes: Map[ru.Type, (String) => Any] = Map(
+    (ru.typeOf[String], (s: String) => s),
+    (ru.typeOf[Option[String]], (s: String) => Some(s)),
+    (ru.typeOf[Int], (s: String) => s.toInt),
+    (ru.typeOf[Option[Int]], (s: String) => Some(s.toInt)),
+    (ru.typeOf[Boolean], (s: String) => s.toBoolean),
+    (ru.typeOf[Option[Boolean]], (s: String) => Some(s.toBoolean)),
+    (ru.typeOf[Byte], (s: String) => s.toByte),
+    (ru.typeOf[Option[Byte]], (s: String) => Some(s.toByte)),
+    (ru.typeOf[Short], (s: String) => s.toShort),
+    (ru.typeOf[Option[Short]], (s: String) => Some(s.toShort)),
+    (ru.typeOf[Long], (s: String) => s.toLong),
+    (ru.typeOf[Option[Long]], (s: String) => Some(s.toLong)),
+    (ru.typeOf[Double], (s: String) => s.toDouble),
+    (ru.typeOf[Option[Double]], (s: String) => Some(s.toDouble)),
+    (ru.typeOf[Float], (s: String) => s.toFloat),
+    (ru.typeOf[Option[Float]], (s: String) => Some(s.toFloat)),
+    (ru.typeOf[Date], (s: String) => DateUtil.parseISO8601Date(s)),
+    (ru.typeOf[Option[Date]], (s: String) => if (s == null || s.isEmpty()) None else Some(DateUtil.parseISO8601Date(s))))
 
   /**
    * Factory to create a parameter binding for a specific parameter in the constructor
@@ -251,12 +250,6 @@ object RequestParamBinding {
           throw new IllegalArgumentException(s"Unsupported REST request body data type ${tpe} in ${requestClassName}.")
         }
 
-        val swaggerDataType: String = tpeCategory match {
-          case RequestBodyDataType.Primitive => RequestParamBinding.primitiveTypes.find(e => e._1 =:= tpe).get._2.swaggerType
-          case RequestBodyDataType.Bytes => "bytes"
-          case RequestBodyDataType.Object => tpe.toString()
-        }
-
         val objectClass = if (tpeCategory == RequestBodyDataType.Object) {
           if (required) Some(Class.forName(param.typeSignature.typeSymbol.asClass.fullName))
           else {
@@ -269,7 +262,7 @@ object RequestParamBinding {
           None
         }
 
-        BodyBinding(config, bodyParam, tpeCategory, tpe, swaggerDataType, objectClass, required)
+        BodyBinding(config, bodyParam, tpeCategory, tpe, objectClass, required)
 
       case _ =>
         throw new IllegalStateException("Unsupported parameter registration: " + paramDeclaration.toString)
@@ -284,9 +277,9 @@ object RequestParamBinding {
 trait PrimitiveParamBinding extends RequestParamBinding {
 
   private val entry = RequestParamBinding.primitiveTypes.find(e => e._1 =:= tpe)
-  private val details = if (entry.isDefined) {
-    val (t, details) = entry.get
-    details
+  private val deserializer = if (entry.isDefined) {
+    val (t, deserializer) = entry.get
+    deserializer
   } else {
     throw new RestBindingException("Unsupported type: " + tpe)
   }
@@ -297,13 +290,13 @@ trait PrimitiveParamBinding extends RequestParamBinding {
    * We load this at initialization so it is done once.
    */
   val primitiveParser: (String) => Any = {
-    details.deserializer
+    if (entry.isDefined) {
+      val (t, deserializer) = entry.get
+      deserializer
+    } else {
+      throw new RestBindingException("Unsupported type: " + tpe)
+    }
   }
-
-  /**
-   * Swagger data type for primitives: string, byte, int, etc.
-   */
-  val swaggerDataType = details.swaggerType
 
 }
 
@@ -483,7 +476,6 @@ case class HeaderBinding(
  * @param registration Parameter meta data
  * @param tpeCategory Our categorization of the type of the field
  * @param tpe Type of the field
- * @param swaggerDataType This can be a complex or container datatype.
  * @param objectClass For object fields that needs to be deserialized, this is the Java class of the field.
  *   For other categories of deserialization (primitive, bytes, etc) this is set to `None` and not used.
  * @param description Description of the field
@@ -494,7 +486,6 @@ case class BodyBinding(
   registration: BodyParam,
   tpeCategory: RequestBodyDataType.Value,
   tpe: ru.Type,
-  swaggerDataType: String,
   objectClass: Option[Class[_]],
   required: Boolean) extends RequestParamBinding {
 
@@ -509,8 +500,8 @@ case class BodyBinding(
     if (tpeCategory == RequestBodyDataType.Primitive) {
       val entry = RequestParamBinding.primitiveTypes.find(e => e._1 =:= tpe)
       if (entry.isDefined) {
-        val (t, details) = entry.get
-        Some(details.deserializer)
+        val (t, deserializer) = entry.get
+        Some(deserializer)
       } else {
         throw new RestBindingException("Unsupported type: " + tpe)
       }

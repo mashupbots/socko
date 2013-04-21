@@ -240,15 +240,13 @@ case class BodyParam(
 
 /**
  * Identifies a [[org.mashupbots.socko.rest.RestRequest]] parameter validation
+ * 
+ * Note that `valueType` must be in the constructor otherwise it will not be be 
+ * json serialized.
  */
 trait AllowableValues
-
-case class AllowableValuesRange[T](min: T, max: T) extends AllowableValues {
-  val valueType = "RANGE"
-}
-case class AllowableValuesList[T](values: List[T]) extends AllowableValues {
-  val valueType = "LIST"
-}
+case class AllowableValuesRange[T](min: T, max: T, valueType: String = "RANGE") extends AllowableValues
+case class AllowableValuesList[T](values: List[T], valueType: String = "LIST") extends AllowableValues
 
 /**
  * Companion object

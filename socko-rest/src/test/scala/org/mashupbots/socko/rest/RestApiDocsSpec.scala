@@ -33,7 +33,6 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
     val cfg = RestConfig("1.0", "/api")
     val registry = RestRegistry("org.mashupbots.socko.rest.petshop", cfg)
     
-    /*
     "correctly produce resource listing" in {
       val resourceListing = registry.apiDocs("/api-docs.json")
       val resourceListingDoc = """
@@ -64,12 +63,137 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
     "correctly produce pets API declaration" in {
       val api = registry.apiDocs("/api-docs.json/pet")
       val apiDoc = """
-
+		{
+		  "apiVersion":"1.0",
+		  "swaggerVersion":"1.1",
+		  "basePath":"/api",
+		  "resourcePath":"/pet",
+		  "apis":[{
+		    "path":"/pet",
+		    "operations":[{
+		      "httpMethod":"POST",
+		      "summary":"Add a new pet to the store",
+		      "notes":"",
+		      "deprecated":false,
+		      "responseClass":"void",
+		      "nickname":"addPet",
+		      "parameters":[{
+		        "name":"pet",
+		        "description":"Pet object that needs to be added to the store",
+		        "paramType":"body",
+		        "dataType":"Pet",
+		        "required":true,
+		        "allowMultiple":false
+		      }],
+		      "errorResponses":[{
+		        "code":405,
+		        "reason":"Invalid input"
+		      }]
+		    },{
+		      "httpMethod":"PUT",
+		      "summary":"Update an existing pet",
+		      "notes":"",
+		      "deprecated":false,
+		      "responseClass":"void",
+		      "nickname":"updatePet",
+		      "parameters":[{
+		        "name":"pet",
+		        "description":"Pet object that needs to be updated in the store",
+		        "paramType":"body",
+		        "dataType":"Pet",
+		        "required":true,
+		        "allowMultiple":false
+		      }],
+		      "errorResponses":[{
+		        "code":400,
+		        "reason":"Invalid ID supplied"
+		      },{
+		        "code":404,
+		        "reason":"Pet not found"
+		      },{
+		        "code":405,
+		        "reason":"Validation exception"
+		      }]
+		    }]
+		  },{
+		    "path":"/pet/findByStatus",
+		    "operations":[{
+		      "httpMethod":"GET",
+		      "summary":"Finds Pets by status",
+		      "notes":"Multiple status values can be provided with comma seperated strings",
+		      "deprecated":false,
+		      "responseClass":"List[Pet]",
+		      "nickname":"findPetsByStatus",
+		      "parameters":[{
+		        "name":"status",
+		        "description":"Status values that need to be considered for filter",
+		        "paramType":"query",
+		        "dataType":"string",
+		        "required":true,
+		        "allowableValues":{
+		          "values":["available","pending","sold"],
+		          "valueType":"LIST"
+		        },
+		        "allowMultiple":true
+		      }],
+		      "errorResponses":[{
+		        "code":405,
+		        "reason":"Invalid status value"
+		      }]
+		    }]
+		  },{
+		    "path":"/pet/findPetsByTags",
+		    "operations":[{
+		      "httpMethod":"GET",
+		      "summary":"Finds Pets by tags",
+		      "notes":"Muliple tags can be provided with comma seperated strings. Use tag1, tag2, tag3 for testing.",
+		      "deprecated":true,
+		      "responseClass":"List[Pet]",
+		      "nickname":"findPetsByTags",
+		      "parameters":[{
+		        "name":"tags",
+		        "description":"Tags to filter by",
+		        "paramType":"query",
+		        "dataType":"string",
+		        "required":true,
+		        "allowMultiple":false
+		      }],
+		      "errorResponses":[{
+		        "code":405,
+		        "reason":"Invalid tag value"
+		      }]
+		    }]
+		  },{
+		    "path":"/pet/{petId}",
+		    "operations":[{
+		      "httpMethod":"GET",
+		      "summary":"Find pet by ID",
+		      "notes":"Returns a pet based on ID",
+		      "deprecated":false,
+		      "responseClass":"Pet",
+		      "nickname":"getPetById",
+		      "parameters":[{
+		        "name":"petId",
+		        "description":"ID of pet that needs to be fetched",
+		        "paramType":"path",
+		        "dataType":"string",
+		        "required":true,
+		        "allowMultiple":false
+		      }],
+		      "errorResponses":[{
+		        "code":400,
+		        "reason":"Invalid ID supplied"
+		      },{
+		        "code":404,
+		        "reason":"Pet not found"
+		      }]
+		    }]
+		  }]
+		}
         """
       log.debug("Pets API declaration=" + pettyJson(new String(api, CharsetUtil.UTF_8)))
       new String(api, CharsetUtil.UTF_8) must be(compactJson(apiDoc))
     }
-    */
     
     "Identify swagger types" in {
       SwaggerReflector.dataType(ru.typeOf[String]) must be ("string")

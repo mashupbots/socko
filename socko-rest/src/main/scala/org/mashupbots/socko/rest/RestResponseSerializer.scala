@@ -227,21 +227,12 @@ case class ObjectDataSerializer(
     }
   }
 
-  val swaggerType = "TODO"
+  val swaggerType = SwaggerReflector.dataType(tpe)
 
   val contentType = "application/json; charset=UTF-8"
 
   val forceContentType = true
 }
-
-/**
- * Details for a specific primitive type
- *
- * @param tpe Primitive type, for example `Int`
- * @param serializer Converts data of type `tpe` into a byte array
- * @param swaggerType Swagger `responseClass`
- */
-case class PrimitiveType(tpe: ru.Type, serializer: (Any) => Array[Byte], swaggerType: String)
 
 /**
  * Serialize a primitive into a UTF-8 JSON byte array
@@ -259,13 +250,19 @@ case class PrimitiveDataSerializer(
   responseDataTerm: ru.TermSymbol,
   rm: ru.Mirror) extends NonVoidDataSerializer {
 
-  private val details: PrimitiveType = PrimitiveDataSerializer.primitiveTypes.find(t => t.tpe =:= tpe).get
-
-  def serialize(data: Any): Array[Byte] = {
-    details.serializer(data)
+  private val entry = PrimitiveDataSerializer.primitiveTypes.find(e => e._1 =:= tpe)
+  private val serializer = if (entry.isDefined) {
+    val (t, serializer) = entry.get
+    serializer
+  } else {
+    throw new RestBindingException("Unsupported type: " + tpe)
   }
 
-  val swaggerType = details.swaggerType
+  def serialize(data: Any): Array[Byte] = {
+    serializer(data)
+  }
+
+  val swaggerType = SwaggerReflector.dataType(tpe)
 
   val contentType = "application/json; charset=UTF-8"
 
@@ -303,28 +300,28 @@ object PrimitiveDataSerializer {
     else jsonifyDate(ss.get)
   }
 
-  val primitiveTypes: Seq[PrimitiveType] = Seq(
-    PrimitiveType(ru.typeOf[String], (s: Any) => jsonifyString(s), "string"),
-    PrimitiveType(ru.typeOf[Option[String]], (s: Any) => jsonifyOptionString(s), "string"),
-    PrimitiveType(ru.typeOf[Int], (s: Any) => jsonifyVal(s), "int"),
-    PrimitiveType(ru.typeOf[Option[Int]], (s: Any) => jsonifyOptionVal(s), "int"),
-    PrimitiveType(ru.typeOf[Boolean], (s: Any) => jsonifyVal(s), "boolean"),
-    PrimitiveType(ru.typeOf[Option[Boolean]], (s: Any) => jsonifyOptionVal(s), "boolean"),
-    PrimitiveType(ru.typeOf[Byte], (s: Any) => jsonifyVal(s), "byte"),
-    PrimitiveType(ru.typeOf[Option[Byte]], (s: Any) => jsonifyOptionVal(s), "byte"),
-    PrimitiveType(ru.typeOf[Short], (s: Any) => jsonifyVal(s), "short"),
-    PrimitiveType(ru.typeOf[Option[Short]], (s: Any) => jsonifyOptionVal(s), "short"),
-    PrimitiveType(ru.typeOf[Long], (s: Any) => jsonifyVal(s), "long"),
-    PrimitiveType(ru.typeOf[Option[Long]], (s: Any) => jsonifyOptionVal(s), "long"),
-    PrimitiveType(ru.typeOf[Double], (s: Any) => jsonifyVal(s), "double"),
-    PrimitiveType(ru.typeOf[Option[Double]], (s: Any) => jsonifyOptionVal(s), "double"),
-    PrimitiveType(ru.typeOf[Float], (s: Any) => jsonifyVal(s), "float"),
-    PrimitiveType(ru.typeOf[Option[Float]], (s: Any) => jsonifyOptionVal(s), "float"),
-    PrimitiveType(ru.typeOf[Date], (s: Any) => jsonifyDate(s), "date"),
-    PrimitiveType(ru.typeOf[Option[Date]], (s: Any) => jsonifyOptionDate(s), "date"))
+  val primitiveTypes: Map[ru.Type, (Any) => Array[Byte]] = Map(
+    (ru.typeOf[String], (s: Any) => jsonifyString(s)),
+    (ru.typeOf[Option[String]], (s: Any) => jsonifyOptionString(s)),
+    (ru.typeOf[Int], (s: Any) => jsonifyVal(s)),
+    (ru.typeOf[Option[Int]], (s: Any) => jsonifyOptionVal(s)),
+    (ru.typeOf[Boolean], (s: Any) => jsonifyVal(s)),
+    (ru.typeOf[Option[Boolean]], (s: Any) => jsonifyOptionVal(s)),
+    (ru.typeOf[Byte], (s: Any) => jsonifyVal(s)),
+    (ru.typeOf[Option[Byte]], (s: Any) => jsonifyOptionVal(s)),
+    (ru.typeOf[Short], (s: Any) => jsonifyVal(s)),
+    (ru.typeOf[Option[Short]], (s: Any) => jsonifyOptionVal(s)),
+    (ru.typeOf[Long], (s: Any) => jsonifyVal(s)),
+    (ru.typeOf[Option[Long]], (s: Any) => jsonifyOptionVal(s)),
+    (ru.typeOf[Double], (s: Any) => jsonifyVal(s)),
+    (ru.typeOf[Option[Double]], (s: Any) => jsonifyOptionVal(s)),
+    (ru.typeOf[Float], (s: Any) => jsonifyVal(s)),
+    (ru.typeOf[Option[Float]], (s: Any) => jsonifyOptionVal(s)),
+    (ru.typeOf[Date], (s: Any) => jsonifyDate(s)),
+    (ru.typeOf[Option[Date]], (s: Any) => jsonifyOptionDate(s)))
 
   def IsPrimitiveDataType(tpe: ru.Type): Boolean = {
-    primitiveTypes.exists(p => p.tpe =:= tpe)
+    primitiveTypes.exists(p => p._1 =:= tpe)
   }
 }
 
@@ -344,7 +341,7 @@ case class ByteArrayDataSerializer(
     if (data == null) Array.empty else data.asInstanceOf[Array[Byte]]
   }
 
-  val swaggerType = "bytes" // TODO this is not supported by swagger at the moment
+  val swaggerType = SwaggerReflector.dataType(ru.typeOf[Array[Byte]])
 
   val contentType = "application/octet-string"
 
@@ -367,7 +364,7 @@ case class ByteSeqDataSerializer(
     if (data == null) Array.empty else (data.asInstanceOf[Seq[Byte]].toArray)
   }
 
-  val swaggerType = "bytes" // TODO this is not supported by swagger at the moment
+  val swaggerType = SwaggerReflector.dataType(ru.typeOf[Seq[Byte]])
 
   val contentType = "application/octet-string"
 
