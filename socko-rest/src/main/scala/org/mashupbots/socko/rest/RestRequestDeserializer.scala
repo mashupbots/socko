@@ -132,18 +132,6 @@ trait RequestParamBinding {
   def tpe: ru.Type
 
   /**
-   * Swagger parameter type: path, query, body, or header.
-   */
-  def swaggerParamType: String
-
-  /**
-   * Swagger data type.
-   *
-   * For path, query, and header paramTypes, this field must be a primitive. For body, this can be a complex or container datatype.
-   */
-  val swaggerDataType: String = SwaggerReflector.dataType(tpe)
-
-  /**
    * Flag to denote if this parameter is required
    */
   def required: Boolean
@@ -326,8 +314,6 @@ case class PathBinding(
 
   val required = true
 
-  val swaggerParamType = "path"
-
   /**
    * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
    *
@@ -374,7 +360,6 @@ case class QueryStringBinding(
   tpe: ru.Type,
   required: Boolean) extends PrimitiveParamBinding {
 
-  val swaggerParamType = "query"
   val queryFieldName = if (registration.queryName.isEmpty()) registration.name else registration.queryName
 
   /**
@@ -428,7 +413,6 @@ case class HeaderBinding(
   tpe: ru.Type,
   required: Boolean) extends PrimitiveParamBinding {
 
-  val swaggerParamType = "header"
   val headerFieldName = if (registration.headerName.isEmpty()) registration.name else registration.headerName
 
   /**
@@ -489,12 +473,10 @@ case class BodyBinding(
   objectClass: Option[Class[_]],
   required: Boolean) extends RequestParamBinding {
 
-  val swaggerParamType = "body"
-
   /**
    * Parse a string into the specified
    *
-   * We load this at intialization so it is done once.
+   * We load this at initialization so it is done once.
    */
   val primitiveParser: Option[(String) => Any] = {
     if (tpeCategory == RequestBodyDataType.Primitive) {

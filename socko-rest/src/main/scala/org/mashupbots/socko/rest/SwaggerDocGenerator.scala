@@ -119,7 +119,7 @@ object SwaggerResourceListing {
    */
   def apply(resources: Map[String, Seq[RestOperation]], config: RestConfig): SwaggerResourceListing = {
     val resourceListingSwaggerApiPaths: Seq[String] = resources.keys.toSeq.sortBy(s => s)
-    val resourceListingApis: Seq[SwaggerResourceListingApi] = 
+    val resourceListingApis: Seq[SwaggerResourceListingApi] =
       resourceListingSwaggerApiPaths.map(s => SwaggerResourceListingApi(SwaggerDocGenerator.urlPath + s, ""))
     val resourceListing = SwaggerResourceListing(
       config.apiVersion,
@@ -258,12 +258,21 @@ object SwaggerApiOperation {
     val params: Seq[SwaggerApiParameter] = op.deserializer.requestParamBindings.map(b => SwaggerApiParameter(b, config))
     val errors: Seq[SwaggerApiError] = op.registration.errors.map(e => SwaggerApiError(e.code, e.reason)).toSeq
 
+    val swaggerType: String = op.serializer.dataSerializer match {
+      case s:VoidDataSerializer => "void"
+      case s:ObjectDataSerializer => SwaggerReflector.dataType(s.tpe)
+      case s:PrimitiveDataSerializer => SwaggerReflector.dataType(s.tpe)
+      case s:ByteArrayDataSerializer => SwaggerReflector.dataType(ru.typeOf[Array[Byte]])
+      case s:ByteSeqDataSerializer => SwaggerReflector.dataType(ru.typeOf[Seq[Byte]])
+      case _ => throw new IllegalStateException("Unsupported DataSerializer: " + op.serializer.dataSerializer.toString)
+    }
+    
     SwaggerApiOperation(
       op.registration.method.toString,
       op.registration.description,
       op.registration.notes,
       op.registration.deprecated,
-      op.serializer.dataSerializer.swaggerType,
+      swaggerType,
       op.registration.name,
       params,
       errors.sortBy(e => e.code))
@@ -271,7 +280,7 @@ object SwaggerApiOperation {
 }
 
 /**
- * API [[https://github.com/wordnik/swagger-core/wiki/Parameters parameter]] refers to a path, body, query string or 
+ * API [[https://github.com/wordnik/swagger-core/wiki/Parameters parameter]] refers to a path, body, query string or
  * header parameter in a [[org.mashupbots.socko.rest.SwaggerApiOperation]]
  */
 case class SwaggerApiParameter(
@@ -295,11 +304,21 @@ object SwaggerApiParameter {
    * @param config Configuration
    */
   def apply(binding: RequestParamBinding, config: RestConfig): SwaggerApiParameter = {
+    val swaggerParamType: String = binding match {
+      case _: PathBinding => "path"
+      case _: QueryStringBinding => "query"
+      case _: HeaderBinding => "header"
+      case _: BodyBinding => "body"
+      case _ => throw new IllegalStateException("Unsupported RequestParamBinding: " + binding.toString)
+    }
+
+    val swaggerDataType: String = SwaggerReflector.dataType(binding.tpe)
+
     SwaggerApiParameter(
       binding.registration.name,
       binding.registration.description,
-      binding.swaggerParamType,
-      binding.swaggerDataType,
+      swaggerParamType,
+      swaggerDataType,
       binding.required,
       binding.registration.allowableValues,
       binding.registration.allowMultiple)

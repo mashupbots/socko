@@ -134,11 +134,6 @@ abstract class DataSerializer {
   def serialize(data: Any): Array[Byte]
 
   /**
-   * Swagger data type for the `responseClass` in an API declaration
-   */
-  def swaggerType: String
-
-  /**
    * Content MIME Type
    */
   def contentType: String
@@ -195,8 +190,6 @@ case class VoidDataSerializer() extends DataSerializer {
 
   def serialize(data: Any): Array[Byte] = Array.empty
 
-  val swaggerType = "void"
-
   val contentType = ""
 
   val forceContentType = false
@@ -226,8 +219,6 @@ case class ObjectDataSerializer(
       s.getBytes(CharsetUtil.UTF_8)
     }
   }
-
-  val swaggerType = SwaggerReflector.dataType(tpe)
 
   val contentType = "application/json; charset=UTF-8"
 
@@ -261,8 +252,6 @@ case class PrimitiveDataSerializer(
   def serialize(data: Any): Array[Byte] = {
     serializer(data)
   }
-
-  val swaggerType = SwaggerReflector.dataType(tpe)
 
   val contentType = "application/json; charset=UTF-8"
 
@@ -341,8 +330,6 @@ case class ByteArrayDataSerializer(
     if (data == null) Array.empty else data.asInstanceOf[Array[Byte]]
   }
 
-  val swaggerType = SwaggerReflector.dataType(ru.typeOf[Array[Byte]])
-
   val contentType = "application/octet-string"
 
   val forceContentType = false
@@ -363,8 +350,6 @@ case class ByteSeqDataSerializer(
   def serialize(data: Any): Array[Byte] = {
     if (data == null) Array.empty else (data.asInstanceOf[Seq[Byte]].toArray)
   }
-
-  val swaggerType = SwaggerReflector.dataType(ru.typeOf[Seq[Byte]])
 
   val contentType = "application/octet-string"
 
