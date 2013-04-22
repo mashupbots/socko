@@ -85,20 +85,20 @@ object SwaggerReflector {
       val cs = tpe.typeSymbol.asInstanceOf[ru.ClassSymbol]
       val typeParams = cs.typeParams
       val firstTypeParam = typeParams(0).asType.toType
-      val genericType = firstTypeParam.asSeenFrom(tpe, cs)
-      s"Array[${dataType(genericType)}]"
+      val contentType = firstTypeParam.asSeenFrom(tpe, cs)
+      s"Array[${dataType(contentType)}]"
     } else if (tpe <:< setType) {
       val cs = tpe.typeSymbol.asInstanceOf[ru.ClassSymbol]
       val typeParams = cs.typeParams
       val firstTypeParam = typeParams(0).asType.toType
-      val genericType = firstTypeParam.asSeenFrom(tpe, cs)
-      s"Set[${dataType(genericType)}]"
+      val contentType = firstTypeParam.asSeenFrom(tpe, cs)
+      s"Set[${dataType(contentType)}]"
     } else if (tpe <:< optionAnyRefType) {
       val cs = tpe.typeSymbol.asInstanceOf[ru.ClassSymbol]
       val typeParams = cs.typeParams
       val firstTypeParam = typeParams(0).asType.toType
-      val genericType = firstTypeParam.asSeenFrom(tpe, cs)
-      dataType(genericType)
+      val contentType = firstTypeParam.asSeenFrom(tpe, cs)
+      dataType(contentType)
     } else if (tpe <:< anyRefType) {
       val cs = tpe.typeSymbol.asInstanceOf[ru.ClassSymbol]
       val className = cs.fullName
@@ -106,5 +106,84 @@ object SwaggerReflector {
       if (dot > 0) className.substring(dot + 1)
       else className
     } else ""
+  }
+
+  /**
+   * Checks if the type is a primitive
+   *
+   * @param tpe Type to check
+   * @returns `True` if `tpe` is a primitive, `False` otherwise
+   */
+  def isPrimitive(tpe: ru.Type): Boolean = {
+    if (tpe =:= stringType || tpe =:= optionStringType) true
+    else if (tpe =:= intType || tpe =:= optionIntType) true
+    else if (tpe =:= booleanType || tpe =:= optionBooleanType) true
+    else if (tpe =:= byteType || tpe =:= optionByteType) true
+    else if (tpe =:= shortType || tpe =:= optionShortType) true
+    else if (tpe =:= longType || tpe =:= optionLongType) true
+    else if (tpe =:= doubleType || tpe =:= optionDoubleType) true
+    else if (tpe =:= floatType || tpe =:= optionFloatType) true
+    else if (tpe =:= dateType || tpe =:= optionDateType) true
+    else false
+  }
+
+  /**
+   * Returns the type of container (if it is a container)
+   *  - List. An ordered list of values
+   *  - Set. An unordered set of unique values
+   *  - Array. An unordered list of values
+   *
+   * @param tpe Type to check
+   * @returns `List`, `Array`, `Set` or empty string if not a container
+   */
+  def containerType(tpe: ru.Type): String = {
+    if (tpe <:< seqType) "List"
+    else if (tpe <:< arrayType) "Array"
+    else if (tpe <:< setType) "Set"
+    else ""
+  }
+
+  /**
+   * Returns the type of the contents of the container.
+   *
+   * For example, `typeOf[List[Pet]]` will return `typeOf[Pet]`
+   *
+   * @param tpe Container type to reflect
+   * @returns Content type of the container
+   */
+  def containerContentType(tpe: ru.Type): ru.Type = {
+    val cs = tpe.typeSymbol.asInstanceOf[ru.ClassSymbol]
+    val typeParams = cs.typeParams
+    val firstTypeParam = typeParams(0).asType.toType
+    val contentType = firstTypeParam.asSeenFrom(tpe, cs)
+    contentType
+  }
+
+  /**
+   * Determines if `tpe` is `typeOf[Option[_]]`
+   *
+   * @param tpe Type to check
+   * @return `true` if option, `false` otherwise
+   */
+  def isOption(tpe: ru.Type): Boolean = (tpe <:< SwaggerReflector.optionAnyRefType)
+
+  /**
+   * Returns the type of the contents of the option.
+   *
+   * For example, `typeOf[Option[Pet]]` will return `typeOf[Pet]`
+   *
+   * @param tpe Option type to reflect
+   * @returns Content type of the option. If not an option, the input `tpe` is returned
+   */
+  def optionContentType(tpe: ru.Type): ru.Type = {
+    if (isOption(tpe)) {
+      val cs = tpe.typeSymbol.asInstanceOf[ru.ClassSymbol]
+      val typeParams = cs.typeParams
+      val firstTypeParam = typeParams(0).asType.toType
+      val contentType = firstTypeParam.asSeenFrom(tpe, cs)
+      contentType
+    } else {
+      tpe
+    }
   }
 }

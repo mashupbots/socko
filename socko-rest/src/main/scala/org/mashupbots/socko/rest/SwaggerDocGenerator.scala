@@ -69,8 +69,6 @@ object SwaggerDocGenerator extends Logger {
       (path, apiDec)
     })
 
-    // Model
-
     // Finish
     result.toMap
   }
@@ -115,7 +113,7 @@ object SwaggerResourceListing {
    *
    * @param resources Operations grouped by their path. The grouping is specified in the key. For example,
    *   `/users` and `/pets`.
-   * @param config Rest configuration
+   * @param config REST configuration
    */
   def apply(resources: Map[String, Seq[RestOperation]], config: RestConfig): SwaggerResourceListing = {
     val resourceListingSwaggerApiPaths: Seq[String] = resources.keys.toSeq.sortBy(s => s)
@@ -146,7 +144,8 @@ case class SwaggerApiDeclaration(
   swaggerVersion: String,
   basePath: String,
   resourcePath: String,
-  apis: Seq[SwaggerApiPath]) extends SwaggerDoc
+  apis: Seq[SwaggerApiPath],
+  models: Map[String, SwaggerModel]) extends SwaggerDoc
 
 /**
  * Companion object
@@ -167,16 +166,19 @@ object SwaggerApiDeclaration {
    *
    * @param path Unique path. In the above example, it is `/pets/{id}`
    * @param ops HTTP method operations for that unique path
-   * @param config Rest configuration
+   * @param config REST configuration
    */
   def apply(resourcePath: String, ops: Seq[RestOperation], config: RestConfig): SwaggerApiDeclaration = {
+    // Context for this resource path
+    val ctx = SwaggerContext(config, SwaggerModelRegistry())
+
     // Group by path so we can list the operations
     val pathGrouping: Map[String, Seq[RestOperation]] = ops.groupBy(op => op.registration.path)
 
     // Map group to SwaggerApiPaths
     val apiPathsMap: Map[String, SwaggerApiPath] = pathGrouping.map(f => {
       val (path, ops) = f
-      (path, SwaggerApiPath(path, ops, config))
+      (path, SwaggerApiPath(path, ops, ctx))
     })
 
     // Convert to list and sort
@@ -188,7 +190,8 @@ object SwaggerApiDeclaration {
       config.swaggerVersion,
       config.rootPath,
       resourcePath,
-      apiPaths)
+      apiPaths,
+      ctx.modelRegistry.models.toMap)
   }
 }
 
@@ -218,11 +221,10 @@ object SwaggerApiPath {
    *
    * @param path Unique path
    * @param ops HTTP method operations for that unique path
-   * @param config Rest configuration
+   * @param ctx Processing context
    */
-  def apply(path: String, ops: Seq[RestOperation], config: RestConfig): SwaggerApiPath = {
-    val apiOps: Seq[SwaggerApiOperation] = ops.map(op => SwaggerApiOperation(op, config))
-
+  def apply(path: String, ops: Seq[RestOperation], ctx: SwaggerContext): SwaggerApiPath = {
+    val apiOps: Seq[SwaggerApiOperation] = ops.map(op => SwaggerApiOperation(op, ctx))
     SwaggerApiPath(
       path,
       apiOps.sortBy(f => f.httpMethod))
@@ -235,13 +237,13 @@ object SwaggerApiPath {
  */
 case class SwaggerApiOperation(
   httpMethod: String,
-  summary: String,
-  notes: String,
-  deprecated: Boolean,
+  summary: Option[String],
+  notes: Option[String],
+  deprecated: Option[Boolean],
   responseClass: String,
   nickname: String,
-  parameters: Seq[SwaggerApiParameter],
-  errorResponses: Seq[SwaggerApiError])
+  parameters: Option[Seq[SwaggerApiParameter]],
+  errorResponses: Option[Seq[SwaggerApiError]])
 
 /**
  * Companion object
@@ -252,30 +254,37 @@ object SwaggerApiOperation {
    * Creates a new [[org.mashupbots.socko.rest.SwaggerApiOperation]] from a [[org.mashupbots.socko.rest.RestOperation]]
    *
    * @param op Rest operation to document
-   * @param config Rest configuration
+   * @param ctx Processing context
    */
-  def apply(op: RestOperation, config: RestConfig): SwaggerApiOperation = {
-    val params: Seq[SwaggerApiParameter] = op.deserializer.requestParamBindings.map(b => SwaggerApiParameter(b, config))
+  def apply(op: RestOperation, ctx: SwaggerContext): SwaggerApiOperation = {
+    val params: Seq[SwaggerApiParameter] = op.deserializer.requestParamBindings.map(b => SwaggerApiParameter(b, ctx))
     val errors: Seq[SwaggerApiError] = op.registration.errors.map(e => SwaggerApiError(e.code, e.reason)).toSeq
 
     val swaggerType: String = op.serializer.dataSerializer match {
-      case s:VoidDataSerializer => "void"
-      case s:ObjectDataSerializer => SwaggerReflector.dataType(s.tpe)
-      case s:PrimitiveDataSerializer => SwaggerReflector.dataType(s.tpe)
-      case s:ByteArrayDataSerializer => SwaggerReflector.dataType(ru.typeOf[Array[Byte]])
-      case s:ByteSeqDataSerializer => SwaggerReflector.dataType(ru.typeOf[Seq[Byte]])
-      case _ => throw new IllegalStateException("Unsupported DataSerializer: " + op.serializer.dataSerializer.toString)
+      case s: VoidDataSerializer =>
+        "void"
+      case s: ObjectDataSerializer =>
+        ctx.modelRegistry.register(s.tpe)
+        SwaggerReflector.dataType(s.tpe)
+      case s: PrimitiveDataSerializer =>
+        SwaggerReflector.dataType(s.tpe)
+      case s: ByteArrayDataSerializer =>
+        SwaggerReflector.dataType(ru.typeOf[Array[Byte]])
+      case s: ByteSeqDataSerializer =>
+        SwaggerReflector.dataType(ru.typeOf[Seq[Byte]])
+      case _ =>
+        throw new IllegalStateException("Unsupported DataSerializer: " + op.serializer.dataSerializer.toString)
     }
-    
+
     SwaggerApiOperation(
       op.registration.method.toString,
-      op.registration.description,
-      op.registration.notes,
-      op.registration.deprecated,
+      if (op.registration.description.isEmpty) None else Some(op.registration.description),
+      if (op.registration.notes.isEmpty) None else Some(op.registration.notes),
+      if (op.registration.deprecated) Some(true) else None,
       swaggerType,
       op.registration.name,
-      params,
-      errors.sortBy(e => e.code))
+      if (params.isEmpty) None else Some(params),
+      if (errors.isEmpty) None else Some(errors.sortBy(e => e.code)))
   }
 }
 
@@ -285,12 +294,12 @@ object SwaggerApiOperation {
  */
 case class SwaggerApiParameter(
   name: String,
-  description: String,
+  description: Option[String],
   paramType: String,
   dataType: String,
-  required: Boolean,
+  required: Option[Boolean],
   allowableValues: Option[AllowableValues],
-  allowMultiple: Boolean)
+  allowMultiple: Option[Boolean])
 
 /**
  * Companion object
@@ -301,14 +310,16 @@ object SwaggerApiParameter {
    * Creates a new [[org.mashupbots.socko.rest.SwaggerApiParameter]] for a [[org.mashupbots.socko.rest.SwaggerApiParameter]]
    *
    * @param binding parameter binding
-   * @param config Configuration
+   * @param ctx Processing context
    */
-  def apply(binding: RequestParamBinding, config: RestConfig): SwaggerApiParameter = {
+  def apply(binding: RequestParamBinding, ctx: SwaggerContext): SwaggerApiParameter = {
     val swaggerParamType: String = binding match {
       case _: PathBinding => "path"
       case _: QueryStringBinding => "query"
       case _: HeaderBinding => "header"
-      case _: BodyBinding => "body"
+      case _: BodyBinding =>
+        ctx.modelRegistry.register(binding.tpe)
+        "body"
       case _ => throw new IllegalStateException("Unsupported RequestParamBinding: " + binding.toString)
     }
 
@@ -316,12 +327,12 @@ object SwaggerApiParameter {
 
     SwaggerApiParameter(
       binding.registration.name,
-      binding.registration.description,
+      if (binding.registration.description.isEmpty()) None else Some(binding.registration.description),
       swaggerParamType,
       swaggerDataType,
-      binding.required,
+      if (binding.required) Some(true) else None,
       binding.registration.allowableValues,
-      binding.registration.allowMultiple)
+      if (binding.registration.allowMultiple) Some(true) else None)
   }
 }
 
@@ -330,3 +341,128 @@ object SwaggerApiParameter {
  */
 case class SwaggerApiError(code: Int, reason: String)
 
+/**
+ * A swagger model complex data type's properties
+ *
+ * @param description Description of the property
+ * @param type Swagger data type
+ */
+case class SwaggerModelProperty(
+  `type`: String,
+  description: Option[String],
+  required: Option[Boolean],
+  allowableValues: Option[AllowableValues],
+  items: Option[Map[String, String]])
+
+/**
+ * A swagger model complex data type
+ *
+ * @param id Unique id
+ * @param description description
+ *
+ */
+case class SwaggerModel(
+  id: String,
+  description: Option[String],
+  properties: Map[String, SwaggerModelProperty])
+
+/**
+ * Registry of swagger models
+ *
+ * Makes sure that we don't define a model more than one
+ */
+case class SwaggerModelRegistry() {
+  val models: HashMap[String, SwaggerModel] = new HashMap[String, SwaggerModel]()
+
+  /**
+   * Registers a complex type in the swagger model
+   */
+  private def registerComplexType(tpe: ru.Type) = {
+    // If this is an option, get the base type
+    val thisType = SwaggerReflector.optionContentType(tpe)
+
+    // Add to model if not already added
+    val name = SwaggerReflector.dataType(thisType)
+    if (!models.contains(name)) {
+      // Sub complex types to that may also need reflecting
+      val subModels = collection.mutable.Set[ru.Type]()
+
+      // Get properties of this model
+      val properties: Map[String, SwaggerModelProperty] =
+        thisType.members
+          .filter(s => s.isTerm && !s.isMethod && !s.isMacro)
+          .map(s => {
+            val dot = s.fullName.lastIndexOf('.')
+            val termName = if (dot > 0) s.fullName.substring(dot + 1) else s.fullName
+            val required = !(s.typeSignature <:< SwaggerReflector.optionAnyRefType)
+            val termRequired = if (required) Some(true) else None
+            val (termType: String, items: Map[String, String]) =
+              if (SwaggerReflector.isPrimitive(s.typeSignature)) {
+                // Primitive
+                (SwaggerReflector.dataType(s.typeSignature), Map.empty[String, String])
+              } else {
+                val containerType = SwaggerReflector.containerType(s.typeSignature)
+                if (containerType == "") {
+                  // Complex
+                  subModels.add(s.typeSignature)
+                  (SwaggerReflector.dataType(s.typeSignature), Map.empty[String, String])
+                } else {
+                  // Container
+                  val contentType = SwaggerReflector.containerContentType(s.typeSignature)
+                  if (SwaggerReflector.isPrimitive(contentType)) {
+                    // Container of primitives
+                    (containerType, Map[String, String]("type" -> SwaggerReflector.dataType(contentType)))
+                  } else {
+                    // Container of complex types
+                    subModels.add(contentType)
+                    (containerType, Map[String, String]("$ref" -> SwaggerReflector.dataType(contentType)))
+                  }
+                }
+              }
+            val termItems = if (items.isEmpty) None else Some(items)
+
+            // Return name-value for map
+            (termName, SwaggerModelProperty(termType, None, termRequired, None, termItems))
+          }).toMap
+
+      // Add model to registry
+      val model = SwaggerModel(name, None, properties)
+      models.put(name, model)
+
+      // Add sub-models - we do this after we add to model to cyclical entries
+      subModels.foreach(sm => register(sm))
+    }
+  }
+
+  /**
+   * Determines if we need to register a type as a model. Primitives are ignored.
+   *
+   * @param tpe Type to register
+   */
+  def register(tpe: ru.Type): Unit = {
+    if (SwaggerReflector.isPrimitive(tpe))
+      // Ignore primitive
+      Unit
+    else {
+      val containerType = SwaggerReflector.containerType(tpe)
+      if (containerType == "") {
+        // Register complex type
+        registerComplexType(tpe)
+      } else {
+        // Container type
+        val contentType = SwaggerReflector.containerContentType(tpe)
+        if (SwaggerReflector.isPrimitive(contentType))
+          // Ignore primitive containers
+          Unit
+        else
+          // Register Container of complex types
+          registerComplexType(contentType)
+      }
+    }
+  }
+}
+
+case class SwaggerContext(config: RestConfig, modelRegistry: SwaggerModelRegistry)
+
+    
+                      

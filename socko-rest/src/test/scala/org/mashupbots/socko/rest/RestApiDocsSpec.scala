@@ -31,7 +31,22 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
   "RestApiDocs" must {
 
     val cfg = RestConfig("1.0", "/api")
-    val registry = RestRegistry("org.mashupbots.socko.rest.petshop", cfg)
+    val registry = RestRegistry("org.mashupbots.socko.rest.petshop", cfg)    
+    
+    "Identify swagger types" in {
+      SwaggerReflector.dataType(ru.typeOf[String]) must be ("string")
+      SwaggerReflector.dataType(ru.typeOf[Int]) must be ("int")
+      
+      SwaggerReflector.dataType(ru.typeOf[List[Int]]) must be ("List[int]")
+      SwaggerReflector.dataType(ru.typeOf[Array[String]]) must be ("Array[string]")
+      SwaggerReflector.dataType(ru.typeOf[Set[Float]]) must be ("Set[float]")
+     
+      SwaggerReflector.dataType(ru.typeOf[Cow]) must be ("Cow")
+      SwaggerReflector.dataType(ru.typeOf[Option[Cow]]) must be ("Cow")
+      SwaggerReflector.dataType(ru.typeOf[List[Cow]]) must be ("List[Cow]")
+      SwaggerReflector.dataType(ru.typeOf[Array[Cow]]) must be ("Array[Cow]")
+      SwaggerReflector.dataType(ru.typeOf[Set[Cow]]) must be ("Set[Cow]")
+    }
     
     "correctly produce resource listing" in {
       val resourceListing = registry.apiDocs("/api-docs.json")
@@ -73,8 +88,6 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 		    "operations":[{
 		      "httpMethod":"POST",
 		      "summary":"Add a new pet to the store",
-		      "notes":"",
-		      "deprecated":false,
 		      "responseClass":"void",
 		      "nickname":"addPet",
 		      "parameters":[{
@@ -82,8 +95,7 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 		        "description":"Pet object that needs to be added to the store",
 		        "paramType":"body",
 		        "dataType":"Pet",
-		        "required":true,
-		        "allowMultiple":false
+		        "required":true
 		      }],
 		      "errorResponses":[{
 		        "code":405,
@@ -92,8 +104,6 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 		    },{
 		      "httpMethod":"PUT",
 		      "summary":"Update an existing pet",
-		      "notes":"",
-		      "deprecated":false,
 		      "responseClass":"void",
 		      "nickname":"updatePet",
 		      "parameters":[{
@@ -101,8 +111,7 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 		        "description":"Pet object that needs to be updated in the store",
 		        "paramType":"body",
 		        "dataType":"Pet",
-		        "required":true,
-		        "allowMultiple":false
+		        "required":true
 		      }],
 		      "errorResponses":[{
 		        "code":400,
@@ -121,7 +130,6 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 		      "httpMethod":"GET",
 		      "summary":"Finds Pets by status",
 		      "notes":"Multiple status values can be provided with comma seperated strings",
-		      "deprecated":false,
 		      "responseClass":"List[Pet]",
 		      "nickname":"findPetsByStatus",
 		      "parameters":[{
@@ -155,8 +163,7 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 		        "description":"Tags to filter by",
 		        "paramType":"query",
 		        "dataType":"string",
-		        "required":true,
-		        "allowMultiple":false
+		        "required":true
 		      }],
 		      "errorResponses":[{
 		        "code":405,
@@ -169,7 +176,6 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 		      "httpMethod":"GET",
 		      "summary":"Find pet by ID",
 		      "notes":"Returns a pet based on ID",
-		      "deprecated":false,
 		      "responseClass":"Pet",
 		      "nickname":"getPetById",
 		      "parameters":[{
@@ -177,8 +183,7 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 		        "description":"ID of pet that needs to be fetched",
 		        "paramType":"path",
 		        "dataType":"string",
-		        "required":true,
-		        "allowMultiple":false
+		        "required":true
 		      }],
 		      "errorResponses":[{
 		        "code":400,
@@ -188,26 +193,74 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 		        "reason":"Pet not found"
 		      }]
 		    }]
-		  }]
+		  }],
+		  "models":{
+		    "Tag":{
+		      "id":"Tag",
+		      "properties":{
+		        "name":{
+		          "type":"string",
+		          "required":true
+		        },
+		        "id":{
+		          "type":"long",
+		          "required":true
+		        }
+		      }
+		    },
+		    "Category":{
+		      "id":"Category",
+		      "properties":{
+		        "name":{
+		          "type":"string",
+		          "required":true
+		        },
+		        "id":{
+		          "type":"long",
+		          "required":true
+		        }
+		      }
+		    },
+		    "Pet":{
+		      "id":"Pet",
+		      "properties":{
+		        "name":{
+		          "type":"string",
+		          "required":true
+		        },
+		        "tags":{
+		          "type":"Array",
+		          "required":true,
+		          "items":{
+		            "$ref":"Tag"
+		          }
+		        },
+		        "photoUrls":{
+		          "type":"Array",
+		          "required":true,
+		          "items":{
+		            "type":"string"
+		          }
+		        },
+		        "id":{
+		          "type":"long",
+		          "required":true
+		        },
+		        "status":{
+		          "type":"string",
+		          "required":true
+		        },
+		        "category":{
+		          "type":"Category",
+		          "required":true
+		        }
+		      }
+		    }
+		  }
 		}
         """
       log.debug("Pets API declaration=" + pettyJson(new String(api, CharsetUtil.UTF_8)))
       new String(api, CharsetUtil.UTF_8) must be(compactJson(apiDoc))
-    }
-    
-    "Identify swagger types" in {
-      SwaggerReflector.dataType(ru.typeOf[String]) must be ("string")
-      SwaggerReflector.dataType(ru.typeOf[Int]) must be ("int")
-      
-      SwaggerReflector.dataType(ru.typeOf[List[Int]]) must be ("List[int]")
-      SwaggerReflector.dataType(ru.typeOf[Array[String]]) must be ("Array[string]")
-      SwaggerReflector.dataType(ru.typeOf[Set[Float]]) must be ("Set[float]")
-     
-      SwaggerReflector.dataType(ru.typeOf[Cow]) must be ("Cow")
-      SwaggerReflector.dataType(ru.typeOf[Option[Cow]]) must be ("Cow")
-      SwaggerReflector.dataType(ru.typeOf[List[Cow]]) must be ("List[Cow]")
-      SwaggerReflector.dataType(ru.typeOf[Array[Cow]]) must be ("Array[Cow]")
-      SwaggerReflector.dataType(ru.typeOf[Set[Cow]]) must be ("Set[Cow]")
     }
     
     def pettyJson(json: String): String = {

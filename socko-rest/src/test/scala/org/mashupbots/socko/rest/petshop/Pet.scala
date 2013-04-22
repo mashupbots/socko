@@ -31,7 +31,7 @@ import org.mashupbots.socko.rest.AllowableValues
 
 case class Tag(id: Long, name: String)
 case class Category(id: Long, name: String)
-case class Pet(tags: Seq[Tag], id: Long, category: Category, status: String, name: String, photoUrls: Seq[String])
+case class Pet(tags: Array[Tag], id: Long, category: Category, status: String, name: String, photoUrls: Array[String])
 
 case class GetPetRequest(context: RestRequestContext, petId: String) extends RestRequest
 case class GetPetResponse(context: RestResponseContext, pet: Option[Pet]) extends RestResponse
