@@ -25,10 +25,13 @@ import org.mashupbots.socko.infrastructure.ReflectUtil
  * incoming requests.
  *
  * @param operations REST operations that will be used for processing requests
+ * @param swaggerApiDocs Swagger API documentation stored in UTF-8 bytes ready to be served.
+ *   The `key` is the exact path to match, the value is the `UTF-8` encoded response
  * @param config REST configuration
  */
 case class RestRegistry(
   operations: Seq[RestOperation],
+  swaggerApiDocs: Map[String, Array[Byte]],
   config: RestConfig) {
 
   /**
@@ -61,19 +64,12 @@ case class RestRegistry(
   }
 
   /**
-   * Root path that will trigger the response of API documentation.  For example, `/api/api-docs.json`.
+   * Root path that will trigger the response of swagger API documentation.  For example, `/api/api-docs.json`.
    */
-  val rootApiDocsUrl = config.rootPath + SwaggerDocGenerator.urlPath
+  val swaggerRootApiDocsUrl = config.rootPath + SwaggerDocGenerator.urlPath
 
   /**
-   * Swagger API documentation ready to be served
-   *
-   * The `key` is the exact path to match, the value is the `UTF-8` encoded response
-   */
-  val apiDocs: Map[String, Array[Byte]] = SwaggerDocGenerator.generate(operations, config)
-
-  /**
-   * Flag to indicate if the path requests api document response.
+   * Flag to indicate if the path requests swagger API document response.
    *
    * For example, `/api/api-docs.json` and `/api/api-docs.json/pets` will return `true` but
    * `/api/pets` will return `false`.
@@ -81,8 +77,8 @@ case class RestRegistry(
    * @param endPoint Endpoint to check
    * @returns `True` if this endpoint requires api documentation to be returned
    */
-  def isApiDocRequest(endPoint: EndPoint): Boolean = {
-    endPoint.path.startsWith(rootApiDocsUrl)
+  def isSwaggerApiDocRequest(endPoint: EndPoint): Boolean = {
+    endPoint.path.startsWith(swaggerRootApiDocsUrl)
   }
 }
 
@@ -152,7 +148,9 @@ object RestRegistry extends Logger {
       }
     })
 
-    RestRegistry(restOperations, config)
+    val swaggerApiDoc = SwaggerDocGenerator.generate(restOperations, config, rm)
+    
+    RestRegistry(restOperations, swaggerApiDoc, config)
   }
 
   /**

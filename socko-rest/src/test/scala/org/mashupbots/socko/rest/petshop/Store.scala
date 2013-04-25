@@ -16,7 +16,6 @@
 package org.mashupbots.socko.rest.petshop
 
 import java.util.Date
-
 import org.mashupbots.socko.rest.BodyParam
 import org.mashupbots.socko.rest.Method
 import org.mashupbots.socko.rest.PathParam
@@ -25,9 +24,11 @@ import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
-
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
+import org.mashupbots.socko.rest.RestModelMetaData
+import org.mashupbots.socko.rest.RestPropertyMetaData
+import org.mashupbots.socko.rest.AllowableValuesList
 
 case class Order(
   id: Long,
@@ -35,6 +36,10 @@ case class Order(
   status: String,
   quantity: Int,
   shipDate: Date)
+object Order extends RestModelMetaData {
+  val modelProperties = Seq(
+    RestPropertyMetaData("status", "Order Status", Some(AllowableValuesList(List("placed", " approved", " delivered")))))
+}
 
 case class GetOrderRequest(context: RestRequestContext, orderId: String) extends RestRequest
 case class GetOrderResponse(context: RestResponseContext, order: Option[Order]) extends RestResponse

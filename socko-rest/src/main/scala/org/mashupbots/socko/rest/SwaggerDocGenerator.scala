@@ -38,9 +38,10 @@ object SwaggerDocGenerator extends Logger {
    *
    * @param operations Rest operations
    * @param config Rest configuration
+   * @param rm Runtime Mirror used to reflect property meta data
    * @returns Map with the `key` being the exact path to match, the value is the `UTF-8` encoded response
    */
-  def generate(operations: Seq[RestOperation], config: RestConfig): Map[String, Array[Byte]] = {
+  def generate(operations: Seq[RestOperation], config: RestConfig, rm: ru.Mirror): Map[String, Array[Byte]] = {
     val result: HashMap[String, Array[Byte]] = new HashMap[String, Array[Byte]]()
 
     // Group operations into resources based on path segments
@@ -64,7 +65,7 @@ object SwaggerDocGenerator extends Logger {
     // API registrations
     val apiregistrations: Map[String, SwaggerApiDeclaration] = apisMap.map(f => {
       val (path, ops) = f
-      val apiDec = SwaggerApiDeclaration(path, ops, config)
+      val apiDec = SwaggerApiDeclaration(path, ops, config, rm)
       result.put(urlPath + path, jsonify(apiDec))
       (path, apiDec)
     })
@@ -164,13 +165,14 @@ object SwaggerApiDeclaration {
    *
    * maps to 1 SwaggerApiPath `/pets` with 2 operations: `POST` and `PUT`
    *
-   * @param path Unique path. In the above example, it is `/pets/{id}`
+   * @param resourcePath Unique path. In the above example, it is `/pets/{id}`
    * @param ops HTTP method operations for that unique path
    * @param config REST configuration
+   * @param rm Runtime mirror for reflecting meta data
    */
-  def apply(resourcePath: String, ops: Seq[RestOperation], config: RestConfig): SwaggerApiDeclaration = {
+  def apply(resourcePath: String, ops: Seq[RestOperation], config: RestConfig, rm: ru.Mirror): SwaggerApiDeclaration = {
     // Context for this resource path
-    val ctx = SwaggerContext(config, SwaggerModelRegistry())
+    val ctx = SwaggerContext(config, SwaggerModelRegistry(rm))
 
     // Group by path so we can list the operations
     val pathGrouping: Map[String, Seq[RestOperation]] = ops.groupBy(op => op.registration.path)
@@ -344,8 +346,12 @@ case class SwaggerApiError(code: Int, reason: String)
 /**
  * A swagger model complex data type's properties
  *
- * @param description Description of the property
  * @param type Swagger data type
+ * @param description Description of the property
+ * @param required Boolean to indicate if the property is required. If `None`, `false` is assumed.
+ * @param allowableValues Optional allowable list or range of values
+ * @param items Only applicable for containers. Defines the data type of items in a container.
+ *   For primitives, it is `"type":"string"`.  For complex types, it is `"$ref":"Category"`.
  */
 case class SwaggerModelProperty(
   `type`: String,
@@ -359,7 +365,7 @@ case class SwaggerModelProperty(
  *
  * @param id Unique id
  * @param description description
- *
+ * @param properties List of properties
  */
 case class SwaggerModel(
   id: String,
@@ -367,12 +373,14 @@ case class SwaggerModel(
   properties: Map[String, SwaggerModelProperty])
 
 /**
- * Registry of swagger models
+ * Registry of swagger models. Makes sure that we don't output a model more than once.
  *
- * Makes sure that we don't define a model more than one
+ * @param rm Runtime Mirror
  */
-case class SwaggerModelRegistry() {
+case class SwaggerModelRegistry(rm: ru.Mirror) {
   val models: HashMap[String, SwaggerModel] = new HashMap[String, SwaggerModel]()
+
+  val typeRestModelMetaData = ru.typeOf[RestModelMetaData]
 
   /**
    * Registers a complex type in the swagger model
@@ -387,6 +395,9 @@ case class SwaggerModelRegistry() {
       // Sub complex types to that may also need reflecting
       val subModels = collection.mutable.Set[ru.Type]()
 
+      // Get properties meta data
+      val propertiesMetaData = locatePropertiesMetaData(thisType)
+
       // Get properties of this model
       val properties: Map[String, SwaggerModelProperty] =
         thisType.members
@@ -396,33 +407,18 @@ case class SwaggerModelRegistry() {
             val termName = if (dot > 0) s.fullName.substring(dot + 1) else s.fullName
             val required = !(s.typeSignature <:< SwaggerReflector.optionAnyRefType)
             val termRequired = if (required) Some(true) else None
-            val (termType: String, items: Map[String, String]) =
-              if (SwaggerReflector.isPrimitive(s.typeSignature)) {
-                // Primitive
-                (SwaggerReflector.dataType(s.typeSignature), Map.empty[String, String])
-              } else {
-                val containerType = SwaggerReflector.containerType(s.typeSignature)
-                if (containerType == "") {
-                  // Complex
-                  subModels.add(s.typeSignature)
-                  (SwaggerReflector.dataType(s.typeSignature), Map.empty[String, String])
-                } else {
-                  // Container
-                  val contentType = SwaggerReflector.containerContentType(s.typeSignature)
-                  if (SwaggerReflector.isPrimitive(contentType)) {
-                    // Container of primitives
-                    (containerType, Map[String, String]("type" -> SwaggerReflector.dataType(contentType)))
-                  } else {
-                    // Container of complex types
-                    subModels.add(contentType)
-                    (containerType, Map[String, String]("$ref" -> SwaggerReflector.dataType(contentType)))
-                  }
-                }
-              }
+            val (termType: String, items: Map[String, String]) = parsePropertyType(s.typeSignature, subModels)
             val termItems = if (items.isEmpty) None else Some(items)
 
+            val metaData: Option[RestPropertyMetaData] = propertiesMetaData.find(p => p.name == termName)
+            val description: Option[String] =
+              if (metaData.isEmpty) None
+              else if (metaData.get.description.isEmpty) None
+              else Some(metaData.get.description)
+            val allowableValues: Option[AllowableValues] = if (metaData.isEmpty) None else metaData.get.allowableValues
+
             // Return name-value for map
-            (termName, SwaggerModelProperty(termType, None, termRequired, None, termItems))
+            (termName, SwaggerModelProperty(termType, description, termRequired, allowableValues, termItems))
           }).toMap
 
       // Add model to registry
@@ -431,6 +427,60 @@ case class SwaggerModelRegistry() {
 
       // Add sub-models - we do this after we add to model to cyclical entries
       subModels.foreach(sm => register(sm))
+    }
+  }
+
+  /**
+   * Parse the type of a property and output the Swagger API details
+   *
+   * @param tpe Type to parse
+   * @param subModels Complex Types and Complex Types within a container are added to this set so that
+   *   they can be registered as a model object for swagger output.
+   * @returns Tuple of swagger data type name and map of swagger container content type. Non container classes
+   *   returns an empty map of container content type.
+   */
+  private def parsePropertyType(tpe: ru.Type, subModels: collection.mutable.Set[ru.Type]): (String, Map[String, String]) = {
+    if (SwaggerReflector.isPrimitive(tpe)) {
+      // Primitive
+      (SwaggerReflector.dataType(tpe), Map.empty[String, String])
+    } else {
+      val containerType = SwaggerReflector.containerType(tpe)
+      if (containerType == "") {
+        // Complex
+        subModels.add(tpe)
+        (SwaggerReflector.dataType(tpe), Map.empty[String, String])
+      } else {
+        // Container
+        val contentType = SwaggerReflector.containerContentType(tpe)
+        if (SwaggerReflector.isPrimitive(contentType)) {
+          // Container of primitives
+          (containerType, Map[String, String]("type" -> SwaggerReflector.dataType(contentType)))
+        } else {
+          // Container of complex types
+          subModels.add(contentType)
+          (containerType, Map[String, String]("$ref" -> SwaggerReflector.dataType(contentType)))
+        }
+      }
+    }
+  }
+
+  /**
+   * Finds the companion object of `tpe` and if it extends [[org.mashupbots.socko.rest.RestModelMetaData]],
+   * `modelProperties` is returned.
+   *
+   * @param tpe Type to investigate
+   * @returns Sequence of [[org.mashupbots.socko.rest.RestModelMetaData]]. Empty if no extra meta data found.
+   */
+  private def locatePropertiesMetaData(tpe: ru.Type): Seq[RestPropertyMetaData] = {
+    val cs = tpe.typeSymbol.asClass
+    val companionModuleSymbol = cs.companionSymbol.asModule
+    val moduleType = companionModuleSymbol.typeSignature
+    if (moduleType <:< typeRestModelMetaData) {
+      val moduleMirror = rm.reflectModule(companionModuleSymbol)
+      val companionObj = moduleMirror.instance.asInstanceOf[RestModelMetaData]
+      companionObj.modelProperties
+    } else {
+      Seq.empty
     }
   }
 

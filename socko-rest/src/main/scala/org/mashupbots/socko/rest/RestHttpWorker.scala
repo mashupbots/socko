@@ -98,7 +98,7 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
       if (op.isEmpty) {
         // Operation not found. See if this is a request for api-docs 
         // More efficient to do this after op lookup rather than take a hit on every request 
-        val docs = registry.apiDocs.get(httpRequestEvent.endPoint.path)
+        val docs = registry.swaggerApiDocs.get(httpRequestEvent.endPoint.path)
         if (docs.isDefined) {
           httpRequestEvent.response.write(docs.get, "application/json;charset=UTF-8")
           stop(FSM.Normal)

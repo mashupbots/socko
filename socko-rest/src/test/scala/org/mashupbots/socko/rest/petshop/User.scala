@@ -24,9 +24,11 @@ import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
-
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
+import org.mashupbots.socko.rest.RestModelMetaData
+import org.mashupbots.socko.rest.RestPropertyMetaData
+import org.mashupbots.socko.rest.AllowableValuesList
 
 case class User(
   id: Long,
@@ -37,6 +39,10 @@ case class User(
   userStatus: Int,
   firstName: String,
   password: String)
+object User extends RestModelMetaData {
+  val modelProperties = Seq(
+    RestPropertyMetaData("status", "User status", Some(AllowableValuesList(List("1-registered", "2-active", "3-closed")))))
+}
 
 case class CreateUserWithArrayRequest(context: RestRequestContext, users: Array[User]) extends RestRequest
 case class CreateUserWithArrayResponse(context: RestResponseContext) extends RestResponse

@@ -28,10 +28,17 @@ import org.mashupbots.socko.rest.RestResponseContext
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import org.mashupbots.socko.rest.AllowableValues
+import org.mashupbots.socko.rest.RestModelMetaData
+import org.mashupbots.socko.rest.RestPropertyMetaData
+import org.mashupbots.socko.rest.AllowableValuesList
 
 case class Tag(id: Long, name: String)
 case class Category(id: Long, name: String)
 case class Pet(tags: Array[Tag], id: Long, category: Category, status: String, name: String, photoUrls: Array[String])
+object Pet extends RestModelMetaData {
+  val modelProperties = Seq(
+    RestPropertyMetaData("status", "pet status in the store", Some(AllowableValuesList(List("available", "pending", "sold")))))
+}
 
 case class GetPetRequest(context: RestRequestContext, petId: String) extends RestRequest
 case class GetPetResponse(context: RestResponseContext, pet: Option[Pet]) extends RestResponse
@@ -76,9 +83,8 @@ object FindPetByStatusRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pet/findByStatus"
   val requestParams = Seq(
-      QueryParam("status", "Status values that need to be considered for filter", allowMultiple = true,
-          allowableValues = Some(AllowableValues(List("available", "pending", "sold"))))
-      )
+    QueryParam("status", "Status values that need to be considered for filter", allowMultiple = true,
+      allowableValues = Some(AllowableValues(List("available", "pending", "sold")))))
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
   override val name = "findPetsByStatus"
   override val description = "Finds Pets by status"

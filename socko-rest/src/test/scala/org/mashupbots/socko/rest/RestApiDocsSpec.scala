@@ -49,7 +49,7 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
     }
     
     "correctly produce resource listing" in {
-      val resourceListing = registry.apiDocs("/api-docs.json")
+      val resourceListing = registry.swaggerApiDocs("/api-docs.json")
       val resourceListingDoc = """
         {
         	"apiVersion":"1.0",
@@ -76,7 +76,7 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
     }
 
     "correctly produce pets API declaration" in {
-      val api = registry.apiDocs("/api-docs.json/pet")
+      val api = registry.swaggerApiDocs("/api-docs.json/pet")
       val apiDoc = """
 		{
 		  "apiVersion":"1.0",
@@ -248,7 +248,12 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 		        },
 		        "status":{
 		          "type":"string",
-		          "required":true
+                  "description":"pet status in the store",
+		          "required":true,
+                  "allowableValues":{
+			        "values":["available","pending","sold"],
+			        "valueType":"LIST"
+			      }
 		        },
 		        "category":{
 		          "type":"Category",
