@@ -36,7 +36,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
 
   "RestResponseSerializerSpec" must {
 
-    val config = RestConfig("1.0", "/api")
+    val config = RestConfig("1.0", "http://localhost/api")
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
     val requestContext = RestRequestContext(EndPoint("GET", "localhost", "/path/1234"), Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
     val responseContext = RestResponseContext(requestContext, HttpResponseStatus(200), Map.empty)

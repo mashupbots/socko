@@ -30,7 +30,7 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
 
   "RestRegistry" must {
 
-    val cfg = RestConfig("1.0", "/api")
+    val cfg = RestConfig("1.0", "http://localhost/api")
     val rm = ru.runtimeMirror(getClass().getClassLoader())
     val classes = ReflectUtil.getClasses(rm.classLoader, "org.mashupbots.socko.rest.test1")
 

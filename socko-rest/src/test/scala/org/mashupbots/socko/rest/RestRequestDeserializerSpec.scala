@@ -34,7 +34,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
 
   "RestRequestDeserializerSpec" must {
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
-    val config = RestConfig("1.0", "/api")
+    val config = RestConfig("1.0", "http://localhost/api")
 
     "Parse path parameters with 1 variable" in {
       val d = RestRequestDeserializer(

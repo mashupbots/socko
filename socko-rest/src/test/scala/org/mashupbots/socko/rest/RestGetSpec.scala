@@ -60,7 +60,7 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
   val path = "http://localhost:" + port + "/"
 
   val restRegistry = RestRegistry("org.mashupbots.socko.rest.get",
-    RestConfig("1.0", "/api", requestTimeoutSeconds = 2, reportRuntimeException = ReportRuntimeException.All))
+    RestConfig("1.0", "http://localhost:9020/api", requestTimeoutSeconds = 2, reportRuntimeException = ReportRuntimeException.All))
   val restHandler = system.actorOf(Props(new RestHandler(restRegistry)))
 
   val routes = Routes({

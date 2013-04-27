@@ -32,6 +32,7 @@ import akka.actor.ActorSystem
 import scala.collection.mutable.ListBuffer
 import akka.actor.Actor
 import akka.actor.Props
+import org.mashupbots.socko.rest.Error
 
 //*************************************************************
 // Model
@@ -105,9 +106,12 @@ class GetOrderProcessor() extends Actor with akka.actor.ActorLogging {
 object GetOrderRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/store/order/{orderId}"
-  val requestParams = Seq(PathParam("orderId"))
+  val requestParams = Seq(PathParam("orderId", "ID of pet that needs to be fetched"))
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
     actorSystem.actorOf(Props[GetOrderProcessor])
+  override val description = "Find purchase order by ID"
+  override val notes = "For valid response try integer IDs with value <= 5. Nonintegers will generate API errors"
+  override val errors = Seq(Error(400, "Invalid ID supplied"), Error(404, "Order not found"))
 }
 
 case class DeleteOrderRequest(context: RestRequestContext, orderId: Long) extends RestRequest
@@ -123,9 +127,12 @@ class DeleteOrderProcessor() extends Actor with akka.actor.ActorLogging {
 object DeleteOrderRegistration extends RestRegistration {
   val method = Method.DELETE
   val path = "/store/order/{orderId}"
-  val requestParams = Seq(PathParam("orderId"))
+  val requestParams = Seq(PathParam("orderId", "ID of the order that needs to be deleted"))
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
     actorSystem.actorOf(Props[DeleteOrderProcessor])
+  override val description = "Delete purchase order by ID"
+  override val notes = "For valid response try integer IDs with value < 5. Nonintegers will generate API errors"
+  override val errors = Seq(Error(400, "Invalid ID supplied"), Error(404, "Order not found"))
 }
 
 case class PlaceOrderRequest(context: RestRequestContext, order: Order) extends RestRequest
@@ -141,7 +148,9 @@ class PlaceOrderProcessor() extends Actor with akka.actor.ActorLogging {
 object PlaceOrderRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/store/order"
-  val requestParams = Seq(BodyParam("order"))
+  val requestParams = Seq(BodyParam("order", "order placed for purchasing the pet"))
   def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
     actorSystem.actorOf(Props[PlaceOrderProcessor])
+  override val description = "Place an order for a pet"
+  override val errors = Seq(Error(400, "Invalid order"))
 }

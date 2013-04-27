@@ -17,31 +17,49 @@ package org.mashupbots.socko.rest
 
 import scala.collection.mutable.HashMap
 import scala.reflect.runtime.{universe => ru}
-
 import org.json4s.NoTypeHints
 import org.json4s.native.{Serialization => json}
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.events.EndPoint
 
 /**
- * Generates [[https://developers.helloreverb.com/swagger/ Swagger]] API documentation
+ * Generated [[https://developers.helloreverb.com/swagger/ Swagger]] API documentation
+ * 
+ * @param lookup Map of path and swagger JSON associated with the path
  */
-object SwaggerDocGenerator extends Logger {
+case class SwaggerApiDocs(lookup: Map[String, Array[Byte]]) {
+  
+  /**
+   * Gets the JSON doc for the specified end point
+   * 
+   * @param path Full path to the requested documentation. For example: `/api/api-docs.json/pet`.
+   * @returns JSON UTF-8, `None` if data for path not found
+   */
+  def get(path: String): Option[Array[Byte]] = {
+    lookup.get(path)
+  }
+}
+
+/**
+ * Companion object
+ */
+object SwaggerApiDocs extends Logger {
 
   /**
    * URL path relative to the config `rootUrl` that will trigger the return of the API documentation
    */
   val urlPath = "/api-docs.json"
-
+    
   /**
    * Generates a Map of URL paths and the associated API documentation to be returned for these paths
    *
    * @param operations Rest operations
    * @param config Rest configuration
    * @param rm Runtime Mirror used to reflect property meta data
-   * @returns Map with the `key` being the exact path to match, the value is the `UTF-8` encoded response
+   * @returns Map with the `key` being the exact path to match, the value is the JSON string
    */
-  def generate(operations: Seq[RestOperation], config: RestConfig, rm: ru.Mirror): Map[String, Array[Byte]] = {
+  def apply(operations: Seq[RestOperation], config: RestConfig, rm: ru.Mirror): SwaggerApiDocs = {
     val result: HashMap[String, Array[Byte]] = new HashMap[String, Array[Byte]]()
 
     // Group operations into resources based on path segments
@@ -60,18 +78,18 @@ object SwaggerDocGenerator extends Logger {
 
     // Resource Listing
     val resourceListing = SwaggerResourceListing(apisMap, config)
-    result.put(urlPath, jsonify(resourceListing))
+    result.put(config.rootPath + urlPath, jsonify(resourceListing))
 
     // API registrations
     val apiregistrations: Map[String, SwaggerApiDeclaration] = apisMap.map(f => {
       val (path, ops) = f
       val apiDec = SwaggerApiDeclaration(path, ops, config, rm)
-      result.put(urlPath + path, jsonify(apiDec))
+      result.put(config.rootPath + urlPath + path, jsonify(apiDec))
       (path, apiDec)
     })
 
     // Finish
-    result.toMap
+    SwaggerApiDocs(result.toMap)
   }
 
   private def jsonify(data: AnyRef): Array[Byte] = {
@@ -119,11 +137,11 @@ object SwaggerResourceListing {
   def apply(resources: Map[String, Seq[RestOperation]], config: RestConfig): SwaggerResourceListing = {
     val resourceListingSwaggerApiPaths: Seq[String] = resources.keys.toSeq.sortBy(s => s)
     val resourceListingApis: Seq[SwaggerResourceListingApi] =
-      resourceListingSwaggerApiPaths.map(s => SwaggerResourceListingApi(SwaggerDocGenerator.urlPath + s, ""))
+      resourceListingSwaggerApiPaths.map(s => SwaggerResourceListingApi(SwaggerApiDocs.urlPath + s, ""))
     val resourceListing = SwaggerResourceListing(
       config.apiVersion,
       config.swaggerVersion,
-      config.rootPath,
+      config.rootApiUrl,
       resourceListingApis)
 
     resourceListing
@@ -190,7 +208,7 @@ object SwaggerApiDeclaration {
     SwaggerApiDeclaration(
       config.apiVersion,
       config.swaggerVersion,
-      config.rootPath,
+      config.rootApiUrl,
       resourcePath,
       apiPaths,
       ctx.modelRegistry.models.toMap)

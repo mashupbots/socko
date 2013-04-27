@@ -18,29 +18,31 @@ package org.mashupbots.socko.rest
 import akka.actor.Extension
 import com.typesafe.config.Config
 import org.mashupbots.socko.infrastructure.ConfigUtil
+import java.net.URI
 
 /**
  * Configuration for REST handler
  *
  * @param apiVersion the version of your API
- * @param rootPath Root path to your API without the protocol, domain and port. For example, `/api`.
+ * @param rootApiUrl Root path to your API with the scheme, domain and port. For example, `http://yourdomain.com/api`.
+ *   This is the path as seen by the end user and not from on the local server.
  * @param swaggerVersion Swagger definition version
  * @param swaggerApiGroupingPathSegment Path segments to group APIs by. Default is `1` which refers to the first
  *   relative path segment.
- *   
- *   For example, the following will be grouped under the `/pets` because the the share `pets` in the 1st path 
+ *
+ *   For example, the following will be grouped under the `/pets` because the the share `pets` in the 1st path
  *   segment.
  *   {{{
  *   /pets
  *   /pets/{petId}
  *   /pets/findById
  *   }}}
- *   
+ *
  * @param requestTimeoutSeconds Number of seconds before a request is timed out. Make sure that your processor
  *   actor responds within this number of seconds or throws an exception.  Defaults to `60` seconds.
- * @param sockoEventCacheTimeoutSeconds Number of seconds before a [[org.mashupbots.socko.events.SockoEvent]] is 
- *   removed from the cache and cannot be accessed by the REST processor. Once the REST processor has access to 
- *   the [[org.mashupbots.socko.events.SockoEvent]], its expiry from the cache does not affect usability. The cache 
+ * @param sockoEventCacheTimeoutSeconds Number of seconds before a [[org.mashupbots.socko.events.SockoEvent]] is
+ *   removed from the cache and cannot be accessed by the REST processor. Once the REST processor has access to
+ *   the [[org.mashupbots.socko.events.SockoEvent]], its expiry from the cache does not affect usability. The cache
  *   is just used as a means to pass the event. Defaults to `5` seconds.
  * @param maxWorkerCount Maximum number of workers per [[org.mashupbots.socko.rest.RestHandler]].
  * @param maxWorkerRescheduleMilliSeconds Reschedule a message for processing again using this delay when max worker
@@ -53,7 +55,7 @@ import org.mashupbots.socko.infrastructure.ConfigUtil
  */
 case class RestConfig(
   apiVersion: String,
-  rootPath: String,
+  rootApiUrl: String,
   swaggerVersion: String = "1.1",
   swaggerApiGroupingPathSegment: Int = 1,
   requestTimeoutSeconds: Int = 60,
@@ -62,14 +64,19 @@ case class RestConfig(
   maxWorkerRescheduleMilliSeconds: Int = 500,
   reportRuntimeException: ReportRuntimeException.Value = ReportRuntimeException.Never) extends Extension {
 
+  val rootApiURI = new URI(rootApiUrl)
+  val schemeDomainPort = s"${rootApiURI.getScheme}://${rootApiURI.getHost}" + 
+    (if (rootApiURI.getPort > 0) s":${rootApiURI.getPort}" else "") 
+  val rootPath = rootApiURI.getPath
+
   val sockoEventCacheTimeoutMilliSeconds = sockoEventCacheTimeoutSeconds * 1000
-  
+
   /**
    * Read configuration from AKKA's `application.conf`
    */
   def this(config: Config, prefix: String) = this(
     config.getString(prefix + ".api-version"),
-    config.getString(prefix + ".root-path"),
+    config.getString(prefix + ".root-api-url"),
     ConfigUtil.getString(config, prefix + ".swagger-version", "1.1"),
     ConfigUtil.getInt(config, prefix + ".swagger-api-grouping-path-segment", 1),
     ConfigUtil.getInt(config, prefix + ".request-timeout-seconds", 60),

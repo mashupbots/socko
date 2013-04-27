@@ -63,7 +63,7 @@ class RestPostSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitS
   val path = "http://localhost:" + port + "/"
 
   val restRegistry = RestRegistry("org.mashupbots.socko.rest.post",
-    RestConfig("1.0", "/api", reportRuntimeException = ReportRuntimeException.All))
+    RestConfig("1.0", "http://localhost:9023/api", reportRuntimeException = ReportRuntimeException.All))
   val restHandler = system.actorOf(Props(new RestHandler(restRegistry)))
 
   val routes = Routes({

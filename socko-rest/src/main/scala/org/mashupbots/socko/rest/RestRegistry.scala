@@ -25,13 +25,12 @@ import org.mashupbots.socko.infrastructure.ReflectUtil
  * incoming requests.
  *
  * @param operations REST operations that will be used for processing requests
- * @param swaggerApiDocs Swagger API documentation stored in UTF-8 bytes ready to be served.
- *   The `key` is the exact path to match, the value is the `UTF-8` encoded response
+ * @param swaggerApiDocs Swagger API documentation
  * @param config REST configuration
  */
 case class RestRegistry(
   operations: Seq[RestOperation],
-  swaggerApiDocs: Map[String, Array[Byte]],
+  swaggerApiDocs: SwaggerApiDocs,
   config: RestConfig) {
 
   /**
@@ -66,7 +65,7 @@ case class RestRegistry(
   /**
    * Root path that will trigger the response of swagger API documentation.  For example, `/api/api-docs.json`.
    */
-  val swaggerRootApiDocsUrl = config.rootPath + SwaggerDocGenerator.urlPath
+  val swaggerRootApiDocsUrl = config.rootPath + SwaggerApiDocs.urlPath
 
   /**
    * Flag to indicate if the path requests swagger API document response.
@@ -147,7 +146,7 @@ object RestRegistry extends Logger {
       }
     })
 
-    val swaggerApiDoc = SwaggerDocGenerator.generate(restOperations, config, rm)
+    val swaggerApiDoc = SwaggerApiDocs(restOperations, config, rm)
     
     RestRegistry(restOperations, swaggerApiDoc, config)
   }

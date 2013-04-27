@@ -207,7 +207,7 @@ class PetProcessor() extends Actor with akka.actor.ActorLogging {
       sender ! response
       context.stop(self)
     case req: FindPetByStatusRequest =>
-      val pets = PetData.findPetByTags(req.status)
+      val pets = PetData.findPetByStatus(req.status)
       val response = FindPetByStatusResponse(req.context.responseContext, pets)
       sender ! response
       context.stop(self)

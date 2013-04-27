@@ -28,7 +28,7 @@ class RestRequestContextSpec extends WordSpec with MustMatchers with GivenWhenTh
 
   "RestRequestContext" must {
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
-    val config = RestConfig("1.0", "/api")
+    val config = RestConfig("1.0", "http://localhost/api")
 
     "Correctly set the timeout period in the context" in {
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/1234"),
