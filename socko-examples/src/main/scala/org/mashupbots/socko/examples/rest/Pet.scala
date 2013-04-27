@@ -32,6 +32,8 @@ import org.mashupbots.socko.rest.RestResponseContext
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import scala.collection.mutable.ListBuffer
+import akka.actor.Actor
+import akka.actor.Props
 
 //*************************************************************
 // Model
@@ -112,13 +114,13 @@ object PetData {
 //*************************************************************
 // API
 //*************************************************************
-case class GetPetRequest(context: RestRequestContext, petId: String) extends RestRequest
+case class GetPetRequest(context: RestRequestContext, petId: Long) extends RestRequest
 case class GetPetResponse(context: RestResponseContext, pet: Option[Pet]) extends RestResponse
 object GetPetRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pet/{petId}"
   val requestParams = Seq(PathParam("petId", "ID of pet that needs to be fetched"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = actorSystem.actorOf(Props[PetProcessor])
   override val name = "getPetById"
   override val description = "Find pet by ID"
   override val notes = "Returns a pet based on ID"
@@ -131,7 +133,7 @@ object CreatePetRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/pet"
   val requestParams = Seq(BodyParam("pet", "Pet object that needs to be added to the store"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = actorSystem.actorOf(Props[PetProcessor])
   override val name = "addPet"
   override val description = "Add a new pet to the store"
   override val errors = Seq(Error(405, "Invalid input"))
@@ -143,7 +145,7 @@ object UpdatePetRegistration extends RestRegistration {
   val method = Method.PUT
   val path = "/pet"
   val requestParams = Seq(BodyParam("pet", "Pet object that needs to be updated in the store"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = actorSystem.actorOf(Props[PetProcessor])
   override val name = "updatePet"
   override val description = "Update an existing pet"
   override val errors = Seq(Error(400, "Invalid ID supplied"), Error(404, "Pet not found"), Error(405, "Validation exception"))
@@ -157,7 +159,7 @@ object FindPetByStatusRegistration extends RestRegistration {
   val requestParams = Seq(
     QueryParam("status", "Status values that need to be considered for filter", allowMultiple = true,
       allowableValues = Some(AllowableValues(List("available", "pending", "sold")))))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = actorSystem.actorOf(Props[PetProcessor])
   override val name = "findPetsByStatus"
   override val description = "Finds Pets by status"
   override val notes = "Multiple status values can be provided with comma seperated strings"
@@ -170,10 +172,49 @@ object FindPetByTagsRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/pet/findPetsByTags"
   val requestParams = Seq(QueryParam("tags", "Tags to filter by"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = actorSystem.actorOf(Props[PetProcessor])
   override val name = "findPetsByTags"
   override val description = "Finds Pets by tags"
   override val notes = "Muliple tags can be provided with comma seperated strings. Use tag1, tag2, tag3 for testing."
   override val errors = Seq(Error(405, "Invalid tag value"))
   override val deprecated = true
+}
+
+/**
+ * Example illustrating using a single Actor to process all PET requests.
+ * A new actor instance is created for each request by the `processorActor()` method.
+ * The instance is terminates itself when processing is finished. 
+ */
+class PetProcessor() extends Actor with akka.actor.ActorLogging {
+  def receive = {
+    case req: GetPetRequest =>
+      val pet = PetData.getPetById(req.petId)
+      val response = if (pet != null) {
+        GetPetResponse(req.context.responseContext, Some(pet))
+      } else {
+        GetPetResponse(req.context.responseContext(404), None)
+      }
+      sender ! response
+      context.stop(self)
+    case req: CreatePetRequest =>
+      PetData.addPet(req.pet)
+      val response = CreatePetResponse(req.context.responseContext)
+      sender ! response
+      context.stop(self)
+    case req: UpdatePetRequest =>
+      PetData.addPet(req.pet)
+      val response = UpdatePetResponse(req.context.responseContext)
+      sender ! response
+      context.stop(self)
+    case req: FindPetByStatusRequest =>
+      val pets = PetData.findPetByTags(req.status)
+      val response = FindPetByStatusResponse(req.context.responseContext, pets)
+      sender ! response
+      context.stop(self)
+    case req: FindPetByTagsRequest =>
+      val pets = PetData.findPetByTags(req.tags)
+      val response = FindPetByTagsResponse(req.context.responseContext, pets)
+      sender ! response
+      context.stop(self)
+  }
 }

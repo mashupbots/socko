@@ -30,6 +30,7 @@ import org.mashupbots.socko.rest.RestResponseContext
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import scala.collection.mutable.ListBuffer
+import akka.actor.Actor
 
 //*************************************************************
 // Model
@@ -103,7 +104,8 @@ object CreateUserWithArrayRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/user/createWithArray"
   val requestParams = Seq(BodyParam("users"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorFor("/user/UserRouter")
 }
 
 case class CreateUserRequest(context: RestRequestContext, user: User) extends RestRequest
@@ -112,7 +114,8 @@ object CreateUserRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/user"
   val requestParams = Seq(BodyParam("user"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorFor("/user/UserRouter")
 }
 
 case class CreateUserWithListRequest(context: RestRequestContext, users: Seq[User]) extends RestRequest
@@ -121,7 +124,8 @@ object CreateUserWithListRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/user/createWithList"
   val requestParams = Seq(BodyParam("users"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorFor("/user/UserRouter")
 }
 
 case class UpdateUserRequest(context: RestRequestContext, username: String, user: User) extends RestRequest
@@ -130,7 +134,8 @@ object UpdateUserRegistration extends RestRegistration {
   val method = Method.PUT
   val path = "/user/{username}"
   val requestParams = Seq(PathParam("username"), BodyParam("user"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorFor("/user/UserRouter")
 }
 
 case class DeleteUserRequest(context: RestRequestContext, username: String) extends RestRequest
@@ -139,7 +144,8 @@ object DeleteUserRegistration extends RestRegistration {
   val method = Method.DELETE
   val path = "/user/{username}"
   val requestParams = Seq(PathParam("username"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorFor("/user/UserRouter")
 }
 
 case class GetUserRequest(context: RestRequestContext, username: String) extends RestRequest
@@ -148,7 +154,8 @@ object GetUserRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/user/{username}"
   val requestParams = Seq(PathParam("username"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorFor("/user/UserRouter")
 }
 
 case class LoginRequest(context: RestRequestContext, username: String, password: String) extends RestRequest
@@ -157,7 +164,8 @@ object LoginRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/user/login"
   val requestParams = Seq(QueryParam("username"), QueryParam("password"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorFor("/user/UserRouter")
 }
 
 case class LogoutRequest(context: RestRequestContext) extends RestRequest
@@ -166,7 +174,47 @@ object LogoutRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/user/logout"
   val requestParams = Seq.empty
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorFor("/user/UserRouter")
 }
 
+/**
+ * Example illustrating using a single Actor to process all PET requests.
+ * This actor will be setup to run under an akka router.
+ */
+class UserProcessor() extends Actor with akka.actor.ActorLogging {
+  def receive = {
+    case req: CreateUserWithArrayRequest =>
+      for (user <- req.users) {
+        UserData.addUser(user)
+      }
+      sender ! CreateUserWithArrayResponse(req.context.responseContext)
+    case req: CreateUserRequest =>
+      UserData.addUser(req.user)
+      sender ! CreateUserResponse(req.context.responseContext)
+    case req: CreateUserWithListRequest =>
+      for (user <- req.users) {
+        UserData.addUser(user)
+      }
+      sender ! CreateUserWithListResponse(req.context.responseContext)
+    case req: UpdateUserRequest =>
+      UserData.addUser(req.user)
+      sender ! UpdatePetResponse(req.context.responseContext)
+    case req: DeleteUserRequest =>
+      UserData.removeUser(req.username)
+      sender ! DeleteUserResponse(req.context.responseContext)
+    case req: GetUserRequest =>
+      val user = UserData.findUserByName(req.username)
+      val response = if (user != null) {
+        GetUserResponse(req.context.responseContext, Some(user))
+      } else {
+        GetUserResponse(req.context.responseContext(404), None)
+      }
+      sender ! response
+    case req: LoginRequest =>
+      sender ! LoginResponse(req.context.responseContext, "logged in user session:" + System.currentTimeMillis())
+    case req: LogoutRequest =>
+      sender ! LogoutResponse(req.context.responseContext)
+  }
+}
 

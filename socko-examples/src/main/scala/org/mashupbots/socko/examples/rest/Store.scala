@@ -30,6 +30,8 @@ import org.mashupbots.socko.rest.RestResponseContext
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import scala.collection.mutable.ListBuffer
+import akka.actor.Actor
+import akka.actor.Props
 
 //*************************************************************
 // Model
@@ -85,31 +87,61 @@ object StoreData {
 //*************************************************************
 // API
 //*************************************************************
-case class GetOrderRequest(context: RestRequestContext, orderId: String) extends RestRequest
+case class GetOrderRequest(context: RestRequestContext, orderId: Long) extends RestRequest
 case class GetOrderResponse(context: RestResponseContext, order: Option[Order]) extends RestResponse
+class GetOrderProcessor() extends Actor with akka.actor.ActorLogging {
+  def receive = {
+    case req: GetOrderRequest =>
+      val order = StoreData.findOrderById(req.orderId)
+      val response = if (order != null) {
+        GetOrderResponse(req.context.responseContext, Some(order))
+      } else {
+        GetOrderResponse(req.context.responseContext(404), None)
+      }
+      sender ! response
+      context.stop(self)
+  }
+}
 object GetOrderRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/store/order/{orderId}"
   val requestParams = Seq(PathParam("orderId"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[GetOrderProcessor])
 }
 
-case class DeleteOrderRequest(context: RestRequestContext, orderId: String) extends RestRequest
+case class DeleteOrderRequest(context: RestRequestContext, orderId: Long) extends RestRequest
 case class DeleteOrderResponse(context: RestResponseContext) extends RestResponse
+class DeleteOrderProcessor() extends Actor with akka.actor.ActorLogging {
+  def receive = {
+    case req: DeleteOrderRequest =>
+      StoreData.deleteOrder(req.orderId)
+      sender ! DeleteOrderResponse(req.context.responseContext)
+      context.stop(self)
+  }
+}
 object DeleteOrderRegistration extends RestRegistration {
   val method = Method.DELETE
   val path = "/store/order/{orderId}"
   val requestParams = Seq(PathParam("orderId"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[DeleteOrderProcessor])
 }
 
 case class PlaceOrderRequest(context: RestRequestContext, order: Order) extends RestRequest
 case class PlaceOrderResponse(context: RestResponseContext) extends RestResponse
+class PlaceOrderProcessor() extends Actor with akka.actor.ActorLogging {
+  def receive = {
+    case req: PlaceOrderRequest =>
+      StoreData.placeOrder(req.order)
+      sender ! PlaceOrderResponse(req.context.responseContext)
+      context.stop(self)
+  }
+}
 object PlaceOrderRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/store/order"
   val requestParams = Seq(BodyParam("order"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = null
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
+    actorSystem.actorOf(Props[PlaceOrderProcessor])
 }
-
-

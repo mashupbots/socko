@@ -56,6 +56,18 @@ case class RestRequestContext(
    * Builds the [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this
    * [[org.mashupbots.socko.rest.RestRequestContext]].
    *
+   * It is assumed that there are no response headers and the response status is `200` OK.
+   *
+   * @returns [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this context
+   */
+  def responseContext(): RestResponseContext = {
+    RestResponseContext(this, HttpResponseStatus(200), Map.empty)
+  }
+  
+  /**
+   * Builds the [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this
+   * [[org.mashupbots.socko.rest.RestRequestContext]].
+   *
    * It is assumed that there are no response headers.
    *
    * @param status HTTP status of the response
