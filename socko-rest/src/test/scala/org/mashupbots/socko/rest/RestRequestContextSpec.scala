@@ -15,16 +15,14 @@
 //
 package org.mashupbots.socko.rest
 
-import java.util.Date
-import scala.reflect.runtime.{ universe => ru }
+import scala.reflect.runtime.{universe => ru}
+
 import org.mashupbots.socko.events.EndPoint
-import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.Logger
+import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
-import akka.actor.ActorSystem
-import akka.actor.ActorRef
 
 class RestRequestContextSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 

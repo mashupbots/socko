@@ -15,19 +15,18 @@
 //
 package org.mashupbots.socko.rest
 
-import scala.reflect.runtime.{ universe => ru }
-import org.json4s.NoTypeHints
-import org.json4s.native.{ Serialization => json }
 import org.mashupbots.socko.infrastructure.Logger
+import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
-import org.mashupbots.socko.infrastructure.ReflectUtil
-import akka.actor.ActorSystem
+
 import com.typesafe.config.ConfigFactory
+
+import akka.actor.ActorSystem
+import akka.actor.ExtendedActorSystem
 import akka.actor.ExtensionId
 import akka.actor.ExtensionIdProvider
-import akka.actor.ExtendedActorSystem
 
 class RestConfigSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 

@@ -15,7 +15,6 @@
 //
 package org.mashupbots.socko.rest
 
-import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.Date
@@ -23,7 +22,6 @@ import java.util.Date
 import org.json4s.NoTypeHints
 import org.json4s.native.{Serialization => json}
 import org.mashupbots.socko.infrastructure.CharsetUtil
-import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.WebLogFormat
 import org.mashupbots.socko.routes.HttpRequest
@@ -34,6 +32,7 @@ import org.mashupbots.socko.webserver.WebLogConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 import org.scalatest.BeforeAndAfterAll
+import org.scalatest.Finders
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
 

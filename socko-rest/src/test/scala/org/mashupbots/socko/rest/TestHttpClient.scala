@@ -21,9 +21,10 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URLConnection
 import java.nio.charset.Charset
+import java.util.Hashtable
 import java.util.zip.GZIPInputStream
 import java.util.zip.InflaterInputStream
-import java.util.Hashtable
+
 import org.mashupbots.socko.infrastructure.CharsetUtil
 
 /**

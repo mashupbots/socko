@@ -15,22 +15,23 @@
 //
 package org.mashupbots.socko.rest.petshop
 
+import org.mashupbots.socko.rest.AllowableValues
+import org.mashupbots.socko.rest.AllowableValuesList
 import org.mashupbots.socko.rest.BodyParam
 import org.mashupbots.socko.rest.Error
 import org.mashupbots.socko.rest.Method
 import org.mashupbots.socko.rest.PathParam
 import org.mashupbots.socko.rest.QueryParam
+import org.mashupbots.socko.rest.RestModelMetaData
+import org.mashupbots.socko.rest.RestPropertyMetaData
 import org.mashupbots.socko.rest.RestRegistration
 import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
+
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
-import org.mashupbots.socko.rest.AllowableValues
-import org.mashupbots.socko.rest.RestModelMetaData
-import org.mashupbots.socko.rest.RestPropertyMetaData
-import org.mashupbots.socko.rest.AllowableValuesList
 
 case class Tag(id: Long, name: String)
 case class Category(id: Long, name: String)

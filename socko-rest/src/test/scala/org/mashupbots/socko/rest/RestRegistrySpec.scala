@@ -18,9 +18,10 @@ package org.mashupbots.socko.rest
 import scala.reflect.runtime.{ universe => ru }
 
 import org.json4s.NoTypeHints
-import org.json4s.native.{ Serialization => json }
+import org.json4s.native.{Serialization => json}
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.ReflectUtil
+import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers

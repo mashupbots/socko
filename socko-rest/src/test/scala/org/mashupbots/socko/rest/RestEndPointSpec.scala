@@ -16,6 +16,7 @@
 package org.mashupbots.socko.rest
 
 import org.mashupbots.socko.infrastructure.Logger
+import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers

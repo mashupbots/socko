@@ -1,5 +1,5 @@
 //
-// Copyright 2013 Vibul Imtarnasan, David Bolton and Socko contributors.
+// Copyimport scala.reflect.runtime.universeright 2013 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 package org.mashupbots.socko.rest
 
 import scala.reflect.runtime.{ universe => ru }
-import org.json4s._
-import org.json4s.native.{ JsonMethods => jsonMethods }
-import org.json4s.native.{ Serialization => json }
+
+import org.json4s.native.{JsonMethods => jsonMethods}
+import org.json4s.string2JsonInput
+import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.Logger
+import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
-import org.mashupbots.socko.infrastructure.ReflectUtil
-import org.mashupbots.socko.infrastructure.CharsetUtil
 
 class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
