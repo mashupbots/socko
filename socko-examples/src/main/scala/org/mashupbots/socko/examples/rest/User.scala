@@ -15,8 +15,11 @@
 //
 package org.mashupbots.socko.examples.rest
 
+import scala.collection.mutable.ListBuffer
+
 import org.mashupbots.socko.rest.AllowableValuesList
 import org.mashupbots.socko.rest.BodyParam
+import org.mashupbots.socko.rest.Error
 import org.mashupbots.socko.rest.Method
 import org.mashupbots.socko.rest.PathParam
 import org.mashupbots.socko.rest.QueryParam
@@ -27,11 +30,11 @@ import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
+
+import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
-import scala.collection.mutable.ListBuffer
-import akka.actor.Actor
-import org.mashupbots.socko.rest.Error
+import akka.actor.actorRef2Scala
 
 //*************************************************************
 // Model
@@ -196,7 +199,7 @@ object LogoutRegistration extends RestRegistration {
 }
 
 /**
- * Example illustrating using a single Actor to process all PET requests.
+ * Example illustrating using a single Actor to process all user requests.
  * This actor will be setup to run under an akka router.
  */
 class UserProcessor() extends Actor with akka.actor.ActorLogging {

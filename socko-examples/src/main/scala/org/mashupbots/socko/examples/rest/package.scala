@@ -16,9 +16,16 @@
 package org.mashupbots.socko.examples
 
 /**
- * Illustrates how to utilize the REST handler.
+ * The example is a clone of the standard Swagger pet store demo app and illustrates how to 
+ * utilize the REST handler.
  * 
- * The example is a clone of the standard Swagger pet store demo app.
+ * Three examples of how to organize your processor actors are provided
+ *  - `Pet` uses a single actor for all operations. The actor is instanced and terminated 
+ *     for each request.    
+ *  - `Store` uses an actor per operation. The actors are instanced and terminated 
+ *     for each request.    
+ *  - `User` uses a single actor for all operation. A pool of actors are instanced under
+ *     a router at startup. The actors are not terminated; rather they are reused.    
  */
 package org.mashupbots.socko.examples.rest {
 }

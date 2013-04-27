@@ -16,8 +16,12 @@
 package org.mashupbots.socko.examples.rest
 
 import java.util.Date
+
+import scala.collection.mutable.ListBuffer
+
 import org.mashupbots.socko.rest.AllowableValuesList
 import org.mashupbots.socko.rest.BodyParam
+import org.mashupbots.socko.rest.Error
 import org.mashupbots.socko.rest.Method
 import org.mashupbots.socko.rest.PathParam
 import org.mashupbots.socko.rest.RestModelMetaData
@@ -27,12 +31,12 @@ import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
+
+import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
-import scala.collection.mutable.ListBuffer
-import akka.actor.Actor
 import akka.actor.Props
-import org.mashupbots.socko.rest.Error
+import akka.actor.actorRef2Scala
 
 //*************************************************************
 // Model

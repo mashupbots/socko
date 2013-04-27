@@ -15,6 +15,7 @@
 //
 package org.mashupbots.socko.examples.rest
 
+import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.handlers.StaticContentHandler
 import org.mashupbots.socko.handlers.StaticContentHandlerConfig
 import org.mashupbots.socko.handlers.StaticResourceRequest
@@ -23,20 +24,21 @@ import org.mashupbots.socko.rest.ReportRuntimeException
 import org.mashupbots.socko.rest.RestConfig
 import org.mashupbots.socko.rest.RestHandler
 import org.mashupbots.socko.rest.RestRegistry
+import org.mashupbots.socko.routes.GET
 import org.mashupbots.socko.routes.HttpRequest
 import org.mashupbots.socko.routes.Path
 import org.mashupbots.socko.routes.PathSegments
 import org.mashupbots.socko.routes.Routes
+import org.mashupbots.socko.webserver.WebLogConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
+
 import com.typesafe.config.ConfigFactory
+
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
 import akka.routing.FromConfig
-import org.mashupbots.socko.routes.GET
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.webserver.WebLogConfig
 
 /**
  * This example shows how use [[org.mashupbots.socko.handler.StaticContentHandler]] to download files and
