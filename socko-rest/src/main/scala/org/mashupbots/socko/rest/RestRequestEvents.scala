@@ -15,16 +15,16 @@
 //
 package org.mashupbots.socko.rest
 
-import org.mashupbots.socko.infrastructure.LocalCache
-import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.SockoEvent
+import org.mashupbots.socko.infrastructure.LocalCache
 
 /**
  * Cache of SockoEvents so REST processor actors can access it for custom
  * request deseralization and custom response seralization.
  *
  * It is NOT passes as part of [[org.mashupbots.socko.rest.RestRequest]] because
- * we want [[org.mashupbots.socko.rest.RestRequest]] to be fully immutable.
+ * we want [[org.mashupbots.socko.rest.RestRequest]] to be fully immutable so that it
+ * can optionally be sent to remote actors for processing.
  */
 object RestRequestEvents {
 

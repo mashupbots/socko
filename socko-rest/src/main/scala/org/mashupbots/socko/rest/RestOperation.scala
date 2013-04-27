@@ -15,10 +15,6 @@
 //
 package org.mashupbots.socko.rest
 
-import org.mashupbots.socko.infrastructure.Logger
-import scala.reflect.runtime.{ universe => ru }
-import org.mashupbots.socko.events.EndPoint
-
 /**
  * A REST operation processes data in the following manner:
  *  - takes input data, deserializes it into a [[org.mashupbots.socko.rest.RestRequest]]

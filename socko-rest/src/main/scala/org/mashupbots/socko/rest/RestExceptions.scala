@@ -1,5 +1,5 @@
 //
-// Copyright 2013 Vibul Imtarnasan, David Bolton and Socko contributors.
+// Copyright 2013 Vibul Imt* arnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

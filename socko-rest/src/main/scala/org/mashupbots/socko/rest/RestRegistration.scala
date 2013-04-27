@@ -15,10 +15,10 @@
 //
 package org.mashupbots.socko.rest
 
-import scala.reflect.runtime.{ universe => ru }
-import akka.actor.ActorSystem
+import scala.reflect.runtime.{universe => ru}
+
 import akka.actor.ActorRef
-import java.util.Date
+import akka.actor.ActorSystem
 
 /**
  * Binds a [[org.mashupbots.socko.rest.RestRequest]], [[org.mashupbots.socko.rest.RestResponse]] and

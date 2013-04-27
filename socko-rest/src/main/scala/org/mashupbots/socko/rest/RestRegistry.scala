@@ -90,7 +90,6 @@ object RestRegistry extends Logger {
   private val typeRestRegistration = ru.typeOf[RestRegistration]
   private val typeRestRequest = ru.typeOf[RestRequest]
   private val typeRestResponse = ru.typeOf[RestResponse]
-  private val typeRestProcessorLocator = ru.typeOf[RestDispatcher]
   private val typeNoSerializationRestResponse = ru.typeOf[NoSerializationRestResponse]
 
   /**

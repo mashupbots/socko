@@ -15,9 +15,6 @@
 //
 package org.mashupbots.socko.rest
 
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-
 /**
  * A request to be processed by a REST processing actor
  */

@@ -18,7 +18,7 @@ package org.mashupbots.socko.rest
 import org.mashupbots.socko.events.HttpResponseStatus
 
 /**
- * Context of the rest request
+ * Context of the REST response. Contains response meta-data.
  *
  * @param requestContext The request context to which this is a response
  * @param status HTTP status

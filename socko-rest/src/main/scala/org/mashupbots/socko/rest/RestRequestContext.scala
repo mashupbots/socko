@@ -15,13 +15,14 @@
 //
 package org.mashupbots.socko.rest
 
+import java.util.Date
 import java.util.UUID
+
 import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.events.HttpResponseStatus
-import java.util.Date
 
 /**
- * Context of the rest request
+ * Provides context to a REST request. Contains request meta-data.
  *
  * @param id UUID for this rest request/response pair
  * @param endPoint HTTP URL at which the request was received

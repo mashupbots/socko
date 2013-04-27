@@ -27,8 +27,7 @@ import akka.actor.Props
 import akka.actor.Terminated
 
 /**
- * The initial processing point for incoming requests. It farms the work out to
- * works to perform processing.
+ * The initial processing point for incoming requests. It farms requests out to worker.
  *
  * Capacity control is implemented here. The maximum number of workers is limited. When the limit
  * is reached, messages are rescheduled for processing.

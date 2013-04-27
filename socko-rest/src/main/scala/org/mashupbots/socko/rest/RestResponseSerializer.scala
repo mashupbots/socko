@@ -15,17 +15,15 @@
 //
 package org.mashupbots.socko.rest
 
-import java.io.BufferedInputStream
-import java.net.URL
 import java.util.Date
-import scala.reflect.runtime.{ universe => ru }
+
+import scala.reflect.runtime.{universe => ru}
+
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.json4s.NoTypeHints
-import org.json4s.native.{ Serialization => json }
+import org.json4s.native.{Serialization => json}
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.infrastructure.CharsetUtil
-import org.mashupbots.socko.infrastructure.DateUtil
-import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.Logger
 
 /**
@@ -43,7 +41,7 @@ case class RestResponseSerializer(
   /**
    * Serialize the data to a HTTP response
    *
-   * HEAD method does not have a body. This method can be used for obtaining metainformation about the
+   * HEAD method does not have a body. This method can be used for obtaining meta information about the
    * entity implied by the request without transferring the entity-body itself. Hence, we map HEAD to
    * a Void response data type.
    *

@@ -25,12 +25,12 @@ import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.infrastructure.DateUtil
 
 /**
- * Deserializes incoming data into a [[org.mashupbots.socko.rest.RestRequest]]
+ * Deserializes incoming request data into a [[org.mashupbots.socko.rest.RestRequest]]
  *
  * @param config REST config
  * @param requestClass Request class
- * @param requestConstructor Constructor to call when instancing the request class
- * @param params Bindings to extract values form the request data. The values will be
+ * @param requestConstructorMirror Constructor to call when instancing the request class
+ * @param requestParamBindings Bindings to extract values form the request data. The values will be
  *   passed into the requestConstructor to instance the request class.
  */
 case class RestRequestDeserializer(

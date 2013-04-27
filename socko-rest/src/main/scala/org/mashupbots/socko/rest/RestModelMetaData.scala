@@ -17,8 +17,16 @@ package org.mashupbots.socko.rest
 
 /**
  * Meta data to describe REST model classes. The trait is expected to be implemented by companion objects.
- *
- *
+ * 
+ * For example:
+ * {{{
+ * case class Pet(tags: Array[Tag], id: Long, category: Category, status: String, name: String, photoUrls: Array[String])
+ * 
+ * object Pet extends RestModelMetaData {
+ *   val modelProperties = Seq(
+ *     RestPropertyMetaData("status", "pet status in the store", Some(AllowableValuesList(List("available", "pending", "sold")))))
+ * }
+ * }}}
  */
 trait RestModelMetaData {
 
