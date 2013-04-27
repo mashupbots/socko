@@ -38,6 +38,10 @@ import org.mashupbots.socko.infrastructure.ConfigUtil
  *   
  * @param requestTimeoutSeconds Number of seconds before a request is timed out. Make sure that your processor
  *   actor responds within this number of seconds or throws an exception.  Defaults to `60` seconds.
+ * @param sockoEventCacheTimeoutSeconds Number of seconds before a [[org.mashupbots.socko.events.SockoEvent]] is 
+ *   removed from the cache and cannot be accessed by the REST processor. Once the REST processor has access to 
+ *   the [[org.mashupbots.socko.events.SockoEvent]], its expiry from the cache does not affect usability. The cache 
+ *   is just used as a means to pass the event. Defaults to `5` seconds.
  * @param maxWorkerCount Maximum number of workers per [[org.mashupbots.socko.rest.RestHandler]].
  * @param maxWorkerRescheduleMilliSeconds Reschedule a message for processing again using this delay when max worker
  *   count has been reached.
@@ -53,10 +57,13 @@ case class RestConfig(
   swaggerVersion: String = "1.1",
   swaggerApiGroupingPathSegment: Int = 1,
   requestTimeoutSeconds: Int = 60,
+  sockoEventCacheTimeoutSeconds: Int = 5,
   maxWorkerCount: Int = 100,
   maxWorkerRescheduleMilliSeconds: Int = 500,
   reportRuntimeException: ReportRuntimeException.Value = ReportRuntimeException.Never) extends Extension {
 
+  val sockoEventCacheTimeoutMilliSeconds = sockoEventCacheTimeoutSeconds * 1000
+  
   /**
    * Read configuration from AKKA's `application.conf`
    */
@@ -66,6 +73,7 @@ case class RestConfig(
     ConfigUtil.getString(config, prefix + ".swagger-version", "1.1"),
     ConfigUtil.getInt(config, prefix + ".swagger-api-grouping-path-segment", 1),
     ConfigUtil.getInt(config, prefix + ".request-timeout-seconds", 60),
+    ConfigUtil.getInt(config, prefix + ".socko-event-cache-timeout-seconds", 5),
     ConfigUtil.getInt(config, prefix + ".max-worker-count", 100),
     ConfigUtil.getInt(config, prefix + ".max-worker-reschedule-milliseconds", 500),
     ReportRuntimeException.withName(ConfigUtil.getString(config, prefix + ".report-runtime-exception", "Never")))

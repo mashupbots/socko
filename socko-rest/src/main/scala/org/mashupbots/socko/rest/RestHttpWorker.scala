@@ -117,9 +117,9 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
           throw RestProcessingException(s"Processing actor '${processingActor.path}' for '${opDeserializer.requestClass.fullName}' is terminated")
         }
 
-        // Cache the request event. It will be automatically removed after a period of time (10 seconds)
+        // Cache the request event. It will be automatically removed after a period of time (5 seconds)
         if (op1.accessSockoEvent) {
-          RestRequestEvents.put(restRequest.context, httpRequestEvent)
+          RestRequestEvents.put(restRequest.context, httpRequestEvent, registry.config.sockoEventCacheTimeoutMilliSeconds)
         }
 
         if (op1.registration.customSerialization) {

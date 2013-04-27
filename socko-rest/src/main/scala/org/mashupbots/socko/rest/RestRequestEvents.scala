@@ -36,9 +36,10 @@ object RestRequestEvents {
    *
    * @param context [[org.mashupbots.socko.rest.RestRequestContext]] associated with the event
    * @param evt The event associated with the context
+   * @param expiry Milliseconds before the item in the cache is expired. Defaults to 5,000 or 5 seconds.
    */
-  def put(context: RestRequestContext, evt: SockoEvent) = {
-    cache.set(context.id.toString, evt, 10000)
+  def put(context: RestRequestContext, evt: SockoEvent, expiry: Int = 5000) = {
+    cache.set(context.id.toString, evt, expiry)
   }
 
   /**
