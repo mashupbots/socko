@@ -34,8 +34,8 @@ import akka.actor.Props
 import akka.routing.FromConfig
 
 /**
- * This example shows how use [[org.mashupbots.socko.handler.StaticContentHandler]] to download files and
- * [[org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder]] to process file uploads.
+ * This example shows how use `org.mashupbots.socko.handler.StaticContentHandler` to download files and
+ * `org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder` to process file uploads.
  *  - Run this class as a Scala Application
  *  - Open your browser and navigate to `http://localhost:8888`.
  */

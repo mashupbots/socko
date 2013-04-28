@@ -41,10 +41,22 @@ import akka.actor.actorRef2Scala
 import akka.routing.FromConfig
 
 /**
- * This example shows how use `org.mashupbots.socko.handler.StaticContentHandler` to download files and
- * [[org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder]] to process file uploads.
+ * This example shows how to 
+ *  - define and register REST your operations (see Pet.scala, Store.scala and User.scala)
+ *  - use `org.mashupbots.socko.rest.RestHandler` to provide REST endpoints
+ *  - use `org.mashupbots.socko.handler.StaticContentHandler` to server swagger-ui file from resources
+ *  
+ * Three examples of how to organize your processor actors are provided:
+ *  - `Pet` uses a single actor for all operations. The actor is instanced and terminated 
+ *     for each request.    
+ *  - `Store` uses an actor per operation. The actors are instanced and terminated 
+ *     for each request.    
+ *  - `User` uses a single actor for all operation. A pool of actors are instanced under
+ *     a router at startup. The actors are not terminated; rather they are reused.
+ *         
+ * To start:
  *  - Run this class as a Scala Application
- *  - Open your browser and navigate to `http://localhost:8888`.
+ *  - Open your browser and navigate to `http://localhost:8888/swagger-ui/index.html`.
  */
 object RestApp extends Logger {
   //
