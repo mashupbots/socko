@@ -72,21 +72,17 @@ object SwaggerReflector {
     else if (tpe =:= doubleType || tpe =:= optionDoubleType) "double"
     else if (tpe =:= floatType || tpe =:= optionFloatType) "float"
     else if (tpe =:= dateType || tpe =:= optionDateType) "date"
-    else if (tpe <:< seqType) {
-      //http://stackoverflow.com/questions/12842729/finding-type-parameters-via-reflection-in-scala-2-10
-      //http://www.scala-lang.org/api/current/index.html#scala.reflect.api.Types$Type
+    else if (tpe <:< seqType || tpe <:< arrayType) {
+      // Map all seq and array to a swagger array because I cannot find 
+      // the scala equivalent for a ordered list
+      // http://stackoverflow.com/questions/12842729/finding-type-parameters-via-reflection-in-scala-2-10
+      // http://www.scala-lang.org/api/current/index.html#scala.reflect.api.Types$Type
       // tpe = List[Int]
       val cs = tpe.typeSymbol.asInstanceOf[ru.ClassSymbol] // class List
       val typeParams = cs.typeParams // List(type A)
       val firstTypeParam = typeParams(0).asType.toType // type A
       val genericType = firstTypeParam.asSeenFrom(tpe, cs)
-      s"List[${dataType(genericType)}]"
-    } else if (tpe <:< arrayType) {
-      val cs = tpe.typeSymbol.asInstanceOf[ru.ClassSymbol]
-      val typeParams = cs.typeParams
-      val firstTypeParam = typeParams(0).asType.toType
-      val contentType = firstTypeParam.asSeenFrom(tpe, cs)
-      s"Array[${dataType(contentType)}]"
+      s"Array[${dataType(genericType)}]"
     } else if (tpe <:< setType) {
       val cs = tpe.typeSymbol.asInstanceOf[ru.ClassSymbol]
       val typeParams = cs.typeParams
@@ -129,15 +125,15 @@ object SwaggerReflector {
 
   /**
    * Returns the type of container (if it is a container)
-   *  - List. An ordered list of values
-   *  - Set. An unordered set of unique values
-   *  - Array. An unordered list of values
+   *  - List. An ordered list of values is not supported because I cannot find Scala equivalent.
+   *  - Set. An unordered set of unique values maps to a Scala Set
+   *  - Array. An unordered list of values maps to a Scala Seq or Array
    *
    * @param tpe Type to check
    * @returns `List`, `Array`, `Set` or empty string if not a container
    */
   def containerType(tpe: ru.Type): String = {
-    if (tpe <:< seqType) "List"
+    if (tpe <:< seqType) "Array"
     else if (tpe <:< arrayType) "Array"
     else if (tpe <:< setType) "Set"
     else ""

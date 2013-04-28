@@ -37,13 +37,13 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
       SwaggerReflector.dataType(ru.typeOf[String]) must be("string")
       SwaggerReflector.dataType(ru.typeOf[Int]) must be("int")
 
-      SwaggerReflector.dataType(ru.typeOf[List[Int]]) must be("List[int]")
+      SwaggerReflector.dataType(ru.typeOf[List[Int]]) must be("Array[int]")
       SwaggerReflector.dataType(ru.typeOf[Array[String]]) must be("Array[string]")
       SwaggerReflector.dataType(ru.typeOf[Set[Float]]) must be("Set[float]")
 
       SwaggerReflector.dataType(ru.typeOf[Cow]) must be("Cow")
       SwaggerReflector.dataType(ru.typeOf[Option[Cow]]) must be("Cow")
-      SwaggerReflector.dataType(ru.typeOf[List[Cow]]) must be("List[Cow]")
+      SwaggerReflector.dataType(ru.typeOf[List[Cow]]) must be("Array[Cow]")
       SwaggerReflector.dataType(ru.typeOf[Array[Cow]]) must be("Array[Cow]")
       SwaggerReflector.dataType(ru.typeOf[Set[Cow]]) must be("Set[Cow]")
     }
@@ -131,7 +131,7 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 		      "httpMethod":"GET",
 		      "summary":"Finds Pets by status",
 		      "notes":"Multiple status values can be provided with comma seperated strings",
-		      "responseClass":"List[Pet]",
+		      "responseClass":"Array[Pet]",
 		      "nickname":"findPetsByStatus",
 		      "parameters":[{
 		        "name":"status",
@@ -157,7 +157,7 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
 		      "summary":"Finds Pets by tags",
 		      "notes":"Muliple tags can be provided with comma seperated strings. Use tag1, tag2, tag3 for testing.",
 		      "deprecated":true,
-		      "responseClass":"List[Pet]",
+		      "responseClass":"Array[Pet]",
 		      "nickname":"findPetsByTags",
 		      "parameters":[{
 		        "name":"tags",
