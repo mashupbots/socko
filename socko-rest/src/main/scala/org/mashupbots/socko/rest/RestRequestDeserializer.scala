@@ -148,7 +148,6 @@ trait RequestParamBinding {
 
 }
 
-
 /**
  * Companion object
  */
@@ -238,17 +237,18 @@ object RequestParamBinding {
           throw new IllegalArgumentException(s"Unsupported REST request body data type ${tpe} in ${requestClassName}.")
         }
 
-        val objectClass = if (tpeCategory == RequestBodyDataType.Object) {
-          if (required) Some(Class.forName(param.typeSignature.typeSymbol.asClass.fullName))
-          else {
-            // Extract underlying type from Option to help with deserlialization
-            import ru._ // Remove unchecked warning: https://issues.scala-lang.org/browse/SI-6338
-            val targs = param.typeSignature match { case ru.TypeRef(_, _, args) => args }
-            Some(Class.forName(targs(0).typeSymbol.asClass.fullName))
+        val objectClass: Option[Class[_]] =
+          if (tpeCategory == RequestBodyDataType.Object) {
+            if (required) Some(Class.forName(param.typeSignature.typeSymbol.asClass.fullName))
+            else {
+              // Extract underlying type from Option to help with deserlialization
+              import ru._ // Remove unchecked warning: https://issues.scala-lang.org/browse/SI-6338
+              val targs = param.typeSignature match { case ru.TypeRef(_, _, args) => args }
+              Some(Class.forName(targs(0).typeSymbol.asClass.fullName))
+            }
+          } else {
+            None
           }
-        } else {
-          None
-        }
 
         BodyBinding(config, bodyParam, tpeCategory, tpe, objectClass, required)
 

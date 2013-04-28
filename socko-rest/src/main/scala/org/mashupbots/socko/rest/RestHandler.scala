@@ -105,7 +105,7 @@ class RestHandler(registry: RestRegistry) extends Actor with FSM[RestHandlerStat
   when(MaxCapacity) {
     case Event(msg: HttpRequestEvent, data: Data) =>
       log.info("Rescheduling HttpRequestEvent channel {} because all workers are busy.", msg.channel.getId)
-      context.system.scheduler.scheduleOnce(registry.config.maxWorkerRescheduleMilliSeconds milliseconds, self, msg)
+      context.system.scheduler.scheduleOnce(registry.config.maxWorkerRescheduleMilliSeconds.milliseconds, self, msg)
       stay
       
     case Event(msg: Terminated, data: Data) =>

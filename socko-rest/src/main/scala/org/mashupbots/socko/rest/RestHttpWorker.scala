@@ -128,7 +128,7 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
           stop(FSM.Normal)
         } else {
           // Wait for response to serialize
-          val future = ask(processingActor, restRequest)(cfg.requestTimeoutSeconds seconds).mapTo[RestResponse]
+          val future = ask(processingActor, restRequest)(cfg.requestTimeoutSeconds.seconds).mapTo[RestResponse]
           future pipeTo self
           goto(WaitingForResponse) using Data(op = op, req = Some(restRequest))
         }
