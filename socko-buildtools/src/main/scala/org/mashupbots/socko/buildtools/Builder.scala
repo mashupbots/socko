@@ -35,7 +35,7 @@ import org.mashupbots.socko.infrastructure.Logger
  * }}}
  *
  *
- * @commandLine Command line to run when a watched file changes.
+ * @param commandLine Command line to run when a watched file changes.
  *   For example
  *   {{{
  *   ant -f /home/username/dev/project/build.xml js
@@ -55,8 +55,8 @@ import org.mashupbots.socko.infrastructure.Logger
  *     - `build-file` and target names cannot have spaces in them.
  *     -  No other ant options are supported. If you wish to use advance ant options, just use the normal ant.
  *
- * @directoryToWatch Full path to the directory to watch
- * @watchRecursively Indicates if we wish to watch files in sub-directories as well
+ * @param directoryToWatch Full path to the directory to watch
+ * @param watchRecursively Indicates if we wish to watch files in sub-directories as well
  * @param eventDelayTimeout Milliseconds to wait after an event for more events before a build is triggered.
  *   If we do not wait, multiple builds may be kicked off when saving a single file. Defaults to `100`.
  */
@@ -79,13 +79,13 @@ case class Builder(commandLine: String,
 
   /**
    * Indicates if thread is still running
-   * @returns True if thread is still, false if not
+   * @return True if thread is still, false if not
    */
   def isAlive(): Boolean = watchThread.isAlive()
 
   /**
    * Passed into `DirectoryWatcher` to let it know if we want to stop or not
-   * @returns True if we want to continue, false if we want to stop
+   * @return True if we want to continue, false if we want to stop
    */
   private def onPoll(): Boolean = {
     !isStopped

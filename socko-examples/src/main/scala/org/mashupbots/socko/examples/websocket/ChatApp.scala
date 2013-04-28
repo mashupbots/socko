@@ -33,7 +33,7 @@ import akka.actor.actorRef2Scala
  * This example shows how to use web sockets, specifically [[org.mashupbots.socko.processors.WebSocketBroadcaster]],
  * for chatting.
  *
- * With [[org.mashupbots.socko.processors.WebSocketBroadcaster]], you can broadcast messages to all registered web
+ * With `org.mashupbots.socko.processors.WebSocketBroadcaster`, you can broadcast messages to all registered web
  * socket connections
  *
  *  - Open a few browsers and navigate to `http://localhost:8888/html`.

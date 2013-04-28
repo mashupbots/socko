@@ -56,7 +56,7 @@ case class BuildRunner(val commandLine: String) extends Logger {
    * See this [[http://stackoverflow.com/questions/6013415/how-does-the-scala-sys-process-from-scala-2-9-work atricle]]
    * for more info.
    *
-   * @param events List of events passed in by [[org.mashupbots.jsappbuilder.DirectoryWatcher]]
+   * @param events List of events passed in by [[org.mashupbots.socko.buildtools.DirectoryWatcher]]
    */
   def runBuild(events: List[WatchEvent[_]] = Nil) {
     try {

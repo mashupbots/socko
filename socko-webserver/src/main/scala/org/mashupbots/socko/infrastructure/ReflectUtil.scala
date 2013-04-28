@@ -106,7 +106,7 @@ object ReflectUtil extends Logger {
    * @param a Annotation
    * @param n Name of annotation parameter
    * @param defaultValue value to return if `n` is not found
-   * @returns Value of the annotation if found, `defaultValue` otherwise
+   * @return Value of the annotation if found, `defaultValue` otherwise
    */
   def getAnnotationJavaLiteralArg[T](a: ru.Annotation, n: ru.Name, defaultValue: T): T = {
     val x = a.javaArgs
