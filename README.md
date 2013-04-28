@@ -55,10 +55,12 @@ Socko is an embedded [Scala](http://www.scala-lang.org/) web server powered by
 
 ## Editing the Source Code
 
-* We are currently using [Eclipse 3.7 Indigo](http://www.eclipse.org/downloads/packages/eclipse-ide-javascript-web-developers/indigosr2) 
-  with [Scala IDE nightly build](http://scala-ide.org/download/nightly.html)
+* We are currently using [Eclipse Juno](http://www.eclipse.org/downloads/packages/eclipse-ide-java-ee-developers/junosr1) 
+  with [Scala IDE 3.0](http://scala-ide.org/download/current.html)
 
-* We are currently using Scala 2.9.1 and JDK7.  You can also use JDK6 but SPDY will not be supported.
+* We are currently using Scala 2.10.1 and JDK7. You will need JDK7 to build.
+  The core and rest projects will be compiled for use with JDK6 but SPDY will 
+  not be supported.
 
 * Generate eclipse project files: `sbt eclispse`
 

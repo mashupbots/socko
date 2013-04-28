@@ -20,24 +20,31 @@ object SockoBuild extends Build {
   lazy val defaultSettings = Defaults.defaultSettings ++ Seq(
     // Info
     organization := "org.mashupbots.socko",
-    version      := "0.2.4",
+    version      := "0.3.0",
     scalaVersion := Dependency.V.Scala,
     organizationHomepage := Some(url("http://www.sockoweb.org")),
 
     // Repositories
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
     credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
-    
-    // Compile options
-    scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-optimize", "-feature"),
-    javacOptions  ++= Seq("-Xlint:unchecked", "-Xlint:deprecation"),
-    
+        
     // sbtEclipse - see examples https://github.com/typesafehub/sbteclipse/blob/master/sbteclipse-plugin/src/sbt-test/sbteclipse/02-contents/project/Build.scala
     EclipseKeys.createSrc := EclipseCreateSrc.ValueSet(EclipseCreateSrc.Unmanaged, EclipseCreateSrc.Source, EclipseCreateSrc.Resource),
     EclipseKeys.withSource := true    
   )
   
+  // Don't publish to maven
   lazy val doNotPublishSettings = Seq(publish := {}, publishLocal := {})
+
+  // Compile settings
+  lazy val compileJdk6Settings = Seq(
+    scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-optimize", "-feature", "-target:jvm-1.6"),
+    javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.6", "-target", "1.6")
+  )
+  lazy val compileJdk7Settings = Seq(
+    scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-optimize", "-feature", "-target:jvm-1.7"),
+    javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.7", "-target", "1.7")
+  )
    
   //
   // Packaging to SonaType using SBT
@@ -93,7 +100,7 @@ object SockoBuild extends Build {
 
   lazy val webserver = Project(id = "socko-webserver",
                          base = file("socko-webserver"),
-                         settings = defaultSettings ++ Seq(
+                         settings = defaultSettings ++ compileJdk6Settings ++ Seq(
                            libraryDependencies ++= Dependencies.webserver,
                            publishTo <<= sockoPublishTo,
                            publishMavenStyle := true,
@@ -105,21 +112,21 @@ object SockoBuild extends Build {
   lazy val buildtools = Project(id = "socko-buildtools",
                          base = file("socko-buildtools"),
                          dependencies = Seq(webserver),
-                         settings = defaultSettings ++ Seq(
+                         settings = defaultSettings ++ compileJdk7Settings ++ Seq(
                            libraryDependencies ++= Dependencies.buildtools
                          ))  
 
   lazy val rest = Project(id = "socko-rest",
                          base = file("socko-rest"),
                          dependencies = Seq(webserver),
-                         settings = defaultSettings ++ Seq(
+                         settings = defaultSettings ++ compileJdk6Settings ++ Seq(
                            libraryDependencies ++= Dependencies.rest
                          ))  
 
   lazy val examples = Project(id = "socko-examples",
                          base = file("socko-examples"),
                          dependencies = Seq(webserver, rest, buildtools),
-                         settings = defaultSettings ++ doNotPublishSettings ++ Seq(
+                         settings = defaultSettings ++ compileJdk7Settings ++ doNotPublishSettings ++ Seq(
                            libraryDependencies ++= Dependencies.examples
                          ))  
 }
