@@ -1,19 +1,12 @@
 ---
 layout: docs
-title: Socko Build Tools Module
+title: Socko User Guide - Javascript Build Tool
 
 BuilderClass: <code><a href="../api/#org.mashupbots.socko.buildtools.Builder">Builder</a></code>
 ---
-# Socko Build Tools Module
+# Socko User Guide - Javascript Build Tool
 
-## Table of Contents
-
- - [What can the Socko build tools do for me?](#What)
- - [How do I use the builder?](#How)
- - [Code Examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/builder)
-
-
-## What can the Socko build tool do for me? <a class="blank" id="What">&nbsp;</a>
+## Introduction
 
 When developing javascript applications, it is quite common to have a build file that concatenates/compresses javascript, CSS
 and HTML files among other tasks.
@@ -24,13 +17,18 @@ test your changes.
 Manually running the build every time you make a change is very boring and can lead to premature 
 [RSI](http://en.wikipedia.org/wiki/Repetitive_strain_injury).
 
-This is where Socko build tools can help.
+This is where Socko javascript build tools can help.
 
 While you are coding, Socko's {{ page.BuilderClass }} is able to watch for changes in your source files and automatically run your
 build for you.  The result of your build is logged to the console.
 
+## Adding the Javascript Build Tool module
 
-## How do I use the builder? <a class="blank" id="How">&nbsp;</a>
+TO DO
+
+Add the module to your project
+
+## Usage <a class="blank" id="How">&nbsp;</a>
 
 {% highlight scala %}
     // Start builder
@@ -57,7 +55,7 @@ Examples of possible command lines:
     // Run Ant in this JVM rather than in a new external process
     val builder = new Builder("internal-ant /home/username/dev/project/build.xml dist", "path/to/src/directory")
 
-    // Run bat file
+    // Run shell script or bat file
     val builder = new Builder("/home/username/dev/project/build.sh", "path/to/src/directory")
 {% endhighlight %}
 

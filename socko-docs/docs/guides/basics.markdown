@@ -1,6 +1,6 @@
 ---
 layout: docs
-title: Socko User Guide
+title: Socko User Guide - Basics
 
 SockoEventClass: <code><a href="../api/#org.mashupbots.socko.events.SockoEvent">SockoEvent</a></code>
 HttpRequestEventClass: <code><a href="../api/#org.mashupbots.socko.events.HttpRequestEvent">HttpRequestEvent</a></code>
@@ -8,30 +8,27 @@ HttpChunkEventClass: <code><a href="../api/#org.mashupbots.socko.events.HttpChun
 WebSocketFrameEventClass: <code><a href="../api/#org.mashupbots.socko.events.WebSocketFrameEvent">WebSocketFrameEvent</a></code>
 WebSocketHandshakeEventClass: <code><a href="../api/#org.mashupbots.socko.events.WebSocketHandshakeEvent">WebSocketHandshakeEvent</a></code>
 WebServerClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServer">WebServer</a></code>
-WebServerConfigClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServerConfig">WebServerConfig</a></code>
-WebLogEventClass: <code><a href="../api/#org.mashupbots.socko.infrastructure.WebLogEvent">WebLogEvent</a></code>
-WebLogWriterClass: <code><a href="../api/#org.mashupbots.socko.infrastructure.WebLogWriter">WebLogWriter</a></code>
-WebSocketBroadcasterClass: <code><a href="../api/#org.mashupbots.socko.handler.WebSocketBroadcaster">WebSocketBroadcaster</a></code>
-StaticContentHandlerClass: <code><a href="../api/#org.mashupbots.socko.handler.StaticContentHandler">StaticContentHandler</a></code>
-StaticContentHandlerConfigClass: <code><a href="../api/#org.mashupbots.socko.handler.StaticContentHandlerConfig">StaticContentHandlerConfig</a></code>
-StaticFileRequestClass: <code><a href="../api/#org.mashupbots.socko.handler.StaticFileRequest">StaticFileRequest</a></code>
-StaticResourceRequestClass: <code><a href="../api/#org.mashupbots.socko.handler.StaticResourceRequest">StaticResourceRequest</a></code>
 ---
-# Socko User Guide
+# Socko User Guide - Basics
 
-## Table of Contents
+## Introduction
+
+As illustrated in the [Quick Start](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/quickstart) 
+example application, the 3 steps that you have to follow to get Socko working for you are:
 
  - [Step 1. Define Actors and Start Akka](#Step1)
+   - [Handling Socko Events](#SockoEvents)
+   - [Akka Dispatchers and Thread Pools](#AkkaDispatchers)
  - [Step 2. Define Routes](#Step2)
+   - [Socko Event Extractors](#SockoEventExtractors)
+   - [Host Extractors](#HostExtractors)
+   - [Method Extractors](#MethodExtractors)
+   - [Path Extractors](#PathExtractors)
+   - [QueryString Extractors](#QueryStringExtractors)
+   - [Concatenating Extractors](#ConcatenatingExtractors)
  - [Step 3. Start/Stop Web Server](#Step3)
- - [Configuration](#Configuration)
- - [Serving Static Content](#StaticContent)
- - [Parsing Query String and Post Data](#ParseQueryStringAndPostData)
- - [Web Sockets](#WebSockets)
- - [SPDY](#SPDY)
- - [Web Logs](#WebLogs)
- - [Code Examples](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples)
 
+These steps are specified in detailed below.
 
 
 ## Step 1. Define Actors and Start Akka <a class="blank" id="Step1">&nbsp;</a>
@@ -71,9 +68,11 @@ For maximum scalability and performance, you will need to carefully choose your 
 The default dispatcher is optimized for non blocking code. If your code blocks though reading from and writing to 
 database and/or file system, then it is advisable to configure Akka to use dispatchers based on thread pools.
 
-### Socko Events
+### Handling Socko Events <a class="blank" id="SockoEvents">&nbsp;</a>
 
 A {{ page.SockoEventClass }} is used to read incoming and write outgoing data.
+
+Your Actor handler must be able to handle {{ page.SockoEventClass }}s.
 
 Two ways to achieve this are:
 
@@ -123,7 +122,8 @@ There are 4 types of {{ page.SockoEventClass }}:
 
 All {{ page.SockoEventClass }} must be used by **local actors** only.
 
-### Akka Dispatchers and Thread Pools
+
+### Akka Dispatchers and Thread Pools <a class="blank" id="AkkaDispatchers">&nbsp;</a>
 
 Akka [dispatchers](http://doc.akka.io/docs/akka/2.0.1/scala/dispatchers.html) controls how your Akka 
 actors process messages.
@@ -432,6 +432,24 @@ This will match `/record/1` and `id` will be set to `1`.
 This will NOT match `/record` because there is only 1 segment; or `/folder/1` before the first segment
 is not `record`.
 
+Another example:
+
+{% highlight scala %}
+    val r = Routes({
+      // Matches /api/abc and /api/xyz
+      case PathSegments("abc" :: relativePath) => {
+        ...
+      }
+    })
+{% endhighlight %}
+
+This will match any paths that has the first segment set as `api`. The remainder of the path segments
+will be boudn to the variable `relativePath`.
+
+This will match `/api/abc` and `relativePath` will be set to `List(abc)`.
+
+This will NOT match `/aaa/abc` because the first segment is not `api`.
+
  
 **[`PathRegex`](../api/#org.mashupbots.socko.routes.PathRegex)**
 
@@ -561,461 +579,6 @@ server, call `stop()`.
 {% endhighlight %}
 
 This example uses the default configuration which starts the web server at `localhost` bound on
-port `8888`.  To customise, refer to [Configuration](#Configuration).
-
-
-
-
-## Configuration <a class="blank" id="Configuration">&nbsp;</a>
-
-A web server's configuration is defined in {{ page.WebServerConfigClass }}.
-
-Web server configuration is immutable. To change the configuration, a new {{ page.WebServerClass }} class
-must be instanced with the new configuration and started.
-
-Common settings are:
-
- - `serverName`
-
-   Human friendly name of this server. Defaults to `WebServer`.
-    
- - `hostname`
- 
-   Hostname or IP address to bind. `0.0.0.0` will bind to all addresses. You can also specify comma 
-   separated hostnames/ip address like `localhost,192.168.1.1`. Defaults to `localhost`.
-   
- - `port`
- 
-   IP port number to bind to. Defaults to `8888`.
-   
- - `webLog`
-   
-   Web server activity log.
-   
- - `ssl`
- 
-   Optional SSL configuration. Default is `None`.
-   
- - `http`
- 
-   Optional HTTP request settings.
-
- - `tcp`
- 
-   Optional TCP/IP settings.
-
-Refer to the api documentation of {{ page.WebServerConfigClass }} for all settings.
-
-Configuration can be changed in [code](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/config/CodedConfigApp.scala)
-or in the project's [Akka configuration file](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/config/AkkaConfigApp.scala).
-
-For example, to change the port to `7777` in code:
-
-{% highlight scala %}
-    val webServer = new WebServer(WebServerConfig(port=7777), routes)
-{% endhighlight %}
-
-To change the port to `9999` in your Akka configuration file, first define an object to load the settings
-from `application.conf`. Note the setting will be named `akka-config-example`.
-
-{% highlight scala %}
-    object MyWebServerConfig extends ExtensionId[WebServerConfig] with ExtensionIdProvider {
-      override def lookup = MyWebServerConfig
-      override def createExtension(system: ExtendedActorSystem) =
-        new WebServerConfig(system.settings.config, "akka-config-example")
-    }
-{% endhighlight %}
-
-Then, start the actor system and load the configuration from that system.
-
-{% highlight scala %}
-    val actorSystem = ActorSystem("AkkaConfigActorSystem")
-    val myWebServerConfig = MyWebServerConfig(actorSystem)
-{% endhighlight %}
-    
-Lastly, add the following our `application.conf`
-
-    akka-config-example {
-        port=9999
-    }
-
-A complete example `application.conf` can be found in {{ page.WebServerConfigClass }}.
-
-
-
-
-## Serving Static Content <a class="blank" id="StaticContent">&nbsp;</a>
-
-Socko's {{ page.StaticContentHandlerClass }} is used for serving static files and resources.
-
-It supports HTTP compression, browser cache control and content caching.
-
-### Setup
-
-We recommend that you run {{ page.StaticContentHandlerClass }} with a router and with its own dispatcher.  This
-because {{ page.StaticContentHandlerClass }} contains block IO which must be isolated from other non blocking 
-actors.
-
-You will also need to configure its operation with {{ page.StaticContentHandlerConfigClass }}.
-
-For example:
-
-{% highlight scala %}
-    val actorConfig = """
-      my-pinned-dispatcher {
-        type=PinnedDispatcher
-        executor=thread-pool-executor
-      }
-      akka {
-        event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
-        loglevel=DEBUG
-        actor {
-          deployment {
-            /static-file-router {
-              router = round-robin
-              nr-of-instances = 5
-            }
-          }
-        }
-      }"""
-
-    val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
-
-    val handlerConfig = StaticContentHandlerConfig(
-      rootFilePaths = Seq(contentDir.getAbsolutePath),
-      tempDir = tempDir)
-
-    val staticContentHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(handlerConfig))
-      .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
-{% endhighlight %}
-
-### Requests
-
-To serve a file or resource, send {{ page.StaticFileRequestClass }} or {{ page.StaticResourceRequestClass }} to
-the router.
-
-{% highlight scala %}
-    val routes = Routes({
-      case HttpRequest(request) => request match {
-        case GET(Path("/foo.html")) => {
-          staticContentHandlerRouter ! new StaticFileRequest(request, new File("/my/path/", "foo.html"))
-        }
-        case GET(Path("/foo.txt")) => {
-          staticContentHandlerRouter ! new StaticResourceRequest(request, "META-INF/foo.txt")
-        }
-      }
-    })
-{% endhighlight %}
-
-
-
-
-## Parse Query String and Post Data <a class="blank" id="ParseQueryStringAndPostData">&nbsp;</a>
-
-### Query String
-
-You can access query string parameters using {{ page.HttpRequestEventClass }}.
-
-{% highlight scala %}
-  // For mypath?a=1&b=2
-  val qsMap = event.endPoint.queryStringMap
-  assert (qsMap("a") == "1")
-{% endhighlight %}
-
-See the [query string and post data example](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/querystring_post)
-for more details.
-
-### Form Data
-
-If you do not have to support file uploads and your post form data content type is `application/x-www-form-urlencoded data`,
-you can als access form data using {{ page.HttpRequestEventClass }}.
-
-{% highlight scala %}
-  // For firstName=jim&lastName=low
-  val formDataMap = event.request.content.toFormDataMap
-  assert (formDataMap("firstName") == "jim")
-{% endhighlight %}
-
-See the [query string and post data example](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/querystring_post)
-for more details.
-
-### File Upload
-
-If you intend to support file uploads, you need to use Netty's [HttpPostRequestDecoder](http://static.netty.io/3.6/api/org/jboss/netty/handler/codec/http/multipart/HttpPostRequestDecoder.html).
-
-The following example extracts the `description` field as well as a file that was posted.
-
-{% highlight scala %}
-  //
-  // The following form has a file upload input named "fileUpload" and a description
-  // field named "fileDescription".
-  //
-  // ------WebKitFormBoundaryThBHDfQBdTlMy3sK
-  // Content-Disposition: form-data; name="fileUpload"; filename="myfile.txt"
-  // Content-Type: text/plain
-  // 
-  // file contents
-  // ------WebKitFormBoundaryThBHDfQBdTlMy3sK
-  // Content-Disposition: form-data; name="fileDescription"
-  // 
-  // this is my file upload
-  // ------WebKitFormBoundaryThBHDfQBdTlMy3sK--
-  //
-
-  val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, event.nettyHttpRequest)
-  val descriptionField = decoder.getBodyHttpData("fileDescription").asInstanceOf[Attribute]
-  val fileField = decoder.getBodyHttpData("fileUpload").asInstanceOf[FileUpload]
-  val destFile = new File(msg.saveDir, fileField.getFilename)
-{% endhighlight %}
-
-See the [file upload example](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload)
-for more details.
-
-
-
-
-## Web Sockets <a class="blank" id="WebSockets">&nbsp;</a>
-
-For a detailed discussions on how web sockets work, refer to [RFC 6455](http://tools.ietf.org/html/rfc6455)
-
-Prior to a web socket connection being established, a web socket handshake must take place. In Socko, a
-{{ page.WebSocketHandshakeEventClass }} is fired when a handshake is required.
-
-After a successful handshake, {{ page.WebSocketFrameEventClass }} is fired when a web socket text or binary
-frame is received.
-
-The following route from our web socket example app illustrates:
-
-{% highlight scala %}
-    val routes = Routes({
-    
-      case HttpRequest(httpRequest) => httpRequest match {
-        case GET(Path("/html")) => {
-          // Return HTML page to establish web socket
-          actorSystem.actorOf(Props[WebSocketHandler]) ! httpRequest
-        }
-        case Path("/favicon.ico") => {
-          // If favicon.ico, just return a 404 because we don't have that file
-          httpRequest.response.write(HttpResponseStatus.NOT_FOUND)
-        }
-      }
-      
-      case WebSocketHandshake(wsHandshake) => wsHandshake match {
-        case Path("/websocket/") => {
-          // To start Web Socket processing, we first have to authorize the handshake.
-          // This is a security measure to make sure that web sockets can only be established at your specified end points.
-          wsHandshake.authorize()
-        }
-      }
-    
-      case WebSocketFrame(wsFrame) => {
-        // Once handshaking has taken place, we can now process frames sent from the client
-        actorSystem.actorOf(Props[WebSocketHandler]) ! wsFrame
-      }
-    
-    })
-{% endhighlight %}
-
-Note that for a web socket handshake, you only need to call `wsHandshake.authorize()` in order to approve the connection.
-This is a security measure to make sure that web sockets can only be established at your specified end points.
-Dispatching to an actor is not required and not recommended.
-
-You can also specify subprotocols and maximum frame size with authorization. If not specified, the default is no 
-subprotocol support and a maximum frame size of 100K.
-
-    // Only support chat and superchat subprotocols and max frame size of 1000 bytes
-    wsHandshake.authorize("chat, superchat", 1000)
-
-If you wish to push or broadcast messages to a group of web socket connections, use {{ page.WebSocketBroadcasterClass }}.
-See the example web socket [ChatApp](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket/ChatApp.scala) for usage.
-
-
-
-
-## SPDY <a class="blank" id="SPDY">&nbsp;</a>
-
-[SPDY](http://en.wikipedia.org/wiki/SPDY) is an experimental networking protocol used in speeding up delivery of web
-content.
-
-It is currently supported in the Chrome and Firefox (v11+) browsers.
-
-Steps to enabling SPDY:
-
- 1. You will need to run with **JDK 7**
- 
- 2. Setup JVM Bootup classes
-    
-    SPDY uses a special extension to TLS/SSL called [Next Protocol Negotiation](http://tools.ietf.org/html/draft-agl-tls-nextprotoneg-00).
-    This is not currently supported by Java JDK. However, the Jetty team has kindly open sourced their implementation. 
-    
-    Refer to [Jetty NPN](http://wiki.eclipse.org/Jetty/Feature/NPN#Versions) for the correct version and download it from
-    the [maven repository](http://repo2.maven.org/maven2/org/mortbay/jetty/npn/npn-boot/).
-    
-    Add the JAR to your JVM boot parameters: `-Xbootclasspath/p:/path/to/npn-boot-1.0.0.v20120402.jar`.
- 
- 3. Set Web Server Configuration
- 
-    You will need to turn on SSL and enable SPDY in your configuration.
-
-    {% highlight scala %}
-        val keyStoreFile = new File(contentDir, "testKeyStore")
-        val keyStoreFilePassword = "password"
-        val sslConfig = SslConfig(keyStoreFile, keyStoreFilePassword, None, None)
-        val httpConfig = HttpConfig(spdyEnabled = true)
-        val webServerConfig = WebServerConfig(hostname="0.0.0.0", webLog = Some(WebLogConfig()), ssl = Some(sslConfig), http = httpConfig)
-        val webServer = new WebServer(webServerConfig, routes, actorSystem)
-        webServer.start()
-    {% endhighlight %}
-    
-
-
-
-
-## Web Logs <a class="blank" id="WebLogs">&nbsp;</a>
-
-Socko supports 3 web log formats:
-
- - [Common](http://en.wikipedia.org/wiki/Common_Log_Format) - Apache Common format
- - [Combined](http://httpd.apache.org/docs/current/logs.html) - Apache Combined format
- - [Extended](http://www.w3.org/TR/WD-logfile.html) - Extended format
-
-Examples:
-
-    ** COMMON **
-    216.67.1.91 - leon [01/Jul/2002:12:11:52 +0000] "GET /index.html HTTP/1.1" 200 431 "http://www.loganalyzer.net/"
-    
-    ** COMBINED **
-    216.67.1.91 - leon [01/Jul/2002:12:11:52 +0000] "GET /index.html HTTP/1.1" 200 431 "http://www.loganalyzer.net/" "Mozilla/4.05 [en] (WinNT; I)"
-    
-    ** EXTENDED **
-    #Software: Socko
-    #Version: 1.0
-    #Date: 2002-05-02 17:42:15
-    #Fields: date time c-ip cs-username s-ip s-port cs-method cs-uri-stem cs-uri-query sc-status sc-bytes cs-bytes time-taken cs(User-Agent) cs(Referrer)
-    2002-05-24 20:18:01 172.224.24.114 - 206.73.118.24 80 GET /Default.htm - 200 7930 248 31 Mozilla/4.0+(compatible;+MSIE+5.01;+Windows+2000+Server) http://64.224.24.114/
-
-### Turning On Web Logs
-
-By default, web logs are turned **OFF**.
-
-To turn web logs on, add the following `web-log` section to your `application.conf`
- 
-    akka-config-example {
-      server-name=AkkaConfigExample
-      hostname=localhost
-      port=9000
-      
-      # Optional web log. If not supplied, web server activity logging is turned off.
-      web-log {
-      
-        # Optional path of actor to which web log events will be sent for writing. If not specified, the default
-        # web log writer will be created
-        custom-actor-path = 
-
-        # Optional web log format: Common (Default), Combined or Extended 
-        format = Common
-      }
-    }
-    
-You can also turn it on programmatically as illustrated in the [web log example app](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/weblog/WebLogApp.scala).
-
-{% highlight scala %}
-    // Turn on web logs
-    // Web logs will be written to the logger. You can control output via logback.xml.
-    val config = WebServerConfig(webLog = Some(WebLogConfig()))
-    val webServer = new WebServer(config, routes, actorSystem)
-{% endhighlight %}
-    
-When turned on, the default behaviour is to write web logs to your installed [akka logger](http://doc.akka.io/docs/akka/2.0.1/scala/logging.html) 
-using {{ page.WebLogWriterClass }}. The akka logger asynchronously writes to the log so it will not slow down 
-your application down.
-
-To activate akka logging, add the following to `application.conf`:
-
-    akka {
-      event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
-      loglevel = "DEBUG"
-    }
-
-You can configure where web logs are written by configuring your installed logger. For example, if you are using 
-[Logback](http://logback.qos.ch/), you can write to a daily rolling file by changing `logback.xml` to include:
-
-{% highlight xml %}
-    <configuration>
-      <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-          <pattern>%d{HH:mm:ss.SSS} [%thread] [%X{sourceThread}] %-5level %logger{36} %X{akkaSource} - %msg%n</pattern>
-        </encoder>
-      </appender>
-
-      <appender name="WEBLOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logFile.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-          <!-- daily rollover -->
-          <fileNamePattern>logFile.%d{yyyy-MM-dd}.log</fileNamePattern>
-
-          <!-- keep 30 days' worth of history -->
-          <maxHistory>30</maxHistory>
-        </rollingPolicy>
-
-        <encoder>
-          <pattern>%msg%n</pattern>
-        </encoder>
-      </appender> 
-  
-      <logger name="org.mashupbots.socko.infrastructure.WebLogWriter" level="info" additivity="false">
-        <appender-ref ref="WEBLOG" />
-      </logger>
-
-      <root level="info">
-        <appender-ref ref="STDOUT" />
-      </root>
-    </configuration>
-{% endhighlight %}
-
-### Recording Web Logs Events
-
-Web log events can be recorded via the processing context.
-
- - {{ page.HttpRequestEventClass }}
- 
-   Web logs events are automatically recorded for you when you call `response.write()`, `response.writeLastChunk()` 
-   or `response.redirect()` methods.
-
- - {{ page.HttpChunkEventClass }}
-
-   As per {{ page.HttpRequestEventClass }}.
-   
- - {{ page.WebSocketFrameEventClass }}
- 
-   Web log events are **NOT** automatically recorded for you. This is becasue web sockets do not strictly follow 
-   the request/response structure of HTTP. For example, in a chat server, a broadcast message will not have a request
-   frame.
-   
-   If you wish to record a web log event, you can call `writeWebLog()`. The method, uri and other details
-   of the event to be recorded is arbitrarily set by you.
-   
- - {{ page.WebSocketHandshakeEventClass }}
-   
-   Web log events are automatically recorded for you.
-   
-
-### Custom Web Log Output
-
-If you prefer to use your own method and/or format of writing web logs, you can specify the path of a custom actor 
-to recieve {{ page.WebLogEventClass }} messages in your `application.conf`.
-
-    akka-config-example {
-      server-name=AkkaConfigExample
-      hostname=localhost
-      port=9000
-      web-log {
-        custom-actor-path = "akka://my-system/user/my-web-log-writer"
-      }
-    }
-
-For more details, refer to the [custom web log example app](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/weblog/CustomWebLogApp.scala).
-
-
+port `8888`.  To customise, refer to [Configuration](configuration.html).
 
 
