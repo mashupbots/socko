@@ -58,7 +58,7 @@ case class RestRequestContext(
    *
    * It is assumed that there are no response headers and the response status is `200` OK.
    *
-   * @returns [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this context
+   * @return [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this context
    */
   def responseContext(): RestResponseContext = {
     RestResponseContext(this, HttpResponseStatus(200), Map.empty)
@@ -71,7 +71,7 @@ case class RestRequestContext(
    * It is assumed that there are no response headers.
    *
    * @param status HTTP status of the response
-   * @returns [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this context
+   * @return [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this context
    */
   def responseContext(status: Int): RestResponseContext = {
     RestResponseContext(this, HttpResponseStatus(status), Map.empty)
@@ -83,7 +83,7 @@ case class RestRequestContext(
    *
    * @param status HTTP status of the response
    * @param headers HTTP response headers
-   * @returns [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this context
+   * @return [[org.mashupbots.socko.rest.RestResponseContext]] using the details of this context
    */
   def responseContext(status: Int, headers: Map[String, String]): RestResponseContext = {
     RestResponseContext(this, HttpResponseStatus(status), headers)
@@ -104,7 +104,7 @@ object RestRequestContext {
    * @param headers HTTP request headers
    * @param eventType Socko Event Type
    * @param timeoutSeconds Number of seconds before this request times out
-   * @returns a new instance of [[org.mashupbots.socko.rest.RestRequestContext]]
+   * @return a new instance of [[org.mashupbots.socko.rest.RestRequestContext]]
    */
   def apply(endPoint: EndPoint,
     headers: Map[String, String],

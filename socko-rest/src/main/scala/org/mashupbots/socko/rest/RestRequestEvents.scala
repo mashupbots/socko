@@ -31,7 +31,7 @@ object RestRequestEvents {
   private val cache: LocalCache = new LocalCache(1000000, 16)
 
   /**
-   * Places the [[org.mashupbots.socko.rest.SockoEvent]] in the cache for 10 seconds.
+   * Places the [[org.mashupbots.socko.events.SockoEvent]] in the cache for 10 seconds.
    * The event is key'ed by the context ID.
    *
    * @param context [[org.mashupbots.socko.rest.RestRequestContext]] associated with the event
@@ -43,18 +43,18 @@ object RestRequestEvents {
   }
 
   /**
-   * Places the [[org.mashupbots.socko.rest.SockoEvent]] in the cache for 10 seconds.
+   * Places the [[org.mashupbots.socko.events.SockoEvent]] in the cache for 10 seconds.
    * The event is key'ed by the context ID.
    *
    * @param context [[org.mashupbots.socko.rest.RestRequestContext]] associated with the event
-   * @returns The event associated with the context, `None` if not found
+   * @return The event associated with the context, `None` if not found
    */
   def get(context: RestRequestContext): Option[SockoEvent] = {
     cache.get(context.id.toString).asInstanceOf[Option[SockoEvent]]
   }
 
   /**
-   * Removes the specified [[org.mashupbots.socko.rest.SockoEvent]] from the cache
+   * Removes the specified [[org.mashupbots.socko.events.SockoEvent]] from the cache
    *
    * @param context [[org.mashupbots.socko.rest.RestRequestContext]] associated with the event
    */

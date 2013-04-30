@@ -151,7 +151,7 @@ object BuilderApp extends Logger {
    * Returns a newly created temp directory
    *
    * @param namePrefix Prefix to use on the directory name
-   * @returns Newly created directory
+   * @return Newly created directory
    */
   private def createTempDir(namePrefix: String): File = {
     val d = File.createTempFile(namePrefix, "")

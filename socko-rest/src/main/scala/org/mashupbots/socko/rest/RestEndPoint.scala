@@ -101,7 +101,7 @@ case class RestEndPoint(
    *  - `DELETE /pets/{id}` is different to `PUT /pets/{id}` because methods are different
    *
    * @param op Another REST operation to compare against
-   * @returns `True` if the URI templates are ambiguous and 2 or more unique end points can resolve to
+   * @return `True` if the URI templates are ambiguous and 2 or more unique end points can resolve to
    *   either URI templates.  `False` otherwise..
    */
   def comparePath(restEndPoint: RestEndPoint): Boolean = {

@@ -60,7 +60,7 @@ object SwaggerReflector {
    * Converts a scala type of a swagger type
    *
    * @param tpe Scala type of a class or value
-   * @returns String description of the class or value. Empty string if it cannot be converted.
+   * @return String description of the class or value. Empty string if it cannot be converted.
    */
   def dataType(tpe: ru.Type): String = {
     if (tpe =:= stringType || tpe =:= optionStringType) "string"
@@ -108,7 +108,7 @@ object SwaggerReflector {
    * Checks if the type is a primitive
    *
    * @param tpe Type to check
-   * @returns `True` if `tpe` is a primitive, `False` otherwise
+   * @return `True` if `tpe` is a primitive, `False` otherwise
    */
   def isPrimitive(tpe: ru.Type): Boolean = {
     if (tpe =:= stringType || tpe =:= optionStringType) true
@@ -130,7 +130,7 @@ object SwaggerReflector {
    *  - Array. An unordered list of values maps to a Scala Seq or Array
    *
    * @param tpe Type to check
-   * @returns `List`, `Array`, `Set` or empty string if not a container
+   * @return `List`, `Array`, `Set` or empty string if not a container
    */
   def containerType(tpe: ru.Type): String = {
     if (tpe <:< seqType) "Array"
@@ -145,7 +145,7 @@ object SwaggerReflector {
    * For example, `typeOf[List[Pet]]` will return `typeOf[Pet]`
    *
    * @param tpe Container type to reflect
-   * @returns Content type of the container
+   * @return Content type of the container
    */
   def containerContentType(tpe: ru.Type): ru.Type = {
     val cs = tpe.typeSymbol.asInstanceOf[ru.ClassSymbol]
@@ -169,7 +169,7 @@ object SwaggerReflector {
    * For example, `typeOf[Option[Pet]]` will return `typeOf[Pet]`
    *
    * @param tpe Option type to reflect
-   * @returns Content type of the option. If not an option, the input `tpe` is returned
+   * @return Content type of the option. If not an option, the input `tpe` is returned
    */
   def optionContentType(tpe: ru.Type): ru.Type = {
     if (isOption(tpe)) {

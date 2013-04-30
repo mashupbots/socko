@@ -137,12 +137,12 @@ trait RequestParamBinding {
   def required: Boolean
 
   /**
-   * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
+   * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RestRequest]]
    *
    * @param context Request context
    * @param requestClassName Request class name to use in error messages
    * @param httpRequestEvent HTTP request event
-   * @returns a value for passing to the constructor
+   * @return a value for passing to the constructor
    */
   def extract(context: RestRequestContext, requestClassName: String, httpRequestEvent: HttpRequestEvent): Any
 
@@ -315,12 +315,12 @@ case class PathBinding(
   val required = true
 
   /**
-   * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
+   * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RestRequest]]
    *
    * @param context Request context
    * @param requestClassName Request class name
    * @param httpRequestEvent HTTP request event
-   * @returns a value for passing to the constructor
+   * @return a value for passing to the constructor
    */
   def extract(context: RestRequestContext, requestClassName: String, httpRequestEvent: HttpRequestEvent): Any = {
     val s = context.endPoint.pathSegments(pathIndex)
@@ -363,12 +363,12 @@ case class QueryStringBinding(
   val queryFieldName = if (registration.queryName.isEmpty()) registration.name else registration.queryName
 
   /**
-   * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
+   * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RestRequest]]
    *
    * @param context Request context
    * @param requestClass Request class to use in error messages
    * @param httpRequestEvent HTTP request event
-   * @returns a value for passing to the constructor
+   * @return a value for passing to the constructor
    */
   def extract(context: RestRequestContext, requestClassName: String, httpRequestEvent: HttpRequestEvent): Any = {
     val s = context.endPoint.getQueryString(queryFieldName)
@@ -416,12 +416,12 @@ case class HeaderBinding(
   val headerFieldName = if (registration.headerName.isEmpty()) registration.name else registration.headerName
 
   /**
-   * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
+   * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RestRequest]]
    *
    * @param context Request context
    * @param requestClassName Request class
    * @param httpRequestEvent HTTP request event
-   * @returns a value for passing to the constructor
+   * @return a value for passing to the constructor
    */
   def extract(context: RestRequestContext, requestClassName: String, httpRequestEvent: HttpRequestEvent): Any = {
     val s = context.headers.get(headerFieldName)
@@ -493,12 +493,12 @@ case class BodyBinding(
   }
 
   /**
-   * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RequestClass]]
+   * Parse incoming request data into a value for binding to a [[org.mashupbots.socko.rest.RestRequest]]
    *
    * @param context Request context
    * @param requestClassName Request class name
    * @param httpRequestEvent HTTP request event
-   * @returns a value for passing to the constructor
+   * @return a value for passing to the constructor
    */
   def extract(context: RestRequestContext, requestClassName: String, httpRequestEvent: HttpRequestEvent): Any = {
     tpeCategory match {

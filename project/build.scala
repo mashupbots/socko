@@ -96,7 +96,7 @@ object SockoBuild extends Build {
   //
   lazy val root = Project(id = "socko",
                           base = file("."),
-                          settings = defaultSettings ++ Unidoc.settings) aggregate(webserver, buildtools, examples)
+                          settings = defaultSettings ++ Unidoc.settings) aggregate(webserver, buildtools, rest, examples)
 
   lazy val webserver = Project(id = "socko-webserver",
                          base = file("socko-webserver"),

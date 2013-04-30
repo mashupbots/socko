@@ -41,7 +41,7 @@ case class RestRegistry(
    * `None` will be returned because an exact match cannot be found.
    *
    * @param endPoint Endpoint to match
-   * @returns Matching [[org.mashupbots.socko.rest.RestOperation]] or `None` if not found
+   * @return Matching [[org.mashupbots.socko.rest.RestOperation]] or `None` if not found
    */
   def findOperation(endPoint: EndPoint): Option[RestOperation] = {
     val ops = operations.filter(op => op.endPoint.matchEndPoint(endPoint))
@@ -74,7 +74,7 @@ case class RestRegistry(
    * `/api/pets` will return `false`.
    *
    * @param endPoint Endpoint to check
-   * @returns `True` if this endpoint requires api documentation to be returned
+   * @return `True` if this endpoint requires api documentation to be returned
    */
   def isSwaggerApiDocRequest(endPoint: EndPoint): Boolean = {
     endPoint.path.startsWith(swaggerRootApiDocsUrl)
@@ -164,7 +164,7 @@ object RestRegistry extends Logger {
    * @param clz class to check
    * @param classes Collection of classes found in the package to load
    * @param config REST configuration
-   * @returns An instance of the annotation class or `None` if annotation not found
+   * @return An instance of the annotation class or `None` if annotation not found
    */
   def buildRestOperation(rm: ru.Mirror, clz: Class[_], classes: Seq[Class[_]], config: RestConfig): Option[RestOperation] = {
     val registration = findRestRegistration(rm, clz, config);
@@ -189,7 +189,7 @@ object RestRegistry extends Logger {
    * @param rm Runtime mirror
    * @param clz class to check
    * @param config REST configuration
-   * @returns An instance of the annotation class or `None` if annotation not found
+   * @return An instance of the annotation class or `None` if annotation not found
    */
   def findRestRegistration(rm: ru.RuntimeMirror, clz: Class[_], config: RestConfig): Option[RestRegistration] = {
     val moduleSymbol = rm.moduleSymbol(clz)
@@ -215,7 +215,7 @@ object RestRegistry extends Logger {
    * @param rm Mirror
    * @param clz registration class
    * @param classes Sequence of classes in which to search for the request class
-   * @returns the request type or `None` if not found
+   * @return the request type or `None` if not found
    */
   def findRestRequest(
     registration: Option[RestRegistration],
@@ -254,7 +254,7 @@ object RestRegistry extends Logger {
    * @param rm Mirror
    * @param clz registration class
    * @param classes Sequence of classes in which to search for the request class
-   * @returns the response type or `None` if not found
+   * @return the response type or `None` if not found
    */
   def findRestResponse(
     registration: Option[RestRegistration],

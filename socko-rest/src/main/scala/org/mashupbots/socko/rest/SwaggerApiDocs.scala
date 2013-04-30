@@ -34,7 +34,7 @@ case class SwaggerApiDocs(lookup: Map[String, Array[Byte]]) {
    * Gets the JSON doc for the specified end point
    * 
    * @param path Full path to the requested documentation. For example: `/api/api-docs.json/pet`.
-   * @returns JSON UTF-8, `None` if data for path not found
+   * @return JSON UTF-8, `None` if data for path not found
    */
   def get(path: String): Option[Array[Byte]] = {
     lookup.get(path)
@@ -57,7 +57,7 @@ object SwaggerApiDocs extends Logger {
    * @param operations Rest operations
    * @param config Rest configuration
    * @param rm Runtime Mirror used to reflect property meta data
-   * @returns Map with the `key` being the exact path to match, the value is the JSON string
+   * @return Map with the `key` being the exact path to match, the value is the JSON string
    */
   def apply(operations: Seq[RestOperation], config: RestConfig, rm: ru.Mirror): SwaggerApiDocs = {
     val result: HashMap[String, Array[Byte]] = new HashMap[String, Array[Byte]]()
@@ -119,7 +119,7 @@ case class SwaggerResourceListing(
 object SwaggerResourceListing {
 
   /**
-   * Creates a new [[org.mashupbots.socko.rest.ResourceListing]] for a group of APIs
+   * Creates a new [[org.mashupbots.socko.rest.SwaggerResourceListing]] for a group of APIs
    *
    * For example, the following operations are assumed to be in 2 resource groups: `/users` and `/pets`.
    * {{{
@@ -369,7 +369,7 @@ case class SwaggerApiError(code: Int, reason: String)
  * @param required Boolean to indicate if the property is required. If `None`, `false` is assumed.
  * @param allowableValues Optional allowable list or range of values
  * @param items Only applicable for containers. Defines the data type of items in a container.
- *   For primitives, it is `"type":"string"`.  For complex types, it is `"$ref":"Category"`.
+ *   For primitives, it is `"type":"string"`.  For complex types, it is `"ref":"Category"`.
  */
 case class SwaggerModelProperty(
   `type`: String,
@@ -454,7 +454,7 @@ case class SwaggerModelRegistry(rm: ru.Mirror) {
    * @param tpe Type to parse
    * @param subModels Complex Types and Complex Types within a container are added to this set so that
    *   they can be registered as a model object for swagger output.
-   * @returns Tuple of swagger data type name and map of swagger container content type. Non container classes
+   * @return Tuple of swagger data type name and map of swagger container content type. Non container classes
    *   returns an empty map of container content type.
    */
   private def parsePropertyType(tpe: ru.Type, subModels: collection.mutable.Set[ru.Type]): (String, Map[String, String]) = {
@@ -487,7 +487,7 @@ case class SwaggerModelRegistry(rm: ru.Mirror) {
    * `modelProperties` is returned.
    *
    * @param tpe Type to investigate
-   * @returns Sequence of [[org.mashupbots.socko.rest.RestModelMetaData]]. Empty if no extra meta data found.
+   * @return Sequence of [[org.mashupbots.socko.rest.RestModelMetaData]]. Empty if no extra meta data found.
    */
   private def locatePropertiesMetaData(tpe: ru.Type): Seq[RestPropertyMetaData] = {
     val cs = tpe.typeSymbol.asClass

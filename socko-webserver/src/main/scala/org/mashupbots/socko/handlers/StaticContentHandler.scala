@@ -617,7 +617,7 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
    * @param bytesIn Stream containing data to compress
    * @param bytesOut Stream to store compressed output
    * @param format Compression formation: "gzip" or "deflate"
-   * @returns `true` if content is compressed, `false` if error during compressing or format not suppored
+   * @return `true` if content is compressed, `false` if error during compressing or format not suppored
    */
   private def compress(bytesIn: InputStream, bytesOut: OutputStream, format: String): Boolean = {
     try {

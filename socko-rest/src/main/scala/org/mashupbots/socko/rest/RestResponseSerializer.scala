@@ -27,7 +27,7 @@ import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.Logger
 
 /**
- * Serialized outgoing data from a [[org.mashupbots.socko.rest.RestResposne]]
+ * Serialized outgoing data from a [[org.mashupbots.socko.rest.RestResponse]]
  *
  * @param config REST configuration
  * @param responseClass Response class symbol
@@ -144,7 +144,7 @@ abstract class DataSerializer {
   /**
    * Returns the data object for an instance of the response
    *
-   * @returns `None` if the response data type is void, else the value of the data field
+   * @return `None` if the response data type is void, else the value of the data field
    */
   def getData(response: RestResponse): Any
 }
@@ -168,7 +168,7 @@ abstract class NonVoidDataSerializer() extends DataSerializer {
   /**
    * Returns the data object for an instance of the response
    *
-   * @returns `None` if the response data type is void, else the value of the data field
+   * @return `None` if the response data type is void, else the value of the data field
    */
   def getData(response: RestResponse): Any = {
     val instanceMirror = rm.reflect(response)

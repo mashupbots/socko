@@ -57,7 +57,7 @@ class RestHandler(registry: RestRegistry) extends Actor with FSM[RestHandlerStat
   /**
    * Data used when active
    *
-   * @param workerCount Number of [[org.mashupbots.socko.rest.RestWorker]]s running.
+   * @param workerCount Number of [[org.mashupbots.socko.rest.RestHttpWorker]]s running.
    */
   case class Data(workerCount: Int) extends RestHandlerData {
 
