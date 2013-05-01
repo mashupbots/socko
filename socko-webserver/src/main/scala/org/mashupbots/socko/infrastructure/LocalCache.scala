@@ -28,7 +28,7 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap
  *   of magnitude of the ideal value does not usually have a noticeable impact. Because placement in hash tables
  *   is essentially random, the actual concurrency will vary. Defaults to 16.
  */
-class LocalCache(capacity: Long = 1000, concurrentThreadCount: Int = 16) {
+class LocalCache(val capacity: Long = 1000, val concurrentThreadCount: Int = 16) {
 
   private val cache: ConcurrentLinkedHashMap[String, Any] = new ConcurrentLinkedHashMap.Builder[String, Any]()
     .maximumWeightedCapacity(capacity)

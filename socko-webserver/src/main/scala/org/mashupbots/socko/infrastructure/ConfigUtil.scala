@@ -27,7 +27,24 @@ import com.typesafe.config.Config
 object ConfigUtil {
 
   /**
-   * Returns an optional file configuration value. It is assumed that the value of the configuration name is the full
+   * Returns an file configuration value. It is assumed that the value of the configuration is the full
+   * path to a file or directory.
+   */
+  def getFile(config: Config, name: String, defaultValue: File): File = {
+    try {
+      val v = config.getString(name)
+      if (v == null || v == "") {
+        defaultValue
+      } else {
+        new File(v)
+      }
+    } catch {
+      case _: Throwable => defaultValue
+    }
+  }
+  
+  /**
+   * Returns an optional file configuration value. It is assumed that the value of the configuration is the full
    * path to a file or directory.
    */
   def getOptionalFile(config: Config, name: String): Option[File] = {
@@ -75,6 +92,39 @@ object ConfigUtil {
     }
   }
 
+  /**
+   * Returns the specified comma separated value setting as an sequence of string values. 
+   * If setting not specified, then the default is returned.
+   */
+  def getCSV(config: Config, name: String, defaultValue: Seq[String]): Seq[String] = {
+    try {
+      val v = config.getString(name)
+      if (v == null || v == "") {
+        defaultValue
+      } else {
+        v.split(",").map(s => s.trim()).toSeq
+      }
+    } catch {
+      case _: Throwable => defaultValue
+    }
+  }
+
+  /**
+   * Returns an optional comma separated string configuration value
+   */
+  def getOptionalCSV(config: Config, name: String): Option[Seq[String]] = {
+    try {
+      val v = config.getString(name)
+      if (v == null || v == "") {
+        None
+      } else {
+        Some(v.split(",").map(s => s.trim()).toSeq)
+      }
+    } catch {
+      case _: Throwable => None
+    }
+  }
+  
   /**
    * Returns the specified setting as an integer. If setting not specified, then the default is returned.
    */

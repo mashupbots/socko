@@ -31,7 +31,6 @@ import java.util.zip.GZIPOutputStream
 import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
-
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.ChannelFuture
 import org.jboss.netty.channel.ChannelFutureListener
@@ -52,9 +51,11 @@ import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.LocalCache
 import org.mashupbots.socko.infrastructure.MimeTypes
 import org.mashupbots.socko.netty.HttpChunkedFile
-
 import akka.actor.Actor
 import akka.event.Logging
+import com.typesafe.config.Config
+import org.mashupbots.socko.infrastructure.ConfigUtil
+import akka.actor.Extension
 
 /**
  * Handles downloading of static files and resources.
@@ -766,6 +767,49 @@ case class StaticResourceRequest(
 /**
  * Configuration for [[org.mashupbots.socko.handlers.StaticContentHandler]].
  *
+ * This can also be loaded from an externalized AKKA configuration file. For example:
+ * 
+ * {{{
+ *   static-content-config {
+ *     # CSV list of root paths from while files can be served.
+ *     root-file-paths=/home/me/path1,/home/me/path2
+ *     
+ *     # Temporary directory where compressed files can be stored.
+ *     # Defaults to the `java.io.tmpdir` system property if setting is omitted
+ *     temp-dir=localhost
+ *     
+ *     # Max number of files and resources to store in the local in memory cache
+ *     # Defaults to storing 1000 items if setting is omitted
+ *     server-cache-max-size=1000
+ *     
+ *     # Maximum size of files (in bytes) to be cached. Files larger than this will
+ *     # not be cached and will be served from the file system or resorce.
+ *     # Defaults to 100K if setting is omitted
+ *     server-cache-max-file-size=102400
+ *     
+ *     # Number of seconds files will be cached in local memory
+ *     # Defaults to 3600 if setting is omitted 
+ *     server-cache-timeout=3600
+ *     
+ *     # Number of seconds before a browser should check back with the server if a file has been updated.
+ *     # This setting is used to drive the `Expires` and `Cache-Control` HTTP headers.
+ *     # Defaults to 3600 if setting is omitted 
+ *     browser-cache-timeout=3600
+ *   }
+ * }}}
+ *
+ * can be loaded as follows:
+ * {{{
+ *   object MyStaticContentHandlerConfig extends ExtensionId[StaticContentHandlerConfig] with ExtensionIdProvider {
+ *     override def lookup = MyStaticContentHandlerConfig
+ *     override def createExtension(system: ExtendedActorSystem) =
+ *       new StaticContentHandlerConfig(system.settings.config, "static-content-config")
+ *   }
+ *
+ *   val myStaticContentHandlerConfig = MyStaticContentHandlerConfig(actorSystem)
+ * }}} 
+ * 
+ * 
  * @param rootFilePaths List of root paths from while files can be served.
  *   This is enforced to stop relative path type attacks; e.g. `../etc/passwd`
  *
@@ -805,6 +849,16 @@ case class StaticContentHandlerConfig(
   cache: LocalCache = new LocalCache(1000, 16),
   serverCacheMaxFileSize: Int = 1024 * 100,
   serverCacheTimeoutSeconds: Int = 3600,
-  browserCacheTimeoutSeconds: Int = 3600) {
+  browserCacheTimeoutSeconds: Int = 3600) extends Extension {
+  
+  /**
+   * Read configuration from AKKA's `application.conf`
+   */
+  def this(config: Config, prefix: String) = this(
+    ConfigUtil.getCSV(config, prefix + ".root-file-paths", Nil),
+    ConfigUtil.getFile(config, prefix + ".temp-dir", new File(System.getProperty("java.io.tmpdir"))),
+    new LocalCache(ConfigUtil.getInt(config, prefix + ".server-cache-max-size", 1000), 16),
+    ConfigUtil.getInt(config, prefix + ".server-cache-max-file-size", 1024 * 100),
+    ConfigUtil.getInt(config, prefix + ".server-cache-timeout", 3600),
+    ConfigUtil.getInt(config, prefix + ".browser-cache-timeout", 3600))
 }
-

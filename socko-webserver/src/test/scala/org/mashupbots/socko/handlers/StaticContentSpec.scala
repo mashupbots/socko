@@ -22,21 +22,29 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
-import org.mashupbots.socko.routes._
+
+import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.routes.GET
+import org.mashupbots.socko.routes.PathSegments
+import org.mashupbots.socko.routes.Routes
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
-import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
+import org.scalatest.matchers.ShouldMatchers
+
 import com.typesafe.config.ConfigFactory
-import akka.actor.actorRef2Scala
+
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
+import akka.actor.ExtendedActorSystem
+import akka.actor.ExtensionId
+import akka.actor.ExtensionIdProvider
 import akka.actor.Props
+import akka.actor.actorRef2Scala
 import akka.routing.FromConfig
-import org.mashupbots.socko.events.HttpRequestEvent
 
 class StaticContentSpec
   extends WordSpec with ShouldMatchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient with Logger {
@@ -218,7 +226,7 @@ class StaticContentSpec
       resp2.status should equal("304")
       resp2.headers("Date").length should be > 0
     }
-    
+
     "correctly NOT cache a resource" in {
       // Initial get
       val url = new URL(path + "nocache_resource/META-INF/mime.types")
@@ -230,12 +238,12 @@ class StaticContentSpec
       resp.content.length should be > 0
       resp.headers("Date").length should be > 0
       resp.headers("Content-Type") should equal("application/octet-stream")
-      
+
       // No cache headers
       resp.headers.getOrElse("Cache-Control", "") should equal("")
       resp.headers.getOrElse("ETag", "") should equal("")
       resp.headers.getOrElse("Last-Modified", "") should be("")
-    }    
+    }
 
     "correctly get and cache a small file" in {
       val sb = new StringBuilder
@@ -304,10 +312,10 @@ class StaticContentSpec
       val sb = new StringBuilder
       for (i <- 1 to 1000) sb.append("a")
       val contentA = sb.toString
-      
+
       sb.length = 0
       for (i <- 1 to 1000) sb.append("b")
-      val contentB = sb.toString      
+      val contentB = sb.toString
 
       // Initial get of content A
       val file = new File(rootDir, "smallNoCacheFile.txt")
@@ -321,15 +329,15 @@ class StaticContentSpec
       resp.content should equal(contentA)
       resp.headers("Date").length should be > 0
       resp.headers("Content-Type") should equal("text/plain")
-      
+
       // No cache headers
       resp.headers.getOrElse("Cache-Control", "") should equal("")
       resp.headers.getOrElse("ETag", "") should equal("")
       resp.headers.getOrElse("Last-Modified", "") should be("")
-      
+
       // Update file and get again - should be new content because there should not be any caching
       writeTextFile(file, contentB)
-     
+
       val connB = url.openConnection().asInstanceOf[HttpURLConnection];
       val respB = getResponseContent(connB)
 
@@ -339,9 +347,9 @@ class StaticContentSpec
       respB.headers("Content-Type") should equal("text/plain")
       respB.headers.getOrElse("Cache-Control", "") should equal("")
       respB.headers.getOrElse("ETag", "") should equal("")
-      respB.headers.getOrElse("Last-Modified", "") should be("")      
+      respB.headers.getOrElse("Last-Modified", "") should be("")
     }
-    
+
     "correctly get and cache a big file" in {
       val sb = new StringBuilder
       for (i <- 1 to ((1024 * 100) + 1)) sb.append("a")
@@ -404,15 +412,15 @@ class StaticContentSpec
       resp4.headers("Cache-Control") should equal("private, max-age=60")
       resp4.headers("Last-Modified") should not equal (lastModified)
     }
-    
+
     "correctly NOT cache a big file" in {
       val sb = new StringBuilder
       for (i <- 1 to ((1024 * 100) + 1)) sb.append("a")
       val contentA = sb.toString
-      
+
       sb.length = 0
       for (i <- 1 to ((1024 * 100) + 1)) sb.append("b")
-      val contentB = sb.toString      
+      val contentB = sb.toString
 
       // Initial get of content A
       val file = new File(rootDir, "bigNoCacheFile.txt")
@@ -426,15 +434,15 @@ class StaticContentSpec
       resp.content should equal(contentA)
       resp.headers("Date").length should be > 0
       resp.headers("Content-Type") should equal("text/plain")
-      
+
       // No cache headers
       resp.headers.getOrElse("Cache-Control", "") should equal("")
       resp.headers.getOrElse("ETag", "") should equal("")
       resp.headers.getOrElse("Last-Modified", "") should be("")
-      
+
       // Update file and get again - should be new content because there should not be any caching
       writeTextFile(file, contentB)
-     
+
       val connB = url.openConnection().asInstanceOf[HttpURLConnection];
       val respB = getResponseContent(connB)
 
@@ -444,8 +452,8 @@ class StaticContentSpec
       respB.headers("Content-Type") should equal("text/plain")
       respB.headers.getOrElse("Cache-Control", "") should equal("")
       respB.headers.getOrElse("ETag", "") should equal("")
-      respB.headers.getOrElse("Last-Modified", "") should be("")      
-    }    
+      respB.headers.getOrElse("Last-Modified", "") should be("")
+    }
 
     "return '404 Not Found' if requested file is outside specified root directory" in {
       val url = new URL(path + "files/../file.txt")
@@ -705,6 +713,43 @@ class StaticContentSpec
       threads.foreach(t => t.hasErrors should be(false))
     }
 
+    "load from Akka Config" in {
+
+      // *** If you are changing this, review scaladoc of WebServerConfig ***
+      val actorConfig = """
+		barebones-static-handler {
+		}
+		all-static-handler {
+		  root-file-paths="/tmp/x1, /tmp/x2"
+		  temp-dir = "/tmp"
+		  server-cache-max-size=1
+          server-cache-max-file-size=2
+          server-cache-timeout=3
+          browser-cache-timeout=4
+		}"""
+      // *** If you are changing this, review scaladoc of WebServerConfig ***
+
+      val actorSystem = ActorSystem("WebServerConfigSpec", ConfigFactory.parseString(actorConfig))
+
+      val barebones = BareBonesStaticConfig(actorSystem)
+      barebones.rootFilePaths should equal(Nil)
+      barebones.tempDir.getAbsolutePath should equal(System.getProperty("java.io.tmpdir"))
+      barebones.cache.capacity should equal(1000)
+      barebones.serverCacheMaxFileSize should be(102400)
+      barebones.serverCacheTimeoutSeconds should equal(3600)
+      barebones.browserCacheTimeoutSeconds should equal(3600)
+
+      val all = AllStaticConfig(actorSystem)
+      all.rootFilePaths should equal(Seq("/tmp/x1", "/tmp/x2"))
+      all.tempDir.getAbsolutePath should equal("/tmp")
+      all.cache.capacity should equal(1)
+      all.serverCacheMaxFileSize should be(2)
+      all.serverCacheTimeoutSeconds should equal(3)
+      all.browserCacheTimeoutSeconds should equal(4)
+
+      actorSystem.shutdown()
+    }
+
   }
 }
 
@@ -744,4 +789,16 @@ class GetStaticFileThread(name: String, url: String, count: Int, content: String
       Thread.sleep(30)
     }
   }
+}
+
+object BareBonesStaticConfig extends ExtensionId[StaticContentHandlerConfig] with ExtensionIdProvider {
+  override def lookup = BareBonesStaticConfig
+  override def createExtension(system: ExtendedActorSystem) =
+    new StaticContentHandlerConfig(system.settings.config, "barebones-staic-handler")
+}
+
+object AllStaticConfig extends ExtensionId[StaticContentHandlerConfig] with ExtensionIdProvider {
+  override def lookup = AllStaticConfig
+  override def createExtension(system: ExtendedActorSystem) =
+    new StaticContentHandlerConfig(system.settings.config, "all-static-handler")
 }
