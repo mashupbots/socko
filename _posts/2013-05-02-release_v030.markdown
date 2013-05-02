@@ -1,0 +1,28 @@
+---
+layout: post
+title: Release v0.3.0
+summary: RESTful Web Services is finally here!
+author: Vibul
+---
+
+This [release](https://github.com/mashupbots/socko/issues?milestone=3&state=closed) includes:
+ - REST handler
+ - Build tool to help run builds for javascript apps
+ - Update to Scala 2.10, Akka 2.1.2 and Netty 3.6.5
+ - Webserver and REST JARs build to run with JDK 6.
+
+This is the first release of the REST handler. It supports [Swagger](https://developers.helloreverb.com/swagger/)
+and does **not** use annotations. There is more info in the [User Guide](/docs/0.3.0/guides/dynamic-content.html#Rest) 
+and [example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/rest).
+
+Download [socko-webserver_2.10-0.3.0.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.10/0.3.0/socko-webserver_2.10-0.3.0.jar).
+
+For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
+
+Documentation
+ - [User Guide](/docs/0.3.0/guides/user-guide.html)
+ - [API](/docs/0.3.0/api/)
+ - [Change logs](https://github.com/mashupbots/socko/issues?milestone=3&state=closed)
+
+
+

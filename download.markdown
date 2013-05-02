@@ -5,9 +5,9 @@ layout: article
 
 ## Latest Release
 
-The latest verison of Socko is **`0.2.4`** released on 3rd Feb 2013.
+The latest verison of Socko is **`0.3.0`** released on 30th April 2013.
 
-Download [socko-webserver_2.10-0.2.4.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.10/0.2.4/socko-webserver_2.10-0.2.4.jar).
+Download [socko-webserver_2.10-0.3.0.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.10/0.3.0/socko-webserver_2.10-0.3.0.jar).
 
 [Change logs](https://github.com/mashupbots/socko/issues/milestones?state=closed) and 
 [road maps](https://github.com/mashupbots/socko/issues/milestones?state=open) are available on our issue tracker.
@@ -45,14 +45,17 @@ Please install the following:
 
 ### 3. Build
 
-Run Simpble Build Tool to compile and test
+Run Simple Build Tool to compile and test
 
     $ sbt
     $ compile
     $ test
     $ package
 
-The resultant .jar file can be found in `socko-webserver/target/scala-2.10/socko-webserver_2.10-X.X.X.jar`.
+The resultant JAR files can be found in:
+ - `socko-webserver/target/scala-2.10/socko-webserver_2.10-X.X.X.jar`.
+ - `socko-rest/target/scala-2.10/socko-rest_2.10-X.X.X.jar`.
+ - `socko-buildtools/target/scala-2.10/socko-buildtools_2.10-X.X.X.jar`.
 
 ### 4. Run Examples
 
