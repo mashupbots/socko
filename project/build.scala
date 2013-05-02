@@ -96,7 +96,7 @@ object SockoBuild extends Build {
   //
   lazy val root = Project(id = "socko",
                           base = file("."),
-                          settings = defaultSettings ++ 
+                          settings = defaultSettings ++ doNotPublishSettings ++ 
                              Unidoc.settings ++ Seq(Unidoc.unidocExclude := Seq(examples.id))
                          ) aggregate(webserver, buildtools, rest, examples)
 
@@ -115,7 +115,12 @@ object SockoBuild extends Build {
                          base = file("socko-buildtools"),
                          dependencies = Seq(webserver),
                          settings = defaultSettings ++ compileJdk7Settings ++ Seq(
-                           libraryDependencies ++= Dependencies.buildtools
+                           libraryDependencies ++= Dependencies.buildtools,
+                           publishTo <<= sockoPublishTo,
+                           publishMavenStyle := true,
+                           publishArtifact in Test := false,
+                           pomIncludeRepository := { x => false },
+                           pomExtra := sockoPomExtra
                          ))  
 
   lazy val rest = Project(id = "socko-rest",
@@ -123,7 +128,12 @@ object SockoBuild extends Build {
                          dependencies = Seq(webserver),                         
                          settings = defaultSettings ++ compileJdk6Settings ++ Seq(
                            libraryDependencies ++= Dependencies.rest,
-                           parallelExecution in Test := false
+                           parallelExecution in Test := false,
+                           publishTo <<= sockoPublishTo,
+                           publishMavenStyle := true,
+                           publishArtifact in Test := false,
+                           pomIncludeRepository := { x => false },
+                           pomExtra := sockoPomExtra
                          ))  
 
   lazy val examples = Project(id = "socko-examples",
