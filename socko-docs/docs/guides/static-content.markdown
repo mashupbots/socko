@@ -21,13 +21,12 @@ It supports HTTP compression, browser cache control and content caching.
 
 ## Actor Setup <a class="blank" id="ActorSetup">&nbsp;</a>
 
-We recommend that you run {{ page.StaticContentHandlerClass }} with a router and with its own dispatcher.  This
-because {{ page.StaticContentHandlerClass }} contains block IO which must be isolated from other non blocking 
+We recommend that you run {{ page.StaticContentHandlerClass }} with a router and with its own dispatcher.  This is
+because {{ page.StaticContentHandlerClass }} contains blocking IO that must be isolated from other non-blocking 
 actors.
 
-You will also need to configure its operation with {{ page.StaticContentHandlerConfigClass }}.
-
-For example:
+For example, you can use the [Pinned Dispatcher](http://doc.akka.io/api/akka/2.1.2/index.html#akka.dispatch.PinnedDispatcher)
+that dedicates a unique thread for each actor passed in as reference:
 
 {% highlight scala %}
     val actorConfig = """
@@ -63,8 +62,64 @@ For example:
 
 ## Configuration <a class="blank" id="Configuration">&nbsp;</a>
 
-TO DO
-Cache settings, etc....
+The {{ page.StaticContentHandlerConfigClass }} class is used to configure the serving of your static content.
+
+Common settings are:
+
+ - `rootFilePaths`
+
+   List of root paths from while static files can be served. This is enforced to stop relative path type attacks; 
+   e.g. `../etc/passwd`.  It does not apply to serving static resources.
+    
+ - `tempDir`
+ 
+   Temporary directory where compressed files can be stored. Defaults to the `java.io.tmpdir` system property value.
+
+Like other Socko configurations, you can optionally load these settings from  your Akka configuration file.
+
+For example:
+
+{% highlight scala %}
+    val actorConfig = """
+      my-pinned-dispatcher {
+        type=PinnedDispatcher
+        executor=thread-pool-executor
+      }
+      my-static-content-handler {
+		    root-file-paths="/tmp/x1, /tmp/x2"
+		  }
+      akka {
+        event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+        loglevel=DEBUG
+        actor {
+          deployment {
+            /static-file-router {
+              router = round-robin
+              nr-of-instances = 5
+            }
+          }
+        }
+      }"""
+
+    val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
+
+    val handlerConfig = MyStaticHandlerConfig(actorSystem)
+
+    val staticContentHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(handlerConfig))
+      .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
+
+    ...
+
+    object MyStaticHandlerConfig extends ExtensionId[StaticContentHandlerConfig] with ExtensionIdProvider {
+      override def lookup = MyStaticHandlerConfig
+      override def createExtension(system: ExtendedActorSystem) =
+        new StaticContentHandlerConfig(system.settings.config, "my-static-content-handler")
+    }
+
+{% endhighlight %}
+
+Refer to the [scala doc](../api/#org.mashupbots.socko.handlers.StaticContentHandlerConfig) for more information.
+
 
 
 

@@ -13,8 +13,7 @@ WebServerClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServer"
 
 ## Introduction
 
-As illustrated in the [Quick Start](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/quickstart) 
-example application, the 3 steps that you have to follow to get Socko working for you are:
+Let's deep dive into the 3 steps to Socko success:
 
  - [Step 1. Define Actors and Start Akka](#Step1)
    - [Handling Socko Events](#SockoEvents)
@@ -27,8 +26,6 @@ example application, the 3 steps that you have to follow to get Socko working fo
    - [QueryString Extractors](#QueryStringExtractors)
    - [Concatenating Extractors](#ConcatenatingExtractors)
  - [Step 3. Start/Stop Web Server](#Step3)
-
-These steps are specified in detailed below.
 
 
 ## Step 1. Define Actors and Start Akka <a class="blank" id="Step1">&nbsp;</a>
@@ -100,7 +97,7 @@ There are 4 types of {{ page.SockoEventClass }}:
 2. **{{ page.HttpChunkEventClass }}**
 
    This event is fired when a HTTP Chunk is received and is only applicable if you turn off 
-   [chunk aggregation](#Configuration).
+   [chunk aggregation](configuration.html).
    
    Reading requests and writing responses is as per {{ page.HttpRequestEventClass }}.
 
@@ -120,7 +117,7 @@ There are 4 types of {{ page.SockoEventClass }}:
    It should **not** be sent to your actor.
 
 
-All {{ page.SockoEventClass }} must be used by **local actors** only.
+All {{ page.SockoEventClass }}s must be used by **local actors** only.
 
 
 ### Akka Dispatchers and Thread Pools <a class="blank" id="AkkaDispatchers">&nbsp;</a>
@@ -187,7 +184,7 @@ Within your implementation of the partial function, your code will need to dispa
 
 To assist with dispatching, we have included pattern matching extractors:
 
- - [Event](#SockoEventExtractors)
+ - [Event](#SockoEventExtractors) such as `HttpRequestEvent`
  - [Host](#HostExtractors) such as `www.mydomain.com`
  - [Method](#MethodExtractors) such as `GET`
  - [Path](#PathExtractors) such as `/record/1`
@@ -253,7 +250,7 @@ illustrates usage:
 
 ### Host Extractors <a class="blank" id="HostExtractors">&nbsp;</a>
 
-Host extractors matches the host name received in the HTTP request that triggered the {{ page.SockoEventClass }}.
+Host extractors match the host name received in the HTTP request that triggered the {{ page.SockoEventClass }}.
 
 For {{ page.HttpRequestEventClass }}, the host is the value specified in the `HOST` header variable. 
 For {{ page.HttpChunkEventClass }}, {{ page.WebSocketFrameEventClass }} and 
@@ -328,7 +325,7 @@ in your route.
 
 ### Method Extractors <a class="blank" id="MethodExtractors">&nbsp;</a>
 
-Method extractors matches the method received in the HTTP request that triggered the {{ page.SockoEventClass }}.
+Method extractors match the method received in the HTTP request that triggered the {{ page.SockoEventClass }}.
 
 For {{ page.HttpRequestEventClass }}, the method is the extracted from the 1st line. 
 For {{ page.HttpChunkEventClass }}, {{ page.WebSocketFrameEventClass }} and 
@@ -377,7 +374,7 @@ For example, to match HTTP GET with a path of "/clients"
 
 ### Path Extractors <a class="blank" id="PathExtractors">&nbsp;</a>
 
-Path extractors matches the path received in the HTTP request that triggered the {{ page.SockoEventClass }}.
+Path extractors match the path received in the HTTP request that triggered the {{ page.SockoEventClass }}.
 
 For {{ page.HttpRequestEventClass }}, the path is the extracted from the 1st line without any query string. 
 For {{ page.HttpChunkEventClass }}, {{ page.WebSocketFrameEventClass }} and 
@@ -427,28 +424,25 @@ For example:
 This will match any paths that have 2 segments and the first segment being `record`. The second 
 segment will be bound to a variable called `id.` 
 
-This will match `/record/1` and `id` will be set to `1`.
-
-This will NOT match `/record` because there is only 1 segment; or `/folder/1` before the first segment
-is not `record`.
+This will match `/record/1` and `id` will be set to `1`. This will NOT match `/record` because there is 
+only 1 segment; or `/folder/1` before the first segment is not `record`.
 
 Another example:
 
 {% highlight scala %}
     val r = Routes({
       // Matches /api/abc and /api/xyz
-      case PathSegments("abc" :: relativePath) => {
+      case PathSegments("api" :: relativePath) => {
         ...
       }
     })
 {% endhighlight %}
 
-This will match any paths that has the first segment set as `api`. The remainder of the path segments
+This will match any path that has the first segment set as `api`. The remainder of the path segments
 will be boudn to the variable `relativePath`.
 
-This will match `/api/abc` and `relativePath` will be set to `List(abc)`.
-
-This will NOT match `/aaa/abc` because the first segment is not `api`.
+This will match `/api/abc` and `relativePath` will be set to `List(abc)`. This will NOT match `/aaa/abc` because 
+the first segment is not `api`.
 
  
 **[`PathRegex`](../api/#org.mashupbots.socko.routes.PathRegex)**
@@ -474,7 +468,7 @@ in your route.
 
 ### Query String Extractors <a class="blank" id="QueryStringExtractors">&nbsp;</a>
 
-Query string extractors matches the query string received in the HTTP request that triggered the {{ page.SockoEventClass }}.
+Query string extractors match the query string received in the HTTP request that triggered the {{ page.SockoEventClass }}.
 
 For {{ page.HttpRequestEventClass }}, the query string is the extracted from the 1st line. 
 For {{ page.HttpChunkEventClass }}, {{ page.WebSocketFrameEventClass }} and 
@@ -565,6 +559,8 @@ To start you web server, you only need to instance the {{ page.WebServerClass }}
 call `start()` passing in your configuration and routes.  When you wish to stop the web 
 server, call `stop()`.
 
+For example, for a Scala console application:
+
 {% highlight scala %}
     def main(args: Array[String]) {
       val webServer = new WebServer(WebServerConfig(), routes)
@@ -578,7 +574,27 @@ server, call `stop()`.
     }
 {% endhighlight %}
 
-This example uses the default configuration which starts the web server at `localhost` bound on
+For a [AKKA microkernel](http://doc.akka.io/docs/akka/2.1.2/scala/microkernel.html) application:
+
+{% highlight scala %}
+    class SockoKernel extends Bootable {
+      val system = ActorSystem("sockokernel")
+      val webServer = new WebServer(WebServerConfig(), routes)
+
+      def startup = {
+        webServer.start()
+        System.out.println("Open your browser and navigate to http://localhost:8888")
+      }
+     
+      def shutdown = {
+        webServer.stop()
+      }
+    }
+{% endhighlight %}
+
+These example uses the default configuration which starts the web server at `localhost` bound on
 port `8888`.  To customise, refer to [Configuration](configuration.html).
+
+
 
 

@@ -17,7 +17,7 @@ title: Socko User Guide
    - [SPDY](configuration.html#SPDY)
  - [Serving Static Http Content](static-content.html)
  - [Serving Dynamic Http Content](dynamic-content.html)
-   - [Parsing Data](dynamic-content.html#ParsingData)
+   - [Parsing Query String, Form Data and File Uploads](dynamic-content.html#ParsingData)
    - [RESTful Web Services](dynamic-content.html#Rest)
    - [Web Sockets](dynamic-content.html#WebSockets)
  - [Javascript Build Tool](build-tool.html)

@@ -20,8 +20,6 @@ Socko's configuration is defined in {{ page.WebServerConfigClass }}.
 Web server configuration is immutable. To change the configuration, a new {{ page.WebServerClass }} class
 must be instanced with the new configuration and started.
 
-Configuration can be hard coded or externalized in Akka configuration files.
-
 Socko configuration settings can be grouped as:
  - [Network](#Network)
  - [Web Logs](#WebLogs)
@@ -29,7 +27,7 @@ Socko configuration settings can be grouped as:
 
 
 
-## Hard Coding vs Akka Configuration File
+## Loading Configuration
 
 Configuration can be changed in [code](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/config/CodedConfigApp.scala)
 or in the project's [Akka configuration file](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/config/AkkaConfigApp.scala).
@@ -58,7 +56,7 @@ Then, start the actor system and load the configuration from that system.
     val myWebServerConfig = MyWebServerConfig(actorSystem)
 {% endhighlight %}
     
-Lastly, add the following our `application.conf`
+Lastly, add the following your `application.conf`
 
     akka-config-example {
         port=9999
@@ -162,11 +160,11 @@ You can also turn it on programmatically as illustrated in the [web log example 
     val webServer = new WebServer(config, routes, actorSystem)
 {% endhighlight %}
     
-When turned on, the default behaviour is to write web logs to your installed [akka logger](http://doc.akka.io/docs/akka/2.0.1/scala/logging.html) 
-using {{ page.WebLogWriterClass }}. The akka logger asynchronously writes to the log so it will not slow down 
+When turned on, the default behaviour is to write web logs to your installed [Akka logger](http://doc.akka.io/docs/akka/2.0.1/scala/logging.html) 
+using {{ page.WebLogWriterClass }}. The Akka logger asynchronously writes to the log so it will not slow down 
 your application down.
 
-To activate akka logging, add the following to `application.conf`:
+To activate Akka logging, add the following to `application.conf`:
 
     akka {
       event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
@@ -224,11 +222,11 @@ Web log events can be recorded via the processing context.
    
  - {{ page.WebSocketFrameEventClass }}
  
-   Web log events are **NOT** automatically recorded for you. This is becasue web sockets do not strictly follow 
+   Web log events are **NOT** automatically recorded for you. This is because web sockets do not strictly follow 
    the request/response structure of HTTP. For example, in a chat server, a broadcast message will not have a request
    frame.
    
-   If you wish to record a web log event, you can call `writeWebLog()`. The method, uri and other details
+   If you wish to record a web log event, you can call `writeWebLog()`. The method, URI and other details
    of the event to be recorded is arbitrarily set by you.
    
  - {{ page.WebSocketHandshakeEventClass }}

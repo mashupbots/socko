@@ -9,6 +9,20 @@ WebServerConfigClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebS
 ---
 # Socko User Guide - Quick Start
 
+
+## Get Socko
+
+You must have **Scala 2.10** installed. We recommend that you have **JDK 7** installed.
+
+Add the following to your `build.sbt`.  Replace `X.Y.Z` with the version number.
+
+    libraryDependencies += "org.mashupbots.socko" %% "socko-webserver" % "X.Y.Z"
+
+
+Note: JDK 6 is supported for the `webserver` and `rest` modules. All other modules require JDK 7. 
+Further more, the SPDY protocol requires JDK 7.
+
+
 ## Hello App Walkthrough
 
 The [Quick Start](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/quickstart) 

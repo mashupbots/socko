@@ -23,6 +23,59 @@ import java.net.URI
 /**
  * Configuration for REST handler
  *
+ * This can also be loaded from an externalized AKKA configuration file. For example:
+ * 
+ * {{{
+ *   rest-config {
+ *     # The version of your API. Required.
+ *     api-version="1.0"
+ *     
+ *     # Root path to your API with the scheme, domain and port. Required. 
+ *     # This is the path as seen by the end user and not from on the local server.
+ *     root-api-url=http://yourdomain.com/api
+ *     
+ *     # Swagger definition version. Defaults to `1.1` if setting is omitted.
+ *     swagger-version="1.1"
+ *     
+ *     # Path segments to group your APIs into Swagger resources. For exmaple, `/pet` is one resource
+ *     # while `/user` is another. Default is `1` which refers to the first relative path segment.
+ *     swagger-api-grouping-path-segment=1
+ *     
+ *     # Number of seconds before a request is timed out. 
+ *     # Defaults to `60` seconds if setting is omitted.
+ *     request-timeout-seconds=60
+ *     
+ *     # Number of seconds before a SockoEvent is removed from the cache and cannot be accessed by 
+ *     # your actor. Defaults to `5` if setting is omitted.
+ *     socko-event-cache-timeout-seconds=5
+ *     
+ *     # Maximum number of workers per RestHandler
+ *     # Defaults to 100 if setting is omitted.
+ *     max-worker-count=100
+ *     
+ *     # Reschedule a message for processing again using this delay when max worker count has been reached.
+ *     # Defaults to 500 if setting is omitted 
+ *     max-worker-reschedule-milliseconds=500
+ *     
+ *     # Determines if the message from runtime exceptions caught during handing of a REST request is returned   
+ *     # to the caller in addition to the HTTP status code. Values are: `Never`, `BadRequestsOnly`, 
+ *     # `InternalServerErrorOnly or `All`. 
+ *     # Defaults to `Never` if setting is omitted 
+ *     report-runtime-exception=Never
+ *   }
+ * }}}
+ * 
+ * can be loaded as follows:
+ * {{{
+ *   object MyRestHandlerConfig extends ExtensionId[RestConfig] with ExtensionIdProvider {
+ *     override def lookup = MyRestHandlerConfig
+ *     override def createExtension(system: ExtendedActorSystem) =
+ *       new RestConfig(system.settings.config, "rest-config")
+ *   }
+ *
+ *   val myRestConfig = MyRestHandlerConfig(actorSystem)
+ * }}} 
+ *  
  * @param apiVersion the version of your API
  * @param rootApiUrl Root path to your API with the scheme, domain and port. For example, `http://yourdomain.com/api`.
  *   This is the path as seen by the end user and not from on the local server.
@@ -47,8 +100,8 @@ import java.net.URI
  * @param maxWorkerCount Maximum number of workers per [[org.mashupbots.socko.rest.RestHandler]].
  * @param maxWorkerRescheduleMilliSeconds Reschedule a message for processing again using this delay when max worker
  *   count has been reached.
- * @param reportRuntimeException Returns the message from runtime exceptions caught during handing of a REST request
- *   in addition to the HTTP status code.
+ * @param reportRuntimeException Determines if the message from runtime exceptions caught during handing of a 
+ *   REST request is returned to the caller in addition to the HTTP status code.
  *
  *   Two types of exceptions are raised: `400 Bad Requests` and `500 Internal Server Error`.  If turned on, the
  *   message will be return in the response and the content type set to `text/plain; charset=UTF-8`.
