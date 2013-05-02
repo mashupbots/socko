@@ -15,6 +15,112 @@ This is the first release of the REST handler. It supports [Swagger](https://dev
 and does **not** use annotations. There is more info in the [User Guide](/docs/0.3.0/guides/dynamic-content.html#Rest) 
 and [example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/rest).
 
+For the impatient, here's a code snippet:
+
+{% highlight scala %}
+  //
+  // Data Model
+  //
+  case class Tag(id: Long, name: String)
+  case class Category(id: Long, name: String)
+  case class Pet(id: Long, category: Category, name: String, photoUrls: List[String], tags: List[Tag], status: String)
+  object Pet extends RestModelMetaData {
+    val modelProperties = Seq(
+      RestPropertyMetaData("name", "Name of the pet"),
+      RestPropertyMetaData("status", "pet status in the store", Some(AllowableValuesList(List("available", "pending", "sold")))))
+  }
+
+  //
+  // Business Rules
+  //
+  case class GetPetRequest(context: RestRequestContext, petId: Long) extends RestRequest
+  case class GetPetResponse(context: RestResponseContext, pet: Option[Pet]) extends RestResponse
+  class PetProcessor() extends Actor with akka.actor.ActorLogging {
+    def receive = {
+      case req: GetPetRequest =>
+        val pet = PetData.getPetById(req.petId)
+        val response = if (pet != null) {
+          GetPetResponse(req.context.responseContext, Some(pet))
+        } else {
+          GetPetResponse(req.context.responseContext(404), None)
+        }
+        sender ! response
+        context.stop(self)
+    }
+  }
+
+  //
+  // REST Operation Registration
+  //
+  object GetPetRegistration extends RestRegistration {
+    val method = Method.GET
+    val path = "/pet/{petId}"
+    val requestParams = Seq(PathParam("petId", "ID of pet that needs to be fetched"))
+    def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = actorSystem.actorOf(Props[PetProcessor])
+    override val name = "getPetById"
+    override val description = "Find pet by ID"
+    override val notes = "Returns a pet based on ID"
+    override val errors = Seq(Error(400, "Invalid ID supplied"), Error(404, "Pet not found"))
+  }
+
+  //
+  // Start Socko
+  //
+  object RestApp extends Logger {
+    //
+    // STEP #1 - Define Actors and Start Akka
+    //
+    val actorConfig = """
+	  akka {
+	    event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+	    loglevel=DEBUG
+	    actor {
+	      deployment {
+	        /rest-router {
+	          router = round-robin
+	          nr-of-instances = 5
+	        }
+	      }
+	    }
+	  }"""
+
+    val actorSystem = ActorSystem("RestExampleActorSystem", ConfigFactory.parseString(actorConfig))
+
+    val restRegistry = RestRegistry("org.mashupbots.socko.examples.rest",
+      RestConfig("1.0", "http://localhost:8888/api", reportRuntimeException = ReportRuntimeException.All))
+
+    val restRouter = actorSystem.actorOf(Props(new RestHandler(restRegistry)).withRouter(FromConfig()), "rest-router")
+
+    //
+    // STEP #2 - Define Routes
+    //
+    val routes = Routes({
+      case HttpRequest(request) => request match {
+        case PathSegments("api" :: relativePath) => {
+          // REST API - just pass the request to the handler for processing
+          restRouter ! request
+        }
+      }
+    })
+
+    //
+    // STEP #3 - Start and Stop Socko Web Server
+    //
+    def main(args: Array[String]) {
+      // Start web server
+      val config = WebServerConfig(webLog = Some(WebLogConfig()))
+      val webServer = new WebServer(config, routes, actorSystem)
+      Runtime.getRuntime.addShutdownHook(new Thread {
+        override def run {
+          webServer.stop()
+        }
+      })
+      webServer.start()
+    }
+  }
+
+{% endhighlight %}
+
 Download [socko-webserver_2.10-0.3.0.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.10/0.3.0/socko-webserver_2.10-0.3.0.jar).
 
 For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
