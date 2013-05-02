@@ -120,9 +120,10 @@ object SockoBuild extends Build {
 
   lazy val rest = Project(id = "socko-rest",
                          base = file("socko-rest"),
-                         dependencies = Seq(webserver),
+                         dependencies = Seq(webserver),                         
                          settings = defaultSettings ++ compileJdk6Settings ++ Seq(
-                           libraryDependencies ++= Dependencies.rest
+                           libraryDependencies ++= Dependencies.rest,
+                           parallelExecution in Test := false
                          ))  
 
   lazy val examples = Project(id = "socko-examples",

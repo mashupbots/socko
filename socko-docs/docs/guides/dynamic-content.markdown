@@ -112,6 +112,10 @@ provide your users with your API documentation straight from your code.
 The current limitations of Socko's {{ page.RestHandlerClass }} are:
  - Only JSON is supported. XML is not supported.
  - Only HTTP is supported. Web Socket is not supported.
+ - This module relies on Scala reflection. Reflection is tagged as experimental in Scala 2.10. There is also 
+   an issue with [thread safety](http://docs.scala-lang.org/overviews/reflection/thread-safety.html). For unit tests
+   to work, you have to execute them **serially** (in `sbt` set `parallelExecution in Test := false`). Also,
+   instancing {{ page.RestRegistryClass }} in Step #5 must be performed in a single thead.
 
 To use the {{ page.RestHandlerClass }} class, follow the 5 steps below. The example code can be found in the 
 [Pet Shop example REST app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/rest).
@@ -124,9 +128,6 @@ In order to use the Socko RESTful Web Service framework, you need to add an extr
 Add the following to your `build.sbt`.  Replace `X.Y.Z` with the version number.
 
     libraryDependencies += "org.mashupbots.socko" %% "socko-rest" % "X.Y.Z"
-
-**Note** that this module relies on Scala reflection. Reflection is tagged as experimental in Scala 2.10. There is also 
-an issue with [thread safety](http://docs.scala-lang.org/overviews/reflection/thread-safety.html).
 
 
 ### Step 2. Implement your Data Model <a class="blank" id="RestDefinition">&nbsp;</a>
