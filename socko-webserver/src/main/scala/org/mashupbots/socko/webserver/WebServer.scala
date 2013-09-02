@@ -25,9 +25,7 @@ import org.mashupbots.socko.events.SockoEvent
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.WebLogWriter
 
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.actor.Props
+import akka.actor.{ActorRefFactory, ActorRef, Props}
 
 /**
  * Socko Web Server
@@ -47,7 +45,7 @@ import akka.actor.Props
 class WebServer(
   val config: WebServerConfig,
   val routes: PartialFunction[SockoEvent, Unit],
-  val actorSystem: ActorSystem) extends Logger {
+  val actorSystem: ActorRefFactory) extends Logger {
 
   require(config != null)
   config.validate()
@@ -114,13 +112,13 @@ class WebServer(
       bootstrap.setOption("child.soLinger", config.tcp.soLinger.get)
     }
     if (config.tcp.trafficClass.isDefined) {
-      bootstrap.setOption("child.trafficClass", config.tcp.trafficClass.get);
+      bootstrap.setOption("child.trafficClass", config.tcp.trafficClass.get)
     }
     if (config.tcp.reuseAddress.isDefined) {
-      bootstrap.setOption("child.reuseAddress", config.tcp.reuseAddress.get);
+      bootstrap.setOption("child.reuseAddress", config.tcp.reuseAddress.get)
     }
     if (config.tcp.acceptBackLog.isDefined) {
-      bootstrap.setOption("child.backlog", config.tcp.acceptBackLog.get);
+      bootstrap.setOption("child.backlog", config.tcp.acceptBackLog.get)
     }
     
     bootstrap.setPipelineFactory(new PipelineFactory(this))
