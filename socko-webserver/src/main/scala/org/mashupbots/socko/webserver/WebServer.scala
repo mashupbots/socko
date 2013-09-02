@@ -40,12 +40,12 @@ import akka.actor.{ActorRefFactory, ActorRef, Props}
  *
  * @param config Web server configuration
  * @param routes Routes for processing requests
- * @param actorSystem Actor system that can be used to host Socko actors
+ * @param actorFactory Actor factory that can be used to create Socko actors
  */
 class WebServer(
   val config: WebServerConfig,
   val routes: PartialFunction[SockoEvent, Unit],
-  val actorSystem: ActorRefFactory) extends Logger {
+  val actorFactory: ActorRefFactory) extends Logger {
 
   require(config != null)
   config.validate()
@@ -74,10 +74,10 @@ class WebServer(
     None
   } else if (config.webLog.get.customActorPath.isEmpty) {
     // Turn on default web log writer
-    Some(actorSystem.actorOf(Props(new WebLogWriter(config.webLog.get.format))))
+    Some(actorFactory.actorOf(Props(new WebLogWriter(config.webLog.get.format))))
   } else {
     // Use custom provided web log writer
-    Some(actorSystem.actorFor(config.webLog.get.customActorPath.get))
+    Some(actorFactory.actorFor(config.webLog.get.customActorPath.get))
   }
 
   /**
