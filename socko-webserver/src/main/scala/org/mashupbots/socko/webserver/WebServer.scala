@@ -40,7 +40,7 @@ import akka.actor.{ActorRefFactory, ActorRef, Props}
  *
  * @param config Web server configuration
  * @param routes Routes for processing requests
- * @param actorFactory Actor factory that can be used to create Socko actors
+ * @param actorFactory Actor factory (such as an ActorSystem) that can be used to create Socko actors
  */
 class WebServer(
   val config: WebServerConfig,
