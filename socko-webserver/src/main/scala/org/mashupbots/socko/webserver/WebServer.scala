@@ -26,6 +26,10 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.WebLogWriter
 
 import akka.actor.{ActorRefFactory, ActorRef, Props}
+import akka.util.Timeout
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 /**
  * Socko Web Server
@@ -77,7 +81,10 @@ class WebServer(
     Some(actorFactory.actorOf(Props(new WebLogWriter(config.webLog.get.format))))
   } else {
     // Use custom provided web log writer
-    Some(actorFactory.actorFor(config.webLog.get.customActorPath.get))
+    // TODO - change to non blocking
+    implicit val timeout = Timeout(5 seconds)
+    val actorRef = Await.result(actorFactory.actorSelection(config.webLog.get.customActorPath.get).resolveOne(), timeout.duration)
+    Some(actorRef)
   }
 
   /**

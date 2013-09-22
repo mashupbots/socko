@@ -109,7 +109,7 @@ class ChatHandler extends Actor {
     val time = new GregorianCalendar()
     val ts = dateFormatter.format(time.getTime())
 
-    val broadcaster = context.actorFor("/user/webSocketBroadcaster")
+    val broadcaster = context.actorSelection("/user/webSocketBroadcaster")
     broadcaster ! WebSocketBroadcastText(ts + " " + event.readText)
   }
 
