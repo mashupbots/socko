@@ -1,0 +1,1275 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>rest - org.mashupbots.socko.rest</title>
+          <meta name="description" content="rest - org.mashupbots.socko.rest" />
+          <meta name="keywords" content="rest org.mashupbots.socko.rest" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'org.mashupbots.socko.rest.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a href="../../../package.html" class="extype" name="org">org</a>.<a href="../../package.html" class="extype" name="org.mashupbots">mashupbots</a>.<a href="../package.html" class="extype" name="org.mashupbots.socko">socko</a></p>
+        <h1>rest</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rest</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="org.mashupbots.socko.rest.AllowableValues" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="AllowableValuesextendsAnyRef"></a>
+      <a id="AllowableValues:AllowableValues"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="AllowableValues.html"><span class="name">AllowableValues</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Identifies a <a href="RestRequest.html" class="extype" name="org.mashupbots.socko.rest.RestRequest">org.mashupbots.socko.rest.RestRequest</a> parameter validation</p>
+    </li><li name="org.mashupbots.socko.rest.AllowableValuesList" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AllowableValuesList[T]extendsAllowableValueswithProductwithSerializable"></a>
+      <a id="AllowableValuesList[T]:AllowableValuesList[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AllowableValuesList.html"><span class="name">AllowableValuesList</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="values">values: <span class="extype" name="scala.List">List</span>[<span class="extype" name="org.mashupbots.socko.rest.AllowableValuesList.T">T</span>]</span>, <span name="valueType">valueType: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;LIST&quot;</span></span>)</span><span class="result"> extends <a href="AllowableValues.html" class="extype" name="org.mashupbots.socko.rest.AllowableValues">AllowableValues</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.rest.AllowableValuesRange" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AllowableValuesRange[T]extendsAllowableValueswithProductwithSerializable"></a>
+      <a id="AllowableValuesRange[T]:AllowableValuesRange[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AllowableValuesRange.html"><span class="name">AllowableValuesRange</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="min">min: <span class="extype" name="org.mashupbots.socko.rest.AllowableValuesRange.T">T</span></span>, <span name="max">max: <span class="extype" name="org.mashupbots.socko.rest.AllowableValuesRange.T">T</span></span>, <span name="valueType">valueType: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;RANGE&quot;</span></span>)</span><span class="result"> extends <a href="AllowableValues.html" class="extype" name="org.mashupbots.socko.rest.AllowableValues">AllowableValues</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.rest.BodyBinding" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BodyBindingextendsRequestParamBindingwithProductwithSerializable"></a>
+      <a id="BodyBinding:BodyBinding"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="BodyBinding.html"><span class="name">BodyBinding</span></a><span class="params">(<span name="config">config: <a href="RestConfig.html" class="extype" name="org.mashupbots.socko.rest.RestConfig">RestConfig</a></span>, <span name="registration">registration: <a href="BodyParam.html" class="extype" name="org.mashupbots.socko.rest.BodyParam">BodyParam</a></span>, <span name="tpeCategory">tpeCategory: <a href="RequestBodyDataType$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="org.mashupbots.socko.rest.RequestBodyDataType.Value">RequestBodyDataType.Value</a></span>, <span name="tpe">tpe: <span class="extype" name="scala.reflect.api.Types.Type">scala.reflect.api.JavaUniverse.Type</span></span>, <span name="objectClass">objectClass: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.Class">Class</span>[_]]</span>, <span name="required">required: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="RequestParamBinding.html" class="extype" name="org.mashupbots.socko.rest.RequestParamBinding">RequestParamBinding</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Binds a value in the request class to a value in the request body</p>
+    </li><li name="org.mashupbots.socko.rest.BodyParam" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BodyParamextendsRequestParamwithProductwithSerializable"></a>
+      <a id="BodyParam:BodyParam"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="BodyParam.html"><span class="name">BodyParam</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="description">description: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span><span class="result"> extends <a href="RequestParam.html" class="extype" name="org.mashupbots.socko.rest.RequestParam">RequestParam</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Parameter that binds to a value in the header
+</p>
+    </li><li name="org.mashupbots.socko.rest.ByteArrayDataSerializer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ByteArrayDataSerializerextendsNonVoidDataSerializerwithProductwithSerializable"></a>
+      <a id="ByteArrayDataSerializer:ByteArrayDataSerializer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ByteArrayDataSerializer.html"><span class="name">ByteArrayDataSerializer</span></a><span class="params">(<span name="responseDataTerm">responseDataTerm: <span class="extype" name="scala.reflect.api.Symbols.TermSymbol">scala.reflect.api.JavaUniverse.TermSymbol</span></span>, <span name="rm">rm: <span class="extype" name="scala.reflect.api.JavaMirrors.Mirror">scala.reflect.api.JavaUniverse.Mirror</span></span>)</span><span class="result"> extends <a href="NonVoidDataSerializer.html" class="extype" name="org.mashupbots.socko.rest.NonVoidDataSerializer">NonVoidDataSerializer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Serialize a byte array (hint: this does not do much!)
+</p>
+    </li><li name="org.mashupbots.socko.rest.ByteSeqDataSerializer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ByteSeqDataSerializerextendsNonVoidDataSerializerwithProductwithSerializable"></a>
+      <a id="ByteSeqDataSerializer:ByteSeqDataSerializer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ByteSeqDataSerializer.html"><span class="name">ByteSeqDataSerializer</span></a><span class="params">(<span name="responseDataTerm">responseDataTerm: <span class="extype" name="scala.reflect.api.Symbols.TermSymbol">scala.reflect.api.JavaUniverse.TermSymbol</span></span>, <span name="rm">rm: <span class="extype" name="scala.reflect.api.JavaMirrors.Mirror">scala.reflect.api.JavaUniverse.Mirror</span></span>)</span><span class="result"> extends <a href="NonVoidDataSerializer.html" class="extype" name="org.mashupbots.socko.rest.NonVoidDataSerializer">NonVoidDataSerializer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Serialize a byte sequence (hint: this does not do much!)
+</p>
+    </li><li name="org.mashupbots.socko.rest.DataSerializer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="DataSerializerextendsAnyRef"></a>
+      <a id="DataSerializer:DataSerializer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DataSerializer.html"><span class="name">DataSerializer</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Serializes data into a byte array
+</p>
+    </li><li name="org.mashupbots.socko.rest.Error" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ErrorextendsProductwithSerializable"></a>
+      <a id="Error:Error"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Error.html"><span class="name">Error</span></a><span class="params">(<span name="code">code: <span class="extype" name="scala.Int">Int</span></span>, <span name="reason">reason: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Details a HTTP error
+</p>
+    </li><li name="org.mashupbots.socko.rest.HeaderBinding" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HeaderBindingextendsPrimitiveParamBindingwithProductwithSerializable"></a>
+      <a id="HeaderBinding:HeaderBinding"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HeaderBinding.html"><span class="name">HeaderBinding</span></a><span class="params">(<span name="config">config: <a href="RestConfig.html" class="extype" name="org.mashupbots.socko.rest.RestConfig">RestConfig</a></span>, <span name="registration">registration: <a href="HeaderParam.html" class="extype" name="org.mashupbots.socko.rest.HeaderParam">HeaderParam</a></span>, <span name="tpe">tpe: <span class="extype" name="scala.reflect.api.Types.Type">scala.reflect.api.JavaUniverse.Type</span></span>, <span name="required">required: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="PrimitiveParamBinding.html" class="extype" name="org.mashupbots.socko.rest.PrimitiveParamBinding">PrimitiveParamBinding</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Binds a value in the request class to a value in the request header</p>
+    </li><li name="org.mashupbots.socko.rest.HeaderParam" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HeaderParamextendsRequestParamwithProductwithSerializable"></a>
+      <a id="HeaderParam:HeaderParam"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HeaderParam.html"><span class="name">HeaderParam</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="description">description: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="headerName">headerName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="allowMultiple">allowMultiple: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="allowableValues">allowableValues: <span class="extype" name="scala.Option">Option</span>[<a href="AllowableValues.html" class="extype" name="org.mashupbots.socko.rest.AllowableValues">AllowableValues</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="RequestParam.html" class="extype" name="org.mashupbots.socko.rest.RequestParam">RequestParam</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Parameter that binds to a value in the header
+</p>
+    </li><li name="org.mashupbots.socko.rest.NoSerializationRestResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NoSerializationRestResponseextendsRestResponsewithProductwithSerializable"></a>
+      <a id="NoSerializationRestResponse:NoSerializationRestResponse"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="NoSerializationRestResponse.html"><span class="name">NoSerializationRestResponse</span></a><span class="params">(<span name="context">context: <a href="RestResponseContext.html" class="extype" name="org.mashupbots.socko.rest.RestResponseContext">RestResponseContext</a></span>)</span><span class="result"> extends <a href="RestResponse.html" class="extype" name="org.mashupbots.socko.rest.RestResponse">RestResponse</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Class to denote that no serialization is required because it will be custom handled
+by the REST processing actor
+</p>
+    </li><li name="org.mashupbots.socko.rest.NonVoidDataSerializer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NonVoidDataSerializerextendsDataSerializer"></a>
+      <a id="NonVoidDataSerializer:NonVoidDataSerializer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NonVoidDataSerializer.html"><span class="name">NonVoidDataSerializer</span></a><span class="result"> extends <a href="DataSerializer.html" class="extype" name="org.mashupbots.socko.rest.DataSerializer">DataSerializer</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Encapsulates common aspects of non void serializers
+</p>
+    </li><li name="org.mashupbots.socko.rest.ObjectDataSerializer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ObjectDataSerializerextendsNonVoidDataSerializerwithProductwithSerializable"></a>
+      <a id="ObjectDataSerializer:ObjectDataSerializer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ObjectDataSerializer.html"><span class="name">ObjectDataSerializer</span></a><span class="params">(<span name="tpe">tpe: <span class="extype" name="scala.reflect.api.Types.Type">scala.reflect.api.JavaUniverse.Type</span></span>, <span name="responseDataTerm">responseDataTerm: <span class="extype" name="scala.reflect.api.Symbols.TermSymbol">scala.reflect.api.JavaUniverse.TermSymbol</span></span>, <span name="rm">rm: <span class="extype" name="scala.reflect.api.JavaMirrors.Mirror">scala.reflect.api.JavaUniverse.Mirror</span></span>)</span><span class="result"> extends <a href="NonVoidDataSerializer.html" class="extype" name="org.mashupbots.socko.rest.NonVoidDataSerializer">NonVoidDataSerializer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Serialize an object into a UTF-8 JSON byte array</p>
+    </li><li name="org.mashupbots.socko.rest.PathBinding" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PathBindingextendsPrimitiveParamBindingwithProductwithSerializable"></a>
+      <a id="PathBinding:PathBinding"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PathBinding.html"><span class="name">PathBinding</span></a><span class="params">(<span name="config">config: <a href="RestConfig.html" class="extype" name="org.mashupbots.socko.rest.RestConfig">RestConfig</a></span>, <span name="registration">registration: <a href="PathParam.html" class="extype" name="org.mashupbots.socko.rest.PathParam">PathParam</a></span>, <span name="tpe">tpe: <span class="extype" name="scala.reflect.api.Types.Type">scala.reflect.api.JavaUniverse.Type</span></span>, <span name="pathIndex">pathIndex: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <a href="PrimitiveParamBinding.html" class="extype" name="org.mashupbots.socko.rest.PrimitiveParamBinding">PrimitiveParamBinding</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Binds a value in the request class to a value in the request uri path</p>
+    </li><li name="org.mashupbots.socko.rest.PathParam" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PathParamextendsRequestParamwithProductwithSerializable"></a>
+      <a id="PathParam:PathParam"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PathParam.html"><span class="name">PathParam</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="description">description: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="allowableValues">allowableValues: <span class="extype" name="scala.Option">Option</span>[<a href="AllowableValues.html" class="extype" name="org.mashupbots.socko.rest.AllowableValues">AllowableValues</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="RequestParam.html" class="extype" name="org.mashupbots.socko.rest.RequestParam">RequestParam</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Parameter that binds to a value in the path
+</p>
+    </li><li name="org.mashupbots.socko.rest.PathSegment" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PathSegmentextendsProductwithSerializable"></a>
+      <a id="PathSegment:PathSegment"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PathSegment.html"><span class="name">PathSegment</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="isVariable">isVariable: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Encapsulates a path segment</p>
+    </li><li name="org.mashupbots.socko.rest.PrimitiveDataSerializer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PrimitiveDataSerializerextendsNonVoidDataSerializerwithProductwithSerializable"></a>
+      <a id="PrimitiveDataSerializer:PrimitiveDataSerializer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PrimitiveDataSerializer.html"><span class="name">PrimitiveDataSerializer</span></a><span class="params">(<span name="tpe">tpe: <span class="extype" name="scala.reflect.api.Types.Type">scala.reflect.api.JavaUniverse.Type</span></span>, <span name="responseDataTerm">responseDataTerm: <span class="extype" name="scala.reflect.api.Symbols.TermSymbol">scala.reflect.api.JavaUniverse.TermSymbol</span></span>, <span name="rm">rm: <span class="extype" name="scala.reflect.api.JavaMirrors.Mirror">scala.reflect.api.JavaUniverse.Mirror</span></span>)</span><span class="result"> extends <a href="NonVoidDataSerializer.html" class="extype" name="org.mashupbots.socko.rest.NonVoidDataSerializer">NonVoidDataSerializer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Serialize a primitive into a UTF-8 JSON byte array</p>
+    </li><li name="org.mashupbots.socko.rest.PrimitiveParamBinding" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="PrimitiveParamBindingextendsRequestParamBinding"></a>
+      <a id="PrimitiveParamBinding:PrimitiveParamBinding"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="PrimitiveParamBinding.html"><span class="name">PrimitiveParamBinding</span></a><span class="result"> extends <a href="RequestParamBinding.html" class="extype" name="org.mashupbots.socko.rest.RequestParamBinding">RequestParamBinding</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Path, QueryString and Header params must bind to a primitive.</p>
+    </li><li name="org.mashupbots.socko.rest.QueryParam" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="QueryParamextendsRequestParamwithProductwithSerializable"></a>
+      <a id="QueryParam:QueryParam"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="QueryParam.html"><span class="name">QueryParam</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="description">description: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="queryName">queryName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="allowMultiple">allowMultiple: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="allowableValues">allowableValues: <span class="extype" name="scala.Option">Option</span>[<a href="AllowableValues.html" class="extype" name="org.mashupbots.socko.rest.AllowableValues">AllowableValues</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="RequestParam.html" class="extype" name="org.mashupbots.socko.rest.RequestParam">RequestParam</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Parameter that binds to a value in the query string
+</p>
+    </li><li name="org.mashupbots.socko.rest.QueryStringBinding" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="QueryStringBindingextendsPrimitiveParamBindingwithProductwithSerializable"></a>
+      <a id="QueryStringBinding:QueryStringBinding"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="QueryStringBinding.html"><span class="name">QueryStringBinding</span></a><span class="params">(<span name="config">config: <a href="RestConfig.html" class="extype" name="org.mashupbots.socko.rest.RestConfig">RestConfig</a></span>, <span name="registration">registration: <a href="QueryParam.html" class="extype" name="org.mashupbots.socko.rest.QueryParam">QueryParam</a></span>, <span name="tpe">tpe: <span class="extype" name="scala.reflect.api.Types.Type">scala.reflect.api.JavaUniverse.Type</span></span>, <span name="required">required: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="PrimitiveParamBinding.html" class="extype" name="org.mashupbots.socko.rest.PrimitiveParamBinding">PrimitiveParamBinding</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Binds a value in the request class to a value in the request query string</p>
+    </li><li name="org.mashupbots.socko.rest.RequestParam" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RequestParamextendsAnyRef"></a>
+      <a id="RequestParam:RequestParam"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="RequestParam.html"><span class="name">RequestParam</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Identifies a <a href="RestRequest.html" class="extype" name="org.mashupbots.socko.rest.RestRequest">org.mashupbots.socko.rest.RestRequest</a> parameter binding
+</p>
+    </li><li name="org.mashupbots.socko.rest.RequestParamBinding" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RequestParamBindingextendsAnyRef"></a>
+      <a id="RequestParamBinding:RequestParamBinding"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="RequestParamBinding.html"><span class="name">RequestParamBinding</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Binding of a request value
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestBindingException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestBindingExceptionextendsExceptionwithProductwithSerializable"></a>
+      <a id="RestBindingException:RestBindingException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestBindingException.html"><span class="name">RestBindingException</span></a><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Exception raised during the process of deserializing and dispatching a request
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestConfigextendsExtensionwithProductwithSerializable"></a>
+      <a id="RestConfig:RestConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestConfig.html"><span class="name">RestConfig</span></a><span class="params">(<span name="apiVersion">apiVersion: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="rootApiUrl">rootApiUrl: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="swaggerVersion">swaggerVersion: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;1.1&quot;</span></span>, <span name="swaggerApiGroupingPathSegment">swaggerApiGroupingPathSegment: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>, <span name="requestTimeoutSeconds">requestTimeoutSeconds: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">60</span></span>, <span name="sockoEventCacheTimeoutSeconds">sockoEventCacheTimeoutSeconds: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">5</span></span>, <span name="maxWorkerCount">maxWorkerCount: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">100</span></span>, <span name="maxWorkerRescheduleMilliSeconds">maxWorkerRescheduleMilliSeconds: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">500</span></span>, <span name="reportRuntimeException">reportRuntimeException: <a href="ReportRuntimeException$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="org.mashupbots.socko.rest.ReportRuntimeException.Value">ReportRuntimeException.Value</a> = <span class="symbol">ReportRuntimeException.Never</span></span>)</span><span class="result"> extends <span class="extype" name="akka.actor.Extension">Extension</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Configuration for REST handler</p>
+    </li><li name="org.mashupbots.socko.rest.RestDefintionException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestDefintionExceptionextendsExceptionwithProductwithSerializable"></a>
+      <a id="RestDefintionException:RestDefintionException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestDefintionException.html"><span class="name">RestDefintionException</span></a><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Error with your REST definition
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestEndPoint" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestEndPointextendsProductwithSerializable"></a>
+      <a id="RestEndPoint:RestEndPoint"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestEndPoint.html"><span class="name">RestEndPoint</span></a><span class="params">(<span name="method">method: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="rootPath">rootPath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="relativePath">relativePath: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">The HTTP method and path to a REST operation
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestHandlerextendsActorwithFSM[org.mashupbots.socko.rest.RestHandlerState,org.mashupbots.socko.rest.RestHandlerData]withActorLogging"></a>
+      <a id="RestHandler:RestHandler"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestHandler.html"><span class="name">RestHandler</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span> with <span class="extype" name="akka.actor.FSM">FSM</span>[<a href="RestHandlerState.html" class="extype" name="org.mashupbots.socko.rest.RestHandlerState">RestHandlerState</a>, <a href="RestHandlerData.html" class="extype" name="org.mashupbots.socko.rest.RestHandlerData">RestHandlerData</a>] with <span class="extype" name="akka.actor.ActorLogging">ActorLogging</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">The initial processing point for incoming requests.</p>
+    </li><li name="org.mashupbots.socko.rest.RestHandlerData" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RestHandlerDataextendsAnyRef"></a>
+      <a id="RestHandlerData:RestHandlerData"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="RestHandlerData.html"><span class="name">RestHandlerData</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">FSM data for <a href="RestHandler.html" class="extype" name="org.mashupbots.socko.rest.RestHandler">org.mashupbots.socko.rest.RestHandler</a>
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestHandlerState" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RestHandlerStateextendsAnyRef"></a>
+      <a id="RestHandlerState:RestHandlerState"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="RestHandlerState.html"><span class="name">RestHandlerState</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">FSM states for <a href="RestHandler.html" class="extype" name="org.mashupbots.socko.rest.RestHandler">org.mashupbots.socko.rest.RestHandler</a>
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestHandlerWorkerCountRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestHandlerWorkerCountRequestextendsProductwithSerializable"></a>
+      <a id="RestHandlerWorkerCountRequest:RestHandlerWorkerCountRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestHandlerWorkerCountRequest.html"><span class="name">RestHandlerWorkerCountRequest</span></a><span class="params">()</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Message that can be sent to a RestHandler to retrieve the current number of workers
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestHttpWorker" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestHttpWorkerextendsActorwithFSM[org.mashupbots.socko.rest.RestHttpWorkerState,org.mashupbots.socko.rest.RestHttpWorkerData]withActorLogging"></a>
+      <a id="RestHttpWorker:RestHttpWorker"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestHttpWorker.html"><span class="name">RestHttpWorker</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span> with <span class="extype" name="akka.actor.FSM">FSM</span>[<a href="RestHttpWorkerState.html" class="extype" name="org.mashupbots.socko.rest.RestHttpWorkerState">RestHttpWorkerState</a>, <a href="RestHttpWorkerData.html" class="extype" name="org.mashupbots.socko.rest.RestHttpWorkerData">RestHttpWorkerData</a>] with <span class="extype" name="akka.actor.ActorLogging">ActorLogging</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Processes a HTTP REST request.</p>
+    </li><li name="org.mashupbots.socko.rest.RestHttpWorkerData" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RestHttpWorkerDataextendsAnyRef"></a>
+      <a id="RestHttpWorkerData:RestHttpWorkerData"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="RestHttpWorkerData.html"><span class="name">RestHttpWorkerData</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">FSM data for <a href="RestHttpWorker.html" class="extype" name="org.mashupbots.socko.rest.RestHttpWorker">org.mashupbots.socko.rest.RestHttpWorker</a>
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestHttpWorkerState" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RestHttpWorkerStateextendsAnyRef"></a>
+      <a id="RestHttpWorkerState:RestHttpWorkerState"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="RestHttpWorkerState.html"><span class="name">RestHttpWorkerState</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">FSM states for <a href="RestHttpWorker.html" class="extype" name="org.mashupbots.socko.rest.RestHttpWorker">org.mashupbots.socko.rest.RestHttpWorker</a>
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestModelMetaData" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RestModelMetaDataextendsAnyRef"></a>
+      <a id="RestModelMetaData:RestModelMetaData"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="RestModelMetaData.html"><span class="name">RestModelMetaData</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Meta data to describe REST model classes.</p>
+    </li><li name="org.mashupbots.socko.rest.RestNotFoundException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestNotFoundExceptionextendsExceptionwithProductwithSerializable"></a>
+      <a id="RestNotFoundException:RestNotFoundException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestNotFoundException.html"><span class="name">RestNotFoundException</span></a><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Exception raised during if a matching operation cannot be found
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestOperation" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestOperationextendsProductwithSerializable"></a>
+      <a id="RestOperation:RestOperation"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestOperation.html"><span class="name">RestOperation</span></a><span class="params">(<span name="registration">registration: <a href="RestRegistration.html" class="extype" name="org.mashupbots.socko.rest.RestRegistration">RestRegistration</a></span>, <span name="endPoint">endPoint: <a href="RestEndPoint.html" class="extype" name="org.mashupbots.socko.rest.RestEndPoint">RestEndPoint</a></span>, <span name="deserializer">deserializer: <a href="RestRequestDeserializer.html" class="extype" name="org.mashupbots.socko.rest.RestRequestDeserializer">RestRequestDeserializer</a></span>, <span name="serializer">serializer: <a href="RestResponseSerializer.html" class="extype" name="org.mashupbots.socko.rest.RestResponseSerializer">RestResponseSerializer</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A REST operation processes data in the following manner:</p>
+    </li><li name="org.mashupbots.socko.rest.RestProcessingException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestProcessingExceptionextendsExceptionwithProductwithSerializable"></a>
+      <a id="RestProcessingException:RestProcessingException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestProcessingException.html"><span class="name">RestProcessingException</span></a><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Exception raised during the process of a request
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestPropertyMetaData" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestPropertyMetaDataextendsProductwithSerializable"></a>
+      <a id="RestPropertyMetaData:RestPropertyMetaData"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestPropertyMetaData.html"><span class="name">RestPropertyMetaData</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="description">description: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="allowableValues">allowableValues: <span class="extype" name="scala.Option">Option</span>[<a href="AllowableValues.html" class="extype" name="org.mashupbots.socko.rest.AllowableValues">AllowableValues</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Describes a property in this model class
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestRegistration" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RestRegistrationextendsAnyRef"></a>
+      <a id="RestRegistration:RestRegistration"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestRegistration.html"><span class="name">RestRegistration</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Binds a <a href="RestRequest.html" class="extype" name="org.mashupbots.socko.rest.RestRequest">org.mashupbots.socko.rest.RestRequest</a>, <a href="RestResponse.html" class="extype" name="org.mashupbots.socko.rest.RestResponse">org.mashupbots.socko.rest.RestResponse</a> and
+a processor actor to an end point.</p>
+    </li><li name="org.mashupbots.socko.rest.RestRegistry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestRegistryextendsProductwithSerializable"></a>
+      <a id="RestRegistry:RestRegistry"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestRegistry.html"><span class="name">RestRegistry</span></a><span class="params">(<span name="operations">operations: <span class="extype" name="scala.Seq">Seq</span>[<a href="RestOperation.html" class="extype" name="org.mashupbots.socko.rest.RestOperation">RestOperation</a>]</span>, <span name="swaggerApiDocs">swaggerApiDocs: <a href="SwaggerApiDocs.html" class="extype" name="org.mashupbots.socko.rest.SwaggerApiDocs">SwaggerApiDocs</a></span>, <span name="config">config: <a href="RestConfig.html" class="extype" name="org.mashupbots.socko.rest.RestConfig">RestConfig</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Collection <a href="RestOperation.html" class="extype" name="org.mashupbots.socko.rest.RestOperation">org.mashupbots.socko.rest.RestOperation</a>s that will be used to process
+incoming requests.</p>
+    </li><li name="org.mashupbots.socko.rest.RestRequest" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RestRequestextendsAnyRef"></a>
+      <a id="RestRequest:RestRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="RestRequest.html"><span class="name">RestRequest</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A request to be processed by a REST processing actor
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestRequestContext" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestRequestContextextendsProductwithSerializable"></a>
+      <a id="RestRequestContext:RestRequestContext"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestRequestContext.html"><span class="name">RestRequestContext</span></a><span class="params">(<span name="id">id: <span class="extype" name="java.util.UUID">UUID</span></span>, <span name="endPoint">endPoint: <a href="../events/EndPoint.html" class="extype" name="org.mashupbots.socko.events.EndPoint">EndPoint</a></span>, <span name="headers">headers: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="eventType">eventType: <a href="SockoEventType$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="org.mashupbots.socko.rest.SockoEventType.Value">SockoEventType.Value</a></span>, <span name="timeoutSeconds">timeoutSeconds: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Provides context to a REST request.</p>
+    </li><li name="org.mashupbots.socko.rest.RestRequestDeserializer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestRequestDeserializerextendsProductwithSerializable"></a>
+      <a id="RestRequestDeserializer:RestRequestDeserializer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestRequestDeserializer.html"><span class="name">RestRequestDeserializer</span></a><span class="params">(<span name="config">config: <a href="RestConfig.html" class="extype" name="org.mashupbots.socko.rest.RestConfig">RestConfig</a></span>, <span name="requestClass">requestClass: <span class="extype" name="scala.reflect.api.Symbols.ClassSymbol">scala.reflect.api.JavaUniverse.ClassSymbol</span></span>, <span name="requestConstructorMirror">requestConstructorMirror: <span class="extype" name="scala.reflect.api.Mirrors.MethodMirror">scala.reflect.api.JavaUniverse.MethodMirror</span></span>, <span name="requestParamBindings">requestParamBindings: <span class="extype" name="scala.List">List</span>[<a href="RequestParamBinding.html" class="extype" name="org.mashupbots.socko.rest.RequestParamBinding">RequestParamBinding</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Deserializes incoming request data into a <a href="RestRequest.html" class="extype" name="org.mashupbots.socko.rest.RestRequest">org.mashupbots.socko.rest.RestRequest</a>
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestResponse" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RestResponseextendsAnyRef"></a>
+      <a id="RestResponse:RestResponse"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="RestResponse.html"><span class="name">RestResponse</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">The result of processing a <a href="RestRequest.html" class="extype" name="org.mashupbots.socko.rest.RestRequest">org.mashupbots.socko.rest.RestRequest</a>
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestResponseContext" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestResponseContextextendsProductwithSerializable"></a>
+      <a id="RestResponseContext:RestResponseContext"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestResponseContext.html"><span class="name">RestResponseContext</span></a><span class="params">(<span name="requestContext">requestContext: <a href="RestRequestContext.html" class="extype" name="org.mashupbots.socko.rest.RestRequestContext">RestRequestContext</a></span>, <span name="status">status: <a href="../events/HttpResponseStatus.html" class="extype" name="org.mashupbots.socko.events.HttpResponseStatus">HttpResponseStatus</a></span>, <span name="headers">headers: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Context of the REST response.</p>
+    </li><li name="org.mashupbots.socko.rest.RestResponseSerializer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestResponseSerializerextendsLoggerwithProductwithSerializable"></a>
+      <a id="RestResponseSerializer:RestResponseSerializer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RestResponseSerializer.html"><span class="name">RestResponseSerializer</span></a><span class="params">(<span name="config">config: <a href="RestConfig.html" class="extype" name="org.mashupbots.socko.rest.RestConfig">RestConfig</a></span>, <span name="responseClass">responseClass: <span class="extype" name="scala.reflect.api.Symbols.ClassSymbol">scala.reflect.api.JavaUniverse.ClassSymbol</span></span>, <span name="dataSerializer">dataSerializer: <a href="DataSerializer.html" class="extype" name="org.mashupbots.socko.rest.DataSerializer">DataSerializer</a></span>)</span><span class="result"> extends <a href="../infrastructure/Logger.html" class="extype" name="org.mashupbots.socko.infrastructure.Logger">Logger</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Serialized outgoing data from a <a href="RestResponse.html" class="extype" name="org.mashupbots.socko.rest.RestResponse">org.mashupbots.socko.rest.RestResponse</a>
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerApiDeclaration" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerApiDeclarationextendsSwaggerDocwithProductwithSerializable"></a>
+      <a id="SwaggerApiDeclaration:SwaggerApiDeclaration"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerApiDeclaration.html"><span class="name">SwaggerApiDeclaration</span></a><span class="params">(<span name="apiVersion">apiVersion: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="swaggerVersion">swaggerVersion: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="basePath">basePath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="resourcePath">resourcePath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="apis">apis: <span class="extype" name="scala.Seq">Seq</span>[<a href="SwaggerApiPath.html" class="extype" name="org.mashupbots.socko.rest.SwaggerApiPath">SwaggerApiPath</a>]</span>, <span name="models">models: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="SwaggerModel.html" class="extype" name="org.mashupbots.socko.rest.SwaggerModel">SwaggerModel</a>]</span>)</span><span class="result"> extends <a href="SwaggerDoc.html" class="extype" name="org.mashupbots.socko.rest.SwaggerDoc">SwaggerDoc</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Swagger <a href="https://github.com/wordnik/swagger-core/wiki/API-Declaration" target="_blank">API declaration</a>
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerApiDocs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerApiDocsextendsProductwithSerializable"></a>
+      <a id="SwaggerApiDocs:SwaggerApiDocs"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerApiDocs.html"><span class="name">SwaggerApiDocs</span></a><span class="params">(<span name="lookup">lookup: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Generated <a href="https://developers.helloreverb.com/swagger/" target="_blank">Swagger</a> API documentation
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerApiError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerApiErrorextendsProductwithSerializable"></a>
+      <a id="SwaggerApiError:SwaggerApiError"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerApiError.html"><span class="name">SwaggerApiError</span></a><span class="params">(<span name="code">code: <span class="extype" name="scala.Int">Int</span></span>, <span name="reason">reason: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">API error refers to the HTTP response status code and its description
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerApiOperation" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerApiOperationextendsProductwithSerializable"></a>
+      <a id="SwaggerApiOperation:SwaggerApiOperation"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerApiOperation.html"><span class="name">SwaggerApiOperation</span></a><span class="params">(<span name="httpMethod">httpMethod: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="summary">summary: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="notes">notes: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="deprecated">deprecated: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>, <span name="responseClass">responseClass: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="nickname">nickname: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="parameters">parameters: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Seq">Seq</span>[<a href="SwaggerApiParameter.html" class="extype" name="org.mashupbots.socko.rest.SwaggerApiParameter">SwaggerApiParameter</a>]]</span>, <span name="errorResponses">errorResponses: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Seq">Seq</span>[<a href="SwaggerApiError.html" class="extype" name="org.mashupbots.socko.rest.SwaggerApiError">SwaggerApiError</a>]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">API operation refers to a specific HTTP operation that can be performed
+for a path
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerApiParameter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerApiParameterextendsProductwithSerializable"></a>
+      <a id="SwaggerApiParameter:SwaggerApiParameter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerApiParameter.html"><span class="name">SwaggerApiParameter</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="description">description: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="paramType">paramType: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="dataType">dataType: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="required">required: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>, <span name="allowableValues">allowableValues: <span class="extype" name="scala.Option">Option</span>[<a href="AllowableValues.html" class="extype" name="org.mashupbots.socko.rest.AllowableValues">AllowableValues</a>]</span>, <span name="allowMultiple">allowMultiple: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">API <a href="https://github.com/wordnik/swagger-core/wiki/Parameters" target="_blank">parameter</a> refers to a path, body, query string or
+header parameter in a <a href="SwaggerApiOperation.html" class="extype" name="org.mashupbots.socko.rest.SwaggerApiOperation">org.mashupbots.socko.rest.SwaggerApiOperation</a>
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerApiPath" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerApiPathextendsProductwithSerializable"></a>
+      <a id="SwaggerApiPath:SwaggerApiPath"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerApiPath.html"><span class="name">SwaggerApiPath</span></a><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="operations">operations: <span class="extype" name="scala.Seq">Seq</span>[<a href="SwaggerApiOperation.html" class="extype" name="org.mashupbots.socko.rest.SwaggerApiOperation">SwaggerApiOperation</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">API path refers to a specific path and all the operations for that path
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerContext" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerContextextendsProductwithSerializable"></a>
+      <a id="SwaggerContext:SwaggerContext"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerContext.html"><span class="name">SwaggerContext</span></a><span class="params">(<span name="config">config: <a href="RestConfig.html" class="extype" name="org.mashupbots.socko.rest.RestConfig">RestConfig</a></span>, <span name="modelRegistry">modelRegistry: <a href="SwaggerModelRegistry.html" class="extype" name="org.mashupbots.socko.rest.SwaggerModelRegistry">SwaggerModelRegistry</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.rest.SwaggerDoc" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SwaggerDocextendsAnyRef"></a>
+      <a id="SwaggerDoc:SwaggerDoc"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerDoc.html"><span class="name">SwaggerDoc</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.rest.SwaggerModel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerModelextendsProductwithSerializable"></a>
+      <a id="SwaggerModel:SwaggerModel"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerModel.html"><span class="name">SwaggerModel</span></a><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="description">description: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="properties">properties: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="SwaggerModelProperty.html" class="extype" name="org.mashupbots.socko.rest.SwaggerModelProperty">SwaggerModelProperty</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A swagger model complex data type
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerModelProperty" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerModelPropertyextendsProductwithSerializable"></a>
+      <a id="SwaggerModelProperty:SwaggerModelProperty"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerModelProperty.html"><span class="name">SwaggerModelProperty</span></a><span class="params">(<span name="type">type: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="description">description: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="required">required: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>, <span name="allowableValues">allowableValues: <span class="extype" name="scala.Option">Option</span>[<a href="AllowableValues.html" class="extype" name="org.mashupbots.socko.rest.AllowableValues">AllowableValues</a>]</span>, <span name="items">items: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A swagger model complex data type's properties
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerModelRegistry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerModelRegistryextendsProductwithSerializable"></a>
+      <a id="SwaggerModelRegistry:SwaggerModelRegistry"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerModelRegistry.html"><span class="name">SwaggerModelRegistry</span></a><span class="params">(<span name="rm">rm: <span class="extype" name="scala.reflect.api.JavaMirrors.Mirror">scala.reflect.api.JavaUniverse.Mirror</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Registry of swagger models.</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerResourceListing" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerResourceListingextendsSwaggerDocwithProductwithSerializable"></a>
+      <a id="SwaggerResourceListing:SwaggerResourceListing"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerResourceListing.html"><span class="name">SwaggerResourceListing</span></a><span class="params">(<span name="apiVersion">apiVersion: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="swaggerVersion">swaggerVersion: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="basePath">basePath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="apis">apis: <span class="extype" name="scala.Seq">Seq</span>[<a href="SwaggerResourceListingApi.html" class="extype" name="org.mashupbots.socko.rest.SwaggerResourceListingApi">SwaggerResourceListingApi</a>]</span>)</span><span class="result"> extends <a href="SwaggerDoc.html" class="extype" name="org.mashupbots.socko.rest.SwaggerDoc">SwaggerDoc</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Swagger <a href="https://github.com/wordnik/swagger-core/wiki/Resource-Listing" target="_blank">resource listing</a>
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerResourceListingApi" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerResourceListingApiextendsProductwithSerializable"></a>
+      <a id="SwaggerResourceListingApi:SwaggerResourceListingApi"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerResourceListingApi.html"><span class="name">SwaggerResourceListingApi</span></a><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="description">description: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Describes a specific resource in the resource listing
+</p>
+    </li><li name="org.mashupbots.socko.rest.VoidDataSerializer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="VoidDataSerializerextendsDataSerializerwithProductwithSerializable"></a>
+      <a id="VoidDataSerializer:VoidDataSerializer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="VoidDataSerializer.html"><span class="name">VoidDataSerializer</span></a><span class="params">()</span><span class="result"> extends <a href="DataSerializer.html" class="extype" name="org.mashupbots.socko.rest.DataSerializer">DataSerializer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Serializes a void response.</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="org.mashupbots.socko.rest.AllowableValues" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AllowableValues"></a>
+      <a id="AllowableValues:AllowableValues"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="AllowableValues$.html"><span class="name">AllowableValues</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.rest.Method" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Method"></a>
+      <a id="Method:Method"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Method$.html"><span class="name">Method</span></a><span class="result"> extends <span class="extype" name="scala.Enumeration">Enumeration</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">HTTP method supported by <a href="RestHandler.html" class="extype" name="org.mashupbots.socko.rest.RestHandler">org.mashupbots.socko.rest.RestHandler</a>
+</p>
+    </li><li name="org.mashupbots.socko.rest.PathSegment" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PathSegment"></a>
+      <a id="PathSegment:PathSegment"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PathSegment$.html"><span class="name">PathSegment</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Factory to parse a string into a path segment
+</p>
+    </li><li name="org.mashupbots.socko.rest.PrimitiveDataSerializer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PrimitiveDataSerializer"></a>
+      <a id="PrimitiveDataSerializer:PrimitiveDataSerializer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PrimitiveDataSerializer$.html"><span class="name">PrimitiveDataSerializer</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion class
+</p>
+    </li><li name="org.mashupbots.socko.rest.ReportRuntimeException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ReportRuntimeException"></a>
+      <a id="ReportRuntimeException:ReportRuntimeException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ReportRuntimeException$.html"><span class="name">ReportRuntimeException</span></a><span class="result"> extends <span class="extype" name="scala.Enumeration">Enumeration</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Indicates if we want to return a runtime exception message to the caller</p>
+    </li><li name="org.mashupbots.socko.rest.RequestBodyDataType" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequestBodyDataType"></a>
+      <a id="RequestBodyDataType:RequestBodyDataType"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RequestBodyDataType$.html"><span class="name">RequestBodyDataType</span></a><span class="result"> extends <span class="extype" name="scala.Enumeration">Enumeration</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.rest.RequestParamBinding" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequestParamBinding"></a>
+      <a id="RequestParamBinding:RequestParamBinding"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RequestParamBinding$.html"><span class="name">RequestParamBinding</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestBindingException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestBindingException"></a>
+      <a id="RestBindingException:RestBindingException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RestBindingException$.html"><span class="name">RestBindingException</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.rest.RestDefintionException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestDefintionException"></a>
+      <a id="RestDefintionException:RestDefintionException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RestDefintionException$.html"><span class="name">RestDefintionException</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.rest.RestEndPoint" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestEndPoint"></a>
+      <a id="RestEndPoint:RestEndPoint"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RestEndPoint$.html"><span class="name">RestEndPoint</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestNotFoundException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestNotFoundException"></a>
+      <a id="RestNotFoundException:RestNotFoundException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RestNotFoundException$.html"><span class="name">RestNotFoundException</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.rest.RestProcessingException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestProcessingException"></a>
+      <a id="RestProcessingException:RestProcessingException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RestProcessingException$.html"><span class="name">RestProcessingException</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.rest.RestRegistry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestRegistry"></a>
+      <a id="RestRegistry:RestRegistry"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RestRegistry$.html"><span class="name">RestRegistry</span></a><span class="result"> extends <a href="../infrastructure/Logger.html" class="extype" name="org.mashupbots.socko.infrastructure.Logger">Logger</a> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Factory to instance a registry
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestRequestContext" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestRequestContext"></a>
+      <a id="RestRequestContext:RestRequestContext"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RestRequestContext$.html"><span class="name">RestRequestContext</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestRequestDeserializer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestRequestDeserializer"></a>
+      <a id="RestRequestDeserializer:RestRequestDeserializer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RestRequestDeserializer$.html"><span class="name">RestRequestDeserializer</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.rest.RestRequestEvents" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestRequestEvents"></a>
+      <a id="RestRequestEvents:RestRequestEvents"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RestRequestEvents$.html"><span class="name">RestRequestEvents</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Cache of SockoEvents so REST processor actors can access it for custom
+request deseralization and custom response seralization.</p>
+    </li><li name="org.mashupbots.socko.rest.RestResponseSerializer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RestResponseSerializer"></a>
+      <a id="RestResponseSerializer:RestResponseSerializer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RestResponseSerializer$.html"><span class="name">RestResponseSerializer</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.rest.SockoEventType" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SockoEventType"></a>
+      <a id="SockoEventType:SockoEventType"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SockoEventType$.html"><span class="name">SockoEventType</span></a><span class="result"> extends <span class="extype" name="scala.Enumeration">Enumeration</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Denotes the type of <a href="../events/SockoEvent.html" class="extype" name="org.mashupbots.socko.events.SockoEvent">org.mashupbots.socko.events.SockoEvent</a> that triggered this
+REST request
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerApiDeclaration" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerApiDeclaration"></a>
+      <a id="SwaggerApiDeclaration:SwaggerApiDeclaration"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerApiDeclaration$.html"><span class="name">SwaggerApiDeclaration</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerApiDocs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerApiDocs"></a>
+      <a id="SwaggerApiDocs:SwaggerApiDocs"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerApiDocs$.html"><span class="name">SwaggerApiDocs</span></a><span class="result"> extends <a href="../infrastructure/Logger.html" class="extype" name="org.mashupbots.socko.infrastructure.Logger">Logger</a> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerApiOperation" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerApiOperation"></a>
+      <a id="SwaggerApiOperation:SwaggerApiOperation"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerApiOperation$.html"><span class="name">SwaggerApiOperation</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerApiParameter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerApiParameter"></a>
+      <a id="SwaggerApiParameter:SwaggerApiParameter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerApiParameter$.html"><span class="name">SwaggerApiParameter</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerApiPath" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerApiPath"></a>
+      <a id="SwaggerApiPath:SwaggerApiPath"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerApiPath$.html"><span class="name">SwaggerApiPath</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerReflector" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerReflector"></a>
+      <a id="SwaggerReflector:SwaggerReflector"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerReflector$.html"><span class="name">SwaggerReflector</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Scala to Swagger conversion
+</p>
+    </li><li name="org.mashupbots.socko.rest.SwaggerResourceListing" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerResourceListing"></a>
+      <a id="SwaggerResourceListing:SwaggerResourceListing"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerResourceListing$.html"><span class="name">SwaggerResourceListing</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+    </body>
+      </html>

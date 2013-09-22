@@ -1,0 +1,22 @@
+---
+layout: post
+title: Release v0.3.1
+summary: Maintenance Release
+author: Vibul
+---
+
+This [release](https://github.com/mashupbots/socko/issues?milestone=9&state=closed) includes:
+ - Upgrade to Scala (2.10.2), AKKA (2.2.1) and Netty (3.7.0.Final)
+ - Use ActorRefFactory instead of ActorSystem in WebService - thanks to [Remy Sornette](https://github.com/remy-sornette)
+
+Download [socko-webserver_2.10-0.3.1.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.10/0.3.1/socko-webserver_2.10-0.3.1.jar).
+
+For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
+
+Documentation
+ - [User Guide](/docs/0.3.1/guides/user-guide.html)
+ - [API](/docs/0.3.1/api/)
+ - [Change logs](https://github.com/mashupbots/socko/issues?milestone=9&state=closed)
+
+
+

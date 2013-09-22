@@ -1,0 +1,658 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>WebLogEvent - org.mashupbots.socko.infrastructure.WebLogEvent</title>
+          <meta name="description" content="WebLogEvent - org.mashupbots.socko.infrastructure.WebLogEvent" />
+          <meta name="keywords" content="WebLogEvent org.mashupbots.socko.infrastructure.WebLogEvent" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'org.mashupbots.socko.infrastructure.WebLogEvent';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <a href="WebLogEvent$.html" title="Go to companion"><img src="../../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a href="../../../package.html" class="extype" name="org">org</a>.<a href="../../package.html" class="extype" name="org.mashupbots">mashupbots</a>.<a href="../package.html" class="extype" name="org.mashupbots.socko">socko</a>.<a href="package.html" class="extype" name="org.mashupbots.socko.infrastructure">infrastructure</a></p>
+        <h1><a href="WebLogEvent$.html" title="Go to companion">WebLogEvent</a></h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">WebLogEvent</span><span class="params">(<span name="timestamp">timestamp: <span class="extype" name="java.util.Date">Date</span></span>, <span name="serverName">serverName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="channelId">channelId: <span class="extype" name="scala.Int">Int</span></span>, <span name="clientAddress">clientAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="serverAddress">serverAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="username">username: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="method">method: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="requestSize">requestSize: <span class="extype" name="scala.Long">Long</span></span>, <span name="responseStatusCode">responseStatusCode: <span class="extype" name="scala.Int">Int</span></span>, <span name="responseSize">responseSize: <span class="extype" name="scala.Long">Long</span></span>, <span name="timeTaken">timeTaken: <span class="extype" name="scala.Long">Long</span></span>, <span name="protocolVersion">protocolVersion: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="userAgent">userAgent: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="referrer">referrer: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A web log event to record
+</p></div><dl class="paramcmts block"><dt class="param">timestamp</dt><dd class="cmt"><p>Timestamp for the event</p></dd><dt class="param">serverName</dt><dd class="cmt"><p>Socko Web Server instance name</p></dd><dt class="param">channelId</dt><dd class="cmt"><p>Netty channel id</p></dd><dt class="param">clientAddress</dt><dd class="cmt"><p>Client's socket address. We don't convert to string here in case JDK performs a blocknig
+ reverse DNS lookup.</p></dd><dt class="param">serverAddress</dt><dd class="cmt"><p>Server's socket address. We don't convert to string here in case JDK performs a blocknig
+ reverse DNS lookup.</p></dd><dt class="param">username</dt><dd class="cmt"><p>Authenticated user name</p></dd><dt class="param">method</dt><dd class="cmt"><p>The action the client was trying to perform (for example, a GET method).</p></dd><dt class="param">uri</dt><dd class="cmt"><p>The resource accessed; for example, Default.htm.</p></dd><dt class="param">requestSize</dt><dd class="cmt"><p>The number of bytes received by the server.</p></dd><dt class="param">responseStatusCode</dt><dd class="cmt"><p>The status of the action, in HTTP or FTP terms.</p></dd><dt class="param">responseSize</dt><dd class="cmt"><p>The number of bytes sent by the server.</p></dd><dt class="param">timeTaken</dt><dd class="cmt"><p>The duration of time, in milliseconds, that this action consumed.</p></dd><dt class="param">protocolVersion</dt><dd class="cmt"><p>The protocol (HTTP, FTP) version used by the client. For HTTP this will be either
+  HTTP/1.0 or HTTP/1.1.</p></dd><dt class="param">userAgent</dt><dd class="cmt"><p>The browser used on the client.</p></dd><dt class="param">referrer</dt><dd class="cmt"><p>The previous site visited by the user. This site provided a link to the current site.
+</p></dd></dl><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="org.mashupbots.socko.infrastructure.WebLogEvent"><span>WebLogEvent</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="org.mashupbots.socko.infrastructure.WebLogEvent#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(timestamp:java.util.Date,serverName:String,channelId:Int,clientAddress:java.net.SocketAddress,serverAddress:java.net.SocketAddress,username:Option[String],method:String,uri:String,requestSize:Long,responseStatusCode:Int,responseSize:Long,timeTaken:Long,protocolVersion:String,userAgent:Option[String],referrer:Option[String]):org.mashupbots.socko.infrastructure.WebLogEvent"></a>
+      <a id="&lt;init&gt;:WebLogEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">WebLogEvent</span><span class="params">(<span name="timestamp">timestamp: <span class="extype" name="java.util.Date">Date</span></span>, <span name="serverName">serverName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="channelId">channelId: <span class="extype" name="scala.Int">Int</span></span>, <span name="clientAddress">clientAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="serverAddress">serverAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="username">username: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="method">method: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="requestSize">requestSize: <span class="extype" name="scala.Long">Long</span></span>, <span name="responseStatusCode">responseStatusCode: <span class="extype" name="scala.Int">Int</span></span>, <span name="responseSize">responseSize: <span class="extype" name="scala.Long">Long</span></span>, <span name="timeTaken">timeTaken: <span class="extype" name="scala.Long">Long</span></span>, <span name="protocolVersion">protocolVersion: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="userAgent">userAgent: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="referrer">referrer: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">timestamp</dt><dd class="cmt"><p>Timestamp for the event</p></dd><dt class="param">serverName</dt><dd class="cmt"><p>Socko Web Server instance name</p></dd><dt class="param">channelId</dt><dd class="cmt"><p>Netty channel id</p></dd><dt class="param">clientAddress</dt><dd class="cmt"><p>Client's socket address. We don't convert to string here in case JDK performs a blocknig
+ reverse DNS lookup.</p></dd><dt class="param">serverAddress</dt><dd class="cmt"><p>Server's socket address. We don't convert to string here in case JDK performs a blocknig
+ reverse DNS lookup.</p></dd><dt class="param">username</dt><dd class="cmt"><p>Authenticated user name</p></dd><dt class="param">method</dt><dd class="cmt"><p>The action the client was trying to perform (for example, a GET method).</p></dd><dt class="param">uri</dt><dd class="cmt"><p>The resource accessed; for example, Default.htm.</p></dd><dt class="param">requestSize</dt><dd class="cmt"><p>The number of bytes received by the server.</p></dd><dt class="param">responseStatusCode</dt><dd class="cmt"><p>The status of the action, in HTTP or FTP terms.</p></dd><dt class="param">responseSize</dt><dd class="cmt"><p>The number of bytes sent by the server.</p></dd><dt class="param">timeTaken</dt><dd class="cmt"><p>The duration of time, in milliseconds, that this action consumed.</p></dd><dt class="param">protocolVersion</dt><dd class="cmt"><p>The protocol (HTTP, FTP) version used by the client. For HTTP this will be either
+  HTTP/1.0 or HTTP/1.1.</p></dd><dt class="param">userAgent</dt><dd class="cmt"><p>The browser used on the client.</p></dd><dt class="param">referrer</dt><dd class="cmt"><p>The previous site visited by the user. This site provided a link to the current site.
+</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:AnyRef):Boolean"></a>
+      <a id="!=(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:AnyRef):Boolean"></a>
+      <a id="==(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#channelId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="channelId:Int"></a>
+      <a id="channelId:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">channelId</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Netty channel id</p>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#clientAddress" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clientAddress:java.net.SocketAddress"></a>
+      <a id="clientAddress:SocketAddress"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clientAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Client's socket address.</p><div class="fullcomment"><div class="comment cmt"><p>Client's socket address. We don't convert to string here in case JDK performs a blocknig
+ reverse DNS lookup.</p></div></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#method" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="method:String"></a>
+      <a id="method:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">method</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The action the client was trying to perform (for example, a GET method).</p>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#protocolVersion" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="protocolVersion:String"></a>
+      <a id="protocolVersion:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">protocolVersion</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The protocol (HTTP, FTP) version used by the client.</p><div class="fullcomment"><div class="comment cmt"><p>The protocol (HTTP, FTP) version used by the client. For HTTP this will be either
+  HTTP/1.0 or HTTP/1.1.</p></div></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#referrer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="referrer:Option[String]"></a>
+      <a id="referrer:Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">referrer</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The previous site visited by the user.</p><div class="fullcomment"><div class="comment cmt"><p>The previous site visited by the user. This site provided a link to the current site.
+</p></div></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#requestSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="requestSize:Long"></a>
+      <a id="requestSize:Long"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">requestSize</span><span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The number of bytes received by the server.</p>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#responseSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="responseSize:Long"></a>
+      <a id="responseSize:Long"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">responseSize</span><span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The number of bytes sent by the server.</p>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#responseStatusCode" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="responseStatusCode:Int"></a>
+      <a id="responseStatusCode:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">responseStatusCode</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The status of the action, in HTTP or FTP terms.</p>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#serverAddress" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serverAddress:java.net.SocketAddress"></a>
+      <a id="serverAddress:SocketAddress"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serverAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Server's socket address.</p><div class="fullcomment"><div class="comment cmt"><p>Server's socket address. We don't convert to string here in case JDK performs a blocknig
+ reverse DNS lookup.</p></div></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#serverName" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="serverName:String"></a>
+      <a id="serverName:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serverName</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Socko Web Server instance name</p>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#timeTaken" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="timeTaken:Long"></a>
+      <a id="timeTaken:Long"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">timeTaken</span><span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The duration of time, in milliseconds, that this action consumed.</p>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#timestamp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="timestamp:java.util.Date"></a>
+      <a id="timestamp:Date"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">timestamp</span><span class="result">: <span class="extype" name="java.util.Date">Date</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Timestamp for the event</p>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#toCombinedFormat" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toCombinedFormat():String"></a>
+      <a id="toCombinedFormat():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toCombinedFormat</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a log entry in the <a href="http://httpd.apache.org/docs/1.3/logs.html" target="_blank">combined log format</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a log entry in the <a href="http://httpd.apache.org/docs/1.3/logs.html" target="_blank">combined log format</a>.</p><pre><span class="num">216.67</span>.<span class="num">1.91</span> - leon [<span class="num">01</span>/Jul/<span class="num">2002</span>:<span class="num">12</span>:<span class="num">11</span>:<span class="num">52</span> +<span class="num">0000</span>] <span class="lit">"GET /index.html HTTP/1.1"</span> <span class="num">200</span> <span class="num">431</span> <span class="lit">"http://www.loganalyzer.net/"</span> <span class="lit">"Mozilla/4.05 [en] (WinNT; I)"</span></pre></div></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#toCommonFormat" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toCommonFormat():String"></a>
+      <a id="toCommonFormat():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toCommonFormat</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a log entry in the <a href="http://en.wikipedia.org/wiki/Common_Log_Format" target="_blank">common log format</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a log entry in the <a href="http://en.wikipedia.org/wiki/Common_Log_Format" target="_blank">common log format</a>.</p><pre><span class="num">216.67</span>.<span class="num">1.91</span> - leon [<span class="num">01</span>/Jul/<span class="num">2002</span>:<span class="num">12</span>:<span class="num">11</span>:<span class="num">52</span> +<span class="num">0000</span>] <span class="lit">"GET /index.html HTTP/1.1"</span> <span class="num">200</span> <span class="num">431</span></pre></div></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#toExtendedFormat" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toExtendedFormat():String"></a>
+      <a id="toExtendedFormat():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toExtendedFormat</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a log entry in the <a href="http://www.w3.org/TR/WD-logfile.html" target="_blank">extended log format</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a log entry in the <a href="http://www.w3.org/TR/WD-logfile.html" target="_blank">extended log format</a>.</p><pre>#Software: Socko
+#Version: <span class="num">1.0</span>
+#Date: <span class="num">2002</span>-<span class="num">05</span>-<span class="num">02</span> <span class="num">17</span>:<span class="num">42</span>:<span class="num">15</span>
+#Fields: date time c-ip cs-username s-ip s-port cs-method cs-uri-stem cs-uri-query sc-status sc-bytes cs-bytes time-taken cs(User-Agent) cs(Referrer)
+<span class="num">2002</span>-<span class="num">05</span>-<span class="num">24</span> <span class="num">20</span>:<span class="num">18</span>:<span class="num">01</span> <span class="num">172.224</span>.<span class="num">24.114</span> - <span class="num">206.73</span>.<span class="num">118.24</span> <span class="num">80</span> GET /Default.htm - <span class="num">200</span> <span class="num">7930</span> <span class="num">248</span> <span class="num">31</span> Mozilla/<span class="num">4.0</span>+(compatible;+MSIE+<span class="num">5.01</span>;+Windows+<span class="num">2000</span>+Server) http:<span class="cmt">//64.224.24.114/</span></pre></div></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#uri" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="uri:String"></a>
+      <a id="uri:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">uri</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The resource accessed; for example, Default.</p><div class="fullcomment"><div class="comment cmt"><p>The resource accessed; for example, Default.htm.</p></div></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#userAgent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="userAgent:Option[String]"></a>
+      <a id="userAgent:Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">userAgent</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The browser used on the client.</p>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent#username" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="username:Option[String]"></a>
+      <a id="username:Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">username</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Authenticated user name</p>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.Product">
+              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
+            </div><div class="parent" name="scala.Equals">
+              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+    </body>
+      </html>
