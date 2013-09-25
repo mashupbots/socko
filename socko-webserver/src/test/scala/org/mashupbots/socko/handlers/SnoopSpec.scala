@@ -19,7 +19,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.Hashtable
 
-import org.jboss.netty.util.CharsetUtil
+import io.netty.util.CharsetUtil
 import org.mashupbots.socko.infrastructure.WebLogFormat
 import org.mashupbots.socko.routes.HttpRequest
 import org.mashupbots.socko.routes.Path
@@ -58,7 +58,7 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
   val routes = Routes({
     case HttpRequest(httpRequest) => httpRequest match {
       case Path("/snoop/") => {
-        val name = "SnoopHandler_%s_%s".format(httpRequest.channel.getId, System.currentTimeMillis)
+        val name = "SnoopHandler_%s_%s".format(httpRequest.context.name, System.currentTimeMillis)
         actorSystem.actorOf(Props[SnoopHandler], name) ! httpRequest
       }
     }
@@ -70,7 +70,7 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
       }
     }
     case WebSocketFrame(wsFrame) => {
-      val name = "SnoopHandler_%s_%s".format(wsFrame.channel.getId, System.currentTimeMillis)
+      val name = "SnoopHandler_%s_%s".format(wsFrame.context.name, System.currentTimeMillis)
       actorSystem.actorOf(Props[SnoopHandler], name) ! wsFrame
     }
   })

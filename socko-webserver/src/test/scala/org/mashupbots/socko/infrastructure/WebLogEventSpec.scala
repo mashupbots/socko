@@ -32,7 +32,7 @@ class WebLogEventSpec extends WordSpec with ShouldMatchers {
       val evt = WebLogEvent(
         timestamp = ts.getTime,
         "server1",
-        100,
+        "100",
         clientAddress = new InetSocketAddress("127.0.0.1", 9001),
         serverAddress = new InetSocketAddress("127.0.0.2", 9002),
         username = None,
@@ -57,7 +57,7 @@ class WebLogEventSpec extends WordSpec with ShouldMatchers {
       val evt = WebLogEvent(
         timestamp = ts.getTime,
         "server1",
-        100,
+        "100",
         clientAddress = new InetSocketAddress("127.0.0.1", 9001),
         serverAddress = new InetSocketAddress("127.0.0.2", 9002),
         username = Some("my name"), // added space to make sure we strip it
@@ -82,7 +82,7 @@ class WebLogEventSpec extends WordSpec with ShouldMatchers {
       val evt = WebLogEvent(
         timestamp = ts.getTime,
         "server1",
-        100,
+        "100",
         clientAddress = new InetSocketAddress("127.0.0.1", 9001),
         serverAddress = new InetSocketAddress("127.0.0.2", 9002),
         username = None,
@@ -107,7 +107,7 @@ class WebLogEventSpec extends WordSpec with ShouldMatchers {
       val evt = WebLogEvent(
         timestamp = ts.getTime,
         "server1",
-        100,
+        "100",
         clientAddress = new InetSocketAddress("127.0.0.1", 9001),
         serverAddress = new InetSocketAddress("127.0.0.2", 9002),
         username = Some("my name"), // added space to make sure we strip it
@@ -132,7 +132,7 @@ class WebLogEventSpec extends WordSpec with ShouldMatchers {
       val evt = WebLogEvent(
         timestamp = ts.getTime,
         "server1",
-        100,
+        "100",
         clientAddress = new InetSocketAddress("127.0.0.1", 9001),
         serverAddress = new InetSocketAddress("127.0.0.2", 9002),
         username = None,
@@ -157,7 +157,7 @@ class WebLogEventSpec extends WordSpec with ShouldMatchers {
       val evt = WebLogEvent(
         timestamp = ts.getTime,
         "server1",
-        100,
+        "100",
         clientAddress = new InetSocketAddress("127.0.0.1", 9001),
         serverAddress = new InetSocketAddress("127.0.0.2", 9002),
         username = Some("my name"), // added space to make sure we strip it

@@ -15,8 +15,8 @@
 //
 package org.mashupbots.socko.routes
 
+import io.netty.channel.ChannelHandlerContext
 import java.nio.charset.Charset
-import org.jboss.netty.channel.Channel
 import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.events.SockoEvent
 
@@ -24,7 +24,7 @@ import org.mashupbots.socko.events.SockoEvent
  *  Context for testing routing
  */
 case class TestContext(endPoint: EndPoint) extends SockoEvent {
-  val channel: Channel = null
+  val context: ChannelHandlerContext = null
   def readStringContent(): String = ""
   def readStringContent(charset: Charset): String = ""
   def readBinaryContent(): Array[Byte] = null

@@ -20,14 +20,15 @@ import java.util.Date
 
 import scala.collection.JavaConversions._
 
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http.HttpChunk
-import org.jboss.netty.handler.codec.http.HttpChunkTrailer
-import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.jboss.netty.handler.codec.http.HttpRequest
-import org.jboss.netty.handler.codec.http.QueryStringDecoder
-import org.mashupbots.socko.infrastructure.CharsetUtil
+import io.netty.buffer.ByteBuf
+import io.netty.buffer.Unpooled
+import io.netty.handler.codec.http.FullHttpRequest
+import io.netty.handler.codec.http.HttpHeaders
+import io.netty.handler.codec.http.HttpRequest
+import io.netty.handler.codec.http.LastHttpContent
+import io.netty.handler.codec.http.QueryStringDecoder
+import io.netty.util.CharsetUtil
+
 import org.mashupbots.socko.infrastructure.DateUtil
 
 /**
@@ -120,12 +121,12 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
   /**
    * HTTP request headers
    */
-  val headers: Map[String, String] = nettyHttpRequest.getHeaders.map(f => (f.getKey, f.getValue)).toMap
+  lazy val headers: Map[String, String] = nettyHttpRequest.headers.map(f => (f.getKey, f.getValue)).toMap
 
   /**
    * HTTP End point for this request
    */
-  val endPoint = EndPoint(nettyHttpRequest.getMethod.toString,
+  lazy val endPoint = EndPoint(nettyHttpRequest.getMethod.toString,
     HttpHeaders.getHost(nettyHttpRequest), nettyHttpRequest.getUri)
 
   /**
@@ -137,7 +138,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
    * Connection: keep-alive
    * }}}
    */
-  val isKeepAlive = HttpHeaders.isKeepAlive(nettyHttpRequest)
+  lazy val isKeepAlive = HttpHeaders.isKeepAlive(nettyHttpRequest)
 
   /**
    * Array of accepted encoding for content compression from the HTTP header
@@ -145,7 +146,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
    * For example, give then header `Accept-Encoding: gzip, deflate`, then an array containing
    * `gzip` and `defalte` will be returned.
    */
-  val acceptedEncodings: List[String] = {
+  lazy val acceptedEncodings: List[String] = {
     val s = headers.get(HttpHeaders.Names.ACCEPT_ENCODING)
     if (s.isEmpty) {
       List()
@@ -157,7 +158,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
   /**
    * Our supported encoding; `None` if `acceptedEncodings` does not contain an encoding that we support
    */
-  val supportedEncoding: Option[String] = if (acceptedEncodings.contains("gzip")) {
+  lazy val supportedEncoding: Option[String] = if (acceptedEncodings.contains("gzip")) {
     Some("gzip")
   } else if (acceptedEncodings.contains("deflate")) {
     Some("deflate")
@@ -168,7 +169,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
   /**
    * HTTP version
    */
-  val httpVersion = nettyHttpRequest.getProtocolVersion.toString
+  lazy val httpVersion = nettyHttpRequest.getProtocolVersion.toString
 
   /**
    * `True` if and only if 100 continue is expected to be returned
@@ -199,14 +200,15 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
    * Note that if `True`, this HTTP request will NOT have any content. The content will be coming
    * in subsequent HTTP chunks and sent for processing as `HttpChunkEvent`.
    */
-  val isChunked: Boolean = nettyHttpRequest.isChunked
+  val isChunked: Boolean = HttpHeaders.isTransferEncodingChunked(nettyHttpRequest)
 
   /**
    * `True` if and only if this is a request to upgrade to a websocket connection
    */
   val isWebSocketUpgrade: Boolean = {
-    val upgrade = nettyHttpRequest.getHeader(HttpHeaders.Names.UPGRADE)
-    (upgrade != null && upgrade.toLowerCase == "websocket")
+    import HttpHeaders._
+    nettyHttpRequest.headers.get(Names.CONNECTION).equalsIgnoreCase(Values.UPGRADE) &&
+    nettyHttpRequest.headers.get(Names.UPGRADE).equalsIgnoreCase(Values.WEBSOCKET)
   }
 
   /**
@@ -225,9 +227,29 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
   /**
    * Body of the HTTP request
    */
-  val content = new HttpContent(
-    if (nettyHttpRequest.getContent == null) None else Some(nettyHttpRequest.getContent),
-    this.contentType)
+  lazy val content = nettyHttpRequest match {
+    case request: FullHttpRequest =>
+      DefaultHttpContent(request.content, contentType)
+    case _ =>
+      EmptyHttpContent
+  }
+}
+
+trait HttpContent {
+  def isEmpty: Boolean
+  def toFormDataMap: Map[String, List[String]]
+  def toString(charset: Charset): String
+  def toBytes: Array[Byte]
+  def toByteBuf: ByteBuf
+}
+
+object EmptyHttpContent extends HttpContent {
+  def isEmpty = true
+  def toFormDataMap = Map.empty[String, List[String]]
+  override def toString = ""
+  def toString(charset: Charset) = ""
+  def toBytes = Array.empty[Byte]
+  def toByteBuf = Unpooled.EMPTY_BUFFER
 }
 
 /**
@@ -236,7 +258,9 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
  * @param buffer Request body
  * @param contentType MIME type of the request body
  */
-case class HttpContent(buffer: Option[ChannelBuffer], contentType: String) {
+case class DefaultHttpContent(buffer: ByteBuf, contentType: String) extends HttpContent {
+
+  def isEmpty = (buffer.readableBytes == 0)
 
   /**
    * Returns a map of the form data fields
@@ -248,15 +272,12 @@ case class HttpContent(buffer: Option[ChannelBuffer], contentType: String) {
    * for that field. Typically, there is is only 1 value for a field.
    */
   def toFormDataMap(): Map[String, List[String]] = {
-    if (buffer.isEmpty) Map.empty
-    else if (contentType != "application/x-www-form-urlencoded") Map.empty
+    if (contentType != "application/x-www-form-urlencoded") Map.empty
     else {
       val encodedString = this.toString
-      val m = new QueryStringDecoder(encodedString, false).getParameters.toMap
+      val m = new QueryStringDecoder(encodedString, false).parameters.toMap
       // Map the Java list values to Scala list
-      for ((key, values) <- m) yield {
-        (key, values.toList)
-      }
+      m.map { case (key, value) => (key, value.toList) }
     }
   }
 
@@ -269,11 +290,7 @@ case class HttpContent(buffer: Option[ChannelBuffer], contentType: String) {
    */
   override def toString() = {
     val charset = HttpResponseMessage.extractMimeTypeCharset(contentType).getOrElse(CharsetUtil.ISO_8859_1)
-    if (buffer.isEmpty) {
-      ""
-    } else {
-      if (buffer.get.readable) buffer.get.toString(charset) else ""
-    }
+    buffer.toString(charset)
   }
 
   /**
@@ -281,31 +298,20 @@ case class HttpContent(buffer: Option[ChannelBuffer], contentType: String) {
    *
    * @param charset Character set to use to decode the string
    */
-  def toString(charset: Charset) = {
-    if (buffer.isEmpty) {
-      ""
-    } else {
-      if (buffer.get.readable) buffer.get.toString(charset) else ""
-    }
-  }
+  def toString(charset: Charset) = buffer.toString(charset)
 
   /**
    * Returns the contents as a byte array
    */
-  def toBytes() = {
-    if (buffer.isEmpty) {
-      Array.empty[Byte]
-    } else {
-      if (buffer.get.readable) buffer.get.array else Array.empty[Byte]
-    }
+  def toBytes = {
+    if (buffer.readableBytes > 0) buffer.array
+    else Array.empty[Byte]
   }
 
   /**
    * Returns the contents as a Netty native channel buffer
    */
-  def toChannelBuffer() = {
-    buffer.getOrElse(ChannelBuffers.EMPTY_BUFFER)
-  }
+  def toByteBuf = buffer
 }
 
 /**
@@ -341,7 +347,7 @@ case class InitialHttpRequestMessage(
     current.contentLength,
     createdOn)
 
-  val content: HttpContent = HttpContent(None, "")
+  val content: HttpContent = EmptyHttpContent
 
   /**
    * Number of milliseconds from the time when the initial request was made
@@ -355,7 +361,7 @@ case class InitialHttpRequestMessage(
    *
    * This is only used by HttpChunkEvent
    */
-  @volatile var totalChunkContentLength: Long = 0
+  var totalChunkContentLength: Long = 0
 }
 
 /**
@@ -364,28 +370,32 @@ case class InitialHttpRequestMessage(
  * @param nettyHttpChunk Netty representation of the HTTP Chunk
  * @param contentType Content type of the data
  */
-case class HttpChunkMessage(nettyHttpChunk: HttpChunk) {
+case class HttpChunkMessage(nettyHttpChunk: io.netty.handler.codec.http.HttpContent) {
 
   /**
    * Returns the length of the content from the `Content-Length` header. If not set, `0` is returned.
    */
-  lazy val contentLength = nettyHttpChunk.getContent.readableBytes
+  lazy val contentLength = nettyHttpChunk.content.readableBytes
 
   /**
    * Flag to denote if this is the last chunk
    */
-  val isLastChunk = nettyHttpChunk.isLast
+  val isLastChunk = nettyHttpChunk.isInstanceOf[LastHttpContent]
 
   /**
    * Trailing headers associated with the last chunk
    */
-  val trailingHeaders = if (isLastChunk) Map.empty[String, String] else
-    nettyHttpChunk.asInstanceOf[HttpChunkTrailer].getHeaders.map(f => (f.getKey, f.getValue)).toMap
+  val trailingHeaders = nettyHttpChunk match {
+    case lastHttpChunk: LastHttpContent =>
+      lastHttpChunk.trailingHeaders.map(e => (e.getKey, e.getValue))
+    case _ =>
+      Map.empty[String, String]
+  }
 
   /**
    * Body of the HTTP chunk
    */
-  val content = HttpContent(if (nettyHttpChunk.getContent == null) None else Some(nettyHttpChunk.getContent), "")
+  val content = DefaultHttpContent(nettyHttpChunk.content, "")
 
 }
 

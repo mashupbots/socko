@@ -19,26 +19,30 @@ import java.net.InetSocketAddress
 import java.net.URI
 import java.util.concurrent.Executors
 
-import org.jboss.netty.bootstrap.ClientBootstrap
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.channel.ChannelHandlerContext
-import org.jboss.netty.channel.ChannelPipeline
-import org.jboss.netty.channel.ChannelPipelineFactory
-import org.jboss.netty.channel.ChannelStateEvent
-import org.jboss.netty.channel.Channels
-import org.jboss.netty.channel.ExceptionEvent
-import org.jboss.netty.channel.MessageEvent
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler
-import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.PongWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketClientHandshaker
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketVersion
-import org.jboss.netty.handler.codec.http.HttpRequestEncoder
-import org.jboss.netty.handler.codec.http.HttpResponse
-import org.jboss.netty.handler.codec.http.HttpResponseDecoder
+import io.netty.bootstrap.Bootstrap
+import io.netty.bootstrap.ServerBootstrap
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory
+import io.netty.channel.Channel
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.ChannelInboundHandlerAdapter
+import io.netty.channel.ChannelInitializer
+import io.netty.channel.ChannelPipeline
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory
+import io.netty.handler.codec.http.websocketx.WebSocketVersion
+import io.netty.channel.socket.SocketChannel
+import io.netty.channel.socket.nio.NioSocketChannel
+import io.netty.handler.codec.http.FullHttpResponse
+import io.netty.handler.codec.http.HttpObjectAggregator
+import io.netty.handler.codec.http.HttpRequestEncoder
+import io.netty.handler.codec.http.HttpResponse
+import io.netty.handler.codec.http.HttpResponseDecoder
+
 import org.mashupbots.socko.infrastructure.Logger
 
 /**
@@ -46,21 +50,21 @@ import org.mashupbots.socko.infrastructure.Logger
  */
 class TestWebSocketClient(url: String, subprotocols: String = null) extends Logger {
 
-  val bootstrap = new ClientBootstrap(
-    new NioClientSocketChannelFactory(
-      Executors.newCachedThreadPool(),
-      Executors.newCachedThreadPool()))
+  val group = new NioEventLoopGroup
+  val bootstrap = new Bootstrap()
+    .group(group)
+    .channel(classOf[NioSocketChannel])
 
   val uri = new URI(url)
 
-  val handshaker = new WebSocketClientHandshakerFactory().newHandshaker(
+  val handshaker = WebSocketClientHandshakerFactory.newHandshaker(
     new URI(url), WebSocketVersion.V13, subprotocols, false, null)
 
   var ch: Channel = null
   val channelData = new ChannelData()
   val monitor = new AnyRef()
 
-  bootstrap.setPipelineFactory(new PipeLineFactory(handshaker, channelData, monitor))
+  bootstrap.handler(new PipeLineFactory(handshaker, channelData, monitor))
 
   /**
    * Connect to the server. This is a blocking call.
@@ -77,7 +81,7 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
     val future = bootstrap.connect(new InetSocketAddress(uri.getHost, uri.getPort))
     future.awaitUninterruptibly()
 
-    ch = future.getChannel()
+    ch = future.channel
     handshaker.handshake(ch)
 
     // Wait until connected
@@ -96,7 +100,7 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
    */
   def send(content: String, waitForResponse: Boolean = false) {
     channelData.hasReplied = false
-    ch.write(new TextWebSocketFrame(content))
+    ch.writeAndFlush(new TextWebSocketFrame(content))
     if (waitForResponse) {
       monitor.synchronized {
         while (!channelData.hasReplied) {
@@ -110,10 +114,9 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
    * Disconnect from the server
    */
   def disconnect() {
-    ch.write(new CloseWebSocketFrame())
-
-    ch.getCloseFuture().awaitUninterruptibly()
-    bootstrap.releaseExternalResources();
+    ch.writeAndFlush(new CloseWebSocketFrame)
+    ch.closeFuture.awaitUninterruptibly
+    group.shutdownGracefully()
   }
 
   /**
@@ -136,13 +139,15 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
   class PipeLineFactory(
     handshaker: WebSocketClientHandshaker,
     channelData: ChannelData,
-    connectionMonitor: AnyRef) extends ChannelPipelineFactory {
-    def getPipeline: ChannelPipeline = {
-      val newPipeline = Channels.pipeline()
-      newPipeline.addLast("decoder", new HttpResponseDecoder())
-      newPipeline.addLast("encoder", new HttpRequestEncoder())
-      newPipeline.addLast("ws-handler", new WebSocketClientHandler(handshaker, channelData, connectionMonitor))
-      newPipeline
+    connectionMonitor: AnyRef
+  ) extends ChannelInitializer[SocketChannel] {
+
+    def initChannel(channel: SocketChannel) = {
+      val pipeline = channel.pipeline
+      pipeline.addLast("decoder", new HttpResponseDecoder())
+      pipeline.addLast("encoder", new HttpRequestEncoder())
+      pipeline.addLast("aggregator", new HttpObjectAggregator(8196))
+      pipeline.addLast("ws-handler", new WebSocketClientHandler(handshaker, channelData, connectionMonitor))
     }
   }
 
@@ -152,9 +157,10 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
   class WebSocketClientHandler(
     handshaker: WebSocketClientHandshaker,
     channelData: ChannelData,
-    connectionMonitor: AnyRef) extends SimpleChannelUpstreamHandler with Logger {
+    connectionMonitor: AnyRef
+  ) extends ChannelInboundHandlerAdapter with Logger {
 
-    override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    override def channelInactive(ctx: ChannelHandlerContext) = {
       log.debug("WebSocket Client disconnected!");
       channelData.isConnected = Some(false)
       
@@ -164,33 +170,35 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
       }      
     }
 
-    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-      val ch = ctx.getChannel()
-      if (!handshaker.isHandshakeComplete()) {
-        try {
-          handshaker.finishHandshake(ch, e.getMessage.asInstanceOf[HttpResponse])
-          log.debug("WebSocket Client connected!")
-          channelData.isConnected = Some(true)
-        } catch {
-          case ex: Throwable => {
-            log.debug("Error connecting to Web Socket Server", ex)
-            channelData.isConnected = Some(false)
+    override def channelRead(ctx: ChannelHandlerContext, e: AnyRef) {
+      e match {
+        case response: FullHttpResponse =>
+          if (!handshaker.isHandshakeComplete()) {
+            try {
+              handshaker.finishHandshake(ctx.channel, e.asInstanceOf[FullHttpResponse])
+              log.debug("WebSocket Client connected!")
+              channelData.isConnected = Some(true)
+            } catch {
+              case ex: Throwable => {
+                  log.debug("Error connecting to Web Socket Server", ex)
+                  channelData.isConnected = Some(false)
+                }
+            }
           }
-        }
-      } else {
-        val frame = e.getMessage()
-        if (frame.isInstanceOf[TextWebSocketFrame]) {
+          
+        case frame: TextWebSocketFrame =>
           val textFrame = frame.asInstanceOf[TextWebSocketFrame]
-          channelData.textBuffer.append(textFrame.getText)
+          channelData.textBuffer.append(textFrame.text)
           channelData.textBuffer.append("\n")
-          log.debug("WebSocket Client received message: " + textFrame.getText)
+          log.debug("WebSocket Client received message: " + textFrame.text)
           channelData.hasReplied = true
-        } else if (frame.isInstanceOf[PongWebSocketFrame]) {
+          
+        case frame: PongWebSocketFrame =>
           log.debug("WebSocket Client received pong")
-        } else if (frame.isInstanceOf[CloseWebSocketFrame]) {
+          
+        case frame: CloseWebSocketFrame =>
           log.debug("WebSocket Client received closing")
           ch.close()
-        }
       }
 
       // Notify monitor that we have connected
@@ -199,10 +207,9 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
       }
     }
 
-    override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-      val t = e.getCause();
-      t.printStackTrace();
-      e.getChannel().close();
+    override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable) {
+      e.getCause.printStackTrace
+      ctx.channel.close
     }
   }
 

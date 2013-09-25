@@ -16,6 +16,7 @@
 package org.mashupbots.socko.infrastructure
 
 import java.io.InputStream
+import io.netty.util.CharsetUtil
 import java.io.BufferedInputStream
 import java.io.FileInputStream
 import java.io.File

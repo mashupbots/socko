@@ -15,13 +15,15 @@
 //
 package org.mashupbots.socko.handlers
 
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.group.DefaultChannelGroup
-import org.jboss.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
-import org.mashupbots.socko.events.WebSocketHandshakeEvent
+import io.netty.buffer.Unpooled
+import io.netty.channel.group.DefaultChannelGroup
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
+//import org.mashupbots.socko.events.WebSocketHandshakeEvent
 
 import akka.actor.Actor
+import io.netty.util.concurrent.ImmediateEventExecutor
+import org.mashupbots.socko.events.WebSocketHandshakeEvent
 
 /**
  * Broadcasts a message to registered web socket connections.
@@ -40,17 +42,16 @@ import akka.actor.Actor
  * For more information, see the example `ChatApp`.
  */
 class WebSocketBroadcaster extends Actor {
-  private val socketConnections = new DefaultChannelGroup()
+  private val socketConnections = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE)
 
   def receive = {
     case WebSocketBroadcastText(text) =>
       socketConnections.write(new TextWebSocketFrame(text))
     case WebSocketBroadcastBinary(bytes) =>
-      socketConnections.write(new BinaryWebSocketFrame(ChannelBuffers.copiedBuffer(bytes)))
-    case WebSocketBroadcasterRegistration(context) =>
-      socketConnections.add(context.channel)
+      socketConnections.write(new BinaryWebSocketFrame(Unpooled.buffer(bytes.length).writeBytes(bytes)))
+    case WebSocketBroadcasterRegistration(event) =>
+      socketConnections.add(event.context.channel)
   }
-
 }
 
 /**
@@ -70,6 +71,3 @@ case class WebSocketBroadcastText(text: String)
  * to all registered web socket connection.
  */
 case class WebSocketBroadcastBinary(bytes: Array[Byte])
-
-
-

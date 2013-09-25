@@ -15,12 +15,11 @@
 //
 package org.mashupbots.socko.events
 
-import java.nio.charset.Charset
-import java.util.Date
+import io.netty.channel.ChannelHandlerContext
+import io.netty.handler.codec.http.FullHttpRequest
+import io.netty.handler.codec.http.HttpHeaders
+import io.netty.handler.codec.http.HttpRequest
 
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.jboss.netty.handler.codec.http.HttpRequest
 import org.mashupbots.socko.infrastructure.WebLogEvent
 
 /**
@@ -53,8 +52,8 @@ import org.mashupbots.socko.infrastructure.WebLogEvent
  * @param config Processing configuration
  */
 case class WebSocketHandshakeEvent(
-  channel: Channel,
-  nettyHttpRequest: HttpRequest,
+  context: ChannelHandlerContext,
+  nettyHttpRequest: FullHttpRequest,
   config: HttpEventConfig) extends HttpEvent {
 
   /**
@@ -139,9 +138,9 @@ case class WebSocketHandshakeEvent(
     config.webLogWriter.get ! WebLogEvent(
       this.createdOn,
       config.serverName,
-      channel.getId,
-      channel.getRemoteAddress,
-      channel.getLocalAddress,
+      context.name,
+      context.channel.remoteAddress,
+      context.channel.localAddress,
       username,
       request.endPoint.method,
       request.endPoint.uri,
