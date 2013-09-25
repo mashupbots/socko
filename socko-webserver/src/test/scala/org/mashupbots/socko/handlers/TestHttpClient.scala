@@ -15,6 +15,7 @@
 //
 package org.mashupbots.socko.handlers
 
+import io.netty.util.CharsetUtil
 import java.io.BufferedReader
 import java.io.ByteArrayOutputStream
 import java.io.InputStreamReader
@@ -24,7 +25,6 @@ import java.nio.charset.Charset
 import java.util.zip.GZIPInputStream
 import java.util.zip.InflaterInputStream
 import java.util.Hashtable
-import org.mashupbots.socko.infrastructure.CharsetUtil
 
 /**
  * Contains common methods used to call our web server

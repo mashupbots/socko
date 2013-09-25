@@ -18,12 +18,13 @@ package org.mashupbots.socko.handlers
 
 import scala.collection.JavaConversions.asScalaBuffer
 
-import org.jboss.netty.channel.ChannelLocal
-import org.jboss.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
-import org.jboss.netty.handler.codec.http.multipart.Attribute
-import org.jboss.netty.handler.codec.http.multipart.DefaultHttpDataFactory
-import org.jboss.netty.handler.codec.http.multipart.FileUpload
-import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder
+import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
+import io.netty.handler.codec.http.multipart.Attribute
+import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory
+import io.netty.handler.codec.http.multipart.FileUpload
+import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder
+import io.netty.util.AttributeKey
+
 import org.mashupbots.socko.events.HttpChunkEvent
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.WebSocketFrameEvent
@@ -37,6 +38,7 @@ import akka.event.Logging
  * We use this in our testing of Socko
  */
 class SnoopHandler extends Actor {
+  
   private val log = Logging(context.system, this)
 
   /**
@@ -53,16 +55,16 @@ class SnoopHandler extends Actor {
       snoopWebSocket(webSocketEvent)
       context.stop(self)
     case _ => {
-      log.info("received unknown message of type: ")
-      context.stop(self)
-    }
+        log.info("received unknown message of type: ")
+        context.stop(self)
+      }
   }
 
   /**
    * Echo the details of the HTTP request that we just received
    */
   private def snoopHttpRequest(event: HttpRequestEvent) {
-    val channel = event.channel
+    val context = event.context
     val request = event.nettyHttpRequest
 
     // Send 100 continue if required
@@ -79,16 +81,16 @@ class SnoopHandler extends Actor {
     buf.append("HOSTNAME: " + event.endPoint.host + "\r\n")
     buf.append("REQUEST_URI: " + event.endPoint.path + "\r\n\r\n")
 
-    val headers = request.getHeaders().toList
+    val headers = request.headers.entries
     headers.foreach(h => buf.append("HEADER: " + h.getKey() + " = " + h.getValue() + "\r\n"))
 
     val params = event.endPoint.queryStringMap
     if (!params.isEmpty) {
       params.foreach({
-        case (key, values) => {
-          values.foreach(v => buf.append("QUERYSTRING PARAM: " + key + " = " + v + "\r\n"))
-        }
-      })
+          case (key, values) => {
+              values.foreach(v => buf.append("QUERYSTRING PARAM: " + key + " = " + v + "\r\n"))
+            }
+        })
       buf.append("\r\n")
     }
 
@@ -102,26 +104,25 @@ class SnoopHandler extends Actor {
       val content = event.request.content.toString()
 
       dataList.foreach(data => {
-        log.debug(data.toString)
-        if (data.getHttpDataType() == HttpDataType.Attribute) {
-          // Normal post data
-          val attribute = data.asInstanceOf[Attribute]
-          buf.append("  " + data.getName + "=" + attribute.getValue + "\r\n")
-        } else if (data.getHttpDataType() == HttpDataType.FileUpload) {
-          // File upload
-          val fileUpload = data.asInstanceOf[FileUpload]
-          buf.append("  File Field=" + fileUpload.getName + "\r\n")
-          buf.append("  File Name=" + fileUpload.getFilename + "\r\n")
-          buf.append("  File MIME Type=" + fileUpload.getContentType + "\r\n")
-          buf.append("  File Content=" + fileUpload.getString(fileUpload.getCharset) + "\r\n")
-        }
-      })
+          log.debug(data.toString)
+          if (data.getHttpDataType() == HttpDataType.Attribute) {
+            // Normal post data
+            val attribute = data.asInstanceOf[Attribute]
+            buf.append("  " + data.getName + "=" + attribute.getValue + "\r\n")
+          } else if (data.getHttpDataType() == HttpDataType.FileUpload) {
+            // File upload
+            val fileUpload = data.asInstanceOf[FileUpload]
+            buf.append("  File Field=" + fileUpload.getName + "\r\n")
+            buf.append("  File Name=" + fileUpload.getFilename + "\r\n")
+            buf.append("  File MIME Type=" + fileUpload.getContentType + "\r\n")
+            buf.append("  File Content=" + fileUpload.getString(fileUpload.getCharset) + "\r\n")
+          }
+        })
     } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
       buf.append("URLENCODED FORM DATA\r\n")
-      event.request.content.toFormDataMap.foreach(entry => buf.append(s"  ${entry._1}=${entry._2(0)}\r\n"))
+      event.request.content.map(_.toFormDataMap.foreach(entry => buf.append(s"  ${entry._1}=${entry._2(0)}\r\n")))
     } else {
-      val content = event.request.content.toString()
-      if (content.length > 0) {
+      event.request.content.foreach { content =>
         buf.append("CONTENT: " + content + "\r\n")
       }
     }
@@ -140,12 +141,12 @@ class SnoopHandler extends Actor {
    */
   private def snoopHttpChunk(event: HttpChunkEvent) {
     // Accumulate chunk info in a string buffer stored in the channel
-    val channel = event.channel
+    val context = event.context
     val buf = {
-      val storedBuf = ChunkDataStore.data.get(channel)
+      val storedBuf = context.attr(SnoopHandler.key).get
       if (storedBuf == null) {
-        val newBuf = new StringBuilder()
-        ChunkDataStore.data.set(channel, newBuf)
+        val newBuf = new StringBuilder
+        context.attr(SnoopHandler.key).set(newBuf)
         newBuf
       } else {
         storedBuf
@@ -176,14 +177,10 @@ class SnoopHandler extends Actor {
       event.writeBinary(event.readBinary)
     }
   }
-
 }
 
-/**
- * Store of channel specific data
- */
-object ChunkDataStore {
-  val data = new ChannelLocal[StringBuilder]
+object SnoopHandler {
+  val key = new AttributeKey[StringBuilder]("data")
 }
 
 object HttpDataFactory {

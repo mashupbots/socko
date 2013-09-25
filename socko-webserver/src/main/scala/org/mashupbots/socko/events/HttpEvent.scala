@@ -18,7 +18,7 @@ package org.mashupbots.socko.events
 /**
  * Abstract event triggered on HTTP related activity
  */
-abstract class HttpEvent() extends SockoEvent {
+trait HttpEvent extends SockoEvent {
 
   /**
    * Event processing configuration

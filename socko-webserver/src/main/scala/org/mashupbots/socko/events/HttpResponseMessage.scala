@@ -15,21 +15,22 @@
 //
 package org.mashupbots.socko.events
 
+import io.netty.util.CharsetUtil
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import java.util.GregorianCalendar
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.GZIPOutputStream
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.ChannelFutureListener
-import org.jboss.netty.handler.codec.http.DefaultHttpChunk
-import org.jboss.netty.handler.codec.http.DefaultHttpChunkTrailer
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse
-import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.jboss.netty.handler.codec.http.HttpResponse
-import org.jboss.netty.handler.codec.http.HttpVersion
-import org.jboss.netty.handler.codec.spdy.SpdyHttpHeaders
-import org.mashupbots.socko.infrastructure.CharsetUtil
+import io.netty.channel.ChannelFutureListener
+import io.netty.handler.codec.http.DefaultFullHttpResponse
+import io.netty.handler.codec.http.DefaultHttpContent
+import io.netty.handler.codec.http.DefaultHttpResponse
+import io.netty.handler.codec.http.DefaultLastHttpContent
+import io.netty.handler.codec.http.FullHttpResponse
+import io.netty.handler.codec.http.HttpHeaders
+import io.netty.handler.codec.http.HttpResponse
+import io.netty.handler.codec.http.HttpVersion
+import io.netty.handler.codec.spdy.SpdyHttpHeaders
 import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.IOUtil
 
@@ -102,7 +103,7 @@ case class HttpResponseMessage(event: HttpEvent) {
     assert(!hasBeenWritten, "Response has ended")
 
     val response = new DefaultHttpResponse(HttpVersion.valueOf(request.httpVersion), HttpResponseStatus.CONTINUE.toNetty)
-    event.channel.write(response)
+    event.context.writeAndFlush(response)
   }
 
   /**
@@ -120,28 +121,28 @@ case class HttpResponseMessage(event: HttpEvent) {
     assert(!hasBeenWritten, "Response has ended")
 
     // Build the response object.
-    val response = new DefaultHttpResponse(HttpVersion.valueOf(request.httpVersion), status.toNetty)
+    val response = new DefaultFullHttpResponse(HttpVersion.valueOf(request.httpVersion), status.toNetty)
 
     // Content
     setContent(response, content, contentType.getOrElse(""))
 
     // Headers
     HttpResponseMessage.setDateHeader(response)
-    HttpResponseMessage.setSpdyHeaders(request, response)
-    headers.foreach { kv => response.setHeader(kv._1, kv._2) }
+//    HttpResponseMessage.setSpdyHeaders(request, response)
+    headers.foreach { kv => response.headers.set(kv._1, kv._2) }
 
     if (request.isKeepAlive) {
       // Add 'Content-Length' header only for a keep-alive connection.
-      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent.readableBytes)
+      response.headers.set(HttpHeaders.Names.CONTENT_LENGTH, response.content.readableBytes)
       // Add keep alive header as per HTTP 1.1 specifications
       HttpResponseMessage.setKeepAliveHeader(response, request.isKeepAlive)
     }
 
     // Write web log
-    event.writeWebLog(response.getStatus.getCode, response.getContent.readableBytes)
+    event.writeWebLog(response.getStatus.code, response.content.readableBytes)
 
     // Write the response.
-    val future = event.channel.write(response)
+    val future = event.context.writeAndFlush(response)
 
     // Close the non-keep-alive connection after the write operation is done.
     if (!request.isKeepAlive) {
@@ -301,7 +302,7 @@ case class HttpResponseMessage(event: HttpEvent) {
    * @param content Binary content to return in the response
    * @param contentType MIME content type to set in the response header. For example, "image/gif"
    */
-  private def setContent(response: HttpResponse, content: Array[Byte], contentType: String) {
+  private def setContent(response: FullHttpResponse, content: Array[Byte], contentType: String) {
     // Check to see if we should compress the content
     val compressible = (content != null &&
       content.size > 0 &&
@@ -315,8 +316,8 @@ case class HttpResponseMessage(event: HttpEvent) {
           IOUtil.using(new GZIPOutputStream(compressBytes)) { compressedOut =>
             compressedOut.write(content, 0, content.length)
           }
-          response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
-          response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "gzip")
+          response.content.writeBytes(compressBytes.toByteArray)
+          response.headers.set(HttpHeaders.Names.CONTENT_ENCODING, "gzip")
         }
       } else if (compressible && request.acceptedEncodings.contains("deflate")) {
 
@@ -324,16 +325,17 @@ case class HttpResponseMessage(event: HttpEvent) {
           IOUtil.using(new DeflaterOutputStream(compressBytes)) { compressedOut =>
             compressedOut.write(content, 0, content.length)
           }
-          response.setContent(ChannelBuffers.copiedBuffer(compressBytes.toByteArray))
-          response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, "deflate")
+          response.content.writeBytes(compressBytes.toByteArray)
+          response.headers.set(HttpHeaders.Names.CONTENT_ENCODING, "deflate")
         }
       } else if (content.size > 0) {
         // No compression
-        response.setContent(ChannelBuffers.copiedBuffer(content))
+        response.content.writeBytes(content)
       }
     } catch {
       // If error, then just write without compression
-      case ex: Throwable => response.setContent(ChannelBuffers.copiedBuffer(content))
+      case ex: Throwable =>
+        response.content.writeBytes(content)
     }
   }
 
@@ -375,19 +377,17 @@ case class HttpResponseMessage(event: HttpEvent) {
 
     // Headers
     HttpResponseMessage.setDateHeader(response)
-    HttpResponseMessage.setSpdyHeaders(request, response)
-    this.headers.foreach { kv => response.setHeader(kv._1, kv._2) }
+//    HttpResponseMessage.setSpdyHeaders(request, response)
+    this.headers.foreach { kv => response.headers.set(kv._1, kv._2) }
     if (request.isKeepAlive) {
       // Add keep alive header as per HTTP 1.1 specifications
       HttpResponseMessage.setKeepAliveHeader(response, request.isKeepAlive)
     }
 
-    // See http://stackoverflow.com/questions/9027322/how-to-use-chunkedstream-properly
-    response.setChunked(true);
-    response.setHeader(HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);
+    response.headers.set(HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);
 
     // Write the response
-    val future = event.channel.write(response)
+    val future = event.context.writeAndFlush(response)
 
     writingChunks = true
   }
@@ -432,8 +432,9 @@ case class HttpResponseMessage(event: HttpEvent) {
 
     totalChunkContentLength += chunkContent.length
 
-    val chunk = new DefaultHttpChunk(ChannelBuffers.wrappedBuffer(chunkContent))
-    event.channel.write(chunk)
+    val buf = event.context.alloc.buffer(chunkContent.length).writeBytes(chunkContent)
+    val chunk = new DefaultHttpContent(buf)
+    event.context.writeAndFlush(chunk)
   }
 
   /**
@@ -451,10 +452,10 @@ case class HttpResponseMessage(event: HttpEvent) {
     assert(writingChunks, "Must call writeFirstChunk() first")
     assert(!hasBeenWritten, "Response has ended")
 
-    val lastChunk = new DefaultHttpChunkTrailer()
-    trailingHeaders.foreach(kv => lastChunk.addHeader(kv._1, kv._2))
+    val lastChunk = new DefaultLastHttpContent
+    trailingHeaders.foreach(kv => lastChunk.trailingHeaders.add(kv._1, kv._2))
 
-    val future = event.channel.write(lastChunk)
+    val future = event.context.writeAndFlush(lastChunk)
     if (!request.isKeepAlive) {
       future.addListener(ChannelFutureListener.CLOSE)
     }
@@ -493,16 +494,16 @@ case class HttpResponseMessage(event: HttpEvent) {
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FOUND.toNetty)
 
     HttpResponseMessage.setDateHeader(response)
-    response.setHeader(HttpHeaders.Names.LOCATION, url)
+    response.headers.set(HttpHeaders.Names.LOCATION, url)
 
     if (!closeChannel) {
       HttpResponseMessage.setKeepAliveHeader(response, request.isKeepAlive)
-      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, response.getContent().readableBytes())
+      response.headers.set(HttpHeaders.Names.CONTENT_LENGTH, 0)
     }
 
-    event.writeWebLog(response.getStatus.getCode, response.getContent.readableBytes)
+    event.writeWebLog(response.getStatus.code, 0)
 
-    val future = event.channel.write(response)
+    val future = event.context.writeAndFlush(response)
     if (closeChannel) {
       future.addListener(ChannelFutureListener.CLOSE)
     }
@@ -526,7 +527,7 @@ object HttpResponseMessage {
   def setDateHeader(response: HttpResponse) {
     val dateFormatter = DateUtil.rfc1123DateFormatter
     val time = new GregorianCalendar()
-    response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(time.getTime()))
+    response.headers.set(HttpHeaders.Names.DATE, dateFormatter.format(time.getTime()))
   }
 
   /**
@@ -541,7 +542,7 @@ object HttpResponseMessage {
    * @param mimeType MIME type
    */
   def setContentTypeHeader(response: HttpResponse, mimeType: String) {
-    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, mimeType)
+    response.headers.set(HttpHeaders.Names.CONTENT_TYPE, mimeType)
   }
 
   /**
@@ -552,8 +553,8 @@ object HttpResponseMessage {
    */
   def setSpdyHeaders(request: HttpRequestMessage, response: HttpResponse) {
     if (request.headers.contains(SpdyHttpHeaders.Names.STREAM_ID)) {
-      response.setHeader(SpdyHttpHeaders.Names.STREAM_ID, request.headers(SpdyHttpHeaders.Names.STREAM_ID))
-      response.setHeader(SpdyHttpHeaders.Names.PRIORITY, 0);
+      response.headers.set(SpdyHttpHeaders.Names.STREAM_ID, request.headers(SpdyHttpHeaders.Names.STREAM_ID))
+      response.headers.set(SpdyHttpHeaders.Names.PRIORITY, 0);
     }
   }
   /**
@@ -572,7 +573,7 @@ object HttpResponseMessage {
    */
   def setKeepAliveHeader(response: HttpResponse, isKeepAlive: Boolean) {
     if (isKeepAlive) {
-      response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+      response.headers.set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
     }
   }
 
@@ -613,11 +614,11 @@ object HttpResponseMessage {
  */
 case class HttpResponseStatus(code: Int) {
 
-  private val nettyHttpResponseStatus = org.jboss.netty.handler.codec.http.HttpResponseStatus.valueOf(code)
+  private val nettyHttpResponseStatus = io.netty.handler.codec.http.HttpResponseStatus.valueOf(code)
 
-  val reasonPhrase = nettyHttpResponseStatus.getReasonPhrase
+  val reasonPhrase = nettyHttpResponseStatus.reasonPhrase
 
-  def toNetty(): org.jboss.netty.handler.codec.http.HttpResponseStatus = {
+  def toNetty(): io.netty.handler.codec.http.HttpResponseStatus = {
     nettyHttpResponseStatus
   }
 

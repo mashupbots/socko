@@ -30,7 +30,9 @@ object SockoBuild extends Build {
         
     // sbtEclipse - see examples https://github.com/typesafehub/sbteclipse/blob/master/sbteclipse-plugin/src/sbt-test/sbteclipse/02-contents/project/Build.scala
     EclipseKeys.createSrc := EclipseCreateSrc.ValueSet(EclipseCreateSrc.Unmanaged, EclipseCreateSrc.Source, EclipseCreateSrc.Resource),
-    EclipseKeys.withSource := true    
+    EclipseKeys.withSource := true,
+    
+    fork in Test := true
   )
   
   // Don't publish to maven
@@ -184,9 +186,9 @@ object Dependency {
   val ant           = "org.apache.ant"                          % "ant"                          % "1.8.4"
   val concurrentmap = "com.googlecode.concurrentlinkedhashmap"  % "concurrentlinkedhashmap-lru"  % "1.3.2"
   val logback       = "ch.qos.logback"                          % "logback-classic"              % "1.0.9" % "runtime"
-  val netty         = "io.netty"                                % "netty"                        % "3.7.0.Final"
+  val netty         = "io.netty"                                % "netty-all"                    % "4.0.9.Final"
   val nextProtoNeg  = "org.eclipse.jetty.npn"                   % "npn-api"                      % "1.1.0.v20120525"
-  val json4s        = "org.json4s"                              %% "json4s-native"               % "3.2.1"
+  val json4s        = "org.json4s"                              %% "json4s-native"               % "3.2.5"
   val scalatest     = "org.scalatest"                           % "scalatest_2.10"               % "2.0.M5b" % "test"
   val swagger       = "com.wordnik"                             % "swagger-core_2.10.0"          % "1.2.0" exclude("org.slf4j", "slf4j-log4j12") exclude("log4j", "log4j")
 }

@@ -15,9 +15,10 @@
 //
 package org.mashupbots.socko.events
 
+import io.netty.util.CharsetUtil
 import scala.collection.JavaConversions._
 
-import org.jboss.netty.handler.codec.http.QueryStringDecoder
+import io.netty.handler.codec.http.QueryStringDecoder
 
 /**
  * Identifies the end point associated with the firing of an event. In Socko terminology, an end point comprise
@@ -31,7 +32,8 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder
 case class EndPoint(
   method: String,
   host: String,
-  uri: String) {
+  uri: String
+) {
 
   require(method != null && method != "", "EndPoint method cannot be null or empty string")
   require(host != null && host != "", "EndPoint host cannot be null or empty string")
@@ -68,11 +70,9 @@ case class EndPoint(
    * Provides Map access to query string parameters
    */
   lazy val queryStringMap: Map[String, List[String]] = {
-    val m = new QueryStringDecoder(uri).getParameters.toMap
+    val m = new QueryStringDecoder(uri, CharsetUtil.UTF_8).parameters.toMap
     // Map the Java list values to Scala list
-    for ((key, values) <- m) yield {
-      (key, values.toList)
-    }
+    m.map { case (key, value) => (key, value.toList) }
   }
 
   /**
@@ -92,5 +92,4 @@ case class EndPoint(
       case ex: NoSuchElementException => None
     }
   }
-
 }

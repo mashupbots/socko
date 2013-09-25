@@ -15,9 +15,9 @@
 //
 package org.mashupbots.socko.events
 
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.jboss.netty.handler.codec.http.HttpRequest
+import io.netty.channel.ChannelHandlerContext
+import io.netty.handler.codec.http.HttpHeaders
+import io.netty.handler.codec.http.HttpRequest
 import org.mashupbots.socko.infrastructure.WebLogEvent
 
 /**
@@ -28,7 +28,7 @@ import org.mashupbots.socko.infrastructure.WebLogEvent
  * @param config Processing configuration
  */
 case class HttpRequestEvent(
-  channel: Channel,
+  context: ChannelHandlerContext,
   nettyHttpRequest: HttpRequest,
   config: HttpEventConfig) extends HttpEvent {
 
@@ -63,9 +63,9 @@ case class HttpRequestEvent(
     config.webLogWriter.get ! WebLogEvent(
       this.createdOn,
       config.serverName,
-      channel.getId,
-      channel.getRemoteAddress,
-      channel.getLocalAddress,
+      context.name,
+      context.channel.remoteAddress,
+      context.channel.localAddress,
       username,
       request.endPoint.method,
       request.endPoint.uri,

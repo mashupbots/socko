@@ -16,24 +16,20 @@
 package org.mashupbots.socko.webserver
 
 import org.eclipse.jetty.npn.NextProtoNego
-import org.jboss.netty.channel.ChannelEvent
-import org.jboss.netty.channel.ChannelHandlerContext
-import org.jboss.netty.channel.ChannelPipeline
-import org.jboss.netty.channel.ChannelUpstreamHandler
-import org.jboss.netty.handler.codec.http.HttpChunkAggregator
-import org.jboss.netty.handler.codec.http.HttpRequestDecoder
-import org.jboss.netty.handler.codec.http.HttpResponseEncoder
-import org.jboss.netty.handler.codec.spdy.SpdyFrameDecoder
-import org.jboss.netty.handler.codec.spdy.SpdyFrameEncoder
-import org.jboss.netty.handler.codec.spdy.SpdyHttpDecoder
-import org.jboss.netty.handler.codec.spdy.SpdyHttpEncoder
-import org.jboss.netty.handler.codec.spdy.SpdySessionHandler
-import org.jboss.netty.handler.ssl.SslHandler
-import org.jboss.netty.handler.stream.ChunkedWriteHandler
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.ChannelInboundHandlerAdapter
+import io.netty.handler.codec.http.HttpObjectAggregator
+import io.netty.handler.codec.http.HttpRequestDecoder
+import io.netty.handler.codec.http.HttpResponseEncoder
+import io.netty.handler.codec.spdy.SpdyFrameDecoder
+import io.netty.handler.codec.spdy.SpdyFrameEncoder
+import io.netty.handler.codec.spdy.SpdyHttpDecoder
+import io.netty.handler.codec.spdy.SpdyHttpEncoder
+import io.netty.handler.codec.spdy.SpdySessionHandler
+import io.netty.handler.ssl.SslHandler
+import io.netty.handler.stream.ChunkedWriteHandler
 import org.mashupbots.socko.netty.SpdyServerProvider
 import org.mashupbots.socko.infrastructure.Logger
-import org.jboss.netty.channel.ChannelStateEvent
-import org.jboss.netty.channel.ChannelState
 
 /**
  * Handler used with SPDY that performs protocol negotiation.
@@ -44,32 +40,27 @@ import org.jboss.netty.channel.ChannelState
  *
  * @param server Web Server
  */
-class ProtocolNegoitationHandler(server: WebServer) extends ChannelUpstreamHandler with Logger {
+class ProtocolNegoitationHandler(server: WebServer) extends ChannelInboundHandlerAdapter with Logger {
 
-  def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+  override def channelActive(ctx: ChannelHandlerContext) = {
+    server.allChannels.add(ctx.channel)
+  }
+  
+  override def channelRead(ctx: ChannelHandlerContext, e: AnyRef) = {
 
-    val pipeline: ChannelPipeline = ctx.getPipeline()
+    val pipeline = ctx.pipeline
     val handler = pipeline.get(classOf[SslHandler])
-    val provider = NextProtoNego.get(handler.getEngine).asInstanceOf[SpdyServerProvider]
+    val provider = NextProtoNego.get(handler.engine).asInstanceOf[SpdyServerProvider]
     val selectedProtocol = provider.getSelectedProtocol
     val httpConfig = server.config.http
 
     // Null is returned during the negotiation process so ignore it
-    if (selectedProtocol == null) {
-      // If channel open event (see SimpleChannelUpstreamHandler for sample), add to all channels
-      // For some reason, there are several channels opened for SPDY for the browser.
-      if (e.isInstanceOf[ChannelStateEvent]) {
-        val evt = e.asInstanceOf[ChannelStateEvent]
-        if (evt.getState() == ChannelState.OPEN) {
-          server.allChannels.add(e.getChannel)
-        }
-      }
-    } else {
+    if (selectedProtocol != null) {
       if (selectedProtocol.startsWith("spdy/")) {
         val version = Integer.parseInt(selectedProtocol.substring(5))
 
         pipeline.addLast("decoder", new SpdyFrameDecoder(version, httpConfig.maxChunkSizeInBytes,
-          httpConfig.maxHeaderSizeInBytes))
+                                                         httpConfig.maxHeaderSizeInBytes))
         pipeline.addLast("spdy_encoder", new SpdyFrameEncoder(version))
         pipeline.addLast("spdy_session_handler", new SpdySessionHandler(version, true))
         pipeline.addLast("spdy_http_encoder", new SpdyHttpEncoder(version))
@@ -79,12 +70,12 @@ class ProtocolNegoitationHandler(server: WebServer) extends ChannelUpstreamHandl
 
         // remove this handler, and process the requests as SPDY
         pipeline.remove(this)
-        ctx.sendUpstream(e)
+
       } else if (selectedProtocol == "http/1.1") {
         pipeline.addLast("decoder", new HttpRequestDecoder(httpConfig.maxInitialLineLength,
-          httpConfig.maxHeaderSizeInBytes, httpConfig.maxChunkSizeInBytes))
+                                                           httpConfig.maxHeaderSizeInBytes, httpConfig.maxChunkSizeInBytes))
         if (httpConfig.aggreateChunks) {
-          pipeline.addLast("chunkAggregator", new HttpChunkAggregator(httpConfig.maxLengthInBytes))
+          pipeline.addLast("chunkAggregator", new HttpObjectAggregator(httpConfig.maxLengthInBytes))
         }
         pipeline.addLast("encoder", new HttpResponseEncoder())
         pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
@@ -92,11 +83,10 @@ class ProtocolNegoitationHandler(server: WebServer) extends ChannelUpstreamHandl
 
         // remove this handler, and process the requests as HTTP
         pipeline.remove(this);
-        ctx.sendUpstream(e);
+
       } else {
         throw new UnsupportedOperationException("Unsupported protocol: " + selectedProtocol)
       }
     }
   }
-
 }

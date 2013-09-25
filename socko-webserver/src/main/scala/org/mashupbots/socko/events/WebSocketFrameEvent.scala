@@ -15,13 +15,13 @@
 //
 package org.mashupbots.socko.events
 
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.jboss.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketFrame
+import io.netty.channel.ChannelHandlerContext
+import io.netty.handler.codec.http.HttpHeaders
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
+import io.netty.handler.codec.http.websocketx.WebSocketFrame
+
 import org.mashupbots.socko.infrastructure.WebLogEvent
 
 /**
@@ -36,7 +36,7 @@ import org.mashupbots.socko.infrastructure.WebLogEvent
  * @param config Web Socket configuration
  */
 case class WebSocketFrameEvent(
-  channel: Channel,
+  context: ChannelHandlerContext,
   initialHttpRequest: InitialHttpRequestMessage,
   wsFrame: WebSocketFrame,
   config: WebSocketEventConfig) extends SockoEvent {
@@ -69,7 +69,7 @@ case class WebSocketFrameEvent(
     if (!wsFrame.isInstanceOf[TextWebSocketFrame]) {
       throw new UnsupportedOperationException("Cannot read a string from a BinaryWebSocketFrame")
     }
-    wsFrame.asInstanceOf[TextWebSocketFrame].getText
+    wsFrame.asInstanceOf[TextWebSocketFrame].text
   }
 
   /**
@@ -78,14 +78,14 @@ case class WebSocketFrameEvent(
    * @param text Text to send to the client
    */
   def writeText(text: String) {
-    channel.write(new TextWebSocketFrame(text))
+    context.writeAndFlush(new TextWebSocketFrame(text))
   }
 
   /**
    * Returns the request content as byte array
    */
   def readBinary(): Array[Byte] = {
-    wsFrame.getBinaryData.array
+    wsFrame.content.array
   }
 
   /**
@@ -94,15 +94,15 @@ case class WebSocketFrameEvent(
    * @param binary Binary data to return to the client
    */
   def writeBinary(binary: Array[Byte]) {
-    val buf = ChannelBuffers.copiedBuffer(binary)
-    channel.write(new BinaryWebSocketFrame(buf))
+    val buf = context.alloc.buffer(binary.length).writeBytes(binary)
+    context.writeAndFlush(new BinaryWebSocketFrame(buf))
   }
 
   /**
    * Close the web socket connection
    */
   def close() {
-    channel.write(new CloseWebSocketFrame())
+    context.writeAndFlush(new CloseWebSocketFrame())
   }
 
   /**
@@ -130,9 +130,9 @@ case class WebSocketFrameEvent(
     config.webLogWriter.get ! WebLogEvent(
       this.createdOn,
       config.serverName,
-      channel.getId,
-      channel.getRemoteAddress,
-      channel.getLocalAddress,
+      context.name,
+      context.channel.remoteAddress,
+      context.channel.localAddress,
       username,
       method,
       uri,
@@ -144,6 +144,5 @@ case class WebSocketFrameEvent(
       None,
       None)
   }
-
 }
 
