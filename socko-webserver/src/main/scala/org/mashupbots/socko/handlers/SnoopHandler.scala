@@ -101,8 +101,6 @@ class SnoopHandler extends Actor {
       val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, event.nettyHttpRequest)
       val dataList = decoder.getBodyHttpDatas().toList
 
-      val content = event.request.content.toString()
-
       dataList.foreach(data => {
           log.debug(data.toString)
           if (data.getHttpDataType() == HttpDataType.Attribute) {
@@ -120,11 +118,9 @@ class SnoopHandler extends Actor {
         })
     } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
       buf.append("URLENCODED FORM DATA\r\n")
-      event.request.content.map(_.toFormDataMap.foreach(entry => buf.append(s"  ${entry._1}=${entry._2(0)}\r\n")))
+      event.request.content.toFormDataMap.foreach(entry => buf.append(s"  ${entry._1}=${entry._2(0)}\r\n"))
     } else {
-      event.request.content.foreach { content =>
-        buf.append("CONTENT: " + content + "\r\n")
-      }
+      buf.append("CONTENT: " + event.request.content + "\r\n")
     }
 
     val x = event.response

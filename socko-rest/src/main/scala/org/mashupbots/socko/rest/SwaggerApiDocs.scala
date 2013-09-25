@@ -17,9 +17,9 @@ package org.mashupbots.socko.rest
 
 import scala.collection.mutable.HashMap
 import scala.reflect.runtime.{universe => ru}
+import io.netty.util.CharsetUtil
 import org.json4s.NoTypeHints
 import org.json4s.native.{Serialization => json}
-import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.events.EndPoint
 

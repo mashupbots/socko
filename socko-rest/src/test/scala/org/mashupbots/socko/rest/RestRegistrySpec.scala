@@ -109,7 +109,7 @@ class RestRegistrySpec extends WordSpec with MustMatchers with GivenWhenThen wit
       val thrown = intercept[RestDefintionException] {
         val r = RestRegistry("org.mashupbots.socko.rest.test2", cfg)
       }
-      thrown.getMessage must be("Operation 'GET /pets' for 'org.mashupbots.socko.rest.test2.GetPets2Request' resolves to the same address as 'GET /pets' for 'org.mashupbots.socko.rest.test2.GetPets1Request'")
+      thrown.getMessage must be("Operation 'GET /pets' for 'org.mashupbots.socko.rest.test2.GetPets1Request' resolves to the same address as 'GET /pets' for 'org.mashupbots.socko.rest.test2.GetPets2Request'")
     }
 
     "test deserialize" in {

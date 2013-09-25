@@ -21,6 +21,7 @@ import java.util.Date
 import scala.collection.JavaConversions._
 
 import io.netty.buffer.ByteBuf
+import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http.FullHttpRequest
 import io.netty.handler.codec.http.HttpHeaders
 import io.netty.handler.codec.http.HttpRequest
@@ -106,7 +107,7 @@ trait HttpRequestMessage {
   /**
    * Body of the HTTP request
    */
-  val content: Option[HttpContent]
+  val content: HttpContent
 }
 
 /**
@@ -228,10 +229,27 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
    */
   lazy val content = nettyHttpRequest match {
     case request: FullHttpRequest =>
-      Some(HttpContent(request.content, contentType))
+      DefaultHttpContent(request.content, contentType)
     case _ =>
-      None
+      EmptyHttpContent
   }
+}
+
+trait HttpContent {
+  def isEmpty: Boolean
+  def toFormDataMap: Map[String, List[String]]
+  def toString(charset: Charset): String
+  def toBytes: Array[Byte]
+  def toByteBuf: ByteBuf
+}
+
+object EmptyHttpContent extends HttpContent {
+  def isEmpty = true
+  def toFormDataMap = Map.empty[String, List[String]]
+  override def toString = ""
+  def toString(charset: Charset) = ""
+  def toBytes = Array.empty[Byte]
+  def toByteBuf = Unpooled.EMPTY_BUFFER
 }
 
 /**
@@ -240,7 +258,9 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
  * @param buffer Request body
  * @param contentType MIME type of the request body
  */
-case class HttpContent(buffer: ByteBuf, contentType: String) {
+case class DefaultHttpContent(buffer: ByteBuf, contentType: String) extends HttpContent {
+
+  def isEmpty = (buffer.readableBytes == 0)
 
   /**
    * Returns a map of the form data fields
@@ -324,7 +344,7 @@ case class InitialHttpRequestMessage(
     current.contentLength,
     createdOn)
 
-  val content: Option[HttpContent] = None
+  val content: HttpContent = EmptyHttpContent
 
   /**
    * Number of milliseconds from the time when the initial request was made
@@ -372,7 +392,7 @@ case class HttpChunkMessage(nettyHttpChunk: io.netty.handler.codec.http.HttpCont
   /**
    * Body of the HTTP chunk
    */
-  val content = HttpContent(nettyHttpChunk.content, "")
+  val content = DefaultHttpContent(nettyHttpChunk.content, "")
 
 }
 

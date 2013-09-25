@@ -45,7 +45,7 @@ class PutCustomProcessor() extends Actor with akka.actor.ActorLogging {
   def receive = {
     case req: PutCustomRequest =>
       val http = RestRequestEvents.get(req.context).get.asInstanceOf[HttpRequestEvent]
-      http.response.write(http.request.content.toString)
+      http.response.write(http.request.content.toString())
       context.stop(self)
   }
 }
