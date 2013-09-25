@@ -504,7 +504,6 @@ case class BodyBinding(
     val content = httpRequestEvent.request.content
     tpeCategory match {
       case RequestBodyDataType.Object =>
-        println(httpRequestEvent.request.content.getClass, "********************************")
         if (content.isEmpty) {
           if (required) {
             throw new RestBindingException(s"Request body is empty for request '${requestClassName}'")
@@ -544,7 +543,7 @@ case class BodyBinding(
           }
         }
       case RequestBodyDataType.Bytes =>
-        httpRequestEvent.request.content.toBytes
+        httpRequestEvent.request.content.toBytes.toSeq
 
       case _ => throw RestBindingException(s"Unsupported request body binding type category: ${tpeCategory}")
     }

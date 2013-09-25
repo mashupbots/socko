@@ -17,8 +17,8 @@ package org.mashupbots.socko.examples.streaming
 
 import java.util.Date
 
+import io.netty.util.CharsetUtil
 import org.mashupbots.socko.events.HttpRequestEvent
-import org.mashupbots.socko.infrastructure.CharsetUtil
 
 import akka.actor.Actor
 

@@ -303,7 +303,10 @@ case class DefaultHttpContent(buffer: ByteBuf, contentType: String) extends Http
   /**
    * Returns the contents as a byte array
    */
-  def toBytes = buffer.array
+  def toBytes = {
+    if (buffer.readableBytes > 0) buffer.array
+    else Array.empty[Byte]
+  }
 
   /**
    * Returns the contents as a Netty native channel buffer

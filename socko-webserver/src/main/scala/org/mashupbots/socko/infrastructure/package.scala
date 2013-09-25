@@ -18,5 +18,7 @@ package org.mashupbots.socko
 /**
  * Utility classes and objects
  */
-package org.mashupbots.socko.infrastructure {
+package object infrastructure {
+  
+  type CharsetUtil = io.netty.util.CharsetUtil
 }

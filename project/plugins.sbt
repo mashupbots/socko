@@ -11,4 +11,4 @@ addSbtPlugin("com.jsuereth" % "xsbt-gpg-plugin" % "0.6")
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.8.4")
 
 // https://github.com/dcaoyuan/nbsbt
-//addSbtPlugin("org.netbeans.nbsbt" %% "nbsbt-plugin" % "1.0.2")
+addSbtPlugin("org.netbeans.nbsbt" %% "nbsbt-plugin" % "1.0.2")
