@@ -15,7 +15,6 @@
 //
 package org.mashupbots.socko.events
 
-import io.netty.util.CharsetUtil
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import java.util.GregorianCalendar
@@ -31,6 +30,7 @@ import io.netty.handler.codec.http.HttpHeaders
 import io.netty.handler.codec.http.HttpResponse
 import io.netty.handler.codec.http.HttpVersion
 import io.netty.handler.codec.spdy.SpdyHttpHeaders
+import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.IOUtil
 

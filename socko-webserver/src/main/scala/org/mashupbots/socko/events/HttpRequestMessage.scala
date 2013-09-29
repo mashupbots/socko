@@ -15,8 +15,8 @@
 //
 package org.mashupbots.socko.events
 
-import java.nio.charset.Charset
 import java.util.Date
+import java.nio.charset.Charset
 
 import scala.collection.JavaConversions._
 
@@ -27,8 +27,7 @@ import io.netty.handler.codec.http.HttpHeaders
 import io.netty.handler.codec.http.HttpRequest
 import io.netty.handler.codec.http.LastHttpContent
 import io.netty.handler.codec.http.QueryStringDecoder
-import io.netty.util.CharsetUtil
-
+import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.DateUtil
 
 /**

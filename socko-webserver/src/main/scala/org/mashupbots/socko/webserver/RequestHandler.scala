@@ -41,7 +41,6 @@ import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
 import io.netty.handler.ssl.SslHandler
-import io.netty.util.CharsetUtil
 import org.mashupbots.socko.events.HttpChunkEvent
 import org.mashupbots.socko.events.HttpEventConfig
 import org.mashupbots.socko.events.HttpRequestEvent
@@ -49,6 +48,7 @@ import org.mashupbots.socko.events.InitialHttpRequestMessage
 import org.mashupbots.socko.events.WebSocketEventConfig
 import org.mashupbots.socko.events.WebSocketFrameEvent
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
+import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.Logger
 
 /**

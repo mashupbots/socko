@@ -21,7 +21,7 @@ import scala.reflect.runtime.{ universe => ru }
 
 import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.events.HttpResponseStatus
-import io.netty.util.CharsetUtil
+import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.Finders

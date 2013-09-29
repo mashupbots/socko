@@ -17,10 +17,10 @@ package org.mashupbots.socko.rest
 
 import scala.reflect.runtime.{ universe => ru }
 
-import io.netty.util.CharsetUtil
 
 import org.json4s.native.{ JsonMethods => jsonMethods }
 import org.json4s.string2JsonInput
+import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.Finders
 import org.scalatest.GivenWhenThen

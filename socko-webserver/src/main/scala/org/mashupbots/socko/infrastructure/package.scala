@@ -20,5 +20,4 @@ package org.mashupbots.socko
  */
 package object infrastructure {
   
-  type CharsetUtil = io.netty.util.CharsetUtil
 }

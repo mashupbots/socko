@@ -48,10 +48,7 @@ class PipelineFactory(server: WebServer) extends ChannelInitializer[SocketChanne
         val ssl = new SslHandler(sslEngine);
         pipeline.addLast("ssl", ssl)
       }
-      
-//      pipeline.addLast("deflater", ZlibCodecFactory.newZlibEncoder(ZlibWrapper.GZIP));
-//      pipeline.addLast("inflater", ZlibCodecFactory.newZlibDecoder(ZlibWrapper.GZIP));
-      
+            
       val httpRequestDecoder = new HttpRequestDecoder(
         httpConfig.maxInitialLineLength,
         httpConfig.maxHeaderSizeInBytes,

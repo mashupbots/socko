@@ -25,7 +25,7 @@ import java.util.Hashtable
 import java.util.zip.GZIPInputStream
 import java.util.zip.InflaterInputStream
 
-import io.netty.util.CharsetUtil
+import org.mashupbots.socko.infrastructure.CharsetUtil
 
 /**
  * Contains common methods used to call our web server

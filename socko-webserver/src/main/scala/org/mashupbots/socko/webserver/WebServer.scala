@@ -127,7 +127,6 @@ class WebServer(
       bootstrap.childOption[java.lang.Integer](ChannelOption.SO_BACKLOG, config.tcp.acceptBackLog.get)
     }
     
-    //bootstrap.setPipelineFactory(new PipelineFactory(this))
     bootstrap.childHandler(new PipelineFactory(this))
 
     val bindFutures = config.hostname.split(",").collect(address => {

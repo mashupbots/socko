@@ -21,7 +21,7 @@ import java.util.Date
 
 import org.json4s.NoTypeHints
 import org.json4s.native.{Serialization => json}
-import io.netty.util.CharsetUtil
+import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.WebLogFormat
 import org.mashupbots.socko.routes.HttpRequest

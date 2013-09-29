@@ -15,7 +15,7 @@
 //
 package org.mashupbots.socko.rest.get
 
-import io.netty.util.CharsetUtil
+import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.rest.Method
 import org.mashupbots.socko.rest.PathParam
 import org.mashupbots.socko.rest.RestRegistration

@@ -15,19 +15,17 @@
 //
 package org.mashupbots.socko.buildtools
 
-import org.scalatest.matchers.ShouldMatchers
+import java.io.File
+import java.nio.file.FileSystems
+import java.nio.file.Files
+
+import org.mashupbots.socko.infrastructure.CharsetUtil
+import org.mashupbots.socko.infrastructure.IOUtil
+import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-import akka.actor.ActorSystem
-import com.typesafe.config.ConfigFactory
-import org.mashupbots.socko.infrastructure.IOUtil
-import io.netty.util.CharsetUtil
-import java.io.File
-import java.nio.file.FileSystems
-import java.nio.file.WatchEvent
-import org.mashupbots.socko.infrastructure.Logger
-import java.nio.file.Files
+import org.scalatest.matchers.ShouldMatchers
 
 class BuilderSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll with Logger {
 

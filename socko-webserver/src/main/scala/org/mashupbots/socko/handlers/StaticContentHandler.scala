@@ -16,7 +16,6 @@
 
 package org.mashupbots.socko.handlers
 
-import io.netty.handler.stream.ChunkedFile
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -27,12 +26,28 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.RandomAccessFile
-import java.util.zip.DeflaterOutputStream
-import java.util.zip.GZIPOutputStream
 import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
+import java.util.zip.DeflaterOutputStream
+import java.util.zip.GZIPOutputStream
 
+import org.mashupbots.socko.events.HttpRequestEvent
+import org.mashupbots.socko.events.HttpResponseStatus
+import org.mashupbots.socko.infrastructure.ConfigUtil
+import org.mashupbots.socko.infrastructure.DateUtil
+import org.mashupbots.socko.infrastructure.HashUtil
+import org.mashupbots.socko.infrastructure.IOUtil
+import org.mashupbots.socko.infrastructure.IOUtil.using
+import org.mashupbots.socko.infrastructure.LocalCache
+import org.mashupbots.socko.infrastructure.MimeTypes
+import org.mashupbots.socko.netty.HttpChunkedFile
+
+import com.typesafe.config.Config
+
+import akka.actor.Actor
+import akka.actor.Extension
+import akka.event.Logging
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelProgressiveFuture
@@ -46,20 +61,6 @@ import io.netty.handler.codec.http.HttpVersion
 import io.netty.handler.codec.http.LastHttpContent
 import io.netty.handler.codec.spdy.SpdyHttpHeaders
 import io.netty.handler.ssl.SslHandler
-
-import org.mashupbots.socko.events.HttpRequestEvent
-import org.mashupbots.socko.infrastructure.IOUtil.using
-import org.mashupbots.socko.infrastructure.DateUtil
-import org.mashupbots.socko.infrastructure.HashUtil
-import org.mashupbots.socko.infrastructure.IOUtil
-import org.mashupbots.socko.infrastructure.LocalCache
-import org.mashupbots.socko.infrastructure.MimeTypes
-import akka.actor.Actor
-import akka.event.Logging
-import com.typesafe.config.Config
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.infrastructure.ConfigUtil
-import akka.actor.Extension
 
 /**
  * Handles downloading of static files and resources.
@@ -589,7 +590,9 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
         val writeFuture: ChannelFuture = {
           if (sendHttpChunks) {
             // Cannot use zero-copy with HTTPS.
-            ctx.writeAndFlush(new ChunkedFile(raf, 0, fileLength, 8192))
+            // Cannot not use standard netty ChunkedFile because we have set transfer-encoding to chunked
+            // and this means that HTTP chunks (and last chunk) are expected and not chunks of binary.
+            ctx.writeAndFlush(new HttpChunkedFile(raf, 0, fileLength, 8192))
           } else {
             // No encryption - use zero-copy.
             val region = new DefaultFileRegion(raf.getChannel(), 0, fileLength)

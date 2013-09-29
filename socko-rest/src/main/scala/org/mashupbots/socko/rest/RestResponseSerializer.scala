@@ -16,7 +16,6 @@
 package org.mashupbots.socko.rest
 
 import io.netty.handler.codec.http.HttpHeaders
-import io.netty.util.CharsetUtil
 import java.util.Date
 
 import scala.reflect.runtime.{universe => ru}
@@ -25,6 +24,7 @@ import org.json4s.NoTypeHints
 import org.json4s.native.{Serialization => json}
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.infrastructure.CharsetUtil
 
 /**
  * Serialized outgoing data from a [[org.mashupbots.socko.rest.RestResponse]]

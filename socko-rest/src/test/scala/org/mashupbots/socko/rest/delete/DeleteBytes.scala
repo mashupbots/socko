@@ -15,7 +15,6 @@
 //
 package org.mashupbots.socko.rest.delete
 
-import io.netty.util.CharsetUtil
 import org.mashupbots.socko.rest.Method
 import org.mashupbots.socko.rest.PathParam
 import org.mashupbots.socko.rest.RestRegistration
@@ -23,6 +22,7 @@ import org.mashupbots.socko.rest.RestRequest
 import org.mashupbots.socko.rest.RestRequestContext
 import org.mashupbots.socko.rest.RestResponse
 import org.mashupbots.socko.rest.RestResponseContext
+import org.mashupbots.socko.infrastructure.CharsetUtil
 
 import akka.actor.Actor
 import akka.actor.ActorRef

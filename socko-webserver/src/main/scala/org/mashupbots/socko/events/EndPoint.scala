@@ -15,9 +15,8 @@
 //
 package org.mashupbots.socko.events
 
-import io.netty.util.CharsetUtil
 import scala.collection.JavaConversions._
-
+import org.mashupbots.socko.infrastructure.CharsetUtil
 import io.netty.handler.codec.http.QueryStringDecoder
 
 /**
