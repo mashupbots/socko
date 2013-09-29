@@ -70,7 +70,7 @@ object BuilderApp extends Logger {
 
   val actorSystem = ActorSystem("BuilderActorSystem", ConfigFactory.parseString(actorConfig))
   val staticContentHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(staticContentHandlerConfig))
-    .withRouter(FromConfig()).withDispatcher("my-dispatcher"), "static-file-router")
+    .withRouter(FromConfig()), "static-file-router")
 
   //
   // STEP #2 - Define Routes
