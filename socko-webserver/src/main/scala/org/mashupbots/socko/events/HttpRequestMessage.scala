@@ -203,10 +203,12 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
 
   /**
    * `True` if and only if this is a request to upgrade to a websocket connection
+   * 
+   * Note: Firefox sends "Connection: keep-alive, Upgrade" rather than "Connection: Upgrade"
    */
   val isWebSocketUpgrade: Boolean = {
     import HttpHeaders._
-    nettyHttpRequest.headers.get(Names.CONNECTION).equalsIgnoreCase(Values.UPGRADE) &&
+    nettyHttpRequest.headers.get(Names.CONNECTION).contains(Values.UPGRADE) &&
     nettyHttpRequest.headers.get(Names.UPGRADE).equalsIgnoreCase(Values.WEBSOCKET)
   }
 
