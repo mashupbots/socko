@@ -15,7 +15,7 @@
 //
 package org.mashupbots.socko.handlers
 
-import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import org.mashupbots.socko.infrastructure.WebLogFormat
 import org.mashupbots.socko.routes._
@@ -59,7 +59,7 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
       }
       case Path("/websocket/oncomplete/") => {
         wsHandshake.authorize(onComplete = Some((event: WebSocketHandshakeEvent) => {
-          wsHandshake.channel.write(new TextWebSocketFrame("Hello - we have completed the handshake"))
+          wsHandshake.context.writeAndFlush(new TextWebSocketFrame("Hello - we have completed the handshake"))
         }))
       }
       case Path("/websocket/maxframesize/") => {
@@ -67,7 +67,7 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
       }
     }
     case WebSocketFrame(wsFrame) => {
-      val name = "SnoopHandler_%s_%s".format(wsFrame.channel.getId, System.currentTimeMillis)
+      val name = "SnoopHandler_%s_%s".format(wsFrame.context.name, System.currentTimeMillis)
       actorSystem.actorOf(Props[SnoopHandler], name) ! wsFrame
     }
   })

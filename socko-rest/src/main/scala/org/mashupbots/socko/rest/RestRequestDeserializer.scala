@@ -85,10 +85,10 @@ object RestRequestDeserializer {
    * @param requestClassSymbol Request class symbol
    */
   def apply(config: RestConfig,
-    rm: ru.Mirror,
-    registration: RestRegistration,
-    endPoint: RestEndPoint,
-    requestClassSymbol: ru.ClassSymbol): RestRequestDeserializer = {
+            rm: ru.Mirror,
+            registration: RestRegistration,
+            endPoint: RestEndPoint,
+            requestClassSymbol: ru.ClassSymbol): RestRequestDeserializer = {
 
     val requestClassName = requestClassSymbol.fullName
     val requestConstructor: ru.MethodSymbol = requestClassSymbol.toType.declaration(ru.nme.CONSTRUCTOR).asMethod
@@ -212,7 +212,7 @@ object RequestParamBinding {
         val idx = endPoint.fullPathSegments.indexWhere(ps => ps.name == paramName && ps.isVariable)
         if (idx == -1) {
           throw RestDefintionException(s"'${paramName}' in '${requestClassName}' is not in the path. " +
-            s"'${endPoint.fullPath}' does not contain a variable named '${paramName}'.")
+                                       s"'${endPoint.fullPath}' does not contain a variable named '${paramName}'.")
         }
         PathBinding(config, pathParm, param.typeSignature, idx)
 
@@ -501,10 +501,10 @@ case class BodyBinding(
    * @return a value for passing to the constructor
    */
   def extract(context: RestRequestContext, requestClassName: String, httpRequestEvent: HttpRequestEvent): Any = {
+    val content = httpRequestEvent.request.content
     tpeCategory match {
       case RequestBodyDataType.Object =>
-        val s = httpRequestEvent.request.content.toString
-        if (s.isEmpty) {
+        if (content.isEmpty) {
           if (required) {
             throw new RestBindingException(s"Request body is empty for request '${requestClassName}'")
           } else {
@@ -512,6 +512,7 @@ case class BodyBinding(
             None
           }
         } else {
+          val s = content.toString()
           try {
             val formats = json.formats(NoTypeHints)
             val scalaType = org.json4s.reflect.Reflector.scalaTypeOf(objectClass.get)
@@ -525,8 +526,7 @@ case class BodyBinding(
           }
         }
       case RequestBodyDataType.Primitive =>
-        val s = httpRequestEvent.request.content.toString
-        if (s.isEmpty) {
+        if (content.isEmpty) {
           if (required) {
             throw new RestBindingException(s"Cannot bind empty body for request '${requestClassName}'")
           } else {
@@ -534,6 +534,7 @@ case class BodyBinding(
             None
           }
         } else {
+          val s = content.toString()
           try {
             primitiveParser.get(s)
           } catch {

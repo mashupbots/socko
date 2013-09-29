@@ -22,7 +22,7 @@ import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.handlers.StaticContentHandler
 import org.mashupbots.socko.handlers.StaticContentHandlerConfig
 import org.mashupbots.socko.handlers.StaticFileRequest
-import org.mashupbots.socko.infrastructure.CharsetUtil
+import io.netty.util.CharsetUtil
 import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes.GET

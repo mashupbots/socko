@@ -15,12 +15,18 @@
 //
 package org.mashupbots.socko.webserver
 
-import java.util.concurrent.Executors
+import scala.collection.JavaConversions._
 
-import org.jboss.netty.bootstrap.ServerBootstrap
-import org.jboss.netty.channel.FixedReceiveBufferSizePredictor
-import org.jboss.netty.channel.group.DefaultChannelGroup
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
+import io.netty.bootstrap.ServerBootstrap
+import io.netty.channel.ChannelFuture
+import io.netty.channel.ChannelFutureListener
+import io.netty.channel.ChannelOption
+import io.netty.channel.group.DefaultChannelGroup
+import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.socket.nio.NioServerSocketChannel
+import io.netty.util.concurrent.GlobalEventExecutor
+
+import java.util.concurrent.CountDownLatch
 import org.mashupbots.socko.events.SockoEvent
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.WebLogWriter
@@ -57,12 +63,7 @@ class WebServer(
   /**
    * Collection of channels that are currently being used
    */
-  val allChannels = new DefaultChannelGroup(config.serverName)
-
-  /**
-   * Channel factory
-   */
-  private var channelFactory: NioServerSocketChannelFactory = null
+  val allChannels = new DefaultChannelGroup(config.serverName, GlobalEventExecutor.INSTANCE)
 
   /**
    * SSL Engine
@@ -91,56 +92,66 @@ class WebServer(
    * Starts the server
    */
   def start(): Unit = {
-    if (channelFactory != null) {
-      log.info("Socko server '{}' already started", Array(config.serverName))
-      return
-    }
-
+    
     allChannels.clear()
 
-    channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
-
-    val bootstrap = new ServerBootstrap(channelFactory)
-
-    bootstrap.setOption("child.tcpNoDelay", config.tcp.noDelay.getOrElse(true))
+    val bossGroup = new NioEventLoopGroup
+    val workerGroup = new NioEventLoopGroup
+    val bootstrap = new ServerBootstrap()
+    .group(bossGroup, workerGroup)
+    .channel(classOf[NioServerSocketChannel])
+    .childOption[java.lang.Boolean](ChannelOption.TCP_NODELAY, config.tcp.noDelay.getOrElse(true).asInstanceOf[java.lang.Boolean])
     if (config.tcp.sendBufferSize.isDefined) {
-      bootstrap.setOption("child.sendBufferSize", config.tcp.sendBufferSize.get)
+      bootstrap.childOption[java.lang.Integer](ChannelOption.SO_SNDBUF, config.tcp.sendBufferSize.get)
     }
     if (config.tcp.receiveBufferSize.isDefined) {
       // Thanks to VertX. We need to set a FixedReceiveBufferSizePredictor, since otherwise Netty will ignore our 
       // setting and use an adaptive buffer which can get very large
-      bootstrap.setOption("child.receiveBufferSize", config.tcp.receiveBufferSize.get)
-      bootstrap.setOption("child.receiveBufferSizePredictor", new FixedReceiveBufferSizePredictor(1024))
+      bootstrap.childOption[Integer](ChannelOption.SO_RCVBUF, config.tcp.receiveBufferSize.get)
+      // ReceiveBufferSizePredictor is not found in netty 4 
+      // bootstrap.setOption("child.receiveBufferSizePredictor", new FixedReceiveBufferSizePredictor(1024))
     }
     if (config.tcp.keepAlive.isDefined) {
-      bootstrap.setOption("child.keepAlive", config.tcp.keepAlive.get)
+      bootstrap.childOption[java.lang.Boolean](ChannelOption.SO_KEEPALIVE, config.tcp.keepAlive.get)
     }    
     if (config.tcp.soLinger.isDefined) {
-      bootstrap.setOption("child.soLinger", config.tcp.soLinger.get)
+      bootstrap.childOption[java.lang.Integer](ChannelOption.SO_LINGER, config.tcp.soLinger.get)
     }
     if (config.tcp.trafficClass.isDefined) {
-      bootstrap.setOption("child.trafficClass", config.tcp.trafficClass.get)
+      bootstrap.childOption[java.lang.Integer](ChannelOption.IP_TOS, config.tcp.trafficClass.get)
     }
     if (config.tcp.reuseAddress.isDefined) {
-      bootstrap.setOption("child.reuseAddress", config.tcp.reuseAddress.get)
+      bootstrap.childOption[java.lang.Boolean](ChannelOption.SO_REUSEADDR, config.tcp.reuseAddress.get)
     }
     if (config.tcp.acceptBackLog.isDefined) {
-      bootstrap.setOption("child.backlog", config.tcp.acceptBackLog.get)
+      bootstrap.childOption[java.lang.Integer](ChannelOption.SO_BACKLOG, config.tcp.acceptBackLog.get)
     }
     
-    bootstrap.setPipelineFactory(new PipelineFactory(this))
+    //bootstrap.setPipelineFactory(new PipelineFactory(this))
+    bootstrap.childHandler(new PipelineFactory(this))
 
-    config.hostname.split(",").foreach(address => {
-      address.trim() match {
-        case "0.0.0.0" =>
-          allChannels.add(bootstrap.bind(new java.net.InetSocketAddress(config.port)))
-        case _ =>
-          if (!address.isEmpty) {
-            allChannels.add(bootstrap.bind(new java.net.InetSocketAddress(address, config.port)))
-          }
+    val bindFutures = config.hostname.split(",").collect(address => {
+        address.trim match {
+          case "0.0.0.0" =>
+            bootstrap.bind(config.port)
+          case _ if (!address.isEmpty) =>
+            bootstrap.bind(address, config.port)
+        }
+      })
+
+    allChannels.addAll(bindFutures.map(_.channel).toList)
+
+    // Wait until the bound ports are ready to accept connections.
+    // This is required to avoid connection refused exceptions during testing.
+    val latch = new CountDownLatch(bindFutures.length)
+    val bindFutureListener = new ChannelFutureListener {
+      def operationComplete(future: ChannelFuture) = {
+        latch.countDown
       }
-    })
-
+    }
+    bindFutures.foreach(_.addListener(bindFutureListener))
+    latch.await
+    
     log.info("Socko server '{}' started on {}:{}", config.serverName, config.hostname, config.port.toString)
   }
 
@@ -152,9 +163,6 @@ class WebServer(
     future.awaitUninterruptibly()
 
     allChannels.clear()
-
-    channelFactory.releaseExternalResources()
-    channelFactory = null
 
     log.info("Socko server '{}' stopped", config.serverName)
   }

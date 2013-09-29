@@ -18,7 +18,7 @@ package org.mashupbots.socko.examples.fileupload
 import java.io.File
 import java.io.FileOutputStream
 
-import org.jboss.netty.util.CharsetUtil
+import io.netty.util.CharsetUtil
 import org.mashupbots.socko.handlers.StaticContentHandler
 import org.mashupbots.socko.handlers.StaticContentHandlerConfig
 import org.mashupbots.socko.handlers.StaticFileRequest
@@ -35,7 +35,7 @@ import akka.routing.FromConfig
 
 /**
  * This example shows how use `org.mashupbots.socko.handler.StaticContentHandler` to download files and
- * `org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder` to process file uploads.
+ * `io.netty.handler.codec.http.multipart.HttpPostRequestDecoder` to process file uploads.
  *  - Run this class as a Scala Application
  *  - Open your browser and navigate to `http://localhost:8888`.
  */
