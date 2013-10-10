@@ -7,3 +7,5 @@
 /.cache
 */bin/
 _site/
+/.nb_classpath
+*/.nb_classpath
