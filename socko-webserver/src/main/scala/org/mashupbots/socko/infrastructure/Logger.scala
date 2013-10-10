@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory
  * Usage:
  * {{{
  * log.debug("Hello")
- * log.error("Message: {} {}", Array[Object]("value1", "value2"))
+ * log.error("Message: {} {}", Array[AnyRef]("value1", "value2"))
  * }}}
  */
 trait Logger {

@@ -21,7 +21,7 @@ import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.handlers.StaticContentHandler
 import org.mashupbots.socko.handlers.StaticContentHandlerConfig
 import org.mashupbots.socko.handlers.StaticFileRequest
-import org.mashupbots.socko.infrastructure.CharsetUtil
+import io.netty.util.CharsetUtil
 import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes._
@@ -70,7 +70,7 @@ object BuilderApp extends Logger {
 
   val actorSystem = ActorSystem("BuilderActorSystem", ConfigFactory.parseString(actorConfig))
   val staticContentHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(staticContentHandlerConfig))
-    .withRouter(FromConfig()).withDispatcher("my-dispatcher"), "static-file-router")
+    .withRouter(FromConfig()), "static-file-router")
 
   //
   // STEP #2 - Define Routes

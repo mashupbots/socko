@@ -17,6 +17,7 @@ package org.mashupbots.socko.rest
 
 import scala.reflect.runtime.{ universe => ru }
 
+
 import org.json4s.native.{ JsonMethods => jsonMethods }
 import org.json4s.string2JsonInput
 import org.mashupbots.socko.infrastructure.CharsetUtil

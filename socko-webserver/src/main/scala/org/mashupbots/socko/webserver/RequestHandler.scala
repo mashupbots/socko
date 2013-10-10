@@ -18,32 +18,29 @@ package org.mashupbots.socko.webserver
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.channel.ChannelFuture
-import org.jboss.netty.channel.ChannelFutureListener
-import org.jboss.netty.channel.ChannelHandlerContext
-import org.jboss.netty.channel.ChannelStateEvent
-import org.jboss.netty.channel.ExceptionEvent
-import org.jboss.netty.channel.MessageEvent
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler
-import org.jboss.netty.handler.codec.frame.TooLongFrameException
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse
-import org.jboss.netty.handler.codec.http.HttpChunk
-import org.jboss.netty.handler.codec.http.HttpChunkAggregator
-import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.jboss.netty.handler.codec.http.HttpRequest
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
-import org.jboss.netty.handler.codec.http.HttpVersion
-import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.PingWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.PongWebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketFrame
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketHandshakeException
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshaker
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
-import org.jboss.netty.handler.ssl.SslHandler
-import org.jboss.netty.util.CharsetUtil
+import io.netty.channel.Channel
+import io.netty.channel.ChannelFuture
+import io.netty.channel.ChannelFutureListener
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.ChannelInboundHandlerAdapter
+import io.netty.handler.codec.TooLongFrameException
+import io.netty.handler.codec.http.DefaultFullHttpResponse
+import io.netty.handler.codec.http.DefaultHttpResponse
+import io.netty.handler.codec.http.FullHttpRequest
+import io.netty.handler.codec.http.HttpContent
+import io.netty.handler.codec.http.HttpHeaders
+import io.netty.handler.codec.http.HttpObjectAggregator
+import io.netty.handler.codec.http.HttpRequest
+import io.netty.handler.codec.http.HttpResponseStatus
+import io.netty.handler.codec.http.HttpVersion
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame
+import io.netty.handler.codec.http.websocketx.WebSocketFrame
+import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException
+import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker
+import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
+import io.netty.handler.ssl.SslHandler
 import org.mashupbots.socko.events.HttpChunkEvent
 import org.mashupbots.socko.events.HttpEventConfig
 import org.mashupbots.socko.events.HttpRequestEvent
@@ -51,6 +48,7 @@ import org.mashupbots.socko.events.InitialHttpRequestMessage
 import org.mashupbots.socko.events.WebSocketEventConfig
 import org.mashupbots.socko.events.WebSocketFrameEvent
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
+import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.Logger
 
 /**
@@ -58,7 +56,7 @@ import org.mashupbots.socko.infrastructure.Logger
  *
  * @param server WebServer using this handler
  */
-class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler with Logger {
+class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter with Logger {
 
   /**
    * WebSocket handshaker used when closing web sockets
@@ -91,19 +89,15 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
    * @param ctx Channel context
    * @param e Message to process
    */
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    e.getMessage match {
-      case httpRequest: HttpRequest =>
-        val event = HttpRequestEvent(e.getChannel, httpRequest, httpConfig)
+  override def channelRead(ctx: ChannelHandlerContext, e: AnyRef) {
+    e match {
+      case httpRequest: FullHttpRequest =>
+        val event = HttpRequestEvent(ctx, httpRequest, httpConfig)
 
-        log.debug("HTTP {} CHANNEL={} {}", event.endPoint, e.getChannel.getId, "")
-
-        if (event.request.isChunked) {
-          validateFirstChunk(event)
-          server.routes(event)
-          initialHttpRequest = Some(new InitialHttpRequestMessage(event.request, event.createdOn))
-        } else if (event.request.isWebSocketUpgrade) {
-          val wsctx = WebSocketHandshakeEvent(e.getChannel, httpRequest, httpConfig)
+        log.debug("HTTP {} CHANNEL={} {}", event.endPoint, ctx.name, "")
+        
+        if (event.request.isWebSocketUpgrade) {
+          val wsctx = WebSocketHandshakeEvent(ctx, httpRequest, httpConfig)
           server.routes(wsctx)
           doWebSocketHandshake(wsctx)
           initialHttpRequest = Some(new InitialHttpRequestMessage(event.request, event.createdOn))
@@ -111,11 +105,20 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
           server.routes(event)
         }
 
-      case httpChunk: HttpChunk =>
-        val event = HttpChunkEvent(e.getChannel, initialHttpRequest.get, httpChunk, httpConfig)
-        initialHttpRequest.get.totalChunkContentLength += httpChunk.getContent.readableBytes
+      case httpRequest: HttpRequest =>
+        val event = HttpRequestEvent(ctx, httpRequest, httpConfig)
+        
+        log.debug("HTTP {} CHANNEL={} {}", event.endPoint, ctx.name, "")
+        
+        validateFirstChunk(event)
+        server.routes(event)
+        initialHttpRequest = Some(new InitialHttpRequestMessage(event.request, event.createdOn))
 
-        log.debug("CHUNK {} CHANNEL={} {}", event.endPoint, e.getChannel.getId, "")
+      case httpChunk: HttpContent =>
+        val event = HttpChunkEvent(ctx, initialHttpRequest.get, httpChunk, httpConfig)
+        initialHttpRequest.get.totalChunkContentLength += httpChunk.content.readableBytes
+
+        log.debug("CHUNK {} CHANNEL={} {}", event.endPoint, ctx.name, "")
 
         server.routes(event)
 
@@ -124,21 +127,21 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
         }
 
       case wsFrame: WebSocketFrame =>
-        val event = WebSocketFrameEvent(e.getChannel, initialHttpRequest.get, wsFrame, wsConfig)
+        val event = WebSocketFrameEvent(ctx, initialHttpRequest.get, wsFrame, wsConfig)
 
-        log.debug("WS {} CHANNEL={} {}", event.endPoint, e.getChannel.getId, "")
+        log.debug("WS {} CHANNEL={} {}", event.endPoint, ctx.name, "")
 
         if (wsFrame.isInstanceOf[CloseWebSocketFrame]) {
           // This will also close the channel
-          wsHandshaker.close(e.getChannel, wsFrame.asInstanceOf[CloseWebSocketFrame])
+          wsHandshaker.close(ctx.channel, wsFrame.asInstanceOf[CloseWebSocketFrame])
         } else if (wsFrame.isInstanceOf[PingWebSocketFrame]) {
-          e.getChannel.write(new PongWebSocketFrame(wsFrame.getBinaryData()))
+          ctx.writeAndFlush(new PongWebSocketFrame(wsFrame.content))
         } else {
           server.routes(event)
         }
 
       case _ =>
-        throw new UnsupportedOperationException(e.getMessage.getClass.toString + " not supported")
+        throw new UnsupportedOperationException(e.getClass.toString + " not supported")
     }
   }
 
@@ -150,7 +153,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
    * @param event HTTP request event that is chunked
    */
   private def validateFirstChunk(event: HttpRequestEvent) {
-    if (isAggreatingChunks(event.channel)) {
+    if (isAggreatingChunks(event.context.channel)) {
       if (event.request.isChunked) {
         if (initialHttpRequest.isDefined) {
           throw new IllegalStateException("New chunk started before the previous chunk ended")
@@ -168,7 +171,7 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
    * Check for last chunk
    */
   private def validateLastChunk(event: HttpChunkEvent) {
-    if (isAggreatingChunks(event.channel)) {
+    if (isAggreatingChunks(event.context.channel)) {
       if (event.chunk.isLastChunk) {
         initialHttpRequest = None
       }
@@ -180,27 +183,27 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
   /**
    * If there is an unhandled exception log and close
    */
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    log.error("Exception caught in HttpRequestHandler", e.getCause)
-
-    e.getCause match {
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable) {
+    log.error("Exception caught in HttpRequestHandler", e)
+    
+    e match {
       // Cannot find route
       case ex: MatchError => writeErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, ex)
-      // Request data size too big
+        // Request data size too big
       case ex: TooLongFrameException => writeErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, ex)
-      // Websockets not supported at this route
+        // Websockets not supported at this route
       case ex: UnsupportedOperationException => writeErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, ex)
-      // Websockets handshake error
+        // Websockets handshake error
       case ex: WebSocketHandshakeException => writeErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, ex)
-      // Catch all
+        // Catch all
       case ex => {
-        try {
-          log.debug("Error handling request", ex)
-          e.getChannel().close()
-        } catch {
-          case ex2: Throwable => log.debug("Error closing channel", ex2)
+          try {
+            log.debug("Error handling request", ex)
+            ctx.channel.close
+          } catch {
+            case ex2: Throwable => log.debug("Error closing channel", ex2)
+          }
         }
-      }
     }
   }
 
@@ -220,17 +223,13 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
       sf.format(Calendar.getInstance().getTime()))
 
     // Write HTTP Response
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status)
-    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
-    response.setContent(ChannelBuffers.copiedBuffer(
-      "Failure: " + status.toString() + "\r\n\r\n" + ex.getMessage + "\r\n",
-      CharsetUtil.UTF_8))
+    val bytes = s"Failure: ${status}\r\n\r\n${ex.getMessage}\r\n".getBytes(CharsetUtil.UTF_8)
+    val content = ctx.channel.alloc.buffer(bytes.length).writeBytes(bytes)
+    val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, content)
+    response.headers.set(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
 
     // Close the connection as soon as the error message is sent.
-    val ch = ctx.getChannel
-    if (ch.isConnected) {
-      ch.write(response).addListener(ChannelFutureListener.CLOSE)
-    }
+    ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE)
   }
 
   /**
@@ -239,8 +238,8 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
    *
    * Note that when a channel closes, `allChannels` automatically removes it.
    */
-  override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    server.allChannels.add(e.getChannel)
+  override def channelActive(ctx: ChannelHandlerContext) {
+    server.allChannels.add(ctx.channel)
   }
 
   /**
@@ -248,12 +247,12 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
    *
    * @param ctx Handshake context
    */
-  private def createWebSocketLocation(ctx: WebSocketHandshakeEvent): String = {
+  private def createWebSocketLocation(e: WebSocketHandshakeEvent): String = {
     val sb = new StringBuilder
-    sb.append(if (isSSLConnection(ctx.channel)) "wss" else "ws")
+    sb.append(if (isSSLConnection(e.context.channel)) "wss" else "ws")
     sb.append("://")
-    sb.append(ctx.request.headers.get(HttpHeaders.Names.HOST))
-    sb.append(ctx.endPoint.uri)
+    sb.append(e.request.headers.get(HttpHeaders.Names.HOST))
+    sb.append(e.endPoint.uri)
     sb.toString
   }
 
@@ -274,11 +273,11 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
       event.maxFrameSize)
     wsHandshaker = wsFactory.newHandshaker(event.nettyHttpRequest)
     if (wsHandshaker == null) {
-      wsFactory.sendUnsupportedWebSocketVersionResponse(event.channel)
-      event.writeWebLog(HttpResponseStatus.UPGRADE_REQUIRED.getCode, 0)
+      WebSocketServerHandshakerFactory.sendUnsupportedWebSocketVersionResponse(event.context.channel)
+      event.writeWebLog(HttpResponseStatus.UPGRADE_REQUIRED.code, 0)
     } else {
-      val future = wsHandshaker.handshake(event.channel, event.nettyHttpRequest)
-      event.writeWebLog(HttpResponseStatus.SWITCHING_PROTOCOLS.getCode, 0)
+      val future = wsHandshaker.handshake(event.context.channel, event.nettyHttpRequest)
+      event.writeWebLog(HttpResponseStatus.SWITCHING_PROTOCOLS.code, 0)
 
       // Callback on complete AFTER data sent to the client
       if (event.onComplete.isDefined) {
@@ -297,14 +296,14 @@ class RequestHandler(server: WebServer) extends SimpleChannelUpstreamHandler wit
    * Check if SSL is being used
    */
   private def isSSLConnection(channel: Channel): Boolean = {
-    (channel.getPipeline().get(classOf[SslHandler]) != null)
+    (channel.pipeline.get(classOf[SslHandler]) != null)
   }
 
   /**
    * Check if this channel is aggregating chunks
    */
   private def isAggreatingChunks(channel: Channel): Boolean = {
-    (channel.getPipeline().get(classOf[HttpChunkAggregator]) != null)
+    (channel.pipeline.get(classOf[HttpObjectAggregator]) != null)
   }
 
 }

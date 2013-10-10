@@ -46,7 +46,7 @@ import java.util.TimeZone
 case class WebLogEvent(
   timestamp: Date,
   serverName: String,
-  channelId: Int,  
+  channelContextName: String,
   clientAddress: SocketAddress,
   serverAddress: SocketAddress,
   username: Option[String],

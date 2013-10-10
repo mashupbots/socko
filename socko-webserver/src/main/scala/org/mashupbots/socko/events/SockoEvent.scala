@@ -15,8 +15,7 @@
 //
 package org.mashupbots.socko.events
 
-import java.nio.charset.Charset
-import org.jboss.netty.channel.Channel
+import io.netty.channel.ChannelHandlerContext
 import java.util.Date
 
 /**
@@ -27,7 +26,7 @@ abstract class SockoEvent() {
   /**
    * Netty channel associated with this request
    */
-  val channel: Channel
+  val context: ChannelHandlerContext
 
   /**
    * The end point to which the message was addressed

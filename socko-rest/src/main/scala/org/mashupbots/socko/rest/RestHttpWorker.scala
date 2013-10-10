@@ -113,9 +113,6 @@ class RestHttpWorker(registry: RestRegistry, httpRequestEvent: HttpRequestEvent)
 
         // Get actor
         val processingActor = op1.registration.processorActor(context.system, restRequest)
-        if (processingActor.isTerminated) {
-          throw RestProcessingException(s"Processing actor '${processingActor.path}' for '${opDeserializer.requestClass.fullName}' is terminated")
-        }
 
         // Cache the request event. It will be automatically removed after a period of time (5 seconds)
         if (op1.accessSockoEvent) {

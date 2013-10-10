@@ -15,9 +15,8 @@
 //
 package org.mashupbots.socko.events
 
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.handler.codec.http.HttpChunk
-import org.jboss.netty.handler.codec.http.HttpHeaders
+import io.netty.channel.ChannelHandlerContext
+import io.netty.handler.codec.http.HttpHeaders
 import org.mashupbots.socko.infrastructure.WebLogEvent
 
 /**
@@ -34,9 +33,9 @@ import org.mashupbots.socko.infrastructure.WebLogEvent
  * @param config Processing configuration
  */
 case class HttpChunkEvent(
-  channel: Channel,
+  context: ChannelHandlerContext,
   initialHttpRequest: InitialHttpRequestMessage,
-  nettyHttpChunk: HttpChunk,
+  nettyHttpChunk: NettyHttpContent,
   config: HttpEventConfig) extends HttpEvent {
 
   /**
@@ -73,9 +72,9 @@ case class HttpChunkEvent(
     config.webLogWriter.get ! WebLogEvent(
       this.createdOn,
       config.serverName,
-      channel.getId,
-      channel.getRemoteAddress,
-      channel.getLocalAddress,
+      context.name,
+      context.channel.remoteAddress,
+      context.channel.localAddress,
       username,
       initialHttpRequest.endPoint.method,
       initialHttpRequest.endPoint.uri,
@@ -87,5 +86,4 @@ case class HttpChunkEvent(
       initialHttpRequest.headers.get(HttpHeaders.Names.USER_AGENT),
       initialHttpRequest.headers.get(HttpHeaders.Names.REFERER))
   }
-
 }

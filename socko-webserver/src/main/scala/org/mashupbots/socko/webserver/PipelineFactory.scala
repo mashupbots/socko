@@ -16,14 +16,15 @@
 package org.mashupbots.socko.webserver
 
 import org.eclipse.jetty.npn.NextProtoNego
-import org.jboss.netty.channel.ChannelPipeline
-import org.jboss.netty.channel.ChannelPipelineFactory
-import org.jboss.netty.channel.Channels
-import org.jboss.netty.handler.codec.http.HttpChunkAggregator
-import org.jboss.netty.handler.codec.http.HttpRequestDecoder
-import org.jboss.netty.handler.codec.http.HttpResponseEncoder
-import org.jboss.netty.handler.ssl.SslHandler
-import org.jboss.netty.handler.stream.ChunkedWriteHandler
+import io.netty.channel.ChannelInitializer
+import io.netty.channel.socket.SocketChannel
+import io.netty.handler.codec.compression.ZlibCodecFactory
+import io.netty.handler.codec.compression.ZlibWrapper
+import io.netty.handler.codec.http.HttpObjectAggregator
+import io.netty.handler.codec.http.HttpRequestDecoder
+import io.netty.handler.codec.http.HttpResponseEncoder
+import io.netty.handler.ssl.SslHandler
+import io.netty.handler.stream.ChunkedWriteHandler
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.netty.SpdyServerProvider
 
@@ -32,56 +33,47 @@ import org.mashupbots.socko.netty.SpdyServerProvider
  *
  * @param server The web server instancing the pipeline
  */
-class PipelineFactory(server: WebServer) extends ChannelPipelineFactory with Logger {
+class PipelineFactory(server: WebServer) extends ChannelInitializer[SocketChannel] with Logger {
 
-  /**
-   * Returns a new channel pipeline instance to handle our channel
-   */
-  def getPipeline(): ChannelPipeline = {
-    if (server.config.http.spdyEnabled) getSpdyPipeline() else getHttpPipeline()
-  }
+  override def initChannel(ch: SocketChannel) {
+    
+    val pipeline = ch.pipeline
+    
+    if (!server.config.http.spdyEnabled) {
+      
+      val httpConfig = server.config.http
 
-  private def getHttpPipeline(): ChannelPipeline = {
-    val newPipeline = Channels.pipeline()
-    val httpConfig = server.config.http
+      if (server.sslManager.isDefined) {
+        val sslEngine = server.sslManager.get.createSSLEngine()
+        val ssl = new SslHandler(sslEngine);
+        pipeline.addLast("ssl", ssl)
+      }
+            
+      val httpRequestDecoder = new HttpRequestDecoder(
+        httpConfig.maxInitialLineLength,
+        httpConfig.maxHeaderSizeInBytes,
+        httpConfig.maxChunkSizeInBytes
+      )
+      pipeline.addLast("decoder", httpRequestDecoder)
 
-    if (server.sslManager.isDefined) {
+      if (httpConfig.aggreateChunks) {
+        pipeline.addLast("chunkAggregator", new HttpObjectAggregator(httpConfig.maxLengthInBytes))
+      }
+
+      pipeline.addLast("encoder", new HttpResponseEncoder())
+      pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
+
+      pipeline.addLast("handler", new RequestHandler(server))
+      
+    } else {
       val sslEngine = server.sslManager.get.createSSLEngine()
       val ssl = new SslHandler(sslEngine);
-      ssl.setCloseOnSSLException(true);
-      newPipeline.addLast("ssl", ssl)
+      pipeline.addLast("ssl", ssl)
+
+      NextProtoNego.put(sslEngine, new SpdyServerProvider())
+      NextProtoNego.debug = log.isDebugEnabled
+
+      pipeline.addLast("pipeLineSelector", new ProtocolNegoitationHandler(server))
     }
-
-    newPipeline.addLast("decoder", new HttpRequestDecoder(
-      httpConfig.maxInitialLineLength,
-      httpConfig.maxHeaderSizeInBytes,
-      httpConfig.maxChunkSizeInBytes))
-
-    if (httpConfig.aggreateChunks) {
-      newPipeline.addLast("chunkAggregator", new HttpChunkAggregator(httpConfig.maxLengthInBytes))
-    }
-
-    newPipeline.addLast("encoder", new HttpResponseEncoder())
-    newPipeline.addLast("chunkWriter", new ChunkedWriteHandler())
-
-    newPipeline.addLast("handler", new RequestHandler(server))
-
-    return newPipeline
-  }
-
-  private def getSpdyPipeline(): ChannelPipeline = {
-    val newPipeline = Channels.pipeline()
-
-    val sslEngine = server.sslManager.get.createSSLEngine()
-    val ssl = new SslHandler(sslEngine);
-    ssl.setCloseOnSSLException(true);
-    newPipeline.addLast("ssl", ssl)
-
-    NextProtoNego.put(sslEngine, new SpdyServerProvider())
-    NextProtoNego.debug = log.isDebugEnabled
-
-    newPipeline.addLast("pipeLineSelector", new ProtocolNegoitationHandler(server))
-
-    return newPipeline
   }
 }

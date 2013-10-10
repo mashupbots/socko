@@ -26,36 +26,41 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.RandomAccessFile
-import java.util.zip.DeflaterOutputStream
-import java.util.zip.GZIPOutputStream
 import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.ChannelFuture
-import org.jboss.netty.channel.ChannelFutureListener
-import org.jboss.netty.channel.ChannelFutureProgressListener
-import org.jboss.netty.channel.DefaultFileRegion
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse
-import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.jboss.netty.handler.codec.http.HttpResponse
-import org.jboss.netty.handler.codec.http.HttpVersion
-import org.jboss.netty.handler.codec.spdy.SpdyHttpHeaders
-import org.jboss.netty.handler.ssl.SslHandler
+import java.util.zip.DeflaterOutputStream
+import java.util.zip.GZIPOutputStream
+
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.infrastructure.IOUtil.using
+import org.mashupbots.socko.infrastructure.ConfigUtil
 import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.HashUtil
 import org.mashupbots.socko.infrastructure.IOUtil
+import org.mashupbots.socko.infrastructure.IOUtil.using
 import org.mashupbots.socko.infrastructure.LocalCache
 import org.mashupbots.socko.infrastructure.MimeTypes
 import org.mashupbots.socko.netty.HttpChunkedFile
-import akka.actor.Actor
-import akka.event.Logging
+
 import com.typesafe.config.Config
-import org.mashupbots.socko.infrastructure.ConfigUtil
+
+import akka.actor.Actor
 import akka.actor.Extension
+import akka.event.Logging
+import io.netty.channel.ChannelFuture
+import io.netty.channel.ChannelFutureListener
+import io.netty.channel.ChannelProgressiveFuture
+import io.netty.channel.ChannelProgressiveFutureListener
+import io.netty.channel.DefaultFileRegion
+import io.netty.handler.codec.http.DefaultFullHttpResponse
+import io.netty.handler.codec.http.DefaultHttpResponse
+import io.netty.handler.codec.http.HttpHeaders
+import io.netty.handler.codec.http.HttpResponse
+import io.netty.handler.codec.http.HttpVersion
+import io.netty.handler.codec.http.LastHttpContent
+import io.netty.handler.codec.spdy.SpdyHttpHeaders
+import io.netty.handler.ssl.SslHandler
 
 /**
  * Handles downloading of static files and resources.
@@ -197,14 +202,14 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
    */
   def receive = {
     case request: StaticFileRequest => {
-      processStaticFileRequest(request)
-    }
+        processStaticFileRequest(request)
+      }
     case request: StaticResourceRequest => {
-      processStaticResourceRequest(request)
-    }
+        processStaticResourceRequest(request)
+      }
     case msg => {
-      log.info("received unknown message of type: {}", msg.getClass.getName)
-    }
+        log.info("received unknown message of type: {}", msg.getClass.getName)
+      }
   }
 
   /**
@@ -226,9 +231,9 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
       }
     } catch {
       case e: Exception => {
-        log.error(e, "Error processing static resource request")
-        event.response.write(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-      }
+          log.error(e, "Error processing static resource request")
+          event.response.write(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+        }
     }
 
   }
@@ -303,25 +308,27 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
       }
 
       // Prepare response    
-      val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
+      val response = new DefaultFullHttpResponse(
+        HttpVersion.valueOf(event.request.httpVersion),
+        HttpResponseStatus.OK.toNetty,
+        event.context.alloc.buffer(data.length).writeBytes(data)
+      )
       setCommonHeaders(event, response, now, cacheEntry.contentType, data.length, encoding)
 
       val browserCacheSeconds = resourceRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
       if (browserCacheSeconds > 0) {
         now.add(Calendar.SECOND, browserCacheSeconds)
-        response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
-        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
-        response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
+        response.headers.set(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
+        response.headers.set(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
+        response.headers.set(HttpHeaders.Names.ETAG, cacheEntry.etag)
       }
-
-      response.setContent(ChannelBuffers.wrappedBuffer(data))
 
       // We have to write our own web log entry since we are not using context.writeResponse
       event.writeWebLog(HttpResponseStatus.OK.code, data.length)
 
       // Write the response
-      val ch = event.channel
-      val writeFuture: ChannelFuture = ch.write(response)
+      val ctx = event.context
+      val writeFuture: ChannelFuture = ctx.writeAndFlush(response)
 
       // Decide whether to close the connection or not.
       if (!event.request.isKeepAlive) {
@@ -355,9 +362,9 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
       }
     } catch {
       case e: Exception => {
-        log.error(e, "Error processing static file request")
-        event.response.write(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-      }
+          log.error(e, "Error processing static file request")
+          event.response.write(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+        }
     }
   }
 
@@ -462,26 +469,27 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
       }
 
       // Prepare response    
-      val response = new DefaultHttpResponse(HttpVersion.valueOf(event.request.httpVersion), HttpResponseStatus.OK.toNetty)
+      val response = new DefaultFullHttpResponse(
+        HttpVersion.valueOf(event.request.httpVersion),
+        HttpResponseStatus.OK.toNetty,
+        event.context.alloc.buffer(data.length).writeBytes(data)
+      )
       setCommonHeaders(event, response, now, cacheEntry.contentType, data.length, encoding)
 
       val browserCacheSeconds = fileRequest.browserCacheTimeoutSeconds.getOrElse(browserCacheTimeoutSeconds)
       if (browserCacheSeconds > 0) {
         now.add(Calendar.SECOND, browserCacheSeconds)
-        response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
-        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
-        response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
-        response.setHeader(HttpHeaders.Names.ETAG, cacheEntry.etag)
+        response.headers.set(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
+        response.headers.set(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
+        response.headers.set(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
+        response.headers.set(HttpHeaders.Names.ETAG, cacheEntry.etag)
       }
-
-      response.setContent(ChannelBuffers.wrappedBuffer(data))
 
       // We have to write our own web log entry since we are not using context.writeResponse
       event.writeWebLog(HttpResponseStatus.OK.code, data.length)
 
       // Write response
-      val ch = event.channel
-      val writeFuture: ChannelFuture = ch.write(response)
+      val writeFuture: ChannelFuture = event.context.writeAndFlush(response)
 
       // Decide whether to close the connection or not.
       if (!event.request.isKeepAlive) {
@@ -503,13 +511,13 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
 
     val ifModifiedSince = event.request.headers.get(HttpHeaders.Names.IF_MODIFIED_SINCE)
     val isModified = (ifModifiedSince.isEmpty || {
-      try {
-        val ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince.get)
-        ifModifiedSinceDate.before(cacheEntry.lastModified)
-      } catch {
-        case _: Throwable => true
-      }
-    })
+        try {
+          val ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince.get)
+          ifModifiedSinceDate.before(cacheEntry.lastModified)
+        } catch {
+          case _: Throwable => true
+        }
+      })
 
     if (isModified) {
       val now = new GregorianCalendar()
@@ -521,7 +529,7 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
           // We put the file timestamp in the hash to make sure that if a file changes,
           // the latest copy is downloaded 
           val compressedFileName = HashUtil.md5(fileRequest.file.getAbsolutePath + "_" + fileRequest.file.lastModified) +
-            "." + supportedEncoding.get
+          "." + supportedEncoding.get
           val compressedFile = new File(tempDir, compressedFileName)
           if (compressedFile.exists) {
             (compressedFile, supportedEncoding.get)
@@ -546,13 +554,13 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
         new RandomAccessFile(fileToDownload, "r")
       } catch {
         case e: FileNotFoundException => {
-          event.response.write(HttpResponseStatus.NOT_FOUND)
-          null
-        }
+            event.response.write(HttpResponseStatus.NOT_FOUND)
+            null
+          }
       }
       if (raf != null) {
-        val ch = event.channel
-        val sendHttpChunks = (ch.getPipeline().get(classOf[SslHandler]) != null)
+        val ctx = event.context
+        val sendHttpChunks = (ctx.pipeline.get(classOf[SslHandler]) != null)
         val fileLength = raf.length()
 
         // Prepare response    
@@ -563,42 +571,43 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
         if (browserCacheSeconds > 0) {
           // Don't use ETAG because big files takes a long time to hash. Just use last modified.
           now.add(Calendar.SECOND, browserCacheSeconds)
-          response.setHeader(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
-          response.setHeader(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
-          response.setHeader(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
+          response.headers.set(HttpHeaders.Names.EXPIRES, dateFormatter.format(now.getTime))
+          response.headers.set(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + browserCacheSeconds)
+          response.headers.set(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(cacheEntry.lastModified))
         }
 
         if (sendHttpChunks) {
-          // See http://stackoverflow.com/questions/9027322/how-to-use-chunkedstream-properly
-          response.setChunked(true);
-          response.setHeader(HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);
+          response.headers.set(HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);
         }
 
         // We have to write our own web log entry since we are not using context.writeResponse
         event.writeWebLog(HttpResponseStatus.OK.code, fileLength)
 
         // Write the initial HTTP response line and headers
-        ch.write(response)
+        ctx.writeAndFlush(response)
 
         // Write the content
         val writeFuture: ChannelFuture = {
           if (sendHttpChunks) {
             // Cannot use zero-copy with HTTPS.
-            ch.write(new HttpChunkedFile(raf, 0, fileLength, 8192))
+            // Cannot not use standard netty ChunkedFile because we have set transfer-encoding to chunked
+            // and this means that HTTP chunks (and last chunk) are expected and not chunks of binary.
+            ctx.writeAndFlush(new HttpChunkedFile(raf, 0, fileLength, 8192))
           } else {
             // No encryption - use zero-copy.
             val region = new DefaultFileRegion(raf.getChannel(), 0, fileLength)
-            val f = ch.write(region)
-            f.addListener(new ChannelFutureProgressListener() {
-              override def operationComplete(future: ChannelFuture) {
-                region.releaseExternalResources()
+            ctx.write(region, ctx.newProgressivePromise).addListener(
+              new ChannelProgressiveFutureListener {
+                override def operationComplete(future: ChannelProgressiveFuture) {
+                  log.debug("{}: Transfer complete.", cacheEntry.path)
+                }
+                override def operationProgressed(
+                  future: ChannelProgressiveFuture, progress: Long, total: Long) {
+                  log.debug("{}: {} / {} %n", cacheEntry.path, progress, total)
+                }
               }
-              override def operationProgressed(
-                future: ChannelFuture, amount: Long, current: Long, total: Long) {
-                log.debug("{}: {} / {} (+{})%n", Array(cacheEntry.path, current, total, amount))
-              }
-            })
-            f
+            )
+            ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
           }
         }
 
@@ -623,18 +632,18 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
   private def compress(bytesIn: InputStream, bytesOut: OutputStream, format: String): Boolean = {
     try {
       using(format match {
-        case "gzip" => new GZIPOutputStream(bytesOut)
-        case "deflate" => new DeflaterOutputStream(bytesOut)
-        case _ => throw new UnsupportedOperationException("HTTP compression method '" + format + "' not supported")
-      }) { compressedOut =>
+          case "gzip" => new GZIPOutputStream(bytesOut)
+          case "deflate" => new DeflaterOutputStream(bytesOut)
+          case _ => throw new UnsupportedOperationException("HTTP compression method '" + format + "' not supported")
+        }) { compressedOut =>
         IOUtil.pipe(bytesIn, compressedOut)
       }
       true
     } catch {
       case ex: Throwable => {
-        log.error(ex, "Compression error")
-        false
-      }
+          log.error(ex, "Compression error")
+          false
+        }
     }
   }
 
@@ -649,25 +658,25 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
    * @param contentEncoding Encoding code. e.g. `gzip`
    */
   private def setCommonHeaders(event: HttpRequestEvent, response: HttpResponse,
-    now: Calendar, contentType: String, contentLength: Long, contentEncoding: String) {
-    response.setHeader(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
+                               now: Calendar, contentType: String, contentLength: Long, contentEncoding: String) {
+    response.headers.set(HttpHeaders.Names.DATE, dateFormatter.format(now.getTime))
 
-    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
+    response.headers.set(HttpHeaders.Names.CONTENT_TYPE, contentType)
 
     if (event.request.isKeepAlive) {
-      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, contentLength)
-      response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+      response.headers.set(HttpHeaders.Names.CONTENT_LENGTH, contentLength)
+      response.headers.set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
     }
 
     if (contentEncoding != "") {
-      response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
+      response.headers.set(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
     }
 
     val spdyId = event.request.headers.getOrElse(SpdyHttpHeaders.Names.STREAM_ID, "")
     if (spdyId != "") {
       log.debug("spdyId {}", spdyId)
-      response.setHeader(SpdyHttpHeaders.Names.STREAM_ID, spdyId)
-      response.setHeader(SpdyHttpHeaders.Names.PRIORITY, 0);
+      response.headers.set(SpdyHttpHeaders.Names.STREAM_ID, spdyId)
+      response.headers.set(SpdyHttpHeaders.Names.PRIORITY, 0);
     }
   }
 

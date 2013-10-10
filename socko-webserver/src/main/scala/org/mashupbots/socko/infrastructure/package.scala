@@ -18,5 +18,6 @@ package org.mashupbots.socko
 /**
  * Utility classes and objects
  */
-package org.mashupbots.socko.infrastructure {
+package object infrastructure {
+  
 }

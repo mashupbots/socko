@@ -27,5 +27,8 @@ package org.mashupbots.socko
  *    a web socket connection. 
  *  - [[org.mashupbots.socko.events.WebSocketFrameEvent]] - Fired when a WebSocket text or binary frame is received.
  */
-package org.mashupbots.socko.events {
+package object events {
+  type NettyHttpRequest = io.netty.handler.codec.http.HttpRequest
+  type NettyHttpResponse = io.netty.handler.codec.http.HttpResponse
+  type NettyHttpContent = io.netty.handler.codec.http.HttpContent
 }

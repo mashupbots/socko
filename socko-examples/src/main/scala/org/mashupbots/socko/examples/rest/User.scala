@@ -108,8 +108,7 @@ object CreateUserWithArrayRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/user/createWithArray"
   val requestParams = Seq(BodyParam("users"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
-    actorSystem.actorFor("/user/user-api-router")
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = RestApp.userProcessorRouter    
   override val description = "Creates list of users with given input array"
 }
 
@@ -119,8 +118,7 @@ object CreateUserRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/user"
   val requestParams = Seq(BodyParam("user"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
-    actorSystem.actorFor("/user/user-api-router")
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = RestApp.userProcessorRouter
   override val description = "Create user"
   override val notes = "This can only be done by the logged in user."
 }
@@ -131,8 +129,7 @@ object CreateUserWithListRegistration extends RestRegistration {
   val method = Method.POST
   val path = "/user/createWithList"
   val requestParams = Seq(BodyParam("users"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
-    actorSystem.actorFor("/user/user-api-router")
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = RestApp.userProcessorRouter
   override val description = "Creates list of users with given list inpu"
 }
 
@@ -142,8 +139,7 @@ object UpdateUserRegistration extends RestRegistration {
   val method = Method.PUT
   val path = "/user/{username}"
   val requestParams = Seq(PathParam("username"), BodyParam("user"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
-    actorSystem.actorFor("/user/user-api-router")
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = RestApp.userProcessorRouter
   override val description = "Update user"
   override val notes = "This can only be done by the logged in user."
   override val errors = Seq(Error(400, "Invalid username supplied"), Error(404, "User not found"))
@@ -155,8 +151,7 @@ object DeleteUserRegistration extends RestRegistration {
   val method = Method.DELETE
   val path = "/user/{username}"
   val requestParams = Seq(PathParam("username"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
-    actorSystem.actorFor("/user/user-api-router")
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = RestApp.userProcessorRouter
   override val description = "Delete user"
   override val notes = "This can only be done by the logged in user."
   override val errors = Seq(Error(400, "Invalid username supplied"), Error(404, "User not found"))
@@ -168,8 +163,7 @@ object GetUserRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/user/{username}"
   val requestParams = Seq(PathParam("username"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
-    actorSystem.actorFor("/user/user-api-router")
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = RestApp.userProcessorRouter
   override val description = "Get user by user name"
   override val errors = Seq(Error(400, "Invalid username supplied"), Error(404, "User not found"))
 }
@@ -180,8 +174,7 @@ object LoginRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/user/login"
   val requestParams = Seq(QueryParam("username"), QueryParam("password"))
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
-    actorSystem.actorFor("/user/user-api-router")
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = RestApp.userProcessorRouter
   override val errors = Seq(Error(400, "Invalid username and password combination"))
 }
 
@@ -191,8 +184,7 @@ object LogoutRegistration extends RestRegistration {
   val method = Method.GET
   val path = "/user/logout"
   val requestParams = Seq.empty
-  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef =
-    actorSystem.actorFor("/user/user-api-router")
+  def processorActor(actorSystem: ActorSystem, request: RestRequest): ActorRef = RestApp.userProcessorRouter
   override val description = "Find purchase order by ID"
   override val notes = "For valid response try integer IDs with value <= 5. Nonintegers will generate API errors"
   override val errors = Seq(Error(400, "Invalid ID supplied"), Error(404, "Order not found"))
