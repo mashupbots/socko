@@ -47,8 +47,10 @@ class WebSocketBroadcaster extends Actor {
   def receive = {
     case WebSocketBroadcastText(text) =>
       socketConnections.write(new TextWebSocketFrame(text))
+      socketConnections.flush
     case WebSocketBroadcastBinary(bytes) =>
       socketConnections.write(new BinaryWebSocketFrame(Unpooled.buffer(bytes.length).writeBytes(bytes)))
+      socketConnections.flush
     case WebSocketBroadcasterRegistration(event) =>
       socketConnections.add(event.context.channel)
   }

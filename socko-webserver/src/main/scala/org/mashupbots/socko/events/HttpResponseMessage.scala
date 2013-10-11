@@ -503,7 +503,10 @@ case class HttpResponseMessage(event: HttpEvent) {
 
     event.writeWebLog(response.getStatus.code, 0)
 
-    val future = event.context.writeAndFlush(response)
+    event.context.write(response)
+    
+    val future = event.context.writeAndFlush(new DefaultLastHttpContent)
+    
     if (closeChannel) {
       future.addListener(ChannelFutureListener.CLOSE)
     }

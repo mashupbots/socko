@@ -208,8 +208,10 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
    */
   val isWebSocketUpgrade: Boolean = {
     import HttpHeaders._
-    nettyHttpRequest.headers.get(Names.CONNECTION).contains(Values.UPGRADE) &&
-    nettyHttpRequest.headers.get(Names.UPGRADE).equalsIgnoreCase(Values.WEBSOCKET)
+    val connection =  nettyHttpRequest.headers.get(Names.CONNECTION)
+    val upgrade = nettyHttpRequest.headers.get(Names.UPGRADE)
+    connection != null && """(?i)\bupgrade\b""".r.findFirstIn(connection).nonEmpty &&
+    Values.WEBSOCKET.equalsIgnoreCase(upgrade)
   }
 
   /**
