@@ -102,7 +102,7 @@ case class HttpResponseMessage(event: HttpEvent) {
     assert(!writingChunks, "Cannot write after writing chunks")
     assert(!hasBeenWritten, "Response has ended")
 
-    val response = new DefaultHttpResponse(HttpVersion.valueOf(request.httpVersion), HttpResponseStatus.CONTINUE.toNetty)
+    val response = new DefaultFullHttpResponse(HttpVersion.valueOf(request.httpVersion), HttpResponseStatus.CONTINUE.toNetty)
     event.context.writeAndFlush(response)
   }
 
@@ -491,7 +491,7 @@ case class HttpResponseMessage(event: HttpEvent) {
     assert(!hasBeenWritten, "Response has ended")
 
     val closeChannel = (!request.isKeepAlive)
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FOUND.toNetty)
+    val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FOUND.toNetty)
 
     HttpResponseMessage.setDateHeader(response)
     response.headers.set(HttpHeaders.Names.LOCATION, url)
@@ -503,10 +503,8 @@ case class HttpResponseMessage(event: HttpEvent) {
 
     event.writeWebLog(response.getStatus.code, 0)
 
-    event.context.write(response)
-    
-    val future = event.context.writeAndFlush(new DefaultLastHttpContent)
-    
+    val future = event.context.writeAndFlush(response)
+        
     if (closeChannel) {
       future.addListener(ChannelFutureListener.CLOSE)
     }
