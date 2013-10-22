@@ -115,7 +115,6 @@ object BenchmarkApp extends Logger {
       }
       case GET(Path("/dynamic")) => {
         dynamicContentHandlerRouter ! request
-        //actorSystem.actorOf(Props[DynamicBenchmarkHandler].withDispatcher("my-dispatcher")) ! request
       }
       case GET(Path("/favicon.ico")) => {
         request.response.write(HttpResponseStatus.NOT_FOUND)
