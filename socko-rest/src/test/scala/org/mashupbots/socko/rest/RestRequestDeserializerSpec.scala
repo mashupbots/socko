@@ -16,9 +16,7 @@
 package org.mashupbots.socko.rest
 
 import java.util.Date
-
 import scala.reflect.runtime.{ universe => ru }
-
 import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.Logger
@@ -26,9 +24,10 @@ import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
-
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
+import org.mashupbots.socko.events.ImmutableHttpHeaders
+import org.mashupbots.socko.events.HttpHeader
 
 class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
@@ -48,7 +47,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings(0).registration.name must be("id")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/1234"),
-        Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
+        ImmutableHttpHeaders.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
       val req = d.deserialize(ctx).asInstanceOf[PathParam1Request]
       req.id must be("1234")
     }
@@ -67,7 +66,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings(1).registration.name must be("format")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/5555/stuff/json/1.2/2.2"),
-        Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
+        ImmutableHttpHeaders.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
       val req = d.deserialize(ctx).asInstanceOf[PathParam2Request]
       req.id must be(5555)
       req.format must be("json")
@@ -83,7 +82,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings.length must be(1)
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/stuff/string_not_int"),
-        Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
+        ImmutableHttpHeaders.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
 
       val thrown = intercept[RestBindingException] {
         val req = d.deserialize(ctx).asInstanceOf[PathParam3Request]
@@ -109,7 +108,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings(4).registration.name must be("notexist")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json?number=1&string=hello&exist=world"),
-        Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
+        ImmutableHttpHeaders.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
       val req = d.deserialize(ctx).asInstanceOf[QueryStringParam1Request]
       req.number must be(1)
       req.s must be("hello")
@@ -135,7 +134,8 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       d.requestParamBindings(4).registration.name must be("notexist")
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
-        Map("number" -> "1", "string" -> "hello", "exist" -> "world"), SockoEventType.HttpRequest, config.requestTimeoutSeconds)
+        ImmutableHttpHeaders(Seq(("number", "1"), ("string", "hello"), ("exist", "world"))),
+        SockoEventType.HttpRequest, config.requestTimeoutSeconds)
 
       val req = d.deserialize(ctx).asInstanceOf[HeaderParam1Request]
       req.number must be(1)
@@ -153,15 +153,16 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
         ru.typeOf[AllDataTypeRequest].typeSymbol.asClass)
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
-        Map("string" -> "s",
-          "int" -> "2000000",
-          "byte" -> "1",
-          "bool" -> "true",
-          "short" -> "200",
-          "long" -> "10000000",
-          "float" -> "1.1",
-          "double" -> "2.2",
-          "date" -> "2001-07-04T12:08:56.235-0700"),
+        ImmutableHttpHeaders(Seq(
+          ("string", "s"),
+          ("int", "2000000"),
+          ("byte", "1"),
+          ("bool", "true"),
+          ("short", "200"),
+          ("long", "10000000"),
+          ("float", "1.1"),
+          ("double", "2.2"),
+          ("date", "2001-07-04T12:08:56.235-0700"))),
         SockoEventType.HttpRequest,
         config.requestTimeoutSeconds)
 
@@ -186,15 +187,16 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
         ru.typeOf[AllOptionalDataTypeRequest].typeSymbol.asClass)
 
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
-        Map("string" -> "s",
-          "int" -> "2000000",
-          "byte" -> "1",
-          "bool" -> "true",
-          "short" -> "200",
-          "long" -> "10000000",
-          "float" -> "1.1",
-          "double" -> "2.2",
-          "date" -> "2001-07-04"),
+        ImmutableHttpHeaders(Seq(
+          ("string", "s"),
+          ("int", "2000000"),
+          ("byte", "1"),
+          ("bool", "true"),
+          ("short", "200"),
+          ("long", "10000000"),
+          ("float", "1.1"),
+          ("double", "2.2"),
+          ("date", "2001-07-04"))),
         SockoEventType.HttpRequest,
         config.requestTimeoutSeconds)
 
@@ -210,7 +212,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       req.date must be(Some(DateUtil.parseISO8601Date("2001-07-04")))
 
       val ctx2 = RestRequestContext(EndPoint("GET", "localhost", "/api/pets/json"),
-        Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
+        ImmutableHttpHeaders.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
 
       val req2 = d.deserialize(ctx2).asInstanceOf[AllOptionalDataTypeRequest]
       req2.string must be(None)
@@ -321,7 +323,7 @@ class RestRequestDeserializerSpec extends WordSpec with MustMatchers with GivenW
       }
       thrown.getMessage must be("First constructor parameter of 'org.mashupbots.socko.rest.FirstParamNotCalledContextRequest' must be called 'context'.")
     }
-    
+
   }
 
 }

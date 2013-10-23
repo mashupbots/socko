@@ -16,13 +16,13 @@
 package org.mashupbots.socko.rest
 
 import scala.reflect.runtime.{universe => ru}
-
 import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
+import org.mashupbots.socko.events.ImmutableHttpHeaders
 
 class RestRequestContextSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
@@ -32,7 +32,7 @@ class RestRequestContextSpec extends WordSpec with MustMatchers with GivenWhenTh
 
     "Correctly set the timeout period in the context" in {
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/1234"),
-        Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
+        ImmutableHttpHeaders.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
 
       ctx.timeoutSeconds must be(config.requestTimeoutSeconds)
       (ctx.timeoutTime.getTime - ctx.startTime.getTime) / 1000 must be(config.requestTimeoutSeconds)

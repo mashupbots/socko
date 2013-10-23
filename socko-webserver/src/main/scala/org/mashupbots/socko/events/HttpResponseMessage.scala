@@ -77,7 +77,7 @@ case class HttpResponseMessage(event: HttpEvent) {
   /**
    * Headers
    */
-  val headers = new scala.collection.mutable.HashMap[String, String]
+  val headers = MutableHttpHeaders()
 
   /**
    * Content type as MIME code. e.g. `image/gif`. `None` if not set
@@ -129,7 +129,7 @@ case class HttpResponseMessage(event: HttpEvent) {
     // Headers
     HttpResponseMessage.setDateHeader(response)
 //    HttpResponseMessage.setSpdyHeaders(request, response)
-    headers.foreach { kv => response.headers.set(kv._1, kv._2) }
+    headers.foreach { h => response.headers.set(h.name, h.value) }
 
     if (request.isKeepAlive) {
       // Add 'Content-Length' header only for a keep-alive connection.
@@ -378,7 +378,7 @@ case class HttpResponseMessage(event: HttpEvent) {
     // Headers
     HttpResponseMessage.setDateHeader(response)
 //    HttpResponseMessage.setSpdyHeaders(request, response)
-    this.headers.foreach { kv => response.headers.set(kv._1, kv._2) }
+    this.headers.foreach { h => response.headers.set(h.name, h.value) }
     if (request.isKeepAlive) {
       // Add keep alive header as per HTTP 1.1 specifications
       HttpResponseMessage.setKeepAliveHeader(response, request.isKeepAlive)
@@ -554,7 +554,7 @@ object HttpResponseMessage {
    */
   def setSpdyHeaders(request: HttpRequestMessage, response: HttpResponse) {
     if (request.headers.contains(SpdyHttpHeaders.Names.STREAM_ID)) {
-      response.headers.set(SpdyHttpHeaders.Names.STREAM_ID, request.headers(SpdyHttpHeaders.Names.STREAM_ID))
+      response.headers.set(SpdyHttpHeaders.Names.STREAM_ID, request.headers.get(SpdyHttpHeaders.Names.STREAM_ID))
       response.headers.set(SpdyHttpHeaders.Names.PRIORITY, 0);
     }
   }

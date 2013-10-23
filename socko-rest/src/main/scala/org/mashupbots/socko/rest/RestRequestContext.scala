@@ -17,9 +17,9 @@ package org.mashupbots.socko.rest
 
 import java.util.Date
 import java.util.UUID
-
 import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.events.HttpResponseStatus
+import org.mashupbots.socko.events.ImmutableHttpHeaders
 
 /**
  * Provides context to a REST request. Contains request meta-data.
@@ -32,7 +32,7 @@ import org.mashupbots.socko.events.HttpResponseStatus
 case class RestRequestContext(
   id: UUID,
   endPoint: EndPoint,
-  headers: Map[String, String],
+  headers: ImmutableHttpHeaders,
   eventType: SockoEventType.Value,
   timeoutSeconds: Int) {
 
@@ -47,7 +47,7 @@ case class RestRequestContext(
    * @param timeoutSeconds Number of seconds before this request times out
    */
   def this(endPoint: EndPoint,
-    headers: Map[String, String],
+    headers: ImmutableHttpHeaders,
     eventType: SockoEventType.Value,
     timeoutSeconds: Int) =
     this(UUID.randomUUID(), endPoint, headers, eventType, timeoutSeconds)
@@ -107,7 +107,7 @@ object RestRequestContext {
    * @return a new instance of [[org.mashupbots.socko.rest.RestRequestContext]]
    */
   def apply(endPoint: EndPoint,
-    headers: Map[String, String],
+    headers: ImmutableHttpHeaders,
     eventType: SockoEventType.Value,
     timeoutSeconds: Int): RestRequestContext = {
     RestRequestContext(UUID.randomUUID(), endPoint, headers, eventType, timeoutSeconds)

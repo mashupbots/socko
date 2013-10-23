@@ -16,9 +16,7 @@
 package org.mashupbots.socko.rest
 
 import java.util.Date
-
 import scala.reflect.runtime.{ universe => ru }
-
 import org.mashupbots.socko.events.EndPoint
 import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.infrastructure.CharsetUtil
@@ -28,9 +26,9 @@ import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
-
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
+import org.mashupbots.socko.events.ImmutableHttpHeaders
 
 class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
 
@@ -38,7 +36,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
 
     val config = RestConfig("1.0", "http://localhost/api")
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
-    val requestContext = RestRequestContext(EndPoint("GET", "localhost", "/path/1234"), Map.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
+    val requestContext = RestRequestContext(EndPoint("GET", "localhost", "/path/1234"), ImmutableHttpHeaders.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
     val responseContext = RestResponseContext(requestContext, HttpResponseStatus(200), Map.empty)
 
     "Serailize void response" in {

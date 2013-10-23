@@ -38,7 +38,7 @@ trait HttpRequestMessage {
   /**
    * HTTP request headers
    */
-  val headers: Map[String, String]
+  val headers: ImmutableHttpHeaders
 
   /**
    * HTTP End point for this request
@@ -120,7 +120,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
   /**
    * HTTP request headers
    */
-  lazy val headers: Map[String, String] = nettyHttpRequest.headers.map(f => (f.getKey, f.getValue)).toMap
+  lazy val headers: ImmutableHttpHeaders = ImmutableHttpHeaders(nettyHttpRequest.headers.map(f => (f.getKey, f.getValue)))
 
   /**
    * HTTP End point for this request
@@ -323,7 +323,7 @@ case class DefaultHttpContent(buffer: ByteBuf, contentType: String) extends Http
  * To save space, the contents is not stored
  */
 case class InitialHttpRequestMessage(
-  headers: Map[String, String],
+  headers: ImmutableHttpHeaders,
   endPoint: EndPoint,
   isKeepAlive: Boolean,
   acceptedEncodings: List[String],
