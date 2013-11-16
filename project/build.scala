@@ -176,7 +176,7 @@ object Dependencies {
 object Dependency {
   object V {
     val Scala       = "2.10.2"
-    val Akka        = "2.2.1"
+    val Akka        = "2.2.3"
   }
 
   val scalaReflect  = "org.scala-lang"                          % "scala-reflect"                % V.Scala
@@ -186,7 +186,7 @@ object Dependency {
   val ant           = "org.apache.ant"                          % "ant"                          % "1.8.4"
   val concurrentmap = "com.googlecode.concurrentlinkedhashmap"  % "concurrentlinkedhashmap-lru"  % "1.3.2"
   val logback       = "ch.qos.logback"                          % "logback-classic"              % "1.0.9" % "runtime"
-  val netty         = "io.netty"                                % "netty-all"                    % "4.0.9.Final"
+  val netty         = "io.netty"                                % "netty-all"                    % "4.0.12.Final"
   val nextProtoNeg  = "org.eclipse.jetty.npn"                   % "npn-api"                      % "1.1.0.v20120525"
   val json4s        = "org.json4s"                              %% "json4s-native"               % "3.2.5"
   val scalatest     = "org.scalatest"                           % "scalatest_2.10"               % "2.0.M5b" % "test"
