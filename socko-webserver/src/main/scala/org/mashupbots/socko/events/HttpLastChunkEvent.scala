@@ -16,32 +16,33 @@
 package org.mashupbots.socko.events
 
 import io.netty.channel.ChannelHandlerContext
-import io.netty.handler.codec.http.HttpHeaders
 import org.mashupbots.socko.infrastructure.WebLogEvent
+import io.netty.handler.codec.http.HttpHeaders
 
 /**
- * Event fired when a HTTP chunk is received
+ * Event fired when the last HTTP chunk is received
  *
  * The [[org.mashupbots.socko.events.HttpChunkEvent]] will only be fired if:
  *  - if the web server is configured NOT to aggregate chunks
  *  - after an initial [[org.mashupbots.socko.events.HttpRequestEvent]] has been received where the
  *    `isChunked` property is set to `True`.
+ *  - after one or more [[org.mashupbots.socko.events.HttpChunkEvent]] has been received
  *
  * @param channel Channel by which the request entered and response will be written
  * @param initialHttpRequest The initial HTTP request associated with this chunk
  * @param nettyHttpChunk Incoming chunk of data for processing
  * @param config Processing configuration
  */
-case class HttpChunkEvent(
+case class HttpLastChunkEvent(
   context: ChannelHandlerContext,
   initialHttpRequest: InitialHttpRequestMessage,
-  nettyHttpChunk: NettyHttpContent,
-  config: HttpEventConfig) extends HttpEvent {
+  nettyHttpLastChunk: NettyHttpLastContent,
+  config: HttpEventConfig)  extends HttpEvent {
 
   /**
    * Data associated with this chunk
    */
-  val chunk: HttpChunkMessage = HttpChunkMessage(nettyHttpChunk)
+  val chunk: HttpLastChunkMessage = HttpLastChunkMessage(nettyHttpLastChunk)
 
   /**
    * Outgoing HTTP Response

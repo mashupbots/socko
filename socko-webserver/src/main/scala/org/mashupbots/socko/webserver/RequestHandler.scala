@@ -17,7 +17,6 @@ package org.mashupbots.socko.webserver
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
-
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener
@@ -30,6 +29,7 @@ import io.netty.handler.codec.http.FullHttpRequest
 import io.netty.handler.codec.http.HttpContent
 import io.netty.handler.codec.http.HttpHeaders
 import io.netty.handler.codec.http.HttpObjectAggregator
+import io.netty.handler.codec.http.LastHttpContent
 import io.netty.handler.codec.http.HttpRequest
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.netty.handler.codec.http.HttpVersion
@@ -50,6 +50,7 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.events.HttpLastChunkEvent
 
 /**
  * Handles incoming HTTP messages from Netty
@@ -94,7 +95,7 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
       case httpRequest: FullHttpRequest =>
         val event = HttpRequestEvent(ctx, httpRequest, httpConfig)
 
-        log.debug("HTTP {} CHANNEL={} {}", event.endPoint, ctx.name, "")
+        log.debug("HTTP FULL REQUEST {} CHANNEL={} {}", event.endPoint, ctx.name, "")
         
         if (event.request.isWebSocketUpgrade) {
           val wsctx = WebSocketHandshakeEvent(ctx, httpRequest, httpConfig)
@@ -108,23 +109,27 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
       case httpRequest: HttpRequest =>
         val event = HttpRequestEvent(ctx, httpRequest, httpConfig)
         
-        log.debug("HTTP {} CHANNEL={} {}", event.endPoint, ctx.name, "")
+        log.debug("HTTP REQUEST {} CHANNEL={} {}", event.endPoint, ctx.name, "")
         
         validateFirstChunk(event)
         server.routes(event)
         initialHttpRequest = Some(new InitialHttpRequestMessage(event.request, event.createdOn))
 
+      case httpLastChunk: LastHttpContent =>
+        val event = HttpLastChunkEvent(ctx, initialHttpRequest.get, httpLastChunk, httpConfig)
+
+        log.debug("HTTP LAST CHUNK {} CHANNEL={} {}", event.endPoint, ctx.name, "")
+
+        server.routes(event)
+        validateLastChunk(event)
+        
       case httpChunk: HttpContent =>
         val event = HttpChunkEvent(ctx, initialHttpRequest.get, httpChunk, httpConfig)
         initialHttpRequest.get.totalChunkContentLength += httpChunk.content.readableBytes
 
-        log.debug("CHUNK {} CHANNEL={} {}", event.endPoint, ctx.name, "")
+        log.debug("HTTP CHUNK {} CHANNEL={} {}", event.endPoint, ctx.name, "")
 
         server.routes(event)
-
-        if (event.chunk.isLastChunk) {
-          validateLastChunk(event)
-        }
 
       case wsFrame: WebSocketFrame =>
         val event = WebSocketFrameEvent(ctx, initialHttpRequest.get, wsFrame, wsConfig)
@@ -170,11 +175,9 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
   /**
    * Check for last chunk
    */
-  private def validateLastChunk(event: HttpChunkEvent) {
+  private def validateLastChunk(event: HttpLastChunkEvent) {
     if (isAggreatingChunks(event.context.channel)) {
-      if (event.chunk.isLastChunk) {
-        initialHttpRequest = None
-      }
+      initialHttpRequest = None
     } else {
       throw new IllegalStateException("Received a chunk when chunks should have been aggreated")
     }

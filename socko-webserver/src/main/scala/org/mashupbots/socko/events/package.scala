@@ -31,4 +31,5 @@ package object events {
   type NettyHttpRequest = io.netty.handler.codec.http.HttpRequest
   type NettyHttpResponse = io.netty.handler.codec.http.HttpResponse
   type NettyHttpContent = io.netty.handler.codec.http.HttpContent
+  type NettyHttpLastContent = io.netty.handler.codec.http.LastHttpContent
 }

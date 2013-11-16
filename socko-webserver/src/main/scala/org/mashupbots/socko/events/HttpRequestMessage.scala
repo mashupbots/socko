@@ -203,15 +203,15 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
 
   /**
    * `True` if and only if this is a request to upgrade to a websocket connection
-   * 
+   *
    * Note: Firefox sends "Connection: keep-alive, Upgrade" rather than "Connection: Upgrade"
    */
   val isWebSocketUpgrade: Boolean = {
     import HttpHeaders._
-    val connection =  nettyHttpRequest.headers.get(Names.CONNECTION)
+    val connection = nettyHttpRequest.headers.get(Names.CONNECTION)
     val upgrade = nettyHttpRequest.headers.get(Names.UPGRADE)
     connection != null && """(?i)\bupgrade\b""".r.findFirstIn(connection).nonEmpty &&
-    Values.WEBSOCKET.equalsIgnoreCase(upgrade)
+      Values.WEBSOCKET.equalsIgnoreCase(upgrade)
   }
 
   /**
@@ -270,7 +270,7 @@ case class DefaultHttpContent(buffer: ByteBuf, contentType: String) extends Http
    *
    * Empty map is returned if the content type is not `application/x-www-form-urlencoded` or if
    * there is no content.
-   * 
+   *
    * The form data field name is the map's key.  The value corresponding to a key are a list values
    * for that field. Typically, there is is only 1 value for a field.
    */
@@ -288,7 +288,7 @@ case class DefaultHttpContent(buffer: ByteBuf, contentType: String) extends Http
    * Returns a string representation of the content.
    *
    * The character set in the content type will be used.
-   * 
+   *
    * If not supplied, ISO-8859-1 is assumed (see http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html section 3.7.1)
    */
   override def toString() = {
@@ -306,8 +306,12 @@ case class DefaultHttpContent(buffer: ByteBuf, contentType: String) extends Http
   /**
    * Returns the contents as a byte array
    */
-  def toBytes = {
-    if (buffer.readableBytes > 0) buffer.array
+  def toBytes:Array[Byte] = {
+    if (buffer.readableBytes > 0) {
+      val a = new Array[Byte](buffer.readableBytes)
+      buffer.readBytes(a)
+      a
+    }      
     else Array.empty[Byte]
   }
 
@@ -371,29 +375,13 @@ case class InitialHttpRequestMessage(
  * HTTP chunk sent from client to sever
  *
  * @param nettyHttpChunk Netty representation of the HTTP Chunk
- * @param contentType Content type of the data
  */
-case class HttpChunkMessage(nettyHttpChunk: io.netty.handler.codec.http.HttpContent) {
+case class HttpChunkMessage(nettyHttpChunk: NettyHttpContent) {
 
   /**
    * Returns the length of the content from the `Content-Length` header. If not set, `0` is returned.
    */
   lazy val contentLength = nettyHttpChunk.content.readableBytes
-
-  /**
-   * Flag to denote if this is the last chunk
-   */
-  val isLastChunk = nettyHttpChunk.isInstanceOf[LastHttpContent]
-
-  /**
-   * Trailing headers associated with the last chunk
-   */
-  val trailingHeaders = nettyHttpChunk match {
-    case lastHttpChunk: LastHttpContent =>
-      lastHttpChunk.trailingHeaders.map(e => (e.getKey, e.getValue))
-    case _ =>
-      Map.empty[String, String]
-  }
 
   /**
    * Body of the HTTP chunk
@@ -402,4 +390,15 @@ case class HttpChunkMessage(nettyHttpChunk: io.netty.handler.codec.http.HttpCont
 
 }
 
+/**
+ * HTTP last chunk sent from client to sever
+ *
+ * @param nettyHttpLastChunk Netty representation of the last HTTP Chunk
+ */
+case class HttpLastChunkMessage(nettyHttpLastChunk: NettyHttpLastContent) {
 
+  /**
+   * Trailing headers associated with the last chunk
+   */
+  val trailingHeaders: ImmutableHttpHeaders = ImmutableHttpHeaders(nettyHttpLastChunk.trailingHeaders.map(f => (f.getKey, f.getValue)))
+}

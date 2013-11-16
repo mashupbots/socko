@@ -97,11 +97,18 @@ There are 4 types of {{ page.SockoEventClass }}:
 2. **{{ page.HttpChunkEventClass }}**
 
    This event is fired when a HTTP Chunk is received and is only applicable if you turn off 
-   [chunk aggregation](configuration.html).
+   [chunk aggregation](configuration.html) and the incoming HTTP request has the `Transfer-Encoding` 
+   header set to `chunked`.
    
    Reading requests and writing responses is as per {{ page.HttpRequestEventClass }}.
 
-3. **{{ page.WebSocketFrameEventClass }}**
+3. **{{ page.HttpLastChunkEventClass }}**
+
+   This event is fired when the last HTTP Chunk has been received.
+   
+   Reading requests and writing responses is as per {{ page.HttpRequestEventClass }}.
+
+4. **{{ page.WebSocketFrameEventClass }}**
 
    This event is fired when a Web Socket Frame is received.
    
@@ -110,7 +117,7 @@ There are 4 types of {{ page.SockoEventClass }}:
    
    To write a frame, use `writeText()` or `writeBinary()`.
 
-4. **{{ page.WebSocketHandshakeEventClass }}**
+5. **{{ page.WebSocketHandshakeEventClass }}**
 
    This event is fired for Web Socket handshaking within your [Route](#Step2). 
 

@@ -17,20 +17,18 @@
 package org.mashupbots.socko.handlers
 
 import scala.collection.JavaConversions.asScalaBuffer
-
 import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
 import io.netty.handler.codec.http.multipart.Attribute
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory
 import io.netty.handler.codec.http.multipart.FileUpload
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder
 import io.netty.util.AttributeKey
-
 import org.mashupbots.socko.events.HttpChunkEvent
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.WebSocketFrameEvent
-
 import akka.actor.Actor
 import akka.event.Logging
+import org.mashupbots.socko.events.HttpLastChunkEvent
 
 /**
  * Sends a response containing information about the received event.
@@ -50,6 +48,9 @@ class SnoopHandler extends Actor {
       context.stop(self)
     case httpChunkEvent: HttpChunkEvent =>
       snoopHttpChunk(httpChunkEvent)
+      context.stop(self)
+    case httpLastChunkEvent: HttpLastChunkEvent =>
+      snoopHttpLastChunk(httpLastChunkEvent)
       context.stop(self)
     case webSocketEvent: WebSocketFrameEvent =>
       snoopWebSocket(webSocketEvent)
@@ -136,7 +137,7 @@ class SnoopHandler extends Actor {
    * This will not be called unless chunk aggregation is turned off
    */
   private def snoopHttpChunk(event: HttpChunkEvent) {
-    // Accumulate chunk info in a string buffer stored in the channel
+    // Accumulate chunk info in a string buffer stored in the channel context
     val context = event.context
     val buf = {
       val storedBuf = context.attr(SnoopHandler.key).get
@@ -149,18 +150,36 @@ class SnoopHandler extends Actor {
       }
     }
 
-    if (event.chunk.isLastChunk) {
-      buf.append("END OF CONTENT\r\n")
-      event.chunk.trailingHeaders.foreach(h => buf.append("HEADER: " + h._1 + " = " + h._2 + "\r\n"))
-      buf.append("\r\n")
-
-      log.info("HttpChunk: " + buf.toString)
-      event.response.write(buf.toString)
-    } else {
-      buf.append("CHUNK: " + event.chunk.toString + "\r\n")
-    }
+    buf.append("CHUNK: " + event.chunk.toString + "\r\n")
   }
 
+  /**
+   * Echo the details of the Last HTTP chunk that we just received
+   *
+   * This will not be called unless chunk aggregation is turned off
+   */
+  private def snoopHttpLastChunk(event: HttpLastChunkEvent) {
+    // Accumulate chunk info in a string buffer stored in the channel context
+    val context = event.context
+    val buf = {
+      val storedBuf = context.attr(SnoopHandler.key).get
+      if (storedBuf == null) {
+        val newBuf = new StringBuilder
+        context.attr(SnoopHandler.key).set(newBuf)
+        newBuf
+      } else {
+        storedBuf
+      }
+    }
+
+    buf.append("END OF CONTENT\r\n")
+	event.chunk.trailingHeaders.foreach(h => buf.append("HEADER: " + h.name + " = " + h.value + "\r\n"))
+	buf.append("\r\n")
+	
+	log.info("HttpChunk: " + buf.toString)
+	event.response.write(buf.toString)
+  }
+  
   /**
    * Echo the details of the web socket frame that we just received
    */
@@ -176,7 +195,7 @@ class SnoopHandler extends Actor {
 }
 
 object SnoopHandler {
-  val key = new AttributeKey[StringBuilder]("data")
+  val key = AttributeKey.valueOf[StringBuilder]("data")
 }
 
 object HttpDataFactory {
