@@ -65,6 +65,8 @@ class WebServer(
    */
   val allChannels = new DefaultChannelGroup(config.serverName, GlobalEventExecutor.INSTANCE)
 
+  val webSocketManager = new WebSocketManager(config.serverName + "-websockets")
+  
   /**
    * SSL Engine
    */

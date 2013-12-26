@@ -16,9 +16,10 @@
 package org.mashupbots.socko.events
 
 import akka.actor.ActorRef
+import io.netty.util.AttributeKey
 
 /**
- * Web Socket configuration used by [[org.mashupbots.socko.events.WebSocketFrameEvent]]
+ * Web Socket configuration used by [[org.mashupbots.socko.events.WebSocketFrameEvent]] in processing
  *
  * @param serverName Name of this instance of the Socko Web Server
  * @param webLogWriter Actor to which web log events to be sent
@@ -26,4 +27,15 @@ import akka.actor.ActorRef
 case class WebSocketEventConfig(
   serverName: String,
   webLogWriter: Option[ActorRef]) {
+}
+
+/**
+ * Companion object
+ */
+object WebSocketEventConfig {
+  
+  /**
+   * Netty context Attribute Key for the id of a web socket connection  
+   */
+  val websocketIdKey = AttributeKey.valueOf[String]("socko_websocket_id")
 }

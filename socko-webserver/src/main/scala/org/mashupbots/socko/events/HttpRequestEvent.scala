@@ -31,7 +31,7 @@ case class HttpRequestEvent(
   context: ChannelHandlerContext,
   nettyHttpRequest: HttpRequest,
   config: HttpEventConfig) extends HttpEvent {
-
+  
   /**
    * Incoming HTTP request
    */

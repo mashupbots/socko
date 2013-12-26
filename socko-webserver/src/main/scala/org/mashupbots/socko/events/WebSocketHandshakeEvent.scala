@@ -19,8 +19,8 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.FullHttpRequest
 import io.netty.handler.codec.http.HttpHeaders
 import io.netty.handler.codec.http.HttpRequest
-
 import org.mashupbots.socko.infrastructure.WebLogEvent
+import java.util.UUID
 
 /**
  * Event fired when performing a web socket handshake to upgrade a HTTP connection to a web socket connection.
@@ -57,6 +57,17 @@ case class WebSocketHandshakeEvent(
   config: HttpEventConfig) extends HttpEvent {
 
   /**
+   * Unique ID for this web socket connection
+   * 
+   * With Netty 5, we can use ChannelId. However, this is not supported in Netty 4 so we'll have to use a 
+   * combination of the UUID and the object hash code.
+   */
+  val websocketId:String = UUID.randomUUID().toString() + "-" + this.hashCode()
+  
+  // Store the websocket ID in the context for future use
+  context.channel.attr(WebSocketEventConfig.websocketIdKey).set(websocketId)
+  
+  /**
    * Incoming HTTP request
    */
   val request = CurrentHttpRequestMessage(nettyHttpRequest)
@@ -77,8 +88,10 @@ case class WebSocketHandshakeEvent(
 
   private var _maxFrameSize: Int = 0
 
-  private var _onComplete: Option[(WebSocketHandshakeEvent) => Unit] = None
+  private var _onComplete: Option[(String) => Unit] = None
 
+  private var _onClose: Option[(String) => Unit] = None
+  
   /**
    * Authorize this web socket handshake to proceed
    *
@@ -87,13 +100,17 @@ case class WebSocketHandshakeEvent(
    * @param maxFrameSize Maximum size of web socket frames. Defaults to 100K.
    * @param onComplete Optional callback executed when the handshake is successfully completed. You can use this 
    *   callback to register the web socket client as being ready to receive data. 
+   * @param onClose Optional callback executed when the websocket is closed. The closed web socket id is passed to method
    */
-  def authorize(subprotocols: String = "", maxFrameSize: Int = 102400,
-    onComplete: Option[(WebSocketHandshakeEvent) => Unit] = None) {
+  def authorize(subprotocols: String = "", 
+      maxFrameSize: Int = 102400,
+      onComplete: Option[(String) => Unit] = None, 
+      onClose: Option[(String) => Unit] = None) {
     _isAuthorized = true
     _authorizedSubprotocols = if (subprotocols == null) "" else subprotocols
     _maxFrameSize = maxFrameSize
     _onComplete = onComplete
+    _onClose = onClose
   }
 
   /**
@@ -120,10 +137,17 @@ case class WebSocketHandshakeEvent(
   /**
    * Callback for when the handshake as completed
    */
-  def onComplete: Option[(WebSocketHandshakeEvent) => Unit] = {
+  def onComplete: Option[(String) => Unit] = {
     _onComplete
   }
 
+  /**
+   * Callback for when the web socket is closed
+   */
+  def onClose: Option[(String) => Unit] = {
+    _onClose
+  }
+  
   /**
    * Adds an entry to the web log
    *
@@ -151,5 +175,17 @@ case class WebSocketHandshakeEvent(
       request.httpVersion,
       request.headers.get(HttpHeaders.Names.USER_AGENT),
       request.headers.get(HttpHeaders.Names.REFERER))
+  }
+}
+
+/**
+ * Companion object
+ */
+object WebSocketHandshakeEvent {
+  
+  /**
+   * Default event handler for onComplete and onClose
+   */
+  def defaultEventHandler(websocketId: String) {    
   }
 }

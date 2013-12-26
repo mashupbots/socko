@@ -17,17 +17,14 @@ package org.mashupbots.socko.examples.websocket
 
 import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
-import org.mashupbots.socko.handlers.WebSocketBroadcastText
-import org.mashupbots.socko.handlers.WebSocketBroadcaster
-import org.mashupbots.socko.handlers.WebSocketBroadcasterRegistration
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes._
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
-
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
+import akka.dispatch.OnComplete
 
 /**
  * This example shows how to use web sockets, specifically `org.mashupbots.socko.processors.WebSocketBroadcaster`,
@@ -47,7 +44,6 @@ object ChatApp extends Logger {
   // `ChatHandler` is created in the route and is self-terminating
   //
   val actorSystem = ActorSystem("ChatExampleActorSystem")
-  val webSocketBroadcaster = actorSystem.actorOf(Props[WebSocketBroadcaster], "webSocketBroadcaster")
 
   //
   // STEP #2 - Define Routes
@@ -71,13 +67,9 @@ object ChatApp extends Logger {
       case Path("/websocket/") => {
         // To start Web Socket processing, we first have to authorize the handshake.
         // This is a security measure to make sure that web sockets can only be established at your specified end points.
-        wsHandshake.authorize(onComplete = Some((event: WebSocketHandshakeEvent) => {
-          // Register this connection with the broadcaster
-          // We do this AFTER handshake has been completed so that the server does not send data to client until
-          // after the client gets a handshake response
-          webSocketBroadcaster ! new WebSocketBroadcasterRegistration(event)
-        }))
-
+        wsHandshake.authorize(
+          onComplete = Some(onWebSocketHandshakeComplete),
+          onClose = Some(onWebSocketClose))
       }
     }
 
@@ -88,11 +80,12 @@ object ChatApp extends Logger {
 
   })
 
+  val webServer = new WebServer(WebServerConfig(), routes, actorSystem)
+
   //
   // STEP #3 - Start and Stop Socko Web Server
   //
   def main(args: Array[String]) {
-    val webServer = new WebServer(WebServerConfig(), routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run { webServer.stop() }
     })
@@ -100,4 +93,13 @@ object ChatApp extends Logger {
 
     System.out.println("Open a few browsers and navigate to http://localhost:8888/html. Start chatting!")
   }
+
+  def onWebSocketHandshakeComplete(websocketId: String) {
+    System.out.println(s"Web Socket $websocketId connected")
+  }
+
+  def onWebSocketClose(websocketId: String) {
+    System.out.println(s"Web Socket $websocketId closed")
+  }
+
 }

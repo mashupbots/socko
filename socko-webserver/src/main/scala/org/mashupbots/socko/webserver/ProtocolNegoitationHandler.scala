@@ -30,6 +30,7 @@ import io.netty.handler.ssl.SslHandler
 import io.netty.handler.stream.ChunkedWriteHandler
 import org.mashupbots.socko.netty.SpdyServerProvider
 import org.mashupbots.socko.infrastructure.Logger
+import io.netty.handler.codec.spdy.SpdyVersion
 
 /**
  * Handler used with SPDY that performs protocol negotiation.
@@ -45,7 +46,7 @@ class ProtocolNegoitationHandler(server: WebServer) extends ChannelInboundHandle
   override def channelActive(ctx: ChannelHandlerContext) = {
     server.allChannels.add(ctx.channel)
   }
-  
+
   override def channelRead(ctx: ChannelHandlerContext, e: AnyRef) = {
 
     val pipeline = ctx.pipeline
@@ -57,14 +58,18 @@ class ProtocolNegoitationHandler(server: WebServer) extends ChannelInboundHandle
     // Null is returned during the negotiation process so ignore it
     if (selectedProtocol != null) {
       if (selectedProtocol.startsWith("spdy/")) {
-        val version = Integer.parseInt(selectedProtocol.substring(5))
+        val spdyVersion = selectedProtocol.substring(5) match {
+          case "3" => SpdyVersion.SPDY_3
+          case "3.1" => SpdyVersion.SPDY_3_1
+          case _ => throw new UnsupportedOperationException("Unsupported protocol: " + selectedProtocol)
+        }
 
-        pipeline.addLast("decoder", new SpdyFrameDecoder(version, httpConfig.maxChunkSizeInBytes,
-                                                         httpConfig.maxHeaderSizeInBytes))
-        pipeline.addLast("spdy_encoder", new SpdyFrameEncoder(version))
-        pipeline.addLast("spdy_session_handler", new SpdySessionHandler(version, true))
-        pipeline.addLast("spdy_http_encoder", new SpdyHttpEncoder(version))
-        pipeline.addLast("spdy_http_decoder", new SpdyHttpDecoder(version, httpConfig.maxLengthInBytes))
+        pipeline.addLast("decoder", new SpdyFrameDecoder(spdyVersion, httpConfig.maxChunkSizeInBytes,
+          httpConfig.maxHeaderSizeInBytes))
+        pipeline.addLast("spdy_encoder", new SpdyFrameEncoder(spdyVersion))
+        pipeline.addLast("spdy_session_handler", new SpdySessionHandler(spdyVersion, true))
+        pipeline.addLast("spdy_http_encoder", new SpdyHttpEncoder(spdyVersion))
+        pipeline.addLast("spdy_http_decoder", new SpdyHttpDecoder(spdyVersion, httpConfig.maxLengthInBytes))
         pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
         pipeline.addLast("handler", new RequestHandler(server))
 
@@ -73,7 +78,7 @@ class ProtocolNegoitationHandler(server: WebServer) extends ChannelInboundHandle
 
       } else if (selectedProtocol == "http/1.1") {
         pipeline.addLast("decoder", new HttpRequestDecoder(httpConfig.maxInitialLineLength,
-                                                           httpConfig.maxHeaderSizeInBytes, httpConfig.maxChunkSizeInBytes))
+          httpConfig.maxHeaderSizeInBytes, httpConfig.maxChunkSizeInBytes))
         if (httpConfig.aggreateChunks) {
           pipeline.addLast("chunkAggregator", new HttpObjectAggregator(httpConfig.maxLengthInBytes))
         }

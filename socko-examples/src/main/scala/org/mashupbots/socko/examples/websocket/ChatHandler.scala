@@ -20,7 +20,6 @@ import java.util.GregorianCalendar
 
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.WebSocketFrameEvent
-import org.mashupbots.socko.handlers.WebSocketBroadcastText
 
 import akka.actor.actorRef2Scala
 import akka.actor.Actor
@@ -109,8 +108,7 @@ class ChatHandler extends Actor {
     val time = new GregorianCalendar()
     val ts = dateFormatter.format(time.getTime())
 
-    val broadcaster = context.actorSelection("/user/webSocketBroadcaster")
-    broadcaster ! WebSocketBroadcastText(ts + " " + event.readText)
+    ChatApp.webServer.webSocketManager.writeText(ts + " " + event.readText)
   }
 
 }

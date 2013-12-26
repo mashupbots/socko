@@ -279,19 +279,32 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
       WebSocketServerHandshakerFactory.sendUnsupportedWebSocketVersionResponse(event.context.channel)
       event.writeWebLog(HttpResponseStatus.UPGRADE_REQUIRED.code, 0)
     } else {
+      val id = event.websocketId
       val future = wsHandshaker.handshake(event.context.channel, event.nettyHttpRequest)
       event.writeWebLog(HttpResponseStatus.SWITCHING_PROTOCOLS.code, 0)
-
+     
+      // Register websockets with the manager
+      server.webSocketManager.addChannel(event.context.channel)
+            
       // Callback on complete AFTER data sent to the client
       if (event.onComplete.isDefined) {
         class OnCompleteListender extends ChannelFutureListener {
           def operationComplete(future: ChannelFuture) {
-            event.onComplete.get(event)
+            event.onComplete.get(id)
           }
         }
         future.addListener(new OnCompleteListender())
       }
-
+      
+      // Callback on close - after the web socket connection (netty channel) is closed
+      if (event.onClose.isDefined) {
+        class OnCloseListender extends ChannelFutureListener {
+          def operationComplete(future: ChannelFuture) {
+            event.onClose.get(id)
+          }
+        }
+        event.context.channel.closeFuture.addListener(new OnCloseListender())
+      }
     }
   }
 

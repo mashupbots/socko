@@ -42,6 +42,13 @@ case class WebSocketFrameEvent(
   config: WebSocketEventConfig) extends SockoEvent {
 
   /**
+   * Unique ID for this web socket connection
+   * 
+   * With Netty 5, we can use ChannelId. However, this is not supported in Netty 4 so we'll have to use UUID
+   */
+  val websocketId:String = context.channel.attr(WebSocketEventConfig.websocketIdKey).get()
+
+  /**
    * HTTP end point used by this chunk
    */
   val endPoint = initialHttpRequest.endPoint
