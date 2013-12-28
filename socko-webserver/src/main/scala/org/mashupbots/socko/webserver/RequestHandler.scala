@@ -279,12 +279,12 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
       WebSocketServerHandshakerFactory.sendUnsupportedWebSocketVersionResponse(event.context.channel)
       event.writeWebLog(HttpResponseStatus.UPGRADE_REQUIRED.code, 0)
     } else {
-      val id = event.websocketId
+      val id = event.webSocketId
       val future = wsHandshaker.handshake(event.context.channel, event.nettyHttpRequest)
       event.writeWebLog(HttpResponseStatus.SWITCHING_PROTOCOLS.code, 0)
      
       // Register websockets with the manager
-      server.webSocketManager.addChannel(event.context.channel)
+      server.webSocketConnections.add(event.context.channel)
             
       // Callback on complete AFTER data sent to the client
       if (event.onComplete.isDefined) {

@@ -62,10 +62,10 @@ case class WebSocketHandshakeEvent(
    * With Netty 5, we can use ChannelId. However, this is not supported in Netty 4 so we'll have to use a 
    * combination of the UUID and the object hash code.
    */
-  val websocketId:String = UUID.randomUUID().toString() + "-" + this.hashCode()
+  val webSocketId:String = UUID.randomUUID().toString() + "-" + this.hashCode()
   
   // Store the websocket ID in the context for future use
-  context.channel.attr(WebSocketEventConfig.websocketIdKey).set(websocketId)
+  context.channel.attr(WebSocketEventConfig.webSocketIdKey).set(webSocketId)
   
   /**
    * Incoming HTTP request

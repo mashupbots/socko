@@ -31,11 +31,12 @@ import scala.collection.JavaConversions._
 /**
  * Manages all web socket connections
  *
- * Acts as a wrapper for Netty's channel group.
+ * Acts as a wrapper for Netty's channel group.  A TODO is to optimize performance by using a 
+ * hash lookup.
  *
- * @param name Name to call this web socket manager. Netty channel group will  use this name.
+ * @param name Name to call this web socket connection. Netty channel group will  use this name.
  */
-class WebSocketManager(val name: String) {
+class WebSocketConnections(val name: String) {
 
   /**
    * Collection of channels that are currently being used
@@ -47,47 +48,47 @@ class WebSocketManager(val name: String) {
    *
    * @param channel Netty channel to add
    */
-  protected[webserver] def addChannel(channel: Channel) = {
+  protected[webserver] def add(channel: Channel) = {
     allWebSocketChannels.add(channel);
   }
 
   /**
    * Disconnects the specified web socket and removes it from the group
    *
-   * @param websocketId ID of web socket to remove
+   * @param webSocketId ID of web socket to remove
    */
-  def closeChannel(websocketId: String) = {
-    allWebSocketChannels.disconnect(WebSocketIdChannelMatcher(List(websocketId)))
+  def close(webSocketId: String) = {
+    allWebSocketChannels.disconnect(WebSocketIdChannelMatcher(List(webSocketId)))
   }
 
   /**
    * Disconnects the specified web sockets and removes it from the group
    *
-   * @param websocketIds IDs of web sockets to remove
+   * @param webSocketIds IDs of web sockets to remove
    */
-  def closeChannel(websocketIds: Iterable[String]) = {
-    allWebSocketChannels.disconnect(WebSocketIdChannelMatcher(websocketIds))
+  def close(webSocketIds: Iterable[String]) = {
+    allWebSocketChannels.disconnect(WebSocketIdChannelMatcher(webSocketIds))
   }
 
   /**
    * Disconnects all web sockets
    */
-  def closeAllChannels() = {
+  def closeAll() = {
     allWebSocketChannels.disconnect(ChannelMatchers.all())
   }
 
   /**
    * Sends a web socket text message to the specified web socket
    */
-  def writeText(text: String, websocketId: String) {
-    writeText(text, List(websocketId))
+  def writeText(text: String, webSocketId: String) {
+    writeText(text, List(webSocketId))
   }
 
   /**
    * Sends a web socket text message to the specified web sockets
    */
-  def writeText(text: String, websocketIds: Iterable[String]) {
-    allWebSocketChannels.write(new TextWebSocketFrame(text), WebSocketIdChannelMatcher(websocketIds))
+  def writeText(text: String, webSocketIds: Iterable[String]) {
+    allWebSocketChannels.write(new TextWebSocketFrame(text), WebSocketIdChannelMatcher(webSocketIds))
     allWebSocketChannels.flush
   }
 
@@ -102,15 +103,15 @@ class WebSocketManager(val name: String) {
   /**
    * Sends a web socket text message to the specified web socket
    */
-  def writeBinary(bytes: Array[Byte], websocketId: String) {
-    writeBinary(bytes, List(websocketId))
+  def writeBinary(bytes: Array[Byte], webSocketId: String) {
+    writeBinary(bytes, List(webSocketId))
   }
 
   /**
    * Sends a web socket text message to the specified web sockets
    */
-  def writeBinary(bytes: Array[Byte], websocketIds: Iterable[String]) {
-    allWebSocketChannels.write(new BinaryWebSocketFrame(Unpooled.buffer(bytes.length).writeBytes(bytes)), WebSocketIdChannelMatcher(websocketIds))
+  def writeBinary(bytes: Array[Byte], webSocketIds: Iterable[String]) {
+    allWebSocketChannels.write(new BinaryWebSocketFrame(Unpooled.buffer(bytes.length).writeBytes(bytes)), WebSocketIdChannelMatcher(webSocketIds))
     allWebSocketChannels.flush
   }
 
@@ -125,24 +126,24 @@ class WebSocketManager(val name: String) {
   /**
    * Checks if the specified web socket id is still connected
    * 
-   * @param websocketId Id of web socket to check if it is still connected
+   * @param webSocketId Id of web socket to check if it is still connected
    * @returns True if connected, False if the channel has been closed.
    */
-  def isConnected(websocketId: String): Boolean = {
-    allWebSocketChannels.iterator().exists(c => c.attr(WebSocketEventConfig.websocketIdKey).get() == websocketId)
+  def isConnected(webSocketId: String): Boolean = {
+    allWebSocketChannels.iterator().exists(c => c.attr(WebSocketEventConfig.webSocketIdKey).get() == webSocketId)
   }
   
   /**
    * Matcher for web socket id to use with channel groups
    */
-  case class WebSocketIdChannelMatcher(websocketIds: Iterable[String]) extends ChannelMatcher {
-    assert(websocketIds != null)
+  case class WebSocketIdChannelMatcher(webSocketIds: Iterable[String]) extends ChannelMatcher {
+    assert(webSocketIds != null)
 
-    def this(websocketId: String) = this(Seq(websocketId))
+    def this(webSocketId: String) = this(Seq(webSocketId))
 
     def matches(channel: io.netty.channel.Channel): Boolean = {
-      val channelId = channel.attr(WebSocketEventConfig.websocketIdKey).get()
-      websocketIds.exists(id => id == channelId)
+      val channelId = channel.attr(WebSocketEventConfig.webSocketIdKey).get()
+      webSocketIds.exists(id => id == channelId)
     }
   }
 }

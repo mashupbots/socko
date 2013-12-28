@@ -36,6 +36,8 @@ WebSocketBroadcasterClass: <code><a href="../api/#org.mashupbots.socko.handler.W
    - [Configuration](dynamic-content.html#RestConfiguration)
    - [Supported Data Types](dynamic-content.html#RestDataType)
  - [Web Sockets](#WebSockets)
+   - [Additional Events](dynamic-content.html#WebSocketEvents)
+   - [Pushing Data](dynamic-content.html#WebSocketPush)
 
 ## Parsing Data <a class="blank" id="ParsingData">&nbsp;</a>
 
@@ -396,7 +398,118 @@ subprotocol support and a maximum frame size of 100K.
     wsHandshake.authorize("chat, superchat", 1000)
 
 If you wish to push or broadcast messages to a group of web socket connections, use {{ page.WebSocketBroadcasterClass }}.
+
 See the example web socket [ChatApp](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket/ChatApp.scala) for usage.
+
+
+### Additional Events <a class="blank" id="WebSocketEvents">&nbsp;</a>
+
+As part of `authorise()`, you are also able to supply functions to handle additional events:
+
+ - `onComplete`: when the handshake completes
+ - `onClose`: when the web socket connection is closed
+
+For both events, a unique web socket id is passed in to uniquely identify the web socket connection.
+
+{% highlight scala %}
+    def onWebSocketHandshakeComplete(websocketId: String) {
+      System.out.println(s"Web Socket $websocketId connected")
+    }
+
+    def onWebSocketClose(websocketId: String) {
+      System.out.println(s"Web Socket $websocketId closed")
+    }
+
+    val routes = Routes({
+    
+      case HttpRequest(httpRequest) => httpRequest match {
+        case GET(Path("/html")) => {
+          // Return HTML page to establish web socket
+          actorSystem.actorOf(Props[WebSocketHandler]) ! httpRequest
+        }
+        case Path("/favicon.ico") => {
+          // If favicon.ico, just return a 404 because we don't have that file
+          httpRequest.response.write(HttpResponseStatus.NOT_FOUND)
+        }
+      }
+      
+      case WebSocketHandshake(wsHandshake) => wsHandshake match {
+        case Path("/websocket/") => {
+          // To start Web Socket processing, we first have to authorize the handshake.
+          // This is a security measure to make sure that web sockets can only be established at your specified end points.
+          wsHandshake.authorize(
+            onComplete = Some(onWebSocketHandshakeComplete),
+            onClose = Some(onWebSocketClose))
+        }
+      }
+    
+      case WebSocketFrame(wsFrame) => {
+        // Once handshaking has taken place, we can now process frames sent from the client
+        actorSystem.actorOf(Props[WebSocketHandler]) ! wsFrame
+      }
+    
+    })
+
+{% endhighlight %}
+
+
+### Pushing Data <a class="blank" id="WebSocketPush">&nbsp;</a>
+
+When a web socket connection is authorised, it is added to the web server object's `webSocketConnections`. Using this, you can push data down to one or more web socket clients.
+
+Each web socket connection is uniquely identified by an ID that you must store if you wish to push data to a specific connection.  This ID is provided in the `WebSocketHandshake` event.
+
+{% highlight scala %}
+    var myWebSocketId
+
+    val routes = Routes({
+    
+      case HttpRequest(httpRequest) => httpRequest match {
+        case GET(Path("/html")) => {
+          // Return HTML page to establish web socket
+          actorSystem.actorOf(Props[WebSocketHandler]) ! httpRequest
+        }
+        case Path("/favicon.ico") => {
+          // If favicon.ico, just return a 404 because we don't have that file
+          httpRequest.response.write(HttpResponseStatus.NOT_FOUND)
+        }
+      }
+      
+      case WebSocketHandshake(wsHandshake) => wsHandshake match {
+        case Path("/websocket/") => {
+          // Store web socket ID for future use
+          myWebSocketId = wsHandshake.webSocketId     
+
+          // Authorise
+          wsHandshake.authorize()
+        }
+      }
+        
+    })
+{% endhighlight %}
+
+
+To push a message:
+
+{% highlight scala %}
+    // Broadcast to all connections
+    MyApp.webServer.webSocketConnections.writeText("Broadcast message to all web socket connections...")
+
+    // Send to a specific connection
+    MyApp.webServer.webSocketConnections.writeText("Hello", myWebSocketId)
+{% endhighlight %}
+
+
+You can also close web socket connections:
+
+{% highlight scala %}
+    // Close all connections
+    MyApp.webServer.webSocketConnections.closeAll()
+
+    // Close a specific web socket connection
+    MyApp.webServer.webSocketConnections.close(myWebSocketId)
+{% endhighlight %}
+
 
 
 

@@ -46,7 +46,7 @@ case class WebSocketFrameEvent(
    * 
    * With Netty 5, we can use ChannelId. However, this is not supported in Netty 4 so we'll have to use UUID
    */
-  val websocketId:String = context.channel.attr(WebSocketEventConfig.websocketIdKey).get()
+  val webSocketId:String = context.channel.attr(WebSocketEventConfig.webSocketIdKey).get()
 
   /**
    * HTTP end point used by this chunk

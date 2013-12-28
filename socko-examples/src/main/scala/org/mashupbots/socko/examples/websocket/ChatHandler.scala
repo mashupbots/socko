@@ -108,7 +108,7 @@ class ChatHandler extends Actor {
     val time = new GregorianCalendar()
     val ts = dateFormatter.format(time.getTime())
 
-    ChatApp.webServer.webSocketManager.writeText(ts + " " + event.readText)
+    ChatApp.webServer.webSocketConnections.writeText(ts + " " + event.readText)
   }
 
 }

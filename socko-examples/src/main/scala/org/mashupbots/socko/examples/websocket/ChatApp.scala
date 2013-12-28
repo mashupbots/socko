@@ -94,12 +94,12 @@ object ChatApp extends Logger {
     System.out.println("Open a few browsers and navigate to http://localhost:8888/html. Start chatting!")
   }
 
-  def onWebSocketHandshakeComplete(websocketId: String) {
-    System.out.println(s"Web Socket $websocketId connected")
+  def onWebSocketHandshakeComplete(webSocketId: String) {
+    System.out.println(s"Web Socket $webSocketId connected")
   }
 
-  def onWebSocketClose(websocketId: String) {
-    System.out.println(s"Web Socket $websocketId closed")
+  def onWebSocketClose(webSocketId: String) {
+    System.out.println(s"Web Socket $webSocketId closed")
   }
 
 }

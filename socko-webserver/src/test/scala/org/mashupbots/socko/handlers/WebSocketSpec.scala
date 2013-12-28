@@ -59,7 +59,7 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
       }
       case Path("/websocket/oncomplete/") => {
         wsHandshake.authorize(onComplete = Some((websocketId: String) => {
-          webServer.webSocketManager.writeText("Hello - we have completed the handshake", websocketId)
+          webServer.webSocketConnections.writeText("Hello - we have completed the handshake", websocketId)
         }))
       }
       case Path("/websocket/maxframesize/") => {

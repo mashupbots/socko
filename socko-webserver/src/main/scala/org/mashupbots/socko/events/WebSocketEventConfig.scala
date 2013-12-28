@@ -37,5 +37,5 @@ object WebSocketEventConfig {
   /**
    * Netty context Attribute Key for the id of a web socket connection  
    */
-  val websocketIdKey = AttributeKey.valueOf[String]("socko_websocket_id")
+  val webSocketIdKey = AttributeKey.valueOf[String]("socko_websocket_id")
 }
