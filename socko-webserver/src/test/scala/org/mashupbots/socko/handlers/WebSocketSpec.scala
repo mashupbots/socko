@@ -60,8 +60,14 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
       case Path("/websocket/callbacks/") => {
         wsHandshake.authorize(onComplete = Some(testOnCompleteCallback), onClose = Some(testOnCloseCallback))
       }
+      case Path("/websocket/identifier/") => {
+        wsHandshake.authorize(onComplete = Some(testOnCompleteIdentifier), onClose = Some(testOnCloseIdentifier))
+      }
       case Path("/websocket/maxframesize/") => {
         wsHandshake.authorize(maxFrameSize = 10)
+      }
+      case Path("/websocket/standard/") => {
+        wsHandshake.authorize()
       }
     }
     case WebSocketFrame(wsFrame) => {
@@ -71,7 +77,7 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
   })
 
   //
-  // Used in Test Events Test Case
+  // Used in Test Callback
   //
   var testCallbackWebSocketId = ""
   var testCallbackWebSocketClosed = false
@@ -86,6 +92,20 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
   }
 
  
+  //
+  // Used in Test Identifier
+  //
+  var testIdentifierWebSocketId = ""
+  var testIdentifierWebSocketClosed = false
+  def testOnCompleteIdentifier(webSocketId: String) {
+    // System.out.println(s"Web Socket $webSocketId connected")
+    testIdentifierWebSocketId = webSocketId
+  }
+  def testOnCloseIdentifier(webSocketId: String) {
+    // System.out.println(s"Web Socket $webSocketId closed")
+    testIdentifierWebSocketClosed = (testIdentifierWebSocketId == webSocketId)
+  }
+
   override def beforeAll(configMap: Map[String, Any]) {
     // Make all content compressible to pass our tests
     val httpConfig = HttpConfig(minCompressibleContentSizeInBytes = 0)
@@ -183,5 +203,38 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
       wsc.disconnect()
     }
     
+    "support push to specific web socket" in {
+      val wsc1 = new TestWebSocketClient(path + "websocket/identifier/")
+      wsc1.connect()
+      wsc1.isConnected should be(true)
+
+      val wsc2 = new TestWebSocketClient(path + "websocket/standard/")
+      wsc2.connect()
+      wsc2.isConnected should be(true)
+
+      // Messages sent to 1 socket should not be received by another
+      webServer.webSocketConnections.writeText("test #1", testIdentifierWebSocketId)
+      webServer.webSocketConnections.writeText("test #2", testIdentifierWebSocketId)
+      webServer.webSocketConnections.writeText("test #3", testIdentifierWebSocketId)
+      Thread.sleep(500)
+      
+      val receivedText1 = wsc1.getReceivedText
+      receivedText1 should equal("test #1\ntest #2\ntest #3\n")
+
+      val receivedText2 = wsc2.getReceivedText
+      receivedText2 should equal("")
+      
+      // Close 1 socket should not close another
+      webServer.webSocketConnections.close(testIdentifierWebSocketId)
+      Thread.sleep(500)
+      webServer.webSocketConnections.isConnected(testCallbackWebSocketId) should be (false)
+      testIdentifierWebSocketClosed should be (true)
+
+      wsc1.isConnected should be(false)
+      wsc2.isConnected should be(true)
+          
+      // Finish
+      wsc2.disconnect()      
+    }    
   }
 }
