@@ -36,7 +36,7 @@ WebSocketBroadcasterClass: <code><a href="../api/#org.mashupbots.socko.handler.W
    - [Configuration](dynamic-content.html#RestConfiguration)
    - [Supported Data Types](dynamic-content.html#RestDataType)
  - [Web Sockets](#WebSockets)
-   - [Additional Events](dynamic-content.html#WebSocketEvents)
+   - [Callbacks](dynamic-content.html#WebSocketCallbacks)
    - [Pushing Data](dynamic-content.html#WebSocketPush)
 
 ## Parsing Data <a class="blank" id="ParsingData">&nbsp;</a>
@@ -397,27 +397,25 @@ subprotocol support and a maximum frame size of 100K.
     // Only support chat and superchat subprotocols and max frame size of 1000 bytes
     wsHandshake.authorize("chat, superchat", 1000)
 
-If you wish to push or broadcast messages to a group of web socket connections, use {{ page.WebSocketBroadcasterClass }}.
-
 See the example web socket [ChatApp](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket/ChatApp.scala) for usage.
 
 
-### Additional Events <a class="blank" id="WebSocketEvents">&nbsp;</a>
+### Callbacks <a class="blank" id="WebSocketCallbacks">&nbsp;</a>
 
-As part of `authorise()`, you are also able to supply functions to handle additional events:
+As part of `authorise()`, you are able to supply callback functions:
 
- - `onComplete`: when the handshake completes
- - `onClose`: when the web socket connection is closed
+ - `onComplete`: called when the handshake completes
+ - `onClose`: called when the web socket connection is closed
 
-For both events, a unique web socket id is passed in to uniquely identify the web socket connection.
+For both functions, a unique identifier for the web socket connection is passed as a parameter.
 
 {% highlight scala %}
-    def onWebSocketHandshakeComplete(websocketId: String) {
-      System.out.println(s"Web Socket $websocketId connected")
+    def onWebSocketHandshakeComplete(webSocketId: String) {
+      System.out.println(s"Web Socket $webSocketId connected")
     }
 
-    def onWebSocketClose(websocketId: String) {
-      System.out.println(s"Web Socket $websocketId closed")
+    def onWebSocketClose(webSocketId: String) {
+      System.out.println(s"Web Socket $webSocketId closed")
     }
 
     val routes = Routes({
@@ -435,8 +433,7 @@ For both events, a unique web socket id is passed in to uniquely identify the we
       
       case WebSocketHandshake(wsHandshake) => wsHandshake match {
         case Path("/websocket/") => {
-          // To start Web Socket processing, we first have to authorize the handshake.
-          // This is a security measure to make sure that web sockets can only be established at your specified end points.
+          // Pass in callback functions upon authorization
           wsHandshake.authorize(
             onComplete = Some(onWebSocketHandshakeComplete),
             onClose = Some(onWebSocketClose))
@@ -455,12 +452,13 @@ For both events, a unique web socket id is passed in to uniquely identify the we
 
 ### Pushing Data <a class="blank" id="WebSocketPush">&nbsp;</a>
 
-When a web socket connection is authorised, it is added to the web server object's `webSocketConnections`. Using this, you can push data down to one or more web socket clients.
+After a web socket connection is authorised, it is added to the web server object's `webSocketConnections`. Using this, you can push data to one or more web socket clients.
 
-Each web socket connection is uniquely identified by an ID that you must store if you wish to push data to a specific connection.  This ID is provided in the `WebSocketHandshake` event.
+Each web socket connection has a unique identifier that you must store if you wish to push data to a specific connection.  The identifier is provided in the `WebSocketHandshake` event
+as well as to the `onComplete` and `onClose` callback functions.
 
 {% highlight scala %}
-    var myWebSocketId
+    var myWebSocketId = ""
 
     val routes = Routes({
     
@@ -500,14 +498,16 @@ To push a message:
 {% endhighlight %}
 
 
-You can also close web socket connections:
+You can also check connectivity and close web socket connections:
 
 {% highlight scala %}
     // Close all connections
     MyApp.webServer.webSocketConnections.closeAll()
 
     // Close a specific web socket connection
-    MyApp.webServer.webSocketConnections.close(myWebSocketId)
+    if (MyApp.webServer.webSocketConnections.isConnected(myWebSocketId)) {
+      MyApp.webServer.webSocketConnections.close(myWebSocketId)
+    }
 {% endhighlight %}
 
 

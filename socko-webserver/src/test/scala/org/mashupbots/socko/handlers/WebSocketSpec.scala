@@ -36,7 +36,7 @@ import akka.actor.Props
 /**
  * Basic web socket tests performed in SnoopSpec.
  *
- * These test are for more advaced web socket features
+ * These test are for more advanced web socket features
  */
 class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient {
 
@@ -57,10 +57,8 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
       case Path("/websocket/subprotocols/") => {
         wsHandshake.authorize(subprotocols = "chat")
       }
-      case Path("/websocket/oncomplete/") => {
-        wsHandshake.authorize(onComplete = Some((websocketId: String) => {
-          webServer.webSocketConnections.writeText("Hello - we have completed the handshake", websocketId)
-        }))
+      case Path("/websocket/callbacks/") => {
+        wsHandshake.authorize(onComplete = Some(testOnCompleteCallback), onClose = Some(testOnCloseCallback))
       }
       case Path("/websocket/maxframesize/") => {
         wsHandshake.authorize(maxFrameSize = 10)
@@ -72,6 +70,22 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
     }
   })
 
+  //
+  // Used in Test Events Test Case
+  //
+  var testCallbackWebSocketId = ""
+  var testCallbackWebSocketClosed = false
+  def testOnCompleteCallback(webSocketId: String) {
+    // System.out.println(s"Web Socket $webSocketId connected")
+    testCallbackWebSocketId = webSocketId
+    webServer.webSocketConnections.writeText("Hello - we have completed the handshake", webSocketId)
+  }
+  def testOnCloseCallback(webSocketId: String) {
+    // System.out.println(s"Web Socket $webSocketId closed")
+    testCallbackWebSocketClosed = (testCallbackWebSocketId == webSocketId)
+  }
+
+ 
   override def beforeAll(configMap: Map[String, Any]) {
     // Make all content compressible to pass our tests
     val httpConfig = HttpConfig(minCompressibleContentSizeInBytes = 0)
@@ -119,42 +133,49 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
       val receivedText = wsc.getReceivedText
       receivedText should equal("test #1\ntest #2\ntest #3\n")
     }
-   
+
     "not support unrecognised Web Sockets subprotocols" in {
       val wsc = new TestWebSocketClient(path + "websocket/subprotocols/", "dontknow")
       wsc.connect()
       wsc.isConnected should be(false)
       wsc.disconnect()
     }
-    
+
     "not support frames too big" in {
       val wsc = new TestWebSocketClient(path + "websocket/maxframesize/")
       wsc.connect()
       wsc.isConnected should be(true)
       
-      wsc.send("0123456789", true)
+      wsc.send("0123456789", true)      
 
       // Max frame size should throw an exception on the server and cause the channel to close
-      wsc.send("01234567890123456789", false)      
+      wsc.send("01234567890123456789", false)
       Thread.sleep(1000)
       wsc.isConnected should be(false)
-      
+
       wsc.disconnect()
-    }    
-    
-    "support callback after handshake" in {
-      val wsc = new TestWebSocketClient(path + "websocket/oncomplete/")
+    }
+
+    "support callback after handshake and on close" in {
+      val wsc = new TestWebSocketClient(path + "websocket/callbacks/")
       wsc.connect()
       wsc.isConnected should be(true)
 
       // Wait for message from callback to arrive 
       Thread.sleep(500)
       wsc.channelData.textBuffer.length should be > (0)
-      wsc.channelData.textBuffer.toString.startsWith("Hello") should be (true)
+      wsc.channelData.textBuffer.toString.startsWith("Hello") should be(true)      
+
+      // Check that the web socket id is present and socket not closed
+      testCallbackWebSocketId.length should be > 0
+      webServer.webSocketConnections.isConnected(testCallbackWebSocketId) should be (true)
       
+      // Disconnect and check that the server registered that the connection is closed
       wsc.disconnect()
-    }    
-    
+      Thread.sleep(500)
+      webServer.webSocketConnections.isConnected(testCallbackWebSocketId) should be (false)
+    }
+
     "not connect if web socket path not found" in {
       val wsc = new TestWebSocketClient(path + "snoop/notexist/")
       wsc.connect()
