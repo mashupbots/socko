@@ -33,6 +33,7 @@ author: Vibul
 `ab -n10000 -c100 <url>`
 
 *Results*
+
 <table class="code">
   <tr>
     <th>Web Server</th>
@@ -64,6 +65,7 @@ author: Vibul
 `ab -n100000 -c100 <url>`
 
 *Results*
+
 <table class="code">
   <tr>
     <th>Web Server</th>

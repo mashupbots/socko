@@ -43,6 +43,7 @@ My benchmarking is not very rigorous
 `ab -n500000 -c100 <url>`
 
 *Results*
+
 <table class="code">
   <tr>
     <th>Web Server</th>
@@ -79,6 +80,7 @@ My benchmarking is not very rigorous
 `ab -n100000 -c100 <url>`
 
 *Results*
+
 <table class="code">
   <tr>
     <th>Web Server</th>
@@ -115,6 +117,7 @@ My benchmarking is not very rigorous
 `ab -n20000 -c100 <url>`
 
 *Results*
+
 <table class="code">
   <tr>
     <th>Web Server</th>
