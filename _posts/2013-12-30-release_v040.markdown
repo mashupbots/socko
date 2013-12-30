@@ -17,6 +17,7 @@ Download [socko-webserver_2.10-0.4.0.jar](https://oss.sonatype.org/content/group
 For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
 
 There are **BREAKING CHANGES** in this release.
+
  - `WebSocketBroadcaster` is no longer supported. Use `webServer.webSocketConnections.writeText("My Message")` instead.
 
  - `onComplete` callback function now takes a web socket id as a parameter rather than the `WebSocketHandshake` event.
