@@ -1,5 +1,5 @@
 //
-// Copyright 2012 Vibul Imtarnasan, David Bolton and Socko contributors.
+// Copyright 2012-2013 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,13 +16,18 @@
 package org.mashupbots.socko.webserver
 
 import java.io.File
-import scala.collection.JavaConversions.asScalaBuffer
+
+import scala.collection.JavaConversions._
+import scala.concurrent.duration._
+
+import org.mashupbots.socko.infrastructure.ConfigUtil
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.WebLogFormat
+
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigException
+
 import akka.actor.Extension
-import org.mashupbots.socko.infrastructure.ConfigUtil
 
 /**
  * Web server configuration
@@ -35,6 +40,7 @@ import org.mashupbots.socko.infrastructure.ConfigUtil
  *     server-name=AkkaConfigExample
  *     hostname=localhost
  *     port=9000
+ *     idle-connection-timeout=0
  *
  *     # Optional web log. If not supplied, web server activity logging is turned off.
  *     web-log {
@@ -149,6 +155,8 @@ import org.mashupbots.socko.infrastructure.ConfigUtil
  * 	You can also specify comma separated hostnames/ip address like `localhost,192.168.1.1`.
  *  Defaults to `localhost`.
  * @param port IP port number to bind to. Defaults to `8888`.
+ * @param idleConnectionTimeout If a connection is idle for this duration, it will be closed. The default is `0`, 
+ *  which indicates NO timeout and idle connections will NOT be closed.
  * @param webLog Optional web log configuration.  If `None`, web log events will NOT be generated.
  * @param ssl SSL protocol configuration. If `None`, then SSL will not be turned on.
  *  Defaults to `None`.
@@ -161,6 +169,7 @@ case class WebServerConfig(
   serverName: String = "WebServer",
   hostname: String = "localhost",
   port: Int = 8888,
+  idleConnectionTimeout: Duration = 0 seconds,
   webLog: Option[WebLogConfig] = None,
   ssl: Option[SslConfig] = None,
   http: HttpConfig = HttpConfig(),
@@ -173,6 +182,7 @@ case class WebServerConfig(
     ConfigUtil.getString(config, prefix + ".server-name", "WebServer"),
     ConfigUtil.getString(config, prefix + ".hostname", "localhost"),
     ConfigUtil.getInt(config, prefix + ".port", 8888),
+    ConfigUtil.getDuration(config, prefix + ".idle-connection-timeout", 0 seconds),    
     WebServerConfig.getOptionalWebLogConfig(config, prefix + ".web-log"),
     WebServerConfig.getOptionalSslConfig(config, prefix + ".ssl"),
     WebServerConfig.getHttpConfig(config, prefix + ".http"),

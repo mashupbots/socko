@@ -1,5 +1,5 @@
 //
-// Copyright 2012 Vibul Imtarnasan, David Bolton and Socko contributors.
+// Copyright 2012-2013 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 package org.mashupbots.socko.webserver
 
 import org.eclipse.jetty.npn.NextProtoNego
+import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.netty.SpdyServerProvider
+
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
-import io.netty.handler.codec.compression.ZlibCodecFactory
-import io.netty.handler.codec.compression.ZlibWrapper
 import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.http.HttpRequestDecoder
 import io.netty.handler.codec.http.HttpResponseEncoder
 import io.netty.handler.ssl.SslHandler
 import io.netty.handler.stream.ChunkedWriteHandler
-import org.mashupbots.socko.infrastructure.Logger
-import org.mashupbots.socko.netty.SpdyServerProvider
+import io.netty.handler.timeout.IdleStateHandler
 
 /**
  * Creates a new channel pipeline for each Netty channel (network connection)
@@ -36,11 +36,11 @@ import org.mashupbots.socko.netty.SpdyServerProvider
 class PipelineFactory(server: WebServer) extends ChannelInitializer[SocketChannel] with Logger {
 
   override def initChannel(ch: SocketChannel) {
-    
+
     val pipeline = ch.pipeline
-    
+
     if (!server.config.http.spdyEnabled) {
-      
+
       val httpConfig = server.config.http
 
       if (server.sslManager.isDefined) {
@@ -48,12 +48,11 @@ class PipelineFactory(server: WebServer) extends ChannelInitializer[SocketChanne
         val ssl = new SslHandler(sslEngine);
         pipeline.addLast("ssl", ssl)
       }
-            
+
       val httpRequestDecoder = new HttpRequestDecoder(
         httpConfig.maxInitialLineLength,
         httpConfig.maxHeaderSizeInBytes,
-        httpConfig.maxChunkSizeInBytes
-      )
+        httpConfig.maxChunkSizeInBytes)
       pipeline.addLast("decoder", httpRequestDecoder)
 
       if (httpConfig.aggreateChunks) {
@@ -63,8 +62,12 @@ class PipelineFactory(server: WebServer) extends ChannelInitializer[SocketChanne
       pipeline.addLast("encoder", new HttpResponseEncoder())
       pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
 
+      if (server.config.idleConnectionTimeout.toSeconds > 0) {
+        pipeline.addLast("idleStateHandler", new IdleStateHandler(0, 0, server.config.idleConnectionTimeout.toSeconds.toInt))
+      }
+
       pipeline.addLast("handler", new RequestHandler(server))
-      
+
     } else {
       val sslEngine = server.sslManager.get.createSSLEngine()
       val ssl = new SslHandler(sslEngine);

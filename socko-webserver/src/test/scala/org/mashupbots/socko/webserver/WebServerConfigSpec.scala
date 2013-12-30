@@ -1,5 +1,5 @@
 //
-// Copyright 2012 Vibul Imtarnasan, David Bolton and Socko contributors.
+// Copyright 2012-2013 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,16 +16,22 @@
 package org.mashupbots.socko.webserver
 
 import java.io.File
-import org.scalatest.matchers.ShouldMatchers
+
+import scala.concurrent.duration._
+
+import org.mashupbots.socko.infrastructure.WebLogFormat
 import org.scalatest.BeforeAndAfterAll
+import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
+import org.scalatest.matchers.ShouldMatchers
+
 import com.typesafe.config.ConfigFactory
+
 import akka.actor.ActorSystem
 import akka.actor.ExtendedActorSystem
 import akka.actor.ExtensionId
 import akka.actor.ExtensionIdProvider
-import org.mashupbots.socko.infrastructure.WebLogFormat
 
 class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
 
@@ -84,17 +90,17 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     }
 
     "validate with no SSL configuration" in {
-      WebServerConfig("test", "0.0.0.0", 80, None, None, HttpConfig()).validate()
+      WebServerConfig("test", "0.0.0.0", 80, 0 seconds, None, None, HttpConfig()).validate()
     }
 
     "validate with server side (keystore) SSL configuration" in {
       WebServerConfig(
-        "test", "0.0.0.0", 80, None, Some(SslConfig(aFile, "test", None, None)), HttpConfig()).validate()
+        "test", "0.0.0.0", 80, 0 seconds, None, Some(SslConfig(aFile, "test", None, None)), HttpConfig()).validate()
     }
 
     "validate with client (truststore) and server side (keystore) SSL configuration" in {
       WebServerConfig(
-        "test", "0.0.0.0", 80, None, Some(SslConfig(aFile, "test", Some(aFile), Some("test"))), HttpConfig()).validate()
+        "test", "0.0.0.0", 80, 0 seconds, None, Some(SslConfig(aFile, "test", Some(aFile), Some("test"))), HttpConfig()).validate()
     }
 
     "throw Exception when server name is not supplied" in {
@@ -190,6 +196,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
 		  server-name = allTest
 		  hostname = localhost
 		  port=10000
+          idle-connection-timeout=30 seconds
           web-log {
             custom-actor-path = "akka://my-system/user/web-log-writer"
             format = Extended
@@ -230,6 +237,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       barebones.serverName should equal("WebServer")
       barebones.hostname should equal("localhost")
       barebones.port should equal(8888)
+      barebones.idleConnectionTimeout.toSeconds should equal(0)
       barebones.webLog should be(None)
       barebones.ssl should equal(None)
       barebones.http.maxLengthInMB should be(4)
@@ -251,6 +259,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       all.serverName should equal("allTest")
       all.hostname should equal("localhost")
       all.port should equal(10000)
+      all.idleConnectionTimeout.toSeconds should equal(30)
 
       all.webLog.get.format should be(WebLogFormat.Extended)
       all.webLog.get.customActorPath.get should be("akka://my-system/user/web-log-writer")
@@ -279,7 +288,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       all.tcp.soLinger should be(Some(3))
       all.tcp.trafficClass should be(Some(4))
       all.tcp.acceptBackLog should be(Some(5))
-      
+
       actorSystem.shutdown()
     }
   }

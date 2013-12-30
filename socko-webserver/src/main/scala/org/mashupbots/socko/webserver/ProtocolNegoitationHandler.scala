@@ -1,5 +1,5 @@
 //
-// Copyright 2012 Vibul Imtarnasan, David Bolton and Socko contributors.
+// Copyright 2012-2013 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 package org.mashupbots.socko.webserver
 
 import org.eclipse.jetty.npn.NextProtoNego
+import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.netty.SpdyServerProvider
+
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
 import io.netty.handler.codec.http.HttpObjectAggregator
@@ -26,11 +29,10 @@ import io.netty.handler.codec.spdy.SpdyFrameEncoder
 import io.netty.handler.codec.spdy.SpdyHttpDecoder
 import io.netty.handler.codec.spdy.SpdyHttpEncoder
 import io.netty.handler.codec.spdy.SpdySessionHandler
+import io.netty.handler.codec.spdy.SpdyVersion
 import io.netty.handler.ssl.SslHandler
 import io.netty.handler.stream.ChunkedWriteHandler
-import org.mashupbots.socko.netty.SpdyServerProvider
-import org.mashupbots.socko.infrastructure.Logger
-import io.netty.handler.codec.spdy.SpdyVersion
+import io.netty.handler.timeout.IdleStateHandler
 
 /**
  * Handler used with SPDY that performs protocol negotiation.
@@ -71,6 +73,9 @@ class ProtocolNegoitationHandler(server: WebServer) extends ChannelInboundHandle
         pipeline.addLast("spdy_http_encoder", new SpdyHttpEncoder(spdyVersion))
         pipeline.addLast("spdy_http_decoder", new SpdyHttpDecoder(spdyVersion, httpConfig.maxLengthInBytes))
         pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
+        if (server.config.idleConnectionTimeout.toSeconds > 0) {
+          pipeline.addLast("idleStateHandler", new IdleStateHandler(0, 0, server.config.idleConnectionTimeout.toSeconds.toInt))
+        }
         pipeline.addLast("handler", new RequestHandler(server))
 
         // remove this handler, and process the requests as SPDY
@@ -84,6 +89,9 @@ class ProtocolNegoitationHandler(server: WebServer) extends ChannelInboundHandle
         }
         pipeline.addLast("encoder", new HttpResponseEncoder())
         pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
+        if (server.config.idleConnectionTimeout.toSeconds > 0) {
+          pipeline.addLast("idleStateHandler", new IdleStateHandler(0, 0, server.config.idleConnectionTimeout.toSeconds.toInt))
+        }
         pipeline.addLast("handler", new RequestHandler(server))
 
         // remove this handler, and process the requests as HTTP

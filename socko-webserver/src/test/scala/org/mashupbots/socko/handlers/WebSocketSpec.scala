@@ -1,5 +1,5 @@
 //
-// Copyright 2012 Vibul Imtarnasan, David Bolton and Socko contributors.
+// Copyright 2012-2013 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
         loglevel = "DEBUG"
 	  }    
     """
-  val actorSystem = ActorSystem("SnoopActorSystem", ConfigFactory.parseString(akkaConfig))
+  val actorSystem = ActorSystem("WsActorSystem", ConfigFactory.parseString(akkaConfig))
   var webServer: WebServer = null
   val port = 9002
   val path = "http://localhost:" + port + "/"

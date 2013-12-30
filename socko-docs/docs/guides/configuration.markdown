@@ -84,6 +84,11 @@ Common settings are:
  
    IP port number to bind to. Defaults to `8888`.
    
+ - `idleConnectionTimeout`
+ 
+   If a connection to the web server is idle (no read or writes) for the specified period of time, it
+   will be closed. Defaults to `0` which indicates no timeout - i.e. connections are not closed.
+
  - `webLog`
    
    Web server activity log.

@@ -15,6 +15,8 @@
 //
 package org.mashupbots.socko.handlers
 
+import scala.concurrent.duration._
+
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import org.mashupbots.socko.infrastructure.WebLogFormat
@@ -36,7 +38,7 @@ import akka.actor.Props
 /**
  * Test broadcast.  Need its own test so that broadcast does not interfere with other tests 
  */
-class WebSocketBroadcastSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient {
+class WebSocketIdleTimeoutSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient {
 
   val akkaConfig =
     """
@@ -45,15 +47,18 @@ class WebSocketBroadcastSpec extends WordSpec with ShouldMatchers with BeforeAnd
         loglevel = "DEBUG"
 	  }    
     """
-  val actorSystem = ActorSystem("WsBroadcastActorSystem", ConfigFactory.parseString(akkaConfig))
+  val actorSystem = ActorSystem("IdleTimeoutActorSystem", ConfigFactory.parseString(akkaConfig))
   var webServer: WebServer = null
-  val port = 9003
+  val port = 9004
   val path = "http://localhost:" + port + "/"
 
   val routes = Routes({
     case WebSocketHandshake(wsHandshake) => wsHandshake match {
-      case Path("/websocket/broadcast/") => {
-        wsHandshake.authorize()
+      case Path("/websocket/1/") => {
+        wsHandshake.authorize(onComplete = Some(testWebSocket1OnComplete), onClose = Some(testWebSocket1OnClose))
+      }
+      case Path("/websocket/2/") => {
+        wsHandshake.authorize(onComplete = Some(testWebSocket2OnComplete), onClose = Some(testWebSocket2OnClose))
       }
     }
     case WebSocketFrame(wsFrame) => {
@@ -62,11 +67,31 @@ class WebSocketBroadcastSpec extends WordSpec with ShouldMatchers with BeforeAnd
     }
   })
 
+  var testWebSocket1Id = ""
+  var testWebSocket1Closed = false
+  def testWebSocket1OnComplete(webSocketId: String) {
+    testWebSocket1Id = webSocketId
+  }
+  def testWebSocket1OnClose(webSocketId: String) {
+    testWebSocket1Closed = (testWebSocket1Id == webSocketId)
+  }
+  
+  var testWebSocket2Id = ""
+  var testWebSocket2Closed = false
+  def testWebSocket2OnComplete(webSocketId: String) {
+    testWebSocket2Id = webSocketId
+  }
+  def testWebSocket2OnClose(webSocketId: String) {
+    testWebSocket2Closed = (testWebSocket2Id == webSocketId)
+  }
+  
   override def beforeAll(configMap: Map[String, Any]) {
     // Make all content compressible to pass our tests
     val httpConfig = HttpConfig(minCompressibleContentSizeInBytes = 0)
     val webLogConfig = Some(WebLogConfig(None, WebLogFormat.Common))
-    val config = WebServerConfig(port = port, webLog = webLogConfig, http = httpConfig)
+    
+    // Set idle timeout to 1 second
+    val config = WebServerConfig(port = port, idleConnectionTimeout = 1 second, webLog = webLogConfig, http = httpConfig)
 
     webServer = new WebServer(config, routes, actorSystem)
     webServer.start()
@@ -78,28 +103,40 @@ class WebSocketBroadcastSpec extends WordSpec with ShouldMatchers with BeforeAnd
 
   "Socko Web Server" should {
 
-    "support push broadcast" in {
-      val wsc1 = new TestWebSocketClient(path + "websocket/broadcast/")
+    "support idle timeout" in {
+      val wsc1 = new TestWebSocketClient(path + "websocket/1/")
       wsc1.connect()
       wsc1.isConnected should be(true)
 
-      val wsc2 = new TestWebSocketClient(path + "websocket/broadcast/")
+      val wsc2 = new TestWebSocketClient(path + "websocket/2/")
       wsc2.connect()
       wsc2.isConnected should be(true)
 
-      webServer.webSocketConnections.writeText("test #1")
-      webServer.webSocketConnections.writeText("test #2")
-      webServer.webSocketConnections.writeText("test #3")
-      Thread.sleep(500)
+      // Write to socket #1 so it does not timeout (set at 1 second)
+      Thread.sleep(300)
+      webServer.webSocketConnections.writeText("test #1", testWebSocket1Id)
+      Thread.sleep(300)
+      webServer.webSocketConnections.writeText("test #2", testWebSocket1Id)
+      Thread.sleep(300)
+      webServer.webSocketConnections.writeText("test #3", testWebSocket1Id)
+      Thread.sleep(300)
+      webServer.webSocketConnections.writeText("test #4", testWebSocket1Id)
+      Thread.sleep(300)
+      webServer.webSocketConnections.writeText("test #5", testWebSocket1Id)
+      Thread.sleep(300)
 
-      wsc1.disconnect()
-      wsc2.disconnect()
+      // Check that #1 is connection and #2 should have timed out and closed
+      webServer.webSocketConnections.isConnected(testWebSocket1Id) should be (true)
+      webServer.webSocketConnections.isConnected(testWebSocket2Id) should be (false)
       
-      val receivedText1 = wsc1.getReceivedText
-      receivedText1 should equal("test #1\ntest #2\ntest #3\n")
+      testWebSocket1Closed should be (false)
+      testWebSocket2Closed should be (true)
 
-      val receivedText2 = wsc2.getReceivedText
-      receivedText2 should equal("test #1\ntest #2\ntest #3\n")      
+      wsc1.isConnected should be(true)
+      wsc2.isConnected should be(false)            
+
+      // Finish
+      wsc1.disconnect()
     }
     
   }

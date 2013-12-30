@@ -1,5 +1,5 @@
 //
-// Copyright 2012 Vibul Imtarnasan, David Bolton and Socko contributors.
+// Copyright 2012-2013 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 package org.mashupbots.socko.infrastructure
 
 import java.io.File
-
 import scala.collection.JavaConversions._
-
+import scala.concurrent.duration._
 import com.typesafe.config.Config
+import java.util.concurrent.TimeUnit
 
 /**
  * A utility class for reading AKKA configuration
@@ -204,4 +204,38 @@ object ConfigUtil {
       case _: Throwable => Nil
     }
   }
+  
+  
+  /**
+   * Returns the specified setting as a Duration. If setting not specified, then the default is returned.
+   */
+  def getDuration(config: Config, name: String, defaultValue: Duration): Duration = {
+    try {
+      val v = config.getString(name)
+      if (v == null || v == "") {
+        defaultValue
+      } else {
+        Duration(config.getMilliseconds(name), TimeUnit.MILLISECONDS)
+      }
+    } catch {
+      case _: Throwable => defaultValue
+    }
+  }
+
+  /**
+   * Returns the specified setting as a Duration. `None` is returned if setting not specified
+   */
+  def getOptionalDuration(config: Config, name: String): Option[Duration] = {
+    try {
+      val v = config.getString(name)
+      if (v == null || v == "") {
+        None
+      } else {
+        Some(Duration(config.getMilliseconds(name), TimeUnit.MILLISECONDS))
+      }
+    } catch {
+      case _: Throwable => None
+    }
+  }
+  
 }

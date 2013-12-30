@@ -1,5 +1,5 @@
 //
-// Copyright 2012 Vibul Imtarnasan, David Bolton and Socko contributors.
+// Copyright 2012-2013 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,6 +51,8 @@ import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.events.HttpLastChunkEvent
+import io.netty.handler.timeout.IdleStateEvent
+import io.netty.handler.timeout.IdleState
 
 /**
  * Handles incoming HTTP messages from Netty
@@ -85,6 +87,20 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
   private lazy val wsConfig = WebSocketEventConfig(server.config.serverName, server.webLogWriter)
 
   /**
+   * Handle idle state timeouts so we can close idle connections
+   */
+  override def userEventTriggered(ctx: ChannelHandlerContext, evt: Object) = {
+    evt match {
+      case idleStateEvent: IdleStateEvent =>
+        if (idleStateEvent.state() == IdleState.ALL_IDLE) {
+          ctx.close()
+        }
+      case _ =>
+      // Ignore
+    }
+  }
+
+  /**
    * Dispatch message to actor system for processing
    *
    * @param ctx Channel context
@@ -96,7 +112,7 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
         val event = HttpRequestEvent(ctx, httpRequest, httpConfig)
 
         log.debug("HTTP FULL REQUEST {} CHANNEL={} {}", event.endPoint, ctx.name, "")
-        
+
         if (event.request.isWebSocketUpgrade) {
           val wsctx = WebSocketHandshakeEvent(ctx, httpRequest, httpConfig)
           server.routes(wsctx)
@@ -108,9 +124,9 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
 
       case httpRequest: HttpRequest =>
         val event = HttpRequestEvent(ctx, httpRequest, httpConfig)
-        
+
         log.debug("HTTP REQUEST {} CHANNEL={} {}", event.endPoint, ctx.name, "")
-        
+
         validateFirstChunk(event)
         server.routes(event)
         initialHttpRequest = Some(new InitialHttpRequestMessage(event.request, event.createdOn))
@@ -122,7 +138,7 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
 
         server.routes(event)
         validateLastChunk(event)
-        
+
       case httpChunk: HttpContent =>
         val event = HttpChunkEvent(ctx, initialHttpRequest.get, httpChunk, httpConfig)
         initialHttpRequest.get.totalChunkContentLength += httpChunk.content.readableBytes
@@ -188,25 +204,25 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
    */
   override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable) {
     log.error("Exception caught in HttpRequestHandler", e)
-    
+
     e match {
       // Cannot find route
       case ex: MatchError => writeErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, ex)
-        // Request data size too big
+      // Request data size too big
       case ex: TooLongFrameException => writeErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, ex)
-        // Websockets not supported at this route
+      // Websockets not supported at this route
       case ex: UnsupportedOperationException => writeErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, ex)
-        // Websockets handshake error
+      // Websockets handshake error
       case ex: WebSocketHandshakeException => writeErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, ex)
-        // Catch all
+      // Catch all
       case ex => {
-          try {
-            log.debug("Error handling request", ex)
-            ctx.channel.close
-          } catch {
-            case ex2: Throwable => log.debug("Error closing channel", ex2)
-          }
+        try {
+          log.debug("Error handling request", ex)
+          ctx.channel.close
+        } catch {
+          case ex2: Throwable => log.debug("Error closing channel", ex2)
         }
+      }
     }
   }
 
@@ -282,10 +298,10 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
       val id = event.webSocketId
       val future = wsHandshaker.handshake(event.context.channel, event.nettyHttpRequest)
       event.writeWebLog(HttpResponseStatus.SWITCHING_PROTOCOLS.code, 0)
-     
+
       // Register websockets with the manager
       server.webSocketConnections.add(event.context.channel)
-            
+
       // Callback on complete AFTER data sent to the client
       if (event.onComplete.isDefined) {
         class OnCompleteListender extends ChannelFutureListener {
@@ -295,7 +311,7 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
         }
         future.addListener(new OnCompleteListender())
       }
-      
+
       // Callback on close - after the web socket connection (netty channel) is closed
       if (event.onClose.isDefined) {
         class OnCloseListender extends ChannelFutureListener {
