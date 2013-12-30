@@ -32,12 +32,16 @@ object SockoBuild extends Build {
     EclipseKeys.createSrc := EclipseCreateSrc.ValueSet(EclipseCreateSrc.Unmanaged, EclipseCreateSrc.Source, EclipseCreateSrc.Resource),
     EclipseKeys.withSource := true,
     
-    fork in Test := true
+    fork in Test := true,
+
+    // Publishing details - see http://www.scala-sbt.org/release/docs/Community/Using-Sonatype.html
+    publishTo <<= sockoPublishTo,
+    publishMavenStyle := true,
+    publishArtifact in Test := false,
+    pomIncludeRepository := { x => false },
+    pomExtra := sockoPomExtra
   )
   
-  // Don't publish to maven
-  lazy val doNotPublishSettings = Seq(publish := {}, publishLocal := {})
-
   // Compile settings
   lazy val compileJdk6Settings = Seq(
     scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-optimize", "-feature", "-language:postfixOps", "-target:jvm-1.6"),
@@ -98,51 +102,37 @@ object SockoBuild extends Build {
   //
   lazy val root = Project(id = "socko",
                           base = file("."),
-                          settings = defaultSettings ++ doNotPublishSettings ++ 
-                             Unidoc.settings ++ Seq(Unidoc.unidocExclude := Seq(examples.id))
-                         ) aggregate(webserver, buildtools, rest, examples)
+                          settings = defaultSettings ++ Unidoc.settings ++ Seq(
+                            Unidoc.unidocExclude := Seq(examples.id),
+                            publishArtifact := false
+                          )) aggregate(webserver, buildtools, rest, examples)
 
   lazy val webserver = Project(id = "socko-webserver",
                          base = file("socko-webserver"),
                          settings = defaultSettings ++ compileJdk6Settings ++ Seq(
-                           libraryDependencies ++= Dependencies.webserver,
-                           publishTo <<= sockoPublishTo,
-                           publishMavenStyle := true,
-                           publishArtifact in Test := false,
-                           pomIncludeRepository := { x => false },
-                           pomExtra := sockoPomExtra
+                           libraryDependencies ++= Dependencies.webserver
                          ))
                          
   lazy val buildtools = Project(id = "socko-buildtools",
                          base = file("socko-buildtools"),
                          dependencies = Seq(webserver),
                          settings = defaultSettings ++ compileJdk7Settings ++ Seq(
-                           libraryDependencies ++= Dependencies.buildtools,
-                           publishTo <<= sockoPublishTo,
-                           publishMavenStyle := true,
-                           publishArtifact in Test := false,
-                           pomIncludeRepository := { x => false },
-                           pomExtra := sockoPomExtra
+                           libraryDependencies ++= Dependencies.buildtools
                          ))  
 
   lazy val rest = Project(id = "socko-rest",
                          base = file("socko-rest"),
                          dependencies = Seq(webserver),                         
                          settings = defaultSettings ++ compileJdk6Settings ++ Seq(
-                           libraryDependencies ++= Dependencies.rest,
-                           parallelExecution in Test := false,
-                           publishTo <<= sockoPublishTo,
-                           publishMavenStyle := true,
-                           publishArtifact in Test := false,
-                           pomIncludeRepository := { x => false },
-                           pomExtra := sockoPomExtra
+                           libraryDependencies ++= Dependencies.rest
                          ))  
 
   lazy val examples = Project(id = "socko-examples",
                          base = file("socko-examples"),
                          dependencies = Seq(webserver, rest, buildtools),
-                         settings = defaultSettings ++ compileJdk7Settings ++ doNotPublishSettings ++ Seq(
-                           libraryDependencies ++= Dependencies.examples
+                         settings = defaultSettings ++ compileJdk7Settings ++ Seq(
+                           libraryDependencies ++= Dependencies.examples,
+                           publishArtifact := false
                          ))  
 }
 
