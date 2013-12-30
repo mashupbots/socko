@@ -1,0 +1,568 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>events - org.mashupbots.socko.events</title>
+          <meta name="description" content="events - org.mashupbots.socko.events" />
+          <meta name="keywords" content="events org.mashupbots.socko.events" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'org.mashupbots.socko.events.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a href="../../../package.html" class="extype" name="org">org</a>.<a href="../../package.html" class="extype" name="org.mashupbots">mashupbots</a>.<a href="../package.html" class="extype" name="org.mashupbots.socko">socko</a></p>
+        <h1>events</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">events</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Socko events are raised by Socko and passed into your routes for dispatching to your handlers.
+Socko events provides a bridge between Netty and Akka.</p><p>There are 4 types of <a href="SockoEvent.html" class="extype" name="org.mashupbots.socko.events.SockoEvent">org.mashupbots.socko.events.SockoEvent</a></p><ul><li><a href="HttpRequestEvent.html" class="extype" name="org.mashupbots.socko.events.HttpRequestEvent">org.mashupbots.socko.events.HttpRequestEvent</a> - Fired when a HTTP request is received</li><li><a href="HttpChunkEvent.html" class="extype" name="org.mashupbots.socko.events.HttpChunkEvent">org.mashupbots.socko.events.HttpChunkEvent</a> - Fired when a HTTP chunk is received. Typically only
+   used with large request data such as file upload.</li><li><a href="WebSocketHandshakeEvent.html" class="extype" name="org.mashupbots.socko.events.WebSocketHandshakeEvent">org.mashupbots.socko.events.WebSocketHandshakeEvent</a> - Fired prior to a web socket handshake to establish
+   a web socket connection.</li><li><a href="WebSocketFrameEvent.html" class="extype" name="org.mashupbots.socko.events.WebSocketFrameEvent">org.mashupbots.socko.events.WebSocketFrameEvent</a> - Fired when a WebSocket text or binary frame is received.
+</li></ul></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="org.mashupbots.socko.events"><span>events</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="org.mashupbots.socko.events.CurrentHttpRequestMessage" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CurrentHttpRequestMessageextendsHttpRequestMessagewithProductwithSerializable"></a>
+      <a id="CurrentHttpRequestMessage:CurrentHttpRequestMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="CurrentHttpRequestMessage.html"><span class="name">CurrentHttpRequestMessage</span></a><span class="params">(<span name="nettyHttpRequest">nettyHttpRequest: <span class="extype" name="io.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>)</span><span class="result"> extends <a href="HttpRequestMessage.html" class="extype" name="org.mashupbots.socko.events.HttpRequestMessage">HttpRequestMessage</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">HTTP request message for the current event (as opposed to an initial HTTP required to triggered a HTTP Chunk or
+web socket event).</p>
+    </li><li name="org.mashupbots.socko.events.DefaultHttpContent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultHttpContentextendsHttpContentwithProductwithSerializable"></a>
+      <a id="DefaultHttpContent:DefaultHttpContent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="DefaultHttpContent.html"><span class="name">DefaultHttpContent</span></a><span class="params">(<span name="buffer">buffer: <span class="extype" name="io.netty.buffer.ByteBuf">ByteBuf</span></span>, <span name="contentType">contentType: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="HttpContent.html" class="extype" name="org.mashupbots.socko.events.HttpContent">HttpContent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents the contents or body of the HTTP request
+</p>
+    </li><li name="org.mashupbots.socko.events.EndPoint" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EndPointextendsProductwithSerializable"></a>
+      <a id="EndPoint:EndPoint"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="EndPoint.html"><span class="name">EndPoint</span></a><span class="params">(<span name="method">method: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Identifies the end point associated with the firing of an event.</p>
+    </li><li name="org.mashupbots.socko.events.HttpChunkEvent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpChunkEventextendsSockoEventwithHttpEventwithProductwithSerializable"></a>
+      <a id="HttpChunkEvent:HttpChunkEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpChunkEvent.html"><span class="name">HttpChunkEvent</span></a><span class="params">(<span name="context">context: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="initialHttpRequest">initialHttpRequest: <a href="InitialHttpRequestMessage.html" class="extype" name="org.mashupbots.socko.events.InitialHttpRequestMessage">InitialHttpRequestMessage</a></span>, <span name="nettyHttpChunk">nettyHttpChunk: <a href="#NettyHttpContent=io.netty.handler.codec.http.HttpContent" class="extmbr" name="org.mashupbots.socko.events.NettyHttpContent">NettyHttpContent</a></span>, <span name="config">config: <a href="HttpEventConfig.html" class="extype" name="org.mashupbots.socko.events.HttpEventConfig">HttpEventConfig</a></span>)</span><span class="result"> extends <a href="SockoEvent.html" class="extype" name="org.mashupbots.socko.events.SockoEvent">SockoEvent</a> with <a href="HttpEvent.html" class="extype" name="org.mashupbots.socko.events.HttpEvent">HttpEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Event fired when a HTTP chunk is received</p>
+    </li><li name="org.mashupbots.socko.events.HttpChunkMessage" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpChunkMessageextendsProductwithSerializable"></a>
+      <a id="HttpChunkMessage:HttpChunkMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpChunkMessage.html"><span class="name">HttpChunkMessage</span></a><span class="params">(<span name="nettyHttpChunk">nettyHttpChunk: <a href="#NettyHttpContent=io.netty.handler.codec.http.HttpContent" class="extmbr" name="org.mashupbots.socko.events.NettyHttpContent">NettyHttpContent</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">HTTP chunk sent from client to sever
+</p>
+    </li><li name="org.mashupbots.socko.events.HttpContent" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="HttpContentextendsAnyRef"></a>
+      <a id="HttpContent:HttpContent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpContent.html"><span class="name">HttpContent</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.events.HttpEvent" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="HttpEventextendsSockoEvent"></a>
+      <a id="HttpEvent:HttpEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpEvent.html"><span class="name">HttpEvent</span></a><span class="result"> extends <a href="SockoEvent.html" class="extype" name="org.mashupbots.socko.events.SockoEvent">SockoEvent</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Abstract event triggered on HTTP related activity
+</p>
+    </li><li name="org.mashupbots.socko.events.HttpEventConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpEventConfigextendsProductwithSerializable"></a>
+      <a id="HttpEventConfig:HttpEventConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpEventConfig.html"><span class="name">HttpEventConfig</span></a><span class="params">(<span name="serverName">serverName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="minCompressibleContentSizeInBytes">minCompressibleContentSizeInBytes: <span class="extype" name="scala.Int">Int</span></span>, <span name="maxCompressibleContentSizeInBytes">maxCompressibleContentSizeInBytes: <span class="extype" name="scala.Int">Int</span></span>, <span name="compressibleContentTypes">compressibleContentTypes: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="webLogWriter">webLogWriter: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="akka.actor.ActorRef">ActorRef</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">HTTP event configuration used in the processing of <a href="HttpEvent.html" class="extype" name="org.mashupbots.socko.events.HttpEvent">org.mashupbots.socko.events.HttpEvent</a>s.</p>
+    </li><li name="org.mashupbots.socko.events.HttpHeader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpHeaderextendsProductwithSerializable"></a>
+      <a id="HttpHeader:HttpHeader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpHeader.html"><span class="name">HttpHeader</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents a HTTP header field
+</p>
+    </li><li name="org.mashupbots.socko.events.HttpLastChunkEvent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpLastChunkEventextendsSockoEventwithHttpEventwithProductwithSerializable"></a>
+      <a id="HttpLastChunkEvent:HttpLastChunkEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpLastChunkEvent.html"><span class="name">HttpLastChunkEvent</span></a><span class="params">(<span name="context">context: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="initialHttpRequest">initialHttpRequest: <a href="InitialHttpRequestMessage.html" class="extype" name="org.mashupbots.socko.events.InitialHttpRequestMessage">InitialHttpRequestMessage</a></span>, <span name="nettyHttpLastChunk">nettyHttpLastChunk: <a href="#NettyHttpLastContent=io.netty.handler.codec.http.LastHttpContent" class="extmbr" name="org.mashupbots.socko.events.NettyHttpLastContent">NettyHttpLastContent</a></span>, <span name="config">config: <a href="HttpEventConfig.html" class="extype" name="org.mashupbots.socko.events.HttpEventConfig">HttpEventConfig</a></span>)</span><span class="result"> extends <a href="SockoEvent.html" class="extype" name="org.mashupbots.socko.events.SockoEvent">SockoEvent</a> with <a href="HttpEvent.html" class="extype" name="org.mashupbots.socko.events.HttpEvent">HttpEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Event fired when the last HTTP chunk is received</p>
+    </li><li name="org.mashupbots.socko.events.HttpLastChunkMessage" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpLastChunkMessageextendsProductwithSerializable"></a>
+      <a id="HttpLastChunkMessage:HttpLastChunkMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpLastChunkMessage.html"><span class="name">HttpLastChunkMessage</span></a><span class="params">(<span name="nettyHttpLastChunk">nettyHttpLastChunk: <a href="#NettyHttpLastContent=io.netty.handler.codec.http.LastHttpContent" class="extmbr" name="org.mashupbots.socko.events.NettyHttpLastContent">NettyHttpLastContent</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">HTTP last chunk sent from client to sever
+</p>
+    </li><li name="org.mashupbots.socko.events.HttpRequestEvent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpRequestEventextendsSockoEventwithHttpEventwithProductwithSerializable"></a>
+      <a id="HttpRequestEvent:HttpRequestEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpRequestEvent.html"><span class="name">HttpRequestEvent</span></a><span class="params">(<span name="context">context: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="nettyHttpRequest">nettyHttpRequest: <span class="extype" name="io.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>, <span name="config">config: <a href="HttpEventConfig.html" class="extype" name="org.mashupbots.socko.events.HttpEventConfig">HttpEventConfig</a></span>)</span><span class="result"> extends <a href="SockoEvent.html" class="extype" name="org.mashupbots.socko.events.SockoEvent">SockoEvent</a> with <a href="HttpEvent.html" class="extype" name="org.mashupbots.socko.events.HttpEvent">HttpEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Event fired when a HTTP request has been received
+</p>
+    </li><li name="org.mashupbots.socko.events.HttpRequestMessage" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="HttpRequestMessageextendsAnyRef"></a>
+      <a id="HttpRequestMessage:HttpRequestMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpRequestMessage.html"><span class="name">HttpRequestMessage</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Encapsulates the all the data sent in a HTTP request; i.</p>
+    </li><li name="org.mashupbots.socko.events.HttpResponseMessage" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpResponseMessageextendsProductwithSerializable"></a>
+      <a id="HttpResponseMessage:HttpResponseMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpResponseMessage.html"><span class="name">HttpResponseMessage</span></a><span class="params">(<span name="event">event: <a href="HttpEvent.html" class="extype" name="org.mashupbots.socko.events.HttpEvent">HttpEvent</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Encapsulates all the data to be sent to the client in an HTTP response; i.</p>
+    </li><li name="org.mashupbots.socko.events.HttpResponseStatus" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpResponseStatusextendsProductwithSerializable"></a>
+      <a id="HttpResponseStatus:HttpResponseStatus"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpResponseStatus.html"><span class="name">HttpResponseStatus</span></a><span class="params">(<span name="code">code: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Port of Netty's HttpResponseStatus class for convenience.</p>
+    </li><li name="org.mashupbots.socko.events.ImmutableHttpHeaders" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ImmutableHttpHeadersextendsIterable[org.mashupbots.socko.events.HttpHeader]withProductwithSerializable"></a>
+      <a id="ImmutableHttpHeaders:ImmutableHttpHeaders"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ImmutableHttpHeaders.html"><span class="name">ImmutableHttpHeaders</span></a><span class="params">(<span name="values">values: <span class="extype" name="scala.Seq">Seq</span>[<a href="HttpHeader.html" class="extype" name="org.mashupbots.socko.events.HttpHeader">HttpHeader</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Iterable">Iterable</span>[<a href="HttpHeader.html" class="extype" name="org.mashupbots.socko.events.HttpHeader">HttpHeader</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Immutable and read only collection of HTTP headers</p>
+    </li><li name="org.mashupbots.socko.events.InitialHttpRequestMessage" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InitialHttpRequestMessageextendsHttpRequestMessagewithProductwithSerializable"></a>
+      <a id="InitialHttpRequestMessage:InitialHttpRequestMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="InitialHttpRequestMessage.html"><span class="name">InitialHttpRequestMessage</span></a><span class="params">(<span name="headers">headers: <a href="ImmutableHttpHeaders.html" class="extype" name="org.mashupbots.socko.events.ImmutableHttpHeaders">ImmutableHttpHeaders</a></span>, <span name="endPoint">endPoint: <a href="EndPoint.html" class="extype" name="org.mashupbots.socko.events.EndPoint">EndPoint</a></span>, <span name="isKeepAlive">isKeepAlive: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="acceptedEncodings">acceptedEncodings: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="httpVersion">httpVersion: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="is100ContinueExpected">is100ContinueExpected: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="ifModifiedSince">ifModifiedSince: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="java.util.Date">Date</span>]</span>, <span name="isChunked">isChunked: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="isWebSocketUpgrade">isWebSocketUpgrade: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="contentType">contentType: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="contentLength">contentLength: <span class="extype" name="scala.Long">Long</span></span>, <span name="createdOn">createdOn: <span class="extype" name="java.util.Date">Date</span></span>)</span><span class="result"> extends <a href="HttpRequestMessage.html" class="extype" name="org.mashupbots.socko.events.HttpRequestMessage">HttpRequestMessage</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Details of the HTTP request that initiated the web socket connection or chunk transfer.</p>
+    </li><li name="org.mashupbots.socko.events.MutableHttpHeaders" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MutableHttpHeadersextendsIterable[org.mashupbots.socko.events.HttpHeader]withProductwithSerializable"></a>
+      <a id="MutableHttpHeaders:MutableHttpHeaders"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="MutableHttpHeaders.html"><span class="name">MutableHttpHeaders</span></a><span class="params">()</span><span class="result"> extends <span class="extype" name="scala.Iterable">Iterable</span>[<a href="HttpHeader.html" class="extype" name="org.mashupbots.socko.events.HttpHeader">HttpHeader</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Mutable collection of HTTP headers</p>
+    </li><li name="org.mashupbots.socko.events.NettyHttpContent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NettyHttpContent=io.netty.handler.codec.http.HttpContent"></a>
+      <a id="NettyHttpContent:NettyHttpContent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">NettyHttpContent</span><span class="result"> = <span class="extype" name="io.netty.handler.codec.http.HttpContent">io.netty.handler.codec.http.HttpContent</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.events.NettyHttpLastContent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NettyHttpLastContent=io.netty.handler.codec.http.LastHttpContent"></a>
+      <a id="NettyHttpLastContent:NettyHttpLastContent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">NettyHttpLastContent</span><span class="result"> = <span class="extype" name="io.netty.handler.codec.http.LastHttpContent">LastHttpContent</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.events.NettyHttpRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NettyHttpRequest=io.netty.handler.codec.http.HttpRequest"></a>
+      <a id="NettyHttpRequest:NettyHttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">NettyHttpRequest</span><span class="result"> = <span class="extype" name="io.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.events.NettyHttpResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NettyHttpResponse=io.netty.handler.codec.http.HttpResponse"></a>
+      <a id="NettyHttpResponse:NettyHttpResponse"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">NettyHttpResponse</span><span class="result"> = <span class="extype" name="io.netty.handler.codec.http.HttpResponse">HttpResponse</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.events.SockoEvent" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SockoEventextendsAnyRef"></a>
+      <a id="SockoEvent:SockoEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SockoEvent.html"><span class="name">SockoEvent</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Socko Events are fired by Socko and passed to your routes for dispatching to your handlers.</p>
+    </li><li name="org.mashupbots.socko.events.WebSocketEventConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WebSocketEventConfigextendsProductwithSerializable"></a>
+      <a id="WebSocketEventConfig:WebSocketEventConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketEventConfig.html"><span class="name">WebSocketEventConfig</span></a><span class="params">(<span name="serverName">serverName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="webLogWriter">webLogWriter: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="akka.actor.ActorRef">ActorRef</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Web Socket configuration used by <a href="WebSocketFrameEvent.html" class="extype" name="org.mashupbots.socko.events.WebSocketFrameEvent">org.mashupbots.socko.events.WebSocketFrameEvent</a> in processing
+</p>
+    </li><li name="org.mashupbots.socko.events.WebSocketFrameEvent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WebSocketFrameEventextendsSockoEventwithProductwithSerializable"></a>
+      <a id="WebSocketFrameEvent:WebSocketFrameEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketFrameEvent.html"><span class="name">WebSocketFrameEvent</span></a><span class="params">(<span name="context">context: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="initialHttpRequest">initialHttpRequest: <a href="InitialHttpRequestMessage.html" class="extype" name="org.mashupbots.socko.events.InitialHttpRequestMessage">InitialHttpRequestMessage</a></span>, <span name="wsFrame">wsFrame: <span class="extype" name="io.netty.handler.codec.http.websocketx.WebSocketFrame">WebSocketFrame</span></span>, <span name="config">config: <a href="WebSocketEventConfig.html" class="extype" name="org.mashupbots.socko.events.WebSocketEventConfig">WebSocketEventConfig</a></span>)</span><span class="result"> extends <a href="SockoEvent.html" class="extype" name="org.mashupbots.socko.events.SockoEvent">SockoEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Event fired when a web socket text or binary frame is received.</p>
+    </li><li name="org.mashupbots.socko.events.WebSocketHandshakeEvent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WebSocketHandshakeEventextendsSockoEventwithHttpEventwithProductwithSerializable"></a>
+      <a id="WebSocketHandshakeEvent:WebSocketHandshakeEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketHandshakeEvent.html"><span class="name">WebSocketHandshakeEvent</span></a><span class="params">(<span name="context">context: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="nettyHttpRequest">nettyHttpRequest: <span class="extype" name="io.netty.handler.codec.http.FullHttpRequest">FullHttpRequest</span></span>, <span name="config">config: <a href="HttpEventConfig.html" class="extype" name="org.mashupbots.socko.events.HttpEventConfig">HttpEventConfig</a></span>)</span><span class="result"> extends <a href="SockoEvent.html" class="extype" name="org.mashupbots.socko.events.SockoEvent">SockoEvent</a> with <a href="HttpEvent.html" class="extype" name="org.mashupbots.socko.events.HttpEvent">HttpEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Event fired when performing a web socket handshake to upgrade a HTTP connection to a web socket connection.</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="org.mashupbots.socko.events.EmptyHttpContent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmptyHttpContent"></a>
+      <a id="EmptyHttpContent:EmptyHttpContent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EmptyHttpContent$.html"><span class="name">EmptyHttpContent</span></a><span class="result"> extends <a href="HttpContent.html" class="extype" name="org.mashupbots.socko.events.HttpContent">HttpContent</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.events.HttpResponseMessage" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpResponseMessage"></a>
+      <a id="HttpResponseMessage:HttpResponseMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpResponseMessage$.html"><span class="name">HttpResponseMessage</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="org.mashupbots.socko.events.HttpResponseStatus" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpResponseStatus"></a>
+      <a id="HttpResponseStatus:HttpResponseStatus"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpResponseStatus$.html"><span class="name">HttpResponseStatus</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Standard HTTP response status codes
+</p>
+    </li><li name="org.mashupbots.socko.events.ImmutableHttpHeaders" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ImmutableHttpHeaders"></a>
+      <a id="ImmutableHttpHeaders:ImmutableHttpHeaders"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ImmutableHttpHeaders$.html"><span class="name">ImmutableHttpHeaders</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.events.MutableHttpHeaders" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MutableHttpHeaders"></a>
+      <a id="MutableHttpHeaders:MutableHttpHeaders"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MutableHttpHeaders$.html"><span class="name">MutableHttpHeaders</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.events.WebSocketEventConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WebSocketEventConfig"></a>
+      <a id="WebSocketEventConfig:WebSocketEventConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketEventConfig$.html"><span class="name">WebSocketEventConfig</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li><li name="org.mashupbots.socko.events.WebSocketHandshakeEvent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WebSocketHandshakeEvent"></a>
+      <a id="WebSocketHandshakeEvent:WebSocketHandshakeEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketHandshakeEvent$.html"><span class="name">WebSocketHandshakeEvent</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object
+</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+    </body>
+      </html>

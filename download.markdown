@@ -5,9 +5,9 @@ layout: article
 
 ## Latest Release
 
-The latest verison of Socko is **`0.3.1`** released on 22nd September 2013.
+The latest verison of Socko is **`0.4.0`** released on 30th December 2013.
 
-Download [socko-webserver_2.10-0.3.1.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.10/0.3.1/socko-webserver_2.10-0.3.1.jar).
+Download [socko-webserver_2.10-0.4.0.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.10/0.4.0/socko-webserver_2.10-0.3.1.jar).
 
 [Change logs](https://github.com/mashupbots/socko/issues/milestones?state=closed) and 
 [road maps](https://github.com/mashupbots/socko/issues/milestones?state=open) are available on our issue tracker.

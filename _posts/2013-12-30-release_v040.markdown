@@ -1,0 +1,34 @@
+---
+layout: post
+title: Release v0.4.0
+summary: Improved Web Socket Connection Management
+author: Vibul
+---
+
+This [release](https://github.com/mashupbots/socko/issues?milestone=9&state=closed) includes:
+ - Upgrade to AKKA (2.2.3) and Netty (4.0.14.Final) thanks to [thirstycrow](https://github.com/thirstycrow)
+ - Support for independently pushing messages to all or specific web socket connections
+ - Notification when a web socket connection is closed
+ - Support for idle connection timeout
+ - Support for HTTP headers with the same header name
+
+Download [socko-webserver_2.10-0.4.0.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.10/0.4.0/socko-webserver_2.10-0.4.0.jar).
+
+For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
+
+There are **BREAKING CHANGES** in this release.
+ - `WebSocketBroadcaster` is no longer supported. Use `webServer.webSocketConnections.writeText("My Message")` instead.
+
+ - `onComplete` callback function now takes a web socket id as a parameter rather than the `WebSocketHandshake` event.
+   You can still write to the connection using `webServer.webSocketConnections.writeText("My Message", webSocketId)` where
+   `webSocketId` is the function's input parameter.
+
+Also, **SPDY** is not working as yet. I'm tyring to debug the upgrade to Netty 4 and SPDY3.
+
+Documentation
+ - [User Guide](/docs/0.4.0/guides/user-guide.html)
+ - [API](/docs/0.4.0/api/)
+ - [Change logs](https://github.com/mashupbots/socko/issues?milestone=10&state=closed)
+
+
+
