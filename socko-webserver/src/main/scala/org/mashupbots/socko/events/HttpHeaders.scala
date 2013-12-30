@@ -39,7 +39,7 @@ case class ImmutableHttpHeaders(private val values: Seq[HttpHeader]) extends Ite
    * Returns the value of the first header that has a matching name.
    *
    * @param name Name of header field to match in a case insensitive manner ([[http://www.ietf.org/rfc/rfc2616.txt RFC 2616]])
-   * @returns None if not found, else the value of the first header with a matching name
+   * @return None if not found, else the value of the first header with a matching name
    */
   def get(name: String): Option[String] = {
     val result = values.find(h => h.name.equalsIgnoreCase(name))
@@ -52,7 +52,7 @@ case class ImmutableHttpHeaders(private val values: Seq[HttpHeader]) extends Ite
    *
    * @param name Name of header field to match in a case insensitive manner ([[http://www.ietf.org/rfc/rfc2616.txt RFC 2616]])
    * @param defaultValue value to return if header not found
-   * @returns Default value if not found, else the value of the first header with a matching name
+   * @return Default value if not found, else the value of the first header with a matching name
    */
   def getOrElse(name: String, defaultValue: String): String = {
     val result = values.find(h => h.name.equalsIgnoreCase(name))
@@ -64,7 +64,7 @@ case class ImmutableHttpHeaders(private val values: Seq[HttpHeader]) extends Ite
    * Returns the values of all matching headers
    *
    * @param name Name of header field to match in a case insensitive manner ([[http://www.ietf.org/rfc/rfc2616.txt RFC 2616]])
-   * @returns Sequence of matching values
+   * @return Sequence of matching values
    */
   def getAll(name: String): Seq[String] = {
     values.filter(h => h.name.equalsIgnoreCase(name)).map(h => h.value)
@@ -74,7 +74,7 @@ case class ImmutableHttpHeaders(private val values: Seq[HttpHeader]) extends Ite
    * Returns true if there is a header with the specified name
    *
    * @param name Name of header field to match in a case insensitive manner ([[http://www.ietf.org/rfc/rfc2616.txt RFC 2616]])
-   * @returns True if there is a header with the specified name, false otherwise
+   * @return True if there is a header with the specified name, false otherwise
    */
   def contains(name: String): Boolean = {
     values.exists(h => h.name.equalsIgnoreCase(name))
@@ -117,7 +117,7 @@ case class MutableHttpHeaders() extends Iterable[HttpHeader] {
    * Returns the value of the first header that has a matching name.
    *
    * @param name Name of header field to match in a case insensitive manner ([[http://www.ietf.org/rfc/rfc2616.txt RFC 2616]])
-   * @returns None if not found, else the value of the first header with a matching name
+   * @return None if not found, else the value of the first header with a matching name
    */
   def get(name: String): Option[String] = {
     val result = values.find(h => h.name.equalsIgnoreCase(name))
@@ -130,7 +130,7 @@ case class MutableHttpHeaders() extends Iterable[HttpHeader] {
    *
    * @param name Name of header field to match in a case insensitive manner ([[http://www.ietf.org/rfc/rfc2616.txt RFC 2616]])
    * @param defaultValue value to return if header not found
-   * @returns Default value if not found, else the value of the first header with a matching name
+   * @return Default value if not found, else the value of the first header with a matching name
    */
   def getOrElse(name: String, defaultValue: String): String = {
     val result = values.find(h => h.name.equalsIgnoreCase(name))
@@ -142,7 +142,7 @@ case class MutableHttpHeaders() extends Iterable[HttpHeader] {
    * Returns the values of all matching headers
    *
    * @param name Name of header field to match in a case insensitive manner ([[http://www.ietf.org/rfc/rfc2616.txt RFC 2616]])
-   * @returns Sequence of matching values
+   * @return Sequence of matching values
    */
   def getAll(name: String): Seq[String] = {
     values.filter(h => h.name.equalsIgnoreCase(name)).map(h => h.value)
@@ -152,7 +152,7 @@ case class MutableHttpHeaders() extends Iterable[HttpHeader] {
    * Returns true if there is a header with the specified name
    *
    * @param name Name of header field to match in a case insensitive manner ([[http://www.ietf.org/rfc/rfc2616.txt RFC 2616]])
-   * @returns True if there is a header with the specified name, false otherwise
+   * @return True if there is a header with the specified name, false otherwise
    */
   def contains(name: String): Boolean = {
     values.exists(h => h.name.equalsIgnoreCase(name))
@@ -212,7 +212,7 @@ case class MutableHttpHeaders() extends Iterable[HttpHeader] {
    * Removes all headers of with the specified name
    *
    * @param name Name of header field to remove
-   * @returns The number of headers removed
+   * @return The number of headers removed
    */
   def remove(name: String): Int = {
     def removeHelper(name: String, startIdx: Int, count: Int): Int = {

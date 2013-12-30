@@ -127,7 +127,7 @@ class WebSocketConnections(val name: String) {
    * Checks if the specified web socket id is connected or not
    * 
    * @param webSocketId Id of web socket to check if it is still connected
-   * @returns True if connected, False if the channel has been closed.
+   * @return `True` if connected, `False` if the channel has been closed.
    */
   def isConnected(webSocketId: String): Boolean = {
     allWebSocketChannels.iterator().exists(c => c.attr(WebSocketEventConfig.webSocketIdKey).get() == webSocketId)
