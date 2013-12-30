@@ -17,7 +17,6 @@ WebSocketFrameEventClass: <code><a href="../api/#org.mashupbots.socko.events.Web
 WebSocketHandshakeEventClass: <code><a href="../api/#org.mashupbots.socko.events.WebSocketHandshakeEvent">WebSocketHandshakeEvent</a></code>
 WebServerClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServer">WebServer</a></code>
 WebServerConfigClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServerConfig">WebServerConfig</a></code>
-WebSocketBroadcasterClass: <code><a href="../api/#org.mashupbots.socko.handler.WebSocketBroadcaster">WebSocketBroadcaster</a></code>
 ---
 # Socko User Guide - Serving Dynamic HTTP Content
 
@@ -70,7 +69,7 @@ for more details.
 
 ### Parsing File Uploads <a class="blank" id="FileUploads">&nbsp;</a>
 
-If you intend to support file uploads, you need to use Netty's [HttpPostRequestDecoder](http://static.netty.io/3.6/api/org/jboss/netty/handler/codec/http/multipart/HttpPostRequestDecoder.html).
+If you intend to support file uploads, you need to use Netty's [HttpPostRequestDecoder](http://netty.io/4.0/api/io/netty/handler/codec/http/multipart/HttpPostRequestDecoder.html).
 
 The following example extracts the `description` field as well as a file that was posted.
 
@@ -402,7 +401,7 @@ See the example web socket [ChatApp](https://github.com/mashupbots/socko/blob/ma
 
 ### Callbacks <a class="blank" id="WebSocketCallbacks">&nbsp;</a>
 
-As part of `authorise()`, you are able to supply callback functions:
+As part of `authorize()`, you are able to supply callback functions:
 
  - `onComplete`: called when the handshake completes
  - `onClose`: called when the web socket connection is closed
@@ -452,7 +451,7 @@ For both functions, a unique identifier for the web socket connection is passed 
 
 ### Pushing Data <a class="blank" id="WebSocketPush">&nbsp;</a>
 
-After a web socket connection is authorised, it is added to the web server object's `webSocketConnections`. Using this, you can push data to one or more web socket clients.
+After a web socket connection is authorized, it is added to the web server object's `webSocketConnections`. Using this, you can push data to one or more web socket clients.
 
 Each web socket connection has a unique identifier that you must store if you wish to push data to a specific connection.  The identifier is provided in the `WebSocketHandshake` event
 as well as to the `onComplete` and `onClose` callback functions.
@@ -478,7 +477,7 @@ as well as to the `onComplete` and `onClose` callback functions.
           // Store web socket ID for future use
           myWebSocketId = wsHandshake.webSocketId     
 
-          // Authorise
+          // Authorize
           wsHandshake.authorize()
         }
       }
