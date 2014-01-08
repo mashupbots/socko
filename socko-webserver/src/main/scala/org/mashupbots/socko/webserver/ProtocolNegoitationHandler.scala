@@ -18,7 +18,6 @@ package org.mashupbots.socko.webserver
 import org.eclipse.jetty.npn.NextProtoNego
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.netty.SpdyServerProvider
-
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
 import io.netty.handler.codec.http.HttpObjectAggregator
@@ -33,6 +32,9 @@ import io.netty.handler.codec.spdy.SpdyVersion
 import io.netty.handler.ssl.SslHandler
 import io.netty.handler.stream.ChunkedWriteHandler
 import io.netty.handler.timeout.IdleStateHandler
+import io.netty.handler.codec.ByteToMessageDecoder
+import io.netty.buffer.ByteBuf
+import io.netty.handler.codec.spdy.SpdyHttpResponseStreamIdHandler
 
 /**
  * Handler used with SPDY that performs protocol negotiation.
@@ -40,66 +42,90 @@ import io.netty.handler.timeout.IdleStateHandler
  * Once Jetty's `NextProtoNego` returns the selected protocol, we setup the pipeline accordingly.
  *
  * Code ported from post form [[http://www.smartjava.org/content/using-spdy-and-http-transparently-using-netty Jos Dirksen]]
- *
+ * and Netty SpdyOrHttpChooser class 
+ * 
  * @param server Web Server
  */
-class ProtocolNegoitationHandler(server: WebServer) extends ChannelInboundHandlerAdapter with Logger {
+class ProtocolNegoitationHandler(server: WebServer) extends ByteToMessageDecoder with Logger {
 
-  override def channelActive(ctx: ChannelHandlerContext) = {
-    server.allChannels.add(ctx.channel)
+  override def decode(ctx: ChannelHandlerContext, in: ByteBuf, out: java.util.List[Object]) {
+    if (initPipeline(ctx)) {
+      // When we reached here we can remove this handler as its now clear what protocol we want to use
+      // from this point on. This will also take care of forward all messages.
+      ctx.pipeline().remove(this);
+    }
   }
 
-  override def channelRead(ctx: ChannelHandlerContext, e: AnyRef) = {
-
+  private def addSpdyHandlers(ctx: ChannelHandlerContext, spdyVersion: SpdyVersion) = {
     val pipeline = ctx.pipeline
-    val handler = pipeline.get(classOf[SslHandler])
-    val provider = NextProtoNego.get(handler.engine).asInstanceOf[SpdyServerProvider]
-    val selectedProtocol = provider.getSelectedProtocol
     val httpConfig = server.config.http
 
-    // Null is returned during the negotiation process so ignore it
-    if (selectedProtocol != null) {
-      if (selectedProtocol.startsWith("spdy/")) {
-        val spdyVersion = selectedProtocol.substring(5) match {
-          case "3" => SpdyVersion.SPDY_3
-          case "3.1" => SpdyVersion.SPDY_3_1
-          case _ => throw new UnsupportedOperationException("Unsupported protocol: " + selectedProtocol)
-        }
+    pipeline.addLast("spdyDecoder", new SpdyFrameDecoder(spdyVersion, httpConfig.maxChunkSizeInBytes,
+      httpConfig.maxHeaderSizeInBytes))
+    pipeline.addLast("spdyEncoder", new SpdyFrameEncoder(spdyVersion))
+    pipeline.addLast("spdySessionHandler", new SpdySessionHandler(spdyVersion, true))
+    pipeline.addLast("spdyHttpEncoder", new SpdyHttpEncoder(spdyVersion))
+    pipeline.addLast("spdyHttpDecoder", new SpdyHttpDecoder(spdyVersion, httpConfig.maxLengthInBytes))
+    pipeline.addLast("spdyStreamIdHandler", new SpdyHttpResponseStreamIdHandler())
 
-        pipeline.addLast("decoder", new SpdyFrameDecoder(spdyVersion, httpConfig.maxChunkSizeInBytes,
-          httpConfig.maxHeaderSizeInBytes))
-        pipeline.addLast("spdy_encoder", new SpdyFrameEncoder(spdyVersion))
-        pipeline.addLast("spdy_session_handler", new SpdySessionHandler(spdyVersion, true))
-        pipeline.addLast("spdy_http_encoder", new SpdyHttpEncoder(spdyVersion))
-        pipeline.addLast("spdy_http_decoder", new SpdyHttpDecoder(spdyVersion, httpConfig.maxLengthInBytes))
-        pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
-        if (server.config.idleConnectionTimeout.toSeconds > 0) {
-          pipeline.addLast("idleStateHandler", new IdleStateHandler(0, 0, server.config.idleConnectionTimeout.toSeconds.toInt))
-        }
-        pipeline.addLast("handler", new RequestHandler(server))
-
-        // remove this handler, and process the requests as SPDY
-        pipeline.remove(this)
-
-      } else if (selectedProtocol == "http/1.1") {
-        pipeline.addLast("decoder", new HttpRequestDecoder(httpConfig.maxInitialLineLength,
-          httpConfig.maxHeaderSizeInBytes, httpConfig.maxChunkSizeInBytes))
-        if (httpConfig.aggreateChunks) {
-          pipeline.addLast("chunkAggregator", new HttpObjectAggregator(httpConfig.maxLengthInBytes))
-        }
-        pipeline.addLast("encoder", new HttpResponseEncoder())
-        pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
-        if (server.config.idleConnectionTimeout.toSeconds > 0) {
-          pipeline.addLast("idleStateHandler", new IdleStateHandler(0, 0, server.config.idleConnectionTimeout.toSeconds.toInt))
-        }
-        pipeline.addLast("handler", new RequestHandler(server))
-
-        // remove this handler, and process the requests as HTTP
-        pipeline.remove(this);
-
-      } else {
-        throw new UnsupportedOperationException("Unsupported protocol: " + selectedProtocol)
-      }
+    pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
+    if (server.config.idleConnectionTimeout.toSeconds > 0) {
+      pipeline.addLast("idleStateHandler", new IdleStateHandler(0, 0, server.config.idleConnectionTimeout.toSeconds.toInt))
     }
+
+    pipeline.addLast("handler", new RequestHandler(server))
+  }
+
+  private def addHttpHandlers(ctx: ChannelHandlerContext) = {
+    val pipeline = ctx.pipeline
+    val httpConfig = server.config.http
+
+    pipeline.addLast("decoder", new HttpRequestDecoder(httpConfig.maxInitialLineLength,
+      httpConfig.maxHeaderSizeInBytes, httpConfig.maxChunkSizeInBytes))
+    if (httpConfig.aggreateChunks) {
+      pipeline.addLast("chunkAggregator", new HttpObjectAggregator(httpConfig.maxLengthInBytes))
+    }
+    pipeline.addLast("encoder", new HttpResponseEncoder())
+
+    pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
+    if (server.config.idleConnectionTimeout.toSeconds > 0) {
+      pipeline.addLast("idleStateHandler", new IdleStateHandler(0, 0, server.config.idleConnectionTimeout.toSeconds.toInt))
+    }
+
+    pipeline.addLast("handler", new RequestHandler(server))
+  }
+
+  def initPipeline(ctx: ChannelHandlerContext): Boolean = {
+    val pipeline = ctx.pipeline
+
+    // SslHandler is needed by SPDY by design.
+    val handler = pipeline.get(classOf[SslHandler])
+    if (handler == null) {
+      throw new IllegalStateException("SslHandler is needed for SPDY");
+    }
+
+    val provider = NextProtoNego.get(handler.engine).asInstanceOf[SpdyServerProvider]
+    val selectedProtocol = provider.getSelectedProtocol
+
+    if (selectedProtocol == null) {
+      log.debug("Selected protocol unknown")
+      false
+    } else {
+      log.debug("Selected protocol: {} ", selectedProtocol)
+      selectedProtocol match {
+        case "spdy/3.1" =>
+          addSpdyHandlers(ctx, SpdyVersion.SPDY_3_1)
+        case "spdy/3" =>
+          addSpdyHandlers(ctx, SpdyVersion.SPDY_3)
+        case "http/1.1" =>
+          addHttpHandlers(ctx)
+        case "http/1.0" =>
+          addHttpHandlers(ctx)
+        case _ =>
+          throw new UnsupportedOperationException("Unsupported protocol: " + selectedProtocol)
+      }
+      true
+    }
+
   }
 }

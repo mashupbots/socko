@@ -33,7 +33,7 @@ public class SpdyServerProvider implements ServerProvider {
 	}
 
 	public List<String> protocols() {
-		return Arrays.asList("spdy/3", "spdy/2", "http/1.1");
+		return Arrays.asList("spdy/3.1", "spdy/3", "http/1.1");
 	}
 
 	public void protocolSelected(String protocol) {

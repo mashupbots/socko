@@ -225,7 +225,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
   /**
    * Returns the length of the content from the `Content-Length` header. If not set, `0` is returned.
    */
-  lazy val contentLength = HttpHeaders.getContentLength(nettyHttpRequest)
+  lazy val contentLength = HttpHeaders.getContentLength(nettyHttpRequest, 0)
 
   /**
    * Body of the HTTP request
