@@ -5,7 +5,7 @@ summary: Improved Web Socket Connection Management
 author: Vibul
 ---
 
-This [release](https://github.com/mashupbots/socko/issues?milestone=9&state=closed) includes:
+This [release](https://github.com/mashupbots/socko/issues?milestone=10&state=closed) includes:
  - Upgrade to AKKA (2.2.3) and Netty (4.0.14.Final) thanks to [thirstycrow](https://github.com/thirstycrow)
  - Support for independently pushing messages to all or specific web socket connections
  - Notification when a web socket connection is closed
