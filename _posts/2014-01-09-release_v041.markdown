@@ -1,0 +1,21 @@
+---
+layout: post
+title: Release v0.4.1
+summary: SPDY fix
+author: Vibul
+---
+
+This [release](https://github.com/mashupbots/socko/issues?milestone=11&state=closed) includes:
+ - Fix to support SPDY 3 and 3.1.
+
+Download [socko-webserver_2.10-0.4.1.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.10/0.4.1/socko-webserver_2.10-0.4.1.jar).
+
+For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
+
+Documentation
+ - [User Guide](/docs/0.4.1/guides/user-guide.html)
+ - [API](/docs/0.4.1/api/)
+ - [Change logs](https://github.com/mashupbots/socko/issues?milestone=11&state=closed)
+
+
+
