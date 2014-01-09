@@ -37,6 +37,7 @@ WebServerConfigClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebS
  - [Web Sockets](#WebSockets)
    - [Callbacks](dynamic-content.html#WebSocketCallbacks)
    - [Pushing Data](dynamic-content.html#WebSocketPush)
+   - [Closing Web Socket Connections](dynamic-content.html#WebSocketClosed)
 
 ## Parsing Data <a class="blank" id="ParsingData">&nbsp;</a>
 
@@ -497,7 +498,23 @@ To push a message:
 {% endhighlight %}
 
 
-You can also check connectivity and close web socket connections:
+An alternative way to push messages is to wrap the `webServer` instance inside an actor. You can push messages by sending the message to the
+actor.
+
+{% highlight scala %}
+    class MyActor(webServer: WebServer) extends Actor {
+      val log = Logging(context.system, this)
+      def receive = {
+        case s: String ⇒ webServer.webSocketConnections.writeText(s)
+        case _      ⇒ log.info("received unknown message")
+      }
+    }
+{% endhighlight %}
+
+
+### Closing Web Socket Connections <a class="blank" id="WebSocketClosed">&nbsp;</a>
+
+You can check connectivity and close web socket connections:
 
 {% highlight scala %}
     // Close all connections
@@ -508,8 +525,5 @@ You can also check connectivity and close web socket connections:
       MyApp.webServer.webSocketConnections.close(myWebSocketId)
     }
 {% endhighlight %}
-
-
-
 
 
