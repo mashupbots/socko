@@ -19,7 +19,7 @@ It supports HTTP compression, browser cache control and content caching.
  - [Configuration](#Configuration)
  - [Handling Requests](#Requests)
 
-## Actor Setup <a class="blank" id="ActorSetup">&nbsp;</a>
+## Actor Setup <a class="blank" id="ActorSetup"></a>
 
 We recommend that you run {{ page.StaticContentHandlerClass }} with a router and with its own dispatcher.  This is
 because {{ page.StaticContentHandlerClass }} contains blocking IO that must be isolated from other non-blocking 
@@ -60,7 +60,7 @@ that dedicates a unique thread for each actor passed in as reference:
 
 
 
-## Configuration <a class="blank" id="Configuration">&nbsp;</a>
+## Configuration <a class="blank" id="Configuration"></a>
 
 The {{ page.StaticContentHandlerConfigClass }} class is used to configure the serving of your static content.
 
@@ -123,7 +123,7 @@ Refer to the [scala doc](../api/#org.mashupbots.socko.handlers.StaticContentHand
 
 
 
-## Handling Requests <a class="blank" id="Requests">&nbsp;</a>
+## Handling Requests <a class="blank" id="Requests"></a>
 
 To serve a file or resource, send {{ page.StaticFileRequestClass }} or {{ page.StaticResourceRequestClass }} to
 the router.

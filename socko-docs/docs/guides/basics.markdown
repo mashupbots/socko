@@ -29,7 +29,7 @@ Let's deep dive into the 3 steps to Socko success:
  - [Step 3. Start/Stop Web Server](#Step3)
 
 
-## Step 1. Define Actors and Start Akka <a class="blank" id="Step1">&nbsp;</a>
+## Step 1. Define Actors and Start Akka <a class="blank" id="Step1"></a>
 
 Socko assumes that you have your business rules implemented as Akka v2 Actors.
 
@@ -66,7 +66,7 @@ For maximum scalability and performance, you will need to carefully choose your 
 The default dispatcher is optimized for non blocking code. If your code blocks though reading from and writing to 
 database and/or file system, then it is advisable to configure Akka to use dispatchers based on thread pools.
 
-### Handling Socko Events <a class="blank" id="SockoEvents">&nbsp;</a>
+### Handling Socko Events <a class="blank" id="SockoEvents"></a>
 
 A {{ page.SockoEventClass }} is used to read incoming and write outgoing data.
 
@@ -128,7 +128,7 @@ There are 4 types of {{ page.SockoEventClass }}:
 All {{ page.SockoEventClass }}s must be used by **local actors** only.
 
 
-### Akka Dispatchers and Thread Pools <a class="blank" id="AkkaDispatchers">&nbsp;</a>
+### Akka Dispatchers and Thread Pools <a class="blank" id="AkkaDispatchers"></a>
 
 Akka [dispatchers](http://doc.akka.io/docs/akka/2.0.1/scala/dispatchers.html) controls how your Akka 
 actors process messages.
@@ -180,7 +180,7 @@ to allocate more threads.
 
 
 
-## Step 2. Define Routes <a class="blank" id="Step2">&nbsp;</a>
+## Step 2. Define Routes <a class="blank" id="Step2"></a>
 
 Routes allows you to control how Socko dispatches incoming events to your actors.
 
@@ -213,7 +213,7 @@ The following example illustrates matching HTTP GET event and dispatching it to 
 For a more detailed example, see our [example route app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/routes).
 
 
-### Event Extractors <a class="blank" id="SockoEventExtractors">&nbsp;</a>
+### Event Extractors <a class="blank" id="SockoEventExtractors"></a>
 
 These extractors allows you to match different types of {{ page.SockoEventClass }}.
 
@@ -256,7 +256,7 @@ illustrates usage:
 {% endhighlight %}
 
 
-### Host Extractors <a class="blank" id="HostExtractors">&nbsp;</a>
+### Host Extractors <a class="blank" id="HostExtractors"></a>
 
 Host extractors match the host name received in the HTTP request that triggered the {{ page.SockoEventClass }}.
 
@@ -331,7 +331,7 @@ in your route.
 {% endhighlight %}
 
 
-### Method Extractors <a class="blank" id="MethodExtractors">&nbsp;</a>
+### Method Extractors <a class="blank" id="MethodExtractors"></a>
 
 Method extractors match the method received in the HTTP request that triggered the {{ page.SockoEventClass }}.
 
@@ -380,7 +380,7 @@ For example, to match HTTP GET with a path of "/clients"
 
 
 
-### Path Extractors <a class="blank" id="PathExtractors">&nbsp;</a>
+### Path Extractors <a class="blank" id="PathExtractors"></a>
 
 Path extractors match the path received in the HTTP request that triggered the {{ page.SockoEventClass }}.
 
@@ -474,7 +474,7 @@ in your route.
 {% endhighlight %}
 
 
-### Query String Extractors <a class="blank" id="QueryStringExtractors">&nbsp;</a>
+### Query String Extractors <a class="blank" id="QueryStringExtractors"></a>
 
 Query string extractors match the query string received in the HTTP request that triggered the {{ page.SockoEventClass }}.
 
@@ -540,7 +540,7 @@ For example, to match `?name1=value1`:
 {% endhighlight %}
 
 
-### Concatenation Extractors <a class="blank" id="ConcatenatingExtractors">&nbsp;</a>
+### Concatenation Extractors <a class="blank" id="ConcatenatingExtractors"></a>
 
 At times, it is useful to combine 2 or more extractors in a single case statement. For this, you can
 use an ampersand ([`&`](../api/#org.mashupbots.socko.routes.$amp$)). 
@@ -561,7 +561,7 @@ you can use
 
 
 
-## Step 3. Start/Stop Web Server <a class="blank" id="Step3">&nbsp;</a>
+## Step 3. Start/Stop Web Server <a class="blank" id="Step3"></a>
 
 To start you web server, you only need to instance the {{ page.WebServerClass }} class and 
 call `start()` passing in your configuration and routes.  When you wish to stop the web 

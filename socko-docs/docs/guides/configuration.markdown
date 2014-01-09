@@ -67,7 +67,7 @@ A complete example `application.conf` can be found in {{ page.WebServerConfigCla
 
 
 
-## Network Settings <a class="blank" id="Network">&nbsp;</a>
+## Network Settings <a class="blank" id="Network"></a>
 
 Common settings are:
 
@@ -110,7 +110,7 @@ Refer to the api documentation of {{ page.WebServerConfigClass }} for all settin
 
 
 
-## Web Log Settings <a class="blank" id="WebLogs">&nbsp;</a>
+## Web Log Settings <a class="blank" id="WebLogs"></a>
 
 Socko supports 3 web log formats:
 
@@ -258,7 +258,7 @@ For more details, refer to the [custom web log example app](https://github.com/m
 
 
 
-## SPDY Settings <a class="blank" id="SPDY">&nbsp;</a>
+## SPDY Settings <a class="blank" id="SPDY"></a>
 
 [SPDY](http://en.wikipedia.org/wiki/SPDY) is an experimental networking protocol used in speeding up delivery of web
 content.

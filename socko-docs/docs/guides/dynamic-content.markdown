@@ -39,9 +39,9 @@ WebServerConfigClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebS
    - [Pushing Data](dynamic-content.html#WebSocketPush)
    - [Closing Web Socket Connections](dynamic-content.html#WebSocketClosed)
 
-## Parsing Data <a class="blank" id="ParsingData">&nbsp;</a>
+## Parsing Data <a class="blank" id="ParsingData"></a>
 
-### Parsing Query Strings <a class="blank" id="QueryStrings">&nbsp;</a>
+### Parsing Query Strings <a class="blank" id="QueryStrings"></a>
 
 You can access query string parameters using {{ page.HttpRequestEventClass }}.
 
@@ -54,7 +54,7 @@ You can access query string parameters using {{ page.HttpRequestEventClass }}.
 See the [query string and post data example](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/querystring_post)
 for more details.
 
-### Parsing Post Form Data <a class="blank" id="PostFormData">&nbsp;</a>
+### Parsing Post Form Data <a class="blank" id="PostFormData"></a>
 
 If you do not have to support file uploads and your post form data content type is `application/x-www-form-urlencoded data`,
 you can access the form data using {{ page.HttpRequestEventClass }}.
@@ -68,7 +68,7 @@ you can access the form data using {{ page.HttpRequestEventClass }}.
 See the [query string and post data example](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/querystring_post)
 for more details.
 
-### Parsing File Uploads <a class="blank" id="FileUploads">&nbsp;</a>
+### Parsing File Uploads <a class="blank" id="FileUploads"></a>
 
 If you intend to support file uploads, you need to use Netty's [HttpPostRequestDecoder](http://netty.io/4.0/api/io/netty/handler/codec/http/multipart/HttpPostRequestDecoder.html).
 
@@ -103,7 +103,7 @@ for more details.
 
 
 
-## RESTful Web Services <a class="blank" id="Rest">&nbsp;</a>
+## RESTful Web Services <a class="blank" id="Rest"></a>
 
 Socko's {{ page.RestHandlerClass }} class provides a quick way to expose your Akka actors as REST end points. You 
 will be able to invoke your Akka actors using Javascript in a web browser app and from other HTTP clients.
@@ -123,7 +123,7 @@ To use the {{ page.RestHandlerClass }} class, follow the 5 steps below. The exam
 [Pet Shop example REST app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/rest).
 
 
-### Step 1. Installation <a class="blank" id="RestInstallation">&nbsp;</a>
+### Step 1. Installation <a class="blank" id="RestInstallation"></a>
 
 In order to use the Socko RESTful Web Service framework, you need to add an extra dependency.
 
@@ -132,7 +132,7 @@ Add the following to your `build.sbt`.  Replace `X.Y.Z` with the version number.
     libraryDependencies += "org.mashupbots.socko" %% "socko-rest" % "X.Y.Z"
 
 
-### Step 2. Implement your Data Model <a class="blank" id="RestDefinition">&nbsp;</a>
+### Step 2. Implement your Data Model <a class="blank" id="RestDefinition"></a>
 
 Define your model as case classes.
 
@@ -155,7 +155,7 @@ Then, provide additional meta data using {{ page.RestPropertyMetaDataClass }}.
 {% endhighlight %}
 
 
-### Step 3. Implement your Business Logic Actors <a class="blank" id="RestBusinessLogic">&nbsp;</a>
+### Step 3. Implement your Business Logic Actors <a class="blank" id="RestBusinessLogic"></a>
 
 Socko {{ page.RestHandlerClass }} uses a Request/Response model.
 
@@ -188,7 +188,7 @@ as illustrated in `GetPetRequest` and `GetPetResponse`. Your request and resposn
 first parameter. Subsequement parameters can contain primitives and your data model classes.
 
 
-### Step 4. Register your REST Operation <a class="blank" id="RestRegistration">&nbsp;</a>
+### Step 4. Register your REST Operation <a class="blank" id="RestRegistration"></a>
 
 In order to notify {{ page.RestHandlerClass }} to the existance of your actor, you need to regsiter it.
 
@@ -230,7 +230,7 @@ we have provided 3 example scenarios:
     **not** terminated; rather they are reused.
 
 
-### Step 5. Using the REST Handler <a class="blank" id="RestHandler">&nbsp;</a>
+### Step 5. Using the REST Handler <a class="blank" id="RestHandler"></a>
 
 In order to use {{ page.RestHandlerClass }}, you must first instance {{ page.RestRegistryClass }}. The registry 
 will search the code base for your {{ page.RestRegistrationClass }}s.
@@ -304,7 +304,7 @@ The following example illustrates:
 {% endhighlight %}
 
 
-### Configuration <a class="blank" id="RestConfiguration">&nbsp;</a>
+### Configuration <a class="blank" id="RestConfiguration"></a>
 
 The {{ page.RestConfigClass }} class is used to configure the REST handler. It is specified when instancing 
 {{ page.RestRegistryClass }}.
@@ -325,7 +325,7 @@ Like other settings, you can set the values programmatically or via an external 
 {{ page.RestConfigClass }} for more details. 
 
 
-### Supported Data Types <a class="blank" id="RestDataType">&nbsp;</a>
+### Supported Data Types <a class="blank" id="RestDataType"></a>
 
 The supported data types aligns with [swagger](https://github.com/wordnik/swagger-core/wiki/Datatypes).
 
@@ -345,7 +345,7 @@ The supported data types aligns with [swagger](https://github.com/wordnik/swagge
 
 
 
-## Web Sockets <a class="blank" id="WebSockets">&nbsp;</a>
+## Web Sockets <a class="blank" id="WebSockets"></a>
 
 For a detailed discussion on how web sockets work, refer to [RFC 6455](http://tools.ietf.org/html/rfc6455).
 
@@ -400,7 +400,7 @@ subprotocol support and a maximum frame size of 100K.
 See the example web socket [ChatApp](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/websocket/ChatApp.scala) for usage.
 
 
-### Callbacks <a class="blank" id="WebSocketCallbacks">&nbsp;</a>
+### Callbacks <a class="blank" id="WebSocketCallbacks"></a>
 
 As part of `authorize()`, you are able to supply callback functions:
 
@@ -450,7 +450,7 @@ For both functions, a unique identifier for the web socket connection is passed 
 {% endhighlight %}
 
 
-### Pushing Data <a class="blank" id="WebSocketPush">&nbsp;</a>
+### Pushing Data <a class="blank" id="WebSocketPush"></a>
 
 After a web socket connection is authorized, it is added to the web server object's `webSocketConnections`. Using this, you can push data to one or more web socket clients.
 
@@ -512,7 +512,7 @@ actor.
 {% endhighlight %}
 
 
-### Closing Web Socket Connections <a class="blank" id="WebSocketClosed">&nbsp;</a>
+### Closing Web Socket Connections <a class="blank" id="WebSocketClosed"></a>
 
 You can check connectivity and close web socket connections:
 

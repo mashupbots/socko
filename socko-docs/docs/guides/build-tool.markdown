@@ -38,7 +38,7 @@ Make sure you are using **JDK 7**.
 
 
 
-## Usage <a class="blank" id="How">&nbsp;</a>
+## Usage <a class="blank" id="How"></a>
 
 In your application, add the following to start and stop the builder:
 

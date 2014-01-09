@@ -112,7 +112,7 @@ It illustrates the 3 steps that you have to follow to get Socko working for you.
 {% endhighlight %}
 
 
-## Step 1. Define Actors and Start Akka <a class="blank" id="Step1">&nbsp;</a>
+## Step 1. Define Actors and Start Akka <a class="blank" id="Step1"></a>
 
 Socko assumes that you have your business rules implemented as Akka v2 Actors.
 
@@ -125,7 +125,7 @@ system called `HelloExampleActorSystem`.  The `HttpRequestEvent` is used by the 
 to write a response to the client.
     
 
-## Step 2. Define Routes <a class="blank" id="Step2">&nbsp;</a>
+## Step 2. Define Routes <a class="blank" id="Step2"></a>
 
 Routes allows you to control how Socko dispatches incoming events to your actors.
 
@@ -151,7 +151,7 @@ For a more detailed example, see our [example route app](https://github.com/mash
 
 
 
-## Step 3. Start/Stop Web Server <a class="blank" id="Step3">&nbsp;</a>
+## Step 3. Start/Stop Web Server <a class="blank" id="Step3"></a>
 
 To start you web server, you only need to instance the {{ page.WebServerClass }} class and 
 call `start()` passing in your configuration and routes.  When you wish to stop the web 
