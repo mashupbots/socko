@@ -128,7 +128,6 @@ case class HttpResponseMessage(event: HttpEvent) {
 
     // Headers
     HttpResponseMessage.setDateHeader(response)
-//    HttpResponseMessage.setSpdyHeaders(request, response)
     headers.foreach { h => response.headers.set(h.name, h.value) }
 
     if (request.isKeepAlive) {
@@ -377,7 +376,6 @@ case class HttpResponseMessage(event: HttpEvent) {
 
     // Headers
     HttpResponseMessage.setDateHeader(response)
-//    HttpResponseMessage.setSpdyHeaders(request, response)
     this.headers.foreach { h => response.headers.set(h.name, h.value) }
     if (request.isKeepAlive) {
       // Add keep alive header as per HTTP 1.1 specifications
@@ -546,18 +544,6 @@ object HttpResponseMessage {
     response.headers.set(HttpHeaders.Names.CONTENT_TYPE, mimeType)
   }
 
-  /**
-   * Copy SPDY headers from request to response
-   *
-   * @param request HTTP request
-   * @param response HTTP response
-   */
-  def setSpdyHeaders(request: HttpRequestMessage, response: HttpResponse) {
-    if (request.headers.contains(SpdyHttpHeaders.Names.STREAM_ID)) {
-      response.headers.set(SpdyHttpHeaders.Names.STREAM_ID, request.headers.get(SpdyHttpHeaders.Names.STREAM_ID))
-      response.headers.set(SpdyHttpHeaders.Names.PRIORITY, 0);
-    }
-  }
   /**
    * Sets the connection header for the HTTP Response
    *

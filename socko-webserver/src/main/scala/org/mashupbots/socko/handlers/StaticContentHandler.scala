@@ -59,7 +59,6 @@ import io.netty.handler.codec.http.HttpHeaders
 import io.netty.handler.codec.http.HttpResponse
 import io.netty.handler.codec.http.HttpVersion
 import io.netty.handler.codec.http.LastHttpContent
-import io.netty.handler.codec.spdy.SpdyHttpHeaders
 import io.netty.handler.ssl.SslHandler
 
 /**
@@ -670,13 +669,6 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
 
     if (contentEncoding != "") {
       response.headers.set(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding)
-    }
-
-    val spdyId = event.request.headers.getOrElse(SpdyHttpHeaders.Names.STREAM_ID, "")
-    if (spdyId != "") {
-      log.debug("spdyId {}", spdyId)
-      response.headers.set(SpdyHttpHeaders.Names.STREAM_ID, spdyId)
-      response.headers.set(SpdyHttpHeaders.Names.PRIORITY, 0);
     }
   }
 
