@@ -72,7 +72,7 @@ object ReflectUtil extends Logger {
         e <- entries;
         entryName = e.getName();
         className = entryName.replace('/', '.').replace('\\', '.').replace(".class", "");
-        if (className.startsWith(packageName))
+        if (className.startsWith(packageName) && className.matches("""^[.\d\w]+$"""))
       ) yield {
         log.debug("Found class in JAR {}", className)
         className
