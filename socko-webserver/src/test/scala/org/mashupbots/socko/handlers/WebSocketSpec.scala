@@ -128,9 +128,9 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
 
       wsc.isConnected should be(true)
 
-      wsc.send("test #1", true)
-      wsc.send("test #2", true)
-      wsc.send("test #3", true)
+      wsc.sendText("test #1", true)
+      wsc.sendText("test #2", true)
+      wsc.sendText("test #3", true)
 
       wsc.disconnect()
 
@@ -144,9 +144,9 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
 
       wsc.isConnected should be(true)
 
-      wsc.send("test #1", true)
-      wsc.send("test #2", true)
-      wsc.send("test #3", true)
+      wsc.sendText("test #1", true)
+      wsc.sendText("test #2", true)
+      wsc.sendText("test #3", true)
 
       wsc.disconnect()
 
@@ -166,10 +166,10 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
       wsc.connect()
       wsc.isConnected should be(true)
       
-      wsc.send("0123456789", true)      
+      wsc.sendText("0123456789", true)      
 
       // Max frame size should throw an exception on the server and cause the channel to close
-      wsc.send("01234567890123456789", false)
+      wsc.sendText("01234567890123456789", false)
       Thread.sleep(1000)
       wsc.isConnected should be(false)
 

@@ -220,20 +220,39 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
       resp.content should include("  File Content=" + buf.toString)
     }
 
-    "support Web Sockets" in {
+    "support Text Web Sockets" in {
       val wsc = new TestWebSocketClient(path + "snoop/websocket/")
       wsc.connect()
 
       wsc.isConnected should be(true)
 
-      wsc.send("test #1", true)
-      wsc.send("test #2", true)
-      wsc.send("test #3", true)
+      wsc.sendText("test #1", true)
+      wsc.sendText("test #2", true)
+      wsc.sendText("test #3", true)
 
       wsc.disconnect()
 
       val receivedText = wsc.getReceivedText
       receivedText should equal("test #1\ntest #2\ntest #3\n")
+    }
+
+    "support Binary Web Sockets" in {
+      val wsc = new TestWebSocketClient(path + "snoop/websocket/")
+      wsc.connect()
+
+      wsc.isConnected should be(true)
+
+      wsc.sendBinary(Array(1), true)
+      wsc.sendBinary(Array(2), true)
+      wsc.sendBinary(Array(3), true)
+
+      wsc.disconnect()
+
+      val receivedBinary = wsc.getReceivedBinary
+      receivedBinary.length should equal(3)
+      receivedBinary(0) should equal(1)
+      receivedBinary(1) should equal(2)
+      receivedBinary(2) should equal(3)
     }
 
     "not connect if web socket path not found" in {

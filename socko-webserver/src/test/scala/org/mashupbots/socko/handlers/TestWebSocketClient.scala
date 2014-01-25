@@ -18,7 +18,6 @@ package org.mashupbots.socko.handlers
 import java.net.InetSocketAddress
 import java.net.URI
 import java.util.concurrent.Executors
-
 import io.netty.bootstrap.Bootstrap
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelHandlerContext
@@ -42,8 +41,9 @@ import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.http.HttpRequestEncoder
 import io.netty.handler.codec.http.HttpResponse
 import io.netty.handler.codec.http.HttpResponseDecoder
-
 import org.mashupbots.socko.infrastructure.Logger
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
+import io.netty.buffer.Unpooled
 
 /**
  * Encapsulates a web socket client for use in testing
@@ -95,12 +95,30 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
   /**
    * Send text to the server and wait for response
    *
-   * @param content Content to send
+   * @param content Text content to send
    * @param waitForResponse Block until a response has been received
    */
-  def send(content: String, waitForResponse: Boolean = false) {
+  def sendText(content: String, waitForResponse: Boolean = false) {
     channelData.hasReplied = false
     ch.writeAndFlush(new TextWebSocketFrame(content))
+    if (waitForResponse) {
+      monitor.synchronized {
+        while (!channelData.hasReplied) {
+          monitor.wait()
+        }
+      }
+    }
+  }
+
+  /**
+   * Send binary to the server and wait for response
+   *
+   * @param content Binary content to send
+   * @param waitForResponse Block until a response has been received
+   */
+  def sendBinary(content: Array[Byte], waitForResponse: Boolean = false) {
+    channelData.hasReplied = false
+    ch.writeAndFlush(new BinaryWebSocketFrame(Unpooled.wrappedBuffer(content)))
     if (waitForResponse) {
       monitor.synchronized {
         while (!channelData.hasReplied) {
@@ -124,6 +142,13 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
    */
   def getReceivedText(): String = {
     channelData.textBuffer.toString
+  }
+
+  /**
+   * Binary that has been received
+   */
+  def getReceivedBinary(): Array[Byte] = {
+    channelData.binaryBuffer.toArray
   }
 
   /**
@@ -187,12 +212,23 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
           }
           
         case frame: TextWebSocketFrame =>
-          val textFrame = frame.asInstanceOf[TextWebSocketFrame]
-          channelData.textBuffer.append(textFrame.text)
+          channelData.textBuffer.append(frame.text)
           channelData.textBuffer.append("\n")
-          log.debug("WebSocket Client received message: " + textFrame.text)
+          log.debug("WebSocket Client received message: " + frame.text)
           channelData.hasReplied = true
           
+        case frame: BinaryWebSocketFrame =>
+          val bytes = if (frame.content.readableBytes > 0) {
+		    val a = new Array[Byte](frame.content.readableBytes)
+		    frame.content.readBytes(a)
+		    a
+		  }      
+		  else Array.empty[Byte]
+          
+	      channelData.binaryBuffer.appendAll(bytes)
+          log.debug("WebSocket Client received binary message")
+          channelData.hasReplied = true
+
         case frame: PongWebSocketFrame =>
           log.debug("WebSocket Client received pong")
           
@@ -220,5 +256,6 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
     var isConnected: Option[Boolean] = None
     var hasReplied = false
     val textBuffer = new StringBuilder()
+    val binaryBuffer = scala.collection.mutable.ListBuffer[Byte]()
   }
 }

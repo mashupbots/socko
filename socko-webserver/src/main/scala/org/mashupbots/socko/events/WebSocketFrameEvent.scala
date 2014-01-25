@@ -92,7 +92,12 @@ case class WebSocketFrameEvent(
    * Returns the request content as byte array
    */
   def readBinary(): Array[Byte] = {
-    wsFrame.content.array
+    if (wsFrame.content.readableBytes > 0) {
+      val a = new Array[Byte](wsFrame.content.readableBytes)
+      wsFrame.content.readBytes(a)
+      a
+    }      
+    else Array.empty[Byte]
   }
 
   /**
