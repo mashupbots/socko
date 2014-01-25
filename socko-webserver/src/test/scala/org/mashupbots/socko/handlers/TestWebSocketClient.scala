@@ -1,5 +1,5 @@
 //
-// Copyright 2012 Vibul Imtarnasan, David Bolton and Socko contributors.
+// Copyright 2012-2014 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -164,8 +164,7 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
   class PipeLineFactory(
     handshaker: WebSocketClientHandshaker,
     channelData: ChannelData,
-    connectionMonitor: AnyRef
-  ) extends ChannelInitializer[SocketChannel] {
+    connectionMonitor: AnyRef) extends ChannelInitializer[SocketChannel] {
 
     def initChannel(channel: SocketChannel) = {
       val pipeline = channel.pipeline
@@ -182,17 +181,16 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
   class WebSocketClientHandler(
     handshaker: WebSocketClientHandshaker,
     channelData: ChannelData,
-    connectionMonitor: AnyRef
-  ) extends ChannelInboundHandlerAdapter with Logger {
+    connectionMonitor: AnyRef) extends ChannelInboundHandlerAdapter with Logger {
 
     override def channelInactive(ctx: ChannelHandlerContext) = {
       log.debug("WebSocket Client disconnected!");
       channelData.isConnected = Some(false)
-      
+
       // Notify monitor that we have disconnected
       connectionMonitor.synchronized {
         connectionMonitor.notifyAll()
-      }      
+      }
     }
 
     override def channelRead(ctx: ChannelHandlerContext, e: AnyRef) {
@@ -205,33 +203,32 @@ class TestWebSocketClient(url: String, subprotocols: String = null) extends Logg
               channelData.isConnected = Some(true)
             } catch {
               case ex: Throwable => {
-                  log.debug("Error connecting to Web Socket Server", ex)
-                  channelData.isConnected = Some(false)
-                }
+                log.debug("Error connecting to Web Socket Server", ex)
+                channelData.isConnected = Some(false)
+              }
             }
           }
-          
+
         case frame: TextWebSocketFrame =>
           channelData.textBuffer.append(frame.text)
           channelData.textBuffer.append("\n")
           log.debug("WebSocket Client received message: " + frame.text)
           channelData.hasReplied = true
-          
+
         case frame: BinaryWebSocketFrame =>
           val bytes = if (frame.content.readableBytes > 0) {
-		    val a = new Array[Byte](frame.content.readableBytes)
-		    frame.content.readBytes(a)
-		    a
-		  }      
-		  else Array.empty[Byte]
-          
-	      channelData.binaryBuffer.appendAll(bytes)
+            val a = new Array[Byte](frame.content.readableBytes)
+            frame.content.readBytes(a)
+            a
+          } else Array.empty[Byte]
+
+          channelData.binaryBuffer.appendAll(bytes)
           log.debug("WebSocket Client received binary message")
           channelData.hasReplied = true
 
         case frame: PongWebSocketFrame =>
           log.debug("WebSocket Client received pong")
-          
+
         case frame: CloseWebSocketFrame =>
           log.debug("WebSocket Client received closing")
           ch.close()

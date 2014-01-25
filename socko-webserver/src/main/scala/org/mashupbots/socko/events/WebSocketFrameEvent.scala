@@ -1,5 +1,5 @@
 //
-// Copyright 2012 Vibul Imtarnasan, David Bolton and Socko contributors.
+// Copyright 2012-2014 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,10 +43,10 @@ case class WebSocketFrameEvent(
 
   /**
    * Unique ID for this web socket connection
-   * 
+   *
    * With Netty 5, we can use ChannelId. However, this is not supported in Netty 4 so we'll have to use UUID
    */
-  val webSocketId:String = context.channel.attr(WebSocketEventConfig.webSocketIdKey).get()
+  val webSocketId: String = context.channel.attr(WebSocketEventConfig.webSocketIdKey).get()
 
   /**
    * HTTP end point used by this chunk
@@ -96,8 +96,7 @@ case class WebSocketFrameEvent(
       val a = new Array[Byte](wsFrame.content.readableBytes)
       wsFrame.content.readBytes(a)
       a
-    }      
-    else Array.empty[Byte]
+    } else Array.empty[Byte]
   }
 
   /**

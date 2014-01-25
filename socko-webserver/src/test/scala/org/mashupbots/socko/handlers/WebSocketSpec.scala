@@ -1,5 +1,5 @@
 //
-// Copyright 2012-2013 Vibul Imtarnasan, David Bolton and Socko contributors.
+// Copyright 2012-2014 Vibul Imtarnasan, David Bolton and Socko contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -91,7 +91,6 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
     testCallbackWebSocketClosed = (testCallbackWebSocketId == webSocketId)
   }
 
- 
   //
   // Used in Test Identifier
   //
@@ -165,8 +164,8 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
       val wsc = new TestWebSocketClient(path + "websocket/maxframesize/")
       wsc.connect()
       wsc.isConnected should be(true)
-      
-      wsc.sendText("0123456789", true)      
+
+      wsc.sendText("0123456789", true)
 
       // Max frame size should throw an exception on the server and cause the channel to close
       wsc.sendText("01234567890123456789", false)
@@ -184,16 +183,16 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
       // Wait for message from callback to arrive 
       Thread.sleep(500)
       wsc.channelData.textBuffer.length should be > (0)
-      wsc.channelData.textBuffer.toString.startsWith("Hello") should be(true)      
+      wsc.channelData.textBuffer.toString.startsWith("Hello") should be(true)
 
       // Check that the web socket id is present and socket not closed
       testCallbackWebSocketId.length should be > 0
-      webServer.webSocketConnections.isConnected(testCallbackWebSocketId) should be (true)
-      
+      webServer.webSocketConnections.isConnected(testCallbackWebSocketId) should be(true)
+
       // Disconnect and check that the server registered that the connection is closed
       wsc.disconnect()
       Thread.sleep(500)
-      webServer.webSocketConnections.isConnected(testCallbackWebSocketId) should be (false)
+      webServer.webSocketConnections.isConnected(testCallbackWebSocketId) should be(false)
     }
 
     "not connect if web socket path not found" in {
@@ -202,7 +201,7 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
       wsc.isConnected should be(false)
       wsc.disconnect()
     }
-    
+
     "support push to specific web socket" in {
       val wsc1 = new TestWebSocketClient(path + "websocket/identifier/")
       wsc1.connect()
@@ -217,24 +216,24 @@ class WebSocketSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll 
       webServer.webSocketConnections.writeText("test #2", testIdentifierWebSocketId)
       webServer.webSocketConnections.writeText("test #3", testIdentifierWebSocketId)
       Thread.sleep(500)
-      
+
       val receivedText1 = wsc1.getReceivedText
       receivedText1 should equal("test #1\ntest #2\ntest #3\n")
 
       val receivedText2 = wsc2.getReceivedText
       receivedText2 should equal("")
-      
+
       // Close 1 socket should not close another
       webServer.webSocketConnections.close(testIdentifierWebSocketId)
       Thread.sleep(500)
-      webServer.webSocketConnections.isConnected(testCallbackWebSocketId) should be (false)
-      testIdentifierWebSocketClosed should be (true)
+      webServer.webSocketConnections.isConnected(testCallbackWebSocketId) should be(false)
+      testIdentifierWebSocketClosed should be(true)
 
       wsc1.isConnected should be(false)
       wsc2.isConnected should be(true)
-          
+
       // Finish
-      wsc2.disconnect()      
-    }    
+      wsc2.disconnect()
+    }
   }
 }
