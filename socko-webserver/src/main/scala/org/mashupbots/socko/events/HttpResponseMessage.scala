@@ -23,7 +23,7 @@ import java.util.zip.GZIPOutputStream
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelFutureListener
 import io.netty.handler.codec.http.DefaultFullHttpResponse
-import io.netty.handler.codec.http.{DefaultHttpContent => DefaultNettyHttpContent}
+import io.netty.handler.codec.http.{ DefaultHttpContent => DefaultNettyHttpContent }
 import io.netty.handler.codec.http.DefaultHttpResponse
 import io.netty.handler.codec.http.DefaultLastHttpContent
 import io.netty.handler.codec.http.FullHttpResponse
@@ -34,6 +34,7 @@ import io.netty.handler.codec.spdy.SpdyHttpHeaders
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.DateUtil
 import org.mashupbots.socko.infrastructure.IOUtil
+import scala.util.Try
 
 /**
  * Encapsulates all the data to be sent to the client in an HTTP response; i.e. headers and content.
@@ -47,7 +48,7 @@ case class HttpResponseMessage(event: HttpEvent) {
    */
   private val request: HttpRequestMessage = event match {
     case ctx: HttpRequestEvent => ctx.request
-    case ctx: HttpChunkEvent => ctx.initialHttpRequest
+    case ctx: HttpChunkEvent   => ctx.initialHttpRequest
   }
 
   /**
@@ -103,7 +104,7 @@ case class HttpResponseMessage(event: HttpEvent) {
     assert(!writingChunks, "Cannot write after writing chunks")
     assert(!hasBeenWritten, "Response has ended")
 
-    val response = new DefaultFullHttpResponse(HttpVersion.valueOf(request.httpVersion), HttpResponseStatus.CONTINUE.toNetty)
+    val response = fullHttpResponse(HttpResponseStatus.CONTINUE)
     event.context.writeAndFlush(response)
   }
 
@@ -122,10 +123,7 @@ case class HttpResponseMessage(event: HttpEvent) {
     assert(!hasBeenWritten, "Response has ended")
 
     // Build the response object.
-    val response = new DefaultFullHttpResponse(HttpVersion.valueOf(request.httpVersion), status.toNetty)
-
-    // Content
-    setContent(response, content, contentType.getOrElse(""))
+    val response = setContent(content, contentType.getOrElse(""))
 
     // Headers
     HttpResponseMessage.setDateHeader(response)
@@ -302,7 +300,7 @@ case class HttpResponseMessage(event: HttpEvent) {
    * @param content Binary content to return in the response
    * @param contentType MIME content type to set in the response header. For example, "image/gif"
    */
-  private def setContent(response: FullHttpResponse, content: Array[Byte], contentType: String) {
+  private def setContent(content: Array[Byte], contentType: String): FullHttpResponse = {
     // Check to see if we should compress the content
     val compressible = (content != null &&
       content.size > 0 &&
@@ -310,35 +308,58 @@ case class HttpResponseMessage(event: HttpEvent) {
       content.size <= event.config.maxCompressibleContentSizeInBytes &&
       event.config.compressibleContentTypes.exists(s => contentType.startsWith(s)))
 
-    try {
-      if (compressible && request.acceptedEncodings.contains("gzip")) {
-        IOUtil.using(new ByteArrayOutputStream()) { compressBytes =>
-          IOUtil.using(new GZIPOutputStream(compressBytes)) { compressedOut =>
-            compressedOut.write(content, 0, content.length)
-          }
-          response.content.writeBytes(compressBytes.toByteArray)
-          response.headers.set(HttpHeaders.Names.CONTENT_ENCODING, "gzip")
-        }
-      } else if (compressible && request.acceptedEncodings.contains("deflate")) {
+    if (compressible) {
+      Try {
+        request.acceptedEncodings.collectFirst {
+          case "gzip" =>
+            IOUtil.using(new ByteArrayOutputStream()) { compressBytes =>
+              IOUtil.using(new GZIPOutputStream(compressBytes)) { compressedOut =>
+                compressedOut.write(content, 0, content.length)
+              }
+              fullHttpResponse(compressBytes.toByteArray, encoding = "gzip")
+            }
 
-        IOUtil.using(new ByteArrayOutputStream()) { compressBytes =>
-          IOUtil.using(new DeflaterOutputStream(compressBytes)) { compressedOut =>
-            compressedOut.write(content, 0, content.length)
-          }
-          response.content.writeBytes(compressBytes.toByteArray)
-          response.headers.set(HttpHeaders.Names.CONTENT_ENCODING, "deflate")
+          case "deflate" =>
+            IOUtil.using(new ByteArrayOutputStream()) { compressBytes =>
+              IOUtil.using(new DeflaterOutputStream(compressBytes)) { compressedOut =>
+                compressedOut.write(content, 0, content.length)
+              }
+              fullHttpResponse(compressBytes.toByteArray, encoding = "deflate")
+            }
+
+        } getOrElse {
+          fullHttpResponse(content)
         }
-      } else if (content.size > 0) {
-        // No compression
-        response.content.writeBytes(content)
+
+      } getOrElse {
+        fullHttpResponse(content)
       }
-    } catch {
-      // If error, then just write without compression
-      case ex: Throwable =>
-        response.content.writeBytes(content)
+
+    } else {
+      fullHttpResponse(content)
     }
   }
 
+  private def fullHttpResponse(status: HttpResponseStatus) = {
+    new DefaultFullHttpResponse(HttpVersion.valueOf(request.httpVersion), status.toNetty)
+  }
+  
+  private def fullHttpResponse(content: Array[Byte]) = {
+    new DefaultFullHttpResponse(
+      HttpVersion.valueOf(request.httpVersion),
+      status.toNetty,
+      Unpooled.wrappedBuffer(content))
+  }
+  
+  private def fullHttpResponse(content: Array[Byte], encoding: String) = {
+    val response = new DefaultFullHttpResponse(
+      HttpVersion.valueOf(request.httpVersion),
+      status.toNetty,
+      Unpooled.wrappedBuffer(content))
+    response.headers.set(HttpHeaders.Names.CONTENT_ENCODING, encoding)
+    response
+  }
+  
   /**
    * Initiates a HTTP chunk response to the client
    *
@@ -490,7 +511,7 @@ case class HttpResponseMessage(event: HttpEvent) {
     assert(!hasBeenWritten, "Response has ended")
 
     val closeChannel = (!request.isKeepAlive)
-    val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FOUND.toNetty)
+    val response = fullHttpResponse(HttpResponseStatus.FOUND)
 
     HttpResponseMessage.setDateHeader(response)
     response.headers.set(HttpHeaders.Names.LOCATION, url)
@@ -503,7 +524,7 @@ case class HttpResponseMessage(event: HttpEvent) {
     event.writeWebLog(response.getStatus.code, 0)
 
     val future = event.context.writeAndFlush(response)
-        
+
     if (closeChannel) {
       future.addListener(ChannelFutureListener.CLOSE)
     }
@@ -579,13 +600,13 @@ object HttpResponseMessage {
     val charset = if (csNameValue.isDefined) {
       val csValue = csNameValue.get.replace(" ", "").replace("charset", "").replace("=", "").toUpperCase
       csValue match {
-        case "UTF-8" => Some(CharsetUtil.UTF_8)
-        case "US-ASCII" => Some(CharsetUtil.US_ASCII)
+        case "UTF-8"      => Some(CharsetUtil.UTF_8)
+        case "US-ASCII"   => Some(CharsetUtil.US_ASCII)
         case "ISO-8859-1" => Some(CharsetUtil.ISO_8859_1)
-        case "UTF-16" => Some(CharsetUtil.UTF_16)
-        case "UTF-16BE" => Some(CharsetUtil.UTF_16BE)
-        case "UTF-16LE" => Some(CharsetUtil.UTF_16LE)
-        case _ => Some(Charset.forName(csValue))
+        case "UTF-16"     => Some(CharsetUtil.UTF_16)
+        case "UTF-16BE"   => Some(CharsetUtil.UTF_16BE)
+        case "UTF-16LE"   => Some(CharsetUtil.UTF_16LE)
+        case _            => Some(Charset.forName(csValue))
       }
     } else {
       None
