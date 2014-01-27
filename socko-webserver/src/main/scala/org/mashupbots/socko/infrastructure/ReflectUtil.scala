@@ -67,17 +67,12 @@ object ReflectUtil extends Logger {
       // If classes are in a JAR, need to look through the JAR (ignoring classes with $ in their names)
       val jarPath = fullPath.replaceFirst("[.]jar[!].*", ".jar").replaceFirst("file:", "")
       val jarFile = new JarFile(jarPath)
-      val entries = jarFile.entries()
-      val i = for (
-        e <- entries;
-        entryName = e.getName();
-        className = entryName.replace('/', '.').replace('\\', '.').replace(".class", "");
-        if (className.startsWith(packageName) && className.matches("""^[\d\w]+$"""))
-      ) yield {
-        log.debug("Found class in JAR {}", className)
-        className
-      }
-      i.toList
+      jarFile.entries.toIterator
+        .map(_.getName)
+        .filter(_.endsWith(".class"))
+        .map(_.replaceAll("""[/\\]""", ".").replace(".class", ""))
+        .filter(_.startsWith(packageName))
+        .toList
     }
 
     // Convert 
@@ -118,4 +113,4 @@ object ReflectUtil extends Logger {
       defaultValue
     }
   }
-} 
+}
