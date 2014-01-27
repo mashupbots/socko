@@ -20,6 +20,7 @@ import java.nio.charset.Charset
 import java.util.GregorianCalendar
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.GZIPOutputStream
+import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelFutureListener
 import io.netty.handler.codec.http.DefaultFullHttpResponse
 import io.netty.handler.codec.http.{DefaultHttpContent => DefaultNettyHttpContent}
@@ -430,7 +431,7 @@ case class HttpResponseMessage(event: HttpEvent) {
 
     totalChunkContentLength += chunkContent.length
 
-    val buf = event.context.alloc.buffer(chunkContent.length).writeBytes(chunkContent)
+    val buf = Unpooled.wrappedBuffer(chunkContent)
     val chunk = new DefaultNettyHttpContent(buf)
     event.context.writeAndFlush(chunk)
   }

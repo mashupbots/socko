@@ -15,6 +15,7 @@
 //
 package org.mashupbots.socko.events
 
+import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.HttpHeaders
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
@@ -105,7 +106,7 @@ case class WebSocketFrameEvent(
    * @param binary Binary data to return to the client
    */
   def writeBinary(binary: Array[Byte]) {
-    val buf = context.alloc.buffer(binary.length).writeBytes(binary)
+    val buf = Unpooled.wrappedBuffer(binary)
     context.writeAndFlush(new BinaryWebSocketFrame(buf))
   }
 

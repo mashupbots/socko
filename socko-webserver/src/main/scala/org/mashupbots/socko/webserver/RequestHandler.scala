@@ -17,6 +17,7 @@ package org.mashupbots.socko.webserver
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import io.netty.buffer.Unpooled
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener
@@ -243,7 +244,7 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
 
     // Write HTTP Response
     val bytes = s"Failure: ${status}\r\n\r\n${ex.getMessage}\r\n".getBytes(CharsetUtil.UTF_8)
-    val content = ctx.channel.alloc.buffer(bytes.length).writeBytes(bytes)
+    val content = Unpooled.wrappedBuffer(bytes)
     val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, content)
     response.headers.set(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
 

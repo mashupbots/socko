@@ -48,6 +48,7 @@ import com.typesafe.config.Config
 import akka.actor.Actor
 import akka.actor.Extension
 import akka.event.Logging
+import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelProgressiveFuture
@@ -310,7 +311,7 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
       val response = new DefaultFullHttpResponse(
         HttpVersion.valueOf(event.request.httpVersion),
         HttpResponseStatus.OK.toNetty,
-        event.context.alloc.buffer(data.length).writeBytes(data)
+        Unpooled.wrappedBuffer(data)
       )
       setCommonHeaders(event, response, now, cacheEntry.contentType, data.length, encoding)
 
@@ -471,7 +472,7 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
       val response = new DefaultFullHttpResponse(
         HttpVersion.valueOf(event.request.httpVersion),
         HttpResponseStatus.OK.toNetty,
-        event.context.alloc.buffer(data.length).writeBytes(data)
+        Unpooled.wrappedBuffer(data)
       )
       setCommonHeaders(event, response, now, cacheEntry.contentType, data.length, encoding)
 
