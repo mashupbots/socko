@@ -111,7 +111,7 @@ class WebSocketConnections(val name: String) {
    * Sends a web socket text message to the specified web sockets
    */
   def writeBinary(bytes: Array[Byte], webSocketIds: Iterable[String]) {
-    allWebSocketChannels.write(new BinaryWebSocketFrame(Unpooled.buffer(bytes.length).writeBytes(bytes)), WebSocketIdChannelMatcher(webSocketIds))
+    allWebSocketChannels.write(new BinaryWebSocketFrame(Unpooled.wrappedBuffer(bytes)), WebSocketIdChannelMatcher(webSocketIds))
     allWebSocketChannels.flush
   }
 
@@ -119,7 +119,7 @@ class WebSocketConnections(val name: String) {
    * Broadcasts a web socket text message to all web socket
    */
   def writeBinary(bytes: Array[Byte]) {
-    allWebSocketChannels.write(new BinaryWebSocketFrame(Unpooled.buffer(bytes.length).writeBytes(bytes)), ChannelMatchers.all())
+    allWebSocketChannels.write(new BinaryWebSocketFrame(Unpooled.wrappedBuffer(bytes)), ChannelMatchers.all())
     allWebSocketChannels.flush
   }
 
