@@ -4,6 +4,7 @@
 
 import sbt._
 import Keys._
+import com.typesafe.sbteclipse.plugin.EclipsePlugin._
 import sbt.Project.Initialize
 import sbtassembly.Plugin._
 import AssemblyKeys._
@@ -26,6 +27,10 @@ object SockoBuild extends Build {
     // Repositories
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
     credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
+        
+    // sbtEclipse - see examples https://github.com/typesafehub/sbteclipse/blob/master/sbteclipse-plugin/src/sbt-test/sbteclipse/02-contents/project/Build.scala
+    EclipseKeys.createSrc := EclipseCreateSrc.ValueSet(EclipseCreateSrc.Unmanaged, EclipseCreateSrc.Source, EclipseCreateSrc.Resource),
+    EclipseKeys.withSource := true,
     
     fork in Test := true,
 
