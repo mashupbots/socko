@@ -87,6 +87,7 @@ class WebSocketBroadcastSpec extends WordSpec with ShouldMatchers with BeforeAnd
       wsc2.connect()
       wsc2.isConnected should be(true)
 
+      Thread.sleep(500)
       webServer.webSocketConnections.writeText("test #1")
       webServer.webSocketConnections.writeText("test #2")
       webServer.webSocketConnections.writeText("test #3")
