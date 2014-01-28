@@ -66,7 +66,7 @@ class PipelineFactory(server: WebServer) extends ChannelInitializer[SocketChanne
         pipeline.addLast("idleStateHandler", new IdleStateHandler(0, 0, server.config.idleConnectionTimeout.toSeconds.toInt))
       }
 
-      pipeline.addLast("handler", new RequestHandler(server))
+      pipeline.addLast("handler", server.handler())
 
     } else {
       val sslEngine = server.sslManager.get.createSSLEngine()
