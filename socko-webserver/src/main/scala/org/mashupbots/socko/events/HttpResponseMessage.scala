@@ -255,6 +255,25 @@ case class HttpResponseMessage(event: HttpEvent) {
   }
 
   /**
+   * Sends a HTTP response to the client with the status and optional headers.
+   *
+   * Example use could be sending a 201 with status header.
+   *
+   * This write is NOT buffered. The response is immediately sent to the client.
+   *
+   * Calling `write()` more than once results in an exception being thrown because only 1 response is permitted per
+   * request.
+   *
+   * @param status HTTP Status
+   * @param headers Headers to add to the HTTP response. It will be added to the `headers` map.
+   */
+  def write(status: HttpResponseStatus, headers: Map[String, String]): Unit = {
+    this.status = status
+    headers.foreach { kv => this.headers.put(kv._1, kv._2) }
+    write(Array.empty[Byte])
+  }
+
+  /**
    * Sends a HTTP response to the client with the status as well as a text message. This is typically used for in
    * the event of an error.
    *
