@@ -60,6 +60,7 @@ import io.netty.handler.timeout.IdleState
  * Handles incoming HTTP messages from Netty
  *
  * @param server WebServer using this handler
+ * @param routes Routes to request processing actors
  */
 class RequestHandler(server: WebServer, routes: PartialFunction[SockoEvent, Unit]) extends ChannelInboundHandlerAdapter with Logger {
 

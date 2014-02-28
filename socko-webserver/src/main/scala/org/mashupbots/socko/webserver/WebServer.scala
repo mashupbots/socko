@@ -42,7 +42,7 @@ import scala.concurrent.duration._
  * Socko Web Server
  *
  * {{{
- *   val webServer = new WebServer(myWebServerConfig, routes)
+ *   val webServer = new WebServer(myWebServerConfig, actorSystem, { server => new RequestHandler(server, routes) })
  *   webServer.start()
  *   ...
  *
@@ -50,14 +50,29 @@ import scala.concurrent.duration._
  * }}}
  *
  * @param config Web server configuration
- * @param routes Routes for processing requests
  * @param actorFactory Actor factory (such as an ActorSystem) that can be used to create Socko actors
+ * @param handlerFactory Factory to create a Netty request handler
  */
 class WebServer(
   val config: WebServerConfig,  
   val actorFactory: ActorRefFactory,
   handlerFactory: WebServer => ChannelInboundHandler) extends Logger {
 
+  /**
+   * Constructor that uses the default [[org.mashupbots.socko.webserver.RequestHandler]] to process incoming requests
+   *
+   * {{{
+   *   val webServer = new WebServer(myWebServerConfig, routes, actorSystem)
+   *   webServer.start()
+   *   ...
+   *
+   *   webServer.stop()
+   * }}}
+   *
+   * @param config Web server configuration
+   * @param routes Routes for processing requests
+   * @param actorFactory Actor factory (such as an ActorSystem) that can be used to create Socko actors
+   */
   def this(config: WebServerConfig,
            routes: PartialFunction[SockoEvent, Unit],
            actorFactory: ActorRefFactory) = {
@@ -68,10 +83,18 @@ class WebServer(
   config.validate()
 
   /**
+   * Creates a new instance of a Netty request handler to put into the pipeline
+   */
+  private[webserver] def handler() = handlerFactory(this)
+  
+  /**
    * Collection of channels that are currently being used
    */
   val allChannels = new DefaultChannelGroup(config.serverName, GlobalEventExecutor.INSTANCE)
 
+  /**
+   * Collectino of web socket connections
+   */
   val webSocketConnections = new WebSocketConnections(config.serverName + "-websockets")
   
   /**
@@ -175,5 +198,4 @@ class WebServer(
     log.info("Socko server '{}' stopped", config.serverName)
   }
   
-  private[webserver] def handler() = handlerFactory(this)
 }
