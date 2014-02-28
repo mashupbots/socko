@@ -20,6 +20,7 @@ import scala.collection.JavaConversions._
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener
+import io.netty.channel.ChannelInboundHandler
 import io.netty.channel.ChannelOption
 import io.netty.channel.group.DefaultChannelGroup
 import io.netty.channel.nio.NioEventLoopGroup
@@ -53,10 +54,16 @@ import scala.concurrent.duration._
  * @param actorFactory Actor factory (such as an ActorSystem) that can be used to create Socko actors
  */
 class WebServer(
-  val config: WebServerConfig,
-  val routes: PartialFunction[SockoEvent, Unit],
-  val actorFactory: ActorRefFactory) extends Logger {
+  val config: WebServerConfig,  
+  val actorFactory: ActorRefFactory,
+  handlerFactory: WebServer => ChannelInboundHandler) extends Logger {
 
+  def this(config: WebServerConfig,
+           routes: PartialFunction[SockoEvent, Unit],
+           actorFactory: ActorRefFactory) = {
+    this(config, actorFactory, { server => new RequestHandler(server, routes) })
+  }
+  
   require(config != null)
   config.validate()
 
@@ -167,5 +174,6 @@ class WebServer(
 
     log.info("Socko server '{}' stopped", config.serverName)
   }
-
+  
+  private[webserver] def handler() = handlerFactory(this)
 }

@@ -46,6 +46,7 @@ import org.mashupbots.socko.events.HttpChunkEvent
 import org.mashupbots.socko.events.HttpEventConfig
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.InitialHttpRequestMessage
+import org.mashupbots.socko.events.SockoEvent
 import org.mashupbots.socko.events.WebSocketEventConfig
 import org.mashupbots.socko.events.WebSocketFrameEvent
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
@@ -60,7 +61,7 @@ import io.netty.handler.timeout.IdleState
  *
  * @param server WebServer using this handler
  */
-class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter with Logger {
+class RequestHandler(server: WebServer, routes: PartialFunction[SockoEvent, Unit]) extends ChannelInboundHandlerAdapter with Logger {
 
   /**
    * WebSocket handshaker used when closing web sockets
@@ -116,11 +117,11 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
 
         if (event.request.isWebSocketUpgrade) {
           val wsctx = WebSocketHandshakeEvent(ctx, httpRequest, httpConfig)
-          server.routes(wsctx)
+          routes(wsctx)
           doWebSocketHandshake(wsctx)
           initialHttpRequest = Some(new InitialHttpRequestMessage(event.request, event.createdOn))
         } else {
-          server.routes(event)
+          routes(event)
         }
 
       case httpRequest: HttpRequest =>
@@ -129,7 +130,7 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
         log.debug("HTTP REQUEST {} CHANNEL={} {}", event.endPoint, ctx.name, "")
 
         validateFirstChunk(event)
-        server.routes(event)
+        routes(event)
         initialHttpRequest = Some(new InitialHttpRequestMessage(event.request, event.createdOn))
 
       case httpLastChunk: LastHttpContent =>
@@ -137,7 +138,7 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
 
         log.debug("HTTP LAST CHUNK {} CHANNEL={} {}", event.endPoint, ctx.name, "")
 
-        server.routes(event)
+        routes(event)
         validateLastChunk(event)
 
       case httpChunk: HttpContent =>
@@ -146,7 +147,7 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
 
         log.debug("HTTP CHUNK {} CHANNEL={} {}", event.endPoint, ctx.name, "")
 
-        server.routes(event)
+        routes(event)
 
       case wsFrame: WebSocketFrame =>
         val event = WebSocketFrameEvent(ctx, initialHttpRequest.get, wsFrame, wsConfig)
@@ -159,7 +160,7 @@ class RequestHandler(server: WebServer) extends ChannelInboundHandlerAdapter wit
         } else if (wsFrame.isInstanceOf[PingWebSocketFrame]) {
           ctx.writeAndFlush(new PongWebSocketFrame(wsFrame.content))
         } else {
-          server.routes(event)
+          routes(event)
         }
 
       case _ =>

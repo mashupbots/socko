@@ -73,7 +73,7 @@ class ProtocolNegoitationHandler(server: WebServer) extends ByteToMessageDecoder
       pipeline.addLast("idleStateHandler", new IdleStateHandler(0, 0, server.config.idleConnectionTimeout.toSeconds.toInt))
     }
 
-    pipeline.addLast("handler", new RequestHandler(server))
+    pipeline.addLast("handler", server.handler)
   }
 
   private def addHttpHandlers(ctx: ChannelHandlerContext) = {
@@ -92,7 +92,7 @@ class ProtocolNegoitationHandler(server: WebServer) extends ByteToMessageDecoder
       pipeline.addLast("idleStateHandler", new IdleStateHandler(0, 0, server.config.idleConnectionTimeout.toSeconds.toInt))
     }
 
-    pipeline.addLast("handler", new RequestHandler(server))
+    pipeline.addLast("handler", server.handler)
   }
 
   def initPipeline(ctx: ChannelHandlerContext): Boolean = {
