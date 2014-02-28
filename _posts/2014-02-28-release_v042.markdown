@@ -1,0 +1,26 @@
+---
+layout: post
+title: Release v0.4.2
+summary: Maintenance Release
+author: Vibul
+---
+
+This [release](https://github.com/mashupbots/socko/issues?milestone=12&state=closed) includes:
+ - Support for custom Netty request handler (thanks to [thirstycrow](https://github.com/thirstycrow))
+ - Support response write method with status and headers parameters (thanks to [rossputin](https://github.com/rossputin))
+ - `event.readBinary()` causes `UnsupportedOperationException`
+ - Don't count in classes with special char when load REST classes from JAR
+ 
+Thanks to [chiappone](https://github.com/chiappone), [gnawux](https://github.com/gnawux) and [marsxu1984](https://github.com/marsxu1984) for raising the issues.
+
+Download [socko-webserver_2.10-0.4.2.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.10/0.4.2/socko-webserver_2.10-0.4.2.jar).
+
+For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
+
+Documentation
+ - [User Guide](/docs/0.4.2/guides/user-guide.html)
+ - [API](/docs/0.4.2/api/)
+ - [Change logs](https://github.com/mashupbots/socko/issues?milestone=12&state=closed)
+
+
+
