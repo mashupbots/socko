@@ -55,8 +55,8 @@ to write a response to the client.
      */
     class HelloHandler extends Actor {
       def receive = {
-        case request: HttpRequestEvent =>
-          request.writeResponse("Hello from Socko (" + new Date().toString + ")")
+        case event: HttpRequestEvent =>
+          event.response.write("Hello from Socko (" + new Date().toString + ")")
           context.stop(self)
       }
     }
