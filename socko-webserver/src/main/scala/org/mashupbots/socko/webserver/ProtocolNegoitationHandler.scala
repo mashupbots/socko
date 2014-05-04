@@ -35,6 +35,7 @@ import io.netty.handler.timeout.IdleStateHandler
 import io.netty.handler.codec.ByteToMessageDecoder
 import io.netty.buffer.ByteBuf
 import io.netty.handler.codec.spdy.SpdyHttpResponseStreamIdHandler
+import io.netty.handler.codec.spdy.SpdyFrameCodec
 
 /**
  * Handler used with SPDY that performs protocol negotiation.
@@ -60,9 +61,11 @@ class ProtocolNegoitationHandler(server: WebServer) extends ByteToMessageDecoder
     val pipeline = ctx.pipeline
     val httpConfig = server.config.http
 
-    pipeline.addLast("spdyDecoder", new SpdyFrameDecoder(spdyVersion, httpConfig.maxChunkSizeInBytes,
-      httpConfig.maxHeaderSizeInBytes))
-    pipeline.addLast("spdyEncoder", new SpdyFrameEncoder(spdyVersion))
+    // Copied and customized from io.netty.handler.codec.spdy.SpdyOrHttpChooser.addSpdyHandlers()
+    pipeline.addLast("spdyFrameCodec", new SpdyFrameCodec(spdyVersion, 
+        httpConfig.maxChunkSizeInBytes,
+        httpConfig.maxHeaderSizeInBytes,
+        6, 15, 8));    
     pipeline.addLast("spdySessionHandler", new SpdySessionHandler(spdyVersion, true))
     pipeline.addLast("spdyHttpEncoder", new SpdyHttpEncoder(spdyVersion))
     pipeline.addLast("spdyHttpDecoder", new SpdyHttpDecoder(spdyVersion, httpConfig.maxLengthInBytes))
@@ -115,8 +118,6 @@ class ProtocolNegoitationHandler(server: WebServer) extends ByteToMessageDecoder
       selectedProtocol match {
         case "spdy/3.1" =>
           addSpdyHandlers(ctx, SpdyVersion.SPDY_3_1)
-        case "spdy/3" =>
-          addSpdyHandlers(ctx, SpdyVersion.SPDY_3)
         case "http/1.1" =>
           addHttpHandlers(ctx)
         case "http/1.0" =>

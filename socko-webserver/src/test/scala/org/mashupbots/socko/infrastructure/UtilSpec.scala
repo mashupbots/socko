@@ -115,7 +115,7 @@ class UtilSpec extends WordSpec with ShouldMatchers with GivenWhenThen with Logg
       val mirror = ru.runtimeMirror(getClass.getClassLoader)
       annotations.foreach(c => {
         val cc = mirror.classSymbol(c)
-        log.debug("Mirror class {}. Annotations: {} {}", c.getName(), cc.annotations)
+        log.debug("Mirror class {}. Annotations: {} {}", c.getName(), cc.annotations, "")
       })
     }
     
