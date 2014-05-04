@@ -165,8 +165,8 @@ object Dependencies {
 
 object Dependency {
   object V {
-    val Scala       = "2.10.2"
-    val Akka        = "2.2.3"
+    val Scala       = "2.11.0"
+    val Akka        = "2.3.2"
   }
 
   val scalaReflect  = "org.scala-lang"                          % "scala-reflect"                % V.Scala
@@ -176,10 +176,10 @@ object Dependency {
   val ant           = "org.apache.ant"                          % "ant"                          % "1.8.4"
   val concurrentmap = "com.googlecode.concurrentlinkedhashmap"  % "concurrentlinkedhashmap-lru"  % "1.3.2"
   val logback       = "ch.qos.logback"                          % "logback-classic"              % "1.0.9" % "runtime"
-  val netty         = "io.netty"                                % "netty-all"                    % "4.0.14.Final"
+  val netty         = "io.netty"                                % "netty-all"                    % "4.0.19.Final"
   val nextProtoNeg  = "org.eclipse.jetty.npn"                   % "npn-api"                      % "1.1.0.v20120525"
-  val json4s        = "org.json4s"                              %% "json4s-native"               % "3.2.5"
-  val scalatest     = "org.scalatest"                           % "scalatest_2.10"               % "2.0.M5b" % "test"
+  val json4s        = "org.json4s"                              %% "json4s-native"               % "3.2.9"
+  val scalatest     = "org.scalatest"                           % "scalatest_2.11"               % "2.1.5" % "test"
   val swagger       = "com.wordnik"                             % "swagger-core_2.10.0"          % "1.2.0" exclude("org.slf4j", "slf4j-log4j12") exclude("log4j", "log4j")
 }
 
