@@ -18,7 +18,6 @@ package org.mashupbots.socko.handlers
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.Hashtable
-
 import io.netty.util.CharsetUtil
 import org.mashupbots.socko.infrastructure.WebLogFormat
 import org.mashupbots.socko.routes.HttpRequest
@@ -30,18 +29,16 @@ import org.mashupbots.socko.webserver.HttpConfig
 import org.mashupbots.socko.webserver.WebLogConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
-import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.GivenWhenThen
+import org.scalatest.Matchers
 import org.scalatest.WordSpec
-
 import com.typesafe.config.ConfigFactory
-
 import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient {
+class SnoopSpec extends WordSpec with Matchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient {
 
   val akkaConfig =
     """
@@ -75,7 +72,7 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
     }
   })
 
-  override def beforeAll(configMap: Map[String, Any]) {
+  override def beforeAll() {
     // Make all content compressible to pass our tests
     val httpConfig = HttpConfig(minCompressibleContentSizeInBytes = 0)
     val webLogConfig = Some(WebLogConfig(None, WebLogFormat.Common))
@@ -85,7 +82,7 @@ class SnoopSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with
     webServer.start()
   }
 
-  override def afterAll(configMap: Map[String, Any]) {
+  override def afterAll() {
     webServer.stop()
   }
 

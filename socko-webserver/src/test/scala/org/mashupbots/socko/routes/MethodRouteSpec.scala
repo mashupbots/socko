@@ -16,10 +16,10 @@
 package org.mashupbots.socko.routes
 
 import org.mashupbots.socko.events.EndPoint
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.WordSpec
 
-class MethodRouteSpec extends WordSpec with ShouldMatchers {
+class MethodRouteSpec extends WordSpec with Matchers {
 
   "Method route extractor" should {
     "route GET method" in {

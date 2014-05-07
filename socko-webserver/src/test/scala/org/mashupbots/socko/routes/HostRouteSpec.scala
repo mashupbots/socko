@@ -16,11 +16,11 @@
 package org.mashupbots.socko.routes
 
 import org.mashupbots.socko.events.EndPoint
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 
-class HostRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
+class HostRouteSpec extends WordSpec with Matchers with GivenWhenThen {
 
   "Host route extractors" should {
     "route on exact host match" in {

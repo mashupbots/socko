@@ -24,7 +24,7 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
 import com.typesafe.config.ConfigFactory
 
@@ -33,7 +33,7 @@ import akka.actor.ExtendedActorSystem
 import akka.actor.ExtensionId
 import akka.actor.ExtensionIdProvider
 
-class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
+class WebServerConfigSpec extends WordSpec with Matchers with GivenWhenThen with BeforeAndAfterAll {
 
   var aDirectory: File = null
 
@@ -49,7 +49,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
       "'" + paramName + "' does not appear in the error message: " + ex.getMessage)
   }
 
-  override def beforeAll(configMap: Map[String, Any]) {
+  override def beforeAll() {
     aDirectory = File.createTempFile("ADir_", "")
     aDirectory.delete()
     aDirectory.mkdir()
@@ -62,7 +62,7 @@ class WebServerConfigSpec extends WordSpec with ShouldMatchers with GivenWhenThe
     out.close
   }
 
-  override def afterAll(configMap: Map[String, Any]) {
+  override def afterAll() {
     if (aDirectory != null) {
       deleteDirectory(aDirectory)
       aDirectory = null

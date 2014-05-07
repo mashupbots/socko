@@ -215,7 +215,7 @@ object ConfigUtil {
       if (v == null || v == "") {
         defaultValue
       } else {
-        Duration(config.getMilliseconds(name), TimeUnit.MILLISECONDS)
+        Duration(config.getDuration(name, TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
       }
     } catch {
       case _: Throwable => defaultValue
@@ -231,7 +231,7 @@ object ConfigUtil {
       if (v == null || v == "") {
         None
       } else {
-        Some(Duration(config.getMilliseconds(name), TimeUnit.MILLISECONDS))
+        Some(Duration(config.getDuration(name, TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS))
       }
     } catch {
       case _: Throwable => None

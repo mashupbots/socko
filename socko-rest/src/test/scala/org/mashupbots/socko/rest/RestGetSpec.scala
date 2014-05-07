@@ -30,8 +30,8 @@ import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Finders
-import org.scalatest.WordSpec
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.WordSpecLike
+import org.scalatest.Matchers
 
 import com.typesafe.config.ConfigFactory
 
@@ -50,8 +50,8 @@ object RestGetSpec {
     """
 }
 
-class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender with WordSpec
-  with MustMatchers with BeforeAndAfterAll with TestHttpClient with Logger {
+class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender with WordSpecLike
+  with Matchers with BeforeAndAfterAll with TestHttpClient with Logger {
 
   def this() = this(ActorSystem("HttpSpec", ConfigFactory.parseString(RestGetSpec.cfg)))
 
@@ -71,7 +71,7 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     }
   })
 
-  override def beforeAll(configMap: Map[String, Any]) {
+  override def beforeAll() {
     // Make all content compressible to pass our tests
     val httpConfig = HttpConfig(minCompressibleContentSizeInBytes = 0)
     val webLogConfig = Some(WebLogConfig(None, WebLogFormat.Common))
@@ -81,7 +81,7 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     webServer.start()
   }
 
-  override def afterAll(configMap: Map[String, Any]) {
+  override def afterAll() {
     webServer.stop()
   }
 
@@ -92,15 +92,15 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
       val resp = getResponseContent(conn)
 
-      resp.status must equal("200")
-      resp.content.length must be(0)
+      resp.status should equal("200")
+      resp.content.length should be(0)
 
       val url2 = new URL(path + "api/void/404")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       val resp2 = getResponseContent(conn2)
 
-      resp2.status must equal("404")
-      resp2.content.length must be(0)
+      resp2.status should equal("404")
+      resp2.content.length should be(0)
 
       // HEAD
       val url3 = new URL(path + "api/void/200")
@@ -108,13 +108,13 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       conn3.setRequestMethod("HEAD")
       val resp3 = getResponseContent(conn3)
 
-      resp3.status must equal("200")
-      resp3.content.length must be(0)
+      resp3.status should equal("200")
+      resp3.content.length should be(0)
 
       //restHandler ! RestHandlerWorkerCountRequest()
       //expectMsgPF(5 seconds) {
       //  case m: Int => {
-      //    m must be(0)
+      //    m should be(0)
       //  }
       //}      
     }
@@ -124,16 +124,16 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
       val resp = getResponseContent(conn)
 
-      resp.status must equal("200")
-      resp.content must be("{\"name\":\"Boo\",\"age\":5}")
-      resp.headers.getOrElse("Content-Type", "") must be("application/json; charset=UTF-8")
+      resp.status should equal("200")
+      resp.content should be("{\"name\":\"Boo\",\"age\":5}")
+      resp.headers.getOrElse("Content-Type", "") should be("application/json; charset=UTF-8")
 
       val url2 = new URL(path + "api/object/404")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       val resp2 = getResponseContent(conn2)
 
-      resp2.status must equal("404")
-      resp2.content.length must be(0)
+      resp2.status should equal("404")
+      resp2.content.length should be(0)
 
       // HEAD
       val url3 = new URL(path + "api/object/200")
@@ -141,8 +141,8 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       conn3.setRequestMethod("HEAD")
       val resp3 = getResponseContent(conn3)
 
-      resp3.status must equal("200")
-      resp3.content.length must be(0)
+      resp3.status should equal("200")
+      resp3.content.length should be(0)
 
     }
 
@@ -151,16 +151,16 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
       val resp = getResponseContent(conn)
 
-      resp.status must equal("200")
-      resp.content must be("hello everybody")
-      resp.headers.getOrElse("Content-Type", "") must be("text/plain; charset=UTF-8")
+      resp.status should equal("200")
+      resp.content should be("hello everybody")
+      resp.headers.getOrElse("Content-Type", "") should be("text/plain; charset=UTF-8")
 
       val url2 = new URL(path + "api/bytes/404")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       val resp2 = getResponseContent(conn2)
 
-      resp2.status must equal("404")
-      resp2.content.length must be(0)
+      resp2.status should equal("404")
+      resp2.content.length should be(0)
 
       // HEAD
       val url3 = new URL(path + "api/bytes/200")
@@ -168,8 +168,8 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       conn3.setRequestMethod("HEAD")
       val resp3 = getResponseContent(conn3)
 
-      resp3.status must equal("200")
-      resp3.content.length must be(0)
+      resp3.status should equal("200")
+      resp3.content.length should be(0)
     }
 
     "GET primitive operations" in {
@@ -177,16 +177,16 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
       val resp = getResponseContent(conn)
 
-      resp.status must equal("200")
+      resp.status should equal("200")
       DateUtil.parseISO8601Date(resp.content.replace("\"", ""))
-      resp.headers.getOrElse("Content-Type", "") must be("application/json; charset=UTF-8")
+      resp.headers.getOrElse("Content-Type", "") should be("application/json; charset=UTF-8")
 
       val url2 = new URL(path + "api/primitive/404")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       val resp2 = getResponseContent(conn2)
 
-      resp2.status must equal("404")
-      resp2.content.length must be(0)
+      resp2.status should equal("404")
+      resp2.content.length should be(0)
 
       // HEAD
       val url3 = new URL(path + "api/primitive/200")
@@ -194,8 +194,8 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       conn3.setRequestMethod("HEAD")
       val resp3 = getResponseContent(conn3)
 
-      resp3.status must equal("200")
-      resp3.content.length must be(0)
+      resp3.status should equal("200")
+      resp3.content.length should be(0)
     }
 
     "Correctly handle binding errors" in {
@@ -204,7 +204,7 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
       val resp = getResponseContent(conn)
 
-      resp.status must equal("404")
+      resp.status should equal("404")
       log.info(s"Error message: ${resp.content}")
 
       // Required query string "sourceURL" not present
@@ -212,16 +212,16 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       val resp2 = getResponseContent(conn2)
 
-      resp2.status must equal("400")
-      resp2.content.length must not be (0)
+      resp2.status should equal("400")
+      resp2.content.length should not be (0)
       log.info(s"Error message: ${resp2.content}")
 
       val url3 = new URL(path + "api/void/cannot_parse")
       val conn3 = url3.openConnection().asInstanceOf[HttpURLConnection]
       val resp3 = getResponseContent(conn3)
 
-      resp3.status must equal("400")
-      resp3.content.length must not be (0)
+      resp3.status should equal("400")
+      resp3.content.length should not be (0)
     }
 
     "Correctly handle errors with processing actors" in {
@@ -229,15 +229,15 @@ class RestGetSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val url = new URL(path + "api/error/exception")
       val conn = url.openConnection().asInstanceOf[HttpURLConnection]
       val resp = getResponseContent(conn)
-      resp.status must equal("500")
-      resp.content must equal("Timed out")
+      resp.status should equal("500")
+      resp.content.contains("timed out") should be(true)
 
       // Processor actor did not respond in time
       val url2 = new URL(path + "api/error/timeout")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       val resp2 = getResponseContent(conn2)
-      resp2.status must equal("500")
-      resp2.content must equal("Timed out")      
+      resp2.status should equal("500")
+      resp2.content.contains("timed out") should be(true)
     }
 
   }

@@ -21,12 +21,10 @@ import java.nio.file.WatchEvent
 
 import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.Logger
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.GivenWhenThen
+import org.scalatest.Matchers
 import org.scalatest.WordSpec
-import org.scalatest.matchers.ShouldMatchers
 
-class DirectoryWatcherSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll with Logger {
+class DirectoryWatcherSpec extends WordSpec with Matchers with Logger {
 
   var triggerred = false
   var stop = false

@@ -15,10 +15,10 @@
 //
 package org.mashupbots.socko.events
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.WordSpec
 
-class HttpHeadersSpec extends WordSpec with ShouldMatchers {
+class HttpHeadersSpec extends WordSpec with Matchers {
 
   "ImmutableHttpHeaders" should {
     "be empty when empty" in {

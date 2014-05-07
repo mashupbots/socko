@@ -19,7 +19,7 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.Matchers
 
 import com.typesafe.config.ConfigFactory
 
@@ -28,22 +28,22 @@ import akka.actor.ExtendedActorSystem
 import akka.actor.ExtensionId
 import akka.actor.ExtensionIdProvider
 
-class RestConfigSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
+class RestConfigSpec extends WordSpec with Matchers with GivenWhenThen with Logger {
 
-  "RestConfig" must {
+  "RestConfig" should {
 
     "correctly load defaults" in {
       val cfg = RestConfig("1", "http://localhost/api")
 
-      cfg.apiVersion must be("1")
-      cfg.schemeDomainPort must be ("http://localhost")
-      cfg.rootPath must be("/api")
-      cfg.swaggerVersion must be("1.1")
-      cfg.swaggerApiGroupingPathSegment must be(1)
-      cfg.requestTimeoutSeconds must be(60)
-      cfg.maxWorkerCount must be(100)
-      cfg.maxWorkerRescheduleMilliSeconds must be(500)
-      cfg.reportRuntimeException must be(ReportRuntimeException.Never)
+      cfg.apiVersion should be("1")
+      cfg.schemeDomainPort should be ("http://localhost")
+      cfg.rootPath should be("/api")
+      cfg.swaggerVersion should be("1.1")
+      cfg.swaggerApiGroupingPathSegment should be(1)
+      cfg.requestTimeoutSeconds should be(60)
+      cfg.maxWorkerCount should be(100)
+      cfg.maxWorkerRescheduleMilliSeconds should be(500)
+      cfg.reportRuntimeException should be(ReportRuntimeException.Never)
     }
 
     "correctly load from akka config" in {
@@ -62,15 +62,15 @@ class RestConfigSpec extends WordSpec with MustMatchers with GivenWhenThen with 
       val actorSystem = ActorSystem("RestConfigSpec", ConfigFactory.parseString(actorConfig))
       val cfg = MyRestConfig(actorSystem)
 
-      cfg.apiVersion must be("1")
-      cfg.rootPath must be("/api")
-      cfg.schemeDomainPort must be ("https://localhost:8888")
-      cfg.swaggerVersion must be("2")
-      cfg.swaggerApiGroupingPathSegment must be(3)
-      cfg.requestTimeoutSeconds must be(4)
-      cfg.maxWorkerCount must be(5)
-      cfg.maxWorkerRescheduleMilliSeconds must be(6)
-      cfg.reportRuntimeException must be(ReportRuntimeException.All)
+      cfg.apiVersion should be("1")
+      cfg.rootPath should be("/api")
+      cfg.schemeDomainPort should be ("https://localhost:8888")
+      cfg.swaggerVersion should be("2")
+      cfg.swaggerApiGroupingPathSegment should be(3)
+      cfg.requestTimeoutSeconds should be(4)
+      cfg.maxWorkerCount should be(5)
+      cfg.maxWorkerRescheduleMilliSeconds should be(6)
+      cfg.reportRuntimeException should be(ReportRuntimeException.All)
     }
 
   }

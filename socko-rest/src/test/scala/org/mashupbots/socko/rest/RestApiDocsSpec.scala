@@ -25,28 +25,28 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.Matchers
 
-class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
+class RestApiDocsSpec extends WordSpec with Matchers with GivenWhenThen with Logger {
 
-  "RestApiDocs" must {
+  "RestApiDocs" should {
 
     val cfg = RestConfig("1.0", "http://localhost:8888/api")
     val registry = RestRegistry("org.mashupbots.socko.rest.petshop", cfg)
 
     "Identify swagger types" in {
-      SwaggerReflector.dataType(ru.typeOf[String]) must be("string")
-      SwaggerReflector.dataType(ru.typeOf[Int]) must be("int")
+      SwaggerReflector.dataType(ru.typeOf[String]) should be("string")
+      SwaggerReflector.dataType(ru.typeOf[Int]) should be("int")
 
-      SwaggerReflector.dataType(ru.typeOf[List[Int]]) must be("Array[int]")
-      SwaggerReflector.dataType(ru.typeOf[Array[String]]) must be("Array[string]")
-      SwaggerReflector.dataType(ru.typeOf[Set[Float]]) must be("Set[float]")
+      SwaggerReflector.dataType(ru.typeOf[List[Int]]) should be("Array[int]")
+      SwaggerReflector.dataType(ru.typeOf[Array[String]]) should be("Array[string]")
+      SwaggerReflector.dataType(ru.typeOf[Set[Float]]) should be("Set[float]")
 
-      SwaggerReflector.dataType(ru.typeOf[Cow]) must be("Cow")
-      SwaggerReflector.dataType(ru.typeOf[Option[Cow]]) must be("Cow")
-      SwaggerReflector.dataType(ru.typeOf[List[Cow]]) must be("Array[Cow]")
-      SwaggerReflector.dataType(ru.typeOf[Array[Cow]]) must be("Array[Cow]")
-      SwaggerReflector.dataType(ru.typeOf[Set[Cow]]) must be("Set[Cow]")
+      SwaggerReflector.dataType(ru.typeOf[Cow]) should be("Cow")
+      SwaggerReflector.dataType(ru.typeOf[Option[Cow]]) should be("Cow")
+      SwaggerReflector.dataType(ru.typeOf[List[Cow]]) should be("Array[Cow]")
+      SwaggerReflector.dataType(ru.typeOf[Array[Cow]]) should be("Array[Cow]")
+      SwaggerReflector.dataType(ru.typeOf[Set[Cow]]) should be("Set[Cow]")
     }
 
     "correctly produce resource listing" in {
@@ -74,7 +74,7 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
         """
       val acutalJson = new String(resourceListing.get, CharsetUtil.UTF_8)
       log.debug("ResourceListing=" + pettyJson(acutalJson))
-      acutalJson must be(compactJson(resourceListingDoc))
+      acutalJson should be(compactJson(resourceListingDoc))
     }
 
     "correctly produce pets API declaration" in {
@@ -268,7 +268,7 @@ class RestApiDocsSpec extends WordSpec with MustMatchers with GivenWhenThen with
         """
       val acutalJson = new String(api.get, CharsetUtil.UTF_8)
       log.debug("Pets API declaration=" + pettyJson(acutalJson))
-      acutalJson must be(compactJson(apiDoc))
+      acutalJson should be(compactJson(apiDoc))
     }
 
     def pettyJson(json: String): String = {

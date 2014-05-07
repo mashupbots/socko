@@ -78,8 +78,8 @@ object RestResponseSerializer {
    * @param responseClassSymbol Response class symbol
    */
   def apply(config: RestConfig, rm: ru.Mirror, registration: RestRegistration, responseClassSymbol: ru.ClassSymbol): RestResponseSerializer = {
-    val responseConstructor: ru.MethodSymbol = responseClassSymbol.toType.declaration(ru.nme.CONSTRUCTOR).asMethod
-    val responseConstructorParams: List[ru.TermSymbol] = responseConstructor.paramss(0).map(p => p.asTerm)
+    val responseConstructor: ru.MethodSymbol = responseClassSymbol.toType.decl(ru.termNames.CONSTRUCTOR).asMethod
+    val responseConstructorParams: List[ru.TermSymbol] = responseConstructor.paramLists(0).map(p => p.asTerm)
 
     if (responseConstructorParams.size == 0) {
       throw RestDefintionException(s"'${responseClassSymbol.fullName}' constructor must have parameters.")
@@ -96,7 +96,7 @@ object RestResponseSerializer {
 
       // The data term name assumed to be in the constructor of a "case class"
       // Get the term name and reflect it as a field in order to read its value in getData()
-      val responseDataTerm = responseClassSymbol.toType.declaration(paramDataTerm.name).asTerm.accessed.asTerm
+      val responseDataTerm = responseClassSymbol.toType.decl(paramDataTerm.name).asTerm.accessed.asTerm
 
       val dataSerializer = if (PrimitiveDataSerializer.IsPrimitiveDataType(paramDataType)) {
         PrimitiveDataSerializer(paramDataType, responseDataTerm, rm)

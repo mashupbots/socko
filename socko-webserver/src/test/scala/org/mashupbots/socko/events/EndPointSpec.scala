@@ -15,10 +15,10 @@
 //
 package org.mashupbots.socko.events
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.WordSpec
 
-class EndPointSpec extends WordSpec with ShouldMatchers {
+class EndPointSpec extends WordSpec with Matchers {
 
   "EndPoint" should {
 

@@ -491,7 +491,7 @@ case class SwaggerModelRegistry(rm: ru.Mirror) {
    */
   private def locatePropertiesMetaData(tpe: ru.Type): Seq[RestPropertyMetaData] = {
     val cs = tpe.typeSymbol.asClass
-    val companionModuleSymbol = cs.companionSymbol.asModule
+    val companionModuleSymbol = cs.companion.asModule
     val moduleType = companionModuleSymbol.typeSignature
     if (moduleType <:< typeRestModelMetaData) {
       val moduleMirror = rm.reflectModule(companionModuleSymbol)

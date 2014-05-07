@@ -15,12 +15,12 @@
 //
 package org.mashupbots.socko.routes
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.WordSpec
 import org.mashupbots.socko.events.EndPoint
 import org.scalatest.GivenWhenThen
 
-class QueryStringRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
+class QueryStringRouteSpec extends WordSpec with Matchers with GivenWhenThen {
 
   "Querystring route extractors" should {
     "route on exact querystring match" in {

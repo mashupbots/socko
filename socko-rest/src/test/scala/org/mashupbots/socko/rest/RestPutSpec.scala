@@ -33,8 +33,8 @@ import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Finders
-import org.scalatest.WordSpec
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.WordSpecLike
+import org.scalatest.Matchers
 
 import com.typesafe.config.ConfigFactory
 
@@ -53,8 +53,8 @@ object RestPutSpec {
     """
 }
 
-class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender with WordSpec
-  with MustMatchers with BeforeAndAfterAll with TestHttpClient with Logger {
+class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender with WordSpecLike
+  with Matchers with BeforeAndAfterAll with TestHttpClient with Logger {
 
   def this() = this(ActorSystem("HttpSpec", ConfigFactory.parseString(RestPutSpec.cfg)))
 
@@ -74,7 +74,7 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     }
   })
 
-  override def beforeAll(configMap: Map[String, Any]) {
+  override def beforeAll() {
     // Make all content compressible to pass our tests
     val httpConfig = HttpConfig(minCompressibleContentSizeInBytes = 0)
     val webLogConfig = Some(WebLogConfig(None, WebLogFormat.Common))
@@ -84,7 +84,7 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     webServer.start()
   }
 
-  override def afterAll(configMap: Map[String, Any]) {
+  override def afterAll() {
     webServer.stop()
   }
 
@@ -96,16 +96,16 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       sendPutRequest(conn, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "{\"name\":\"Boo\",\"age\":5}")
       val resp = getResponseContent(conn)
 
-      resp.status must equal("200")
-      resp.content.length must be(0)
+      resp.status should equal("200")
+      resp.content.length should be(0)
 
       val url2 = new URL(path + "api/void/204")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       sendPutRequest(conn2, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "{\"name\":\"Boo\",\"age\":5}")
       val resp2 = getResponseContent(conn2)
 
-      resp2.status must equal("204")
-      resp2.content.length must be(0)
+      resp2.status should equal("204")
+      resp2.content.length should be(0)
     }
 
     "PUT object operations" in {
@@ -114,9 +114,9 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       sendPutRequest(conn, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "{\"name\":\"Boo\",\"age\":5}")
       val resp = getResponseContent(conn)
 
-      resp.status must equal("200")
-      resp.content must be("{\"name\":\"Boo\",\"age\":5,\"history\":[]}")
-      resp.headers.getOrElse("Content-Type", "") must be("application/json; charset=UTF-8")
+      resp.status should equal("200")
+      resp.content should be("{\"name\":\"Boo\",\"age\":5,\"history\":[]}")
+      resp.headers.getOrElse("Content-Type", "") should be("application/json; charset=UTF-8")
 
       // Non successful return code
       val url2 = new URL(path + "api/object/404")
@@ -124,8 +124,8 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       sendPutRequest(conn2, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "{\"name\":\"Boo\",\"age\":5}")
       val resp2 = getResponseContent(conn2)
 
-      resp2.status must equal("404")
-      resp2.content.length must be(0)
+      resp2.status should equal("404")
+      resp2.content.length should be(0)
 
       // Nested objects
       val evt1 = org.mashupbots.socko.rest.put.Event(new Date(), "born")
@@ -140,9 +140,9 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       sendPutRequest(conn3, "application/json; charset=UTF-8", CharsetUtil.UTF_8, s)
       val resp3 = getResponseContent(conn3)
 
-      resp3.status must equal("200")
-      resp3.content must be(s)
-      resp3.headers.getOrElse("Content-Type", "") must be("application/json; charset=UTF-8")
+      resp3.status should equal("200")
+      resp3.content should be(s)
+      resp3.headers.getOrElse("Content-Type", "") should be("application/json; charset=UTF-8")
 
       // Empty content = bad request because object is required
       val url4 = new URL(path + "api/object/204")
@@ -150,7 +150,7 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       sendPutRequest(conn4, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "")
       val resp4 = getResponseContent(conn4)
 
-      resp4.status must equal("400")
+      resp4.status should equal("400")
     }
 
     "PUT bytes operations" in {
@@ -159,16 +159,16 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       sendPutRequest(conn, "text/plain; charset=UTF-8", CharsetUtil.UTF_8, "YeeHaa")
       val resp = getResponseContent(conn)
 
-      resp.status must equal("200")
-      resp.content must be("YeeHaa")
+      resp.status should equal("200")
+      resp.content should be("YeeHaa")
 
       val url2 = new URL(path + "api/bytes/404")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       sendPutRequest(conn2, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "YeeHaa")
       val resp2 = getResponseContent(conn2)
 
-      resp2.status must equal("404")
-      resp2.content.length must be(0)
+      resp2.status should equal("404")
+      resp2.content.length should be(0)
 
       // Empty byte array
       val url3 = new URL(path + "api/bytes/204")
@@ -176,8 +176,8 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       sendPutRequest(conn3, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "")
       val resp3 = getResponseContent(conn3)
 
-      resp3.status must equal("204")
-      resp3.content.length must be(0)
+      resp3.status should equal("204")
+      resp3.content.length should be(0)
     }
 
     "PUT primitive operations" in {
@@ -186,15 +186,15 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       sendPutRequest(conn, "text/plain; charset=UTF-8", CharsetUtil.UTF_8, "1.23")
       val resp = getResponseContent(conn)
 
-      resp.status must equal("200")
-      resp.content must be("1.23")
+      resp.status should equal("200")
+      resp.content should be("1.23")
 
       val url2 = new URL(path + "api/primitive/404")
       val conn2 = url2.openConnection().asInstanceOf[HttpURLConnection]
       sendPutRequest(conn2, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "1.23")
       val resp2 = getResponseContent(conn2)
 
-      resp2.status must equal("404")
+      resp2.status should equal("404")
 
       // Empty content = binding error because body is required
       val url3 = new URL(path + "api/primitive/204")
@@ -202,7 +202,7 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       sendPutRequest(conn3, "application/json; charset=UTF-8", CharsetUtil.UTF_8, "")
       val resp3 = getResponseContent(conn3)
 
-      resp3.status must equal("400")
+      resp3.status should equal("400")
     }
 
 
@@ -212,8 +212,8 @@ class RestPutSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       sendPutRequest(conn, "text/plain; charset=UTF-8", CharsetUtil.UTF_8, "hello")
       val resp = getResponseContent(conn)
 
-      resp.status must equal("200")
-      resp.content must be("hello")
+      resp.status should equal("200")
+      resp.content should be("hello")
 
     }    
   }

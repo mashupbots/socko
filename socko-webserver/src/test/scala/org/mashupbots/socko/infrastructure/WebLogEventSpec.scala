@@ -15,13 +15,13 @@
 //
 package org.mashupbots.socko.infrastructure
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.WordSpec
 import java.util.Date
 import java.util.GregorianCalendar
 import java.net.InetSocketAddress
 
-class WebLogEventSpec extends WordSpec with ShouldMatchers {
+class WebLogEventSpec extends WordSpec with Matchers {
 
   "WebLogEvent" should {
 

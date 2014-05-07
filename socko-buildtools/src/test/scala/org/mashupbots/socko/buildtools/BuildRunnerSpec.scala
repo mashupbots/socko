@@ -15,19 +15,14 @@
 //
 package org.mashupbots.socko.buildtools
 
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.GivenWhenThen
-import org.scalatest.WordSpec
-import akka.actor.ActorSystem
-import com.typesafe.config.ConfigFactory
-import org.mashupbots.socko.infrastructure.IOUtil
 import java.io.File
-import java.nio.file.FileSystems
-import java.nio.file.WatchEvent
-import org.mashupbots.socko.infrastructure.Logger
 
-class BuildRunnerSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll with Logger {
+import org.mashupbots.socko.infrastructure.IOUtil
+import org.mashupbots.socko.infrastructure.Logger
+import org.scalatest.Matchers
+import org.scalatest.WordSpec
+
+class BuildRunnerSpec extends WordSpec with Matchers with Logger {
 
   "Internal ant build should work" in {
     val root = IOUtil.createTempDir("BuildRunnerSpec")

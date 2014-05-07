@@ -295,7 +295,7 @@ class RequestHandler(server: WebServer, routes: PartialFunction[SockoEvent, Unit
       event.maxFrameSize)
     wsHandshaker = wsFactory.newHandshaker(event.nettyHttpRequest)
     if (wsHandshaker == null) {
-      WebSocketServerHandshakerFactory.sendUnsupportedWebSocketVersionResponse(event.context.channel)
+      WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(event.context.channel)
       event.writeWebLog(HttpResponseStatus.UPGRADE_REQUIRED.code, 0)
     } else {
       val id = event.webSocketId

@@ -25,14 +25,14 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.Matchers
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import org.mashupbots.socko.events.ImmutableHttpHeaders
 
-class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
+class RestResponseSerializerSpec extends WordSpec with Matchers with GivenWhenThen with Logger {
 
-  "RestResponseSerializerSpec" must {
+  "RestResponseSerializerSpec" should {
 
     val config = RestConfig("1.0", "http://localhost/api")
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
@@ -46,11 +46,11 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         SerializerGenericRegistration,
         ru.typeOf[VoidResponse].typeSymbol.asClass)
 
-      s.dataSerializer.isInstanceOf[VoidDataSerializer] must be(true)
+      s.dataSerializer.isInstanceOf[VoidDataSerializer] should be(true)
 
-      s.dataSerializer.getData(null) == null must be (true)
+      s.dataSerializer.getData(null) == null should be (true)
 
-      s.dataSerializer.serialize(null) must be (Array.empty)      
+      s.dataSerializer.serialize(null) should be (Array.empty)      
     }
 
     "Serailize primitive string response" in {
@@ -60,14 +60,14 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         SerializerGenericRegistration,
         ru.typeOf[StringResponse].typeSymbol.asClass)
 
-      s.dataSerializer.isInstanceOf[PrimitiveDataSerializer] must be(true)
+      s.dataSerializer.isInstanceOf[PrimitiveDataSerializer] should be(true)
 
       val response = StringResponse(responseContext, "hello")
       val data = s.dataSerializer.getData(response)
-      data.asInstanceOf[String] must be("hello")
+      data.asInstanceOf[String] should be("hello")
 
       val bytes = s.dataSerializer.serialize(data)
-      new String(bytes, CharsetUtil.UTF_8) must be("\"hello\"")
+      new String(bytes, CharsetUtil.UTF_8) should be("\"hello\"")
     }
 
     "Serailize primitive optional string response" in {
@@ -77,24 +77,24 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         SerializerGenericRegistration,
         ru.typeOf[OptionalStringResponse].typeSymbol.asClass)
 
-      s.dataSerializer.isInstanceOf[PrimitiveDataSerializer] must be(true)
+      s.dataSerializer.isInstanceOf[PrimitiveDataSerializer] should be(true)
 
       // Some
       val response = OptionalStringResponse(responseContext, Some("hello"))
       val i1 = s.dataSerializer.getData(response)
-      i1.asInstanceOf[Option[String]] must be(Some("hello"))
+      i1.asInstanceOf[Option[String]] should be(Some("hello"))
 
       val b1 = s.dataSerializer.serialize(i1)
-      new String(b1, CharsetUtil.UTF_8) must be("\"hello\"")
+      new String(b1, CharsetUtil.UTF_8) should be("\"hello\"")
 
       // None
       val response2 = OptionalStringResponse(responseContext, None)
       val i2 = s.dataSerializer.getData(response2)
-      i2.asInstanceOf[Option[String]] must be(None)
+      i2.asInstanceOf[Option[String]] should be(None)
 
       val b2 = s.dataSerializer.serialize(i2)
       //Note no content is returned rather than empty string
-      new String(b2, CharsetUtil.UTF_8) must be("")
+      new String(b2, CharsetUtil.UTF_8) should be("")
     }
 
     "Serailize primitive int response" in {
@@ -104,14 +104,14 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         SerializerGenericRegistration,
         ru.typeOf[IntResponse].typeSymbol.asClass)
 
-      s.dataSerializer.isInstanceOf[PrimitiveDataSerializer] must be(true)
+      s.dataSerializer.isInstanceOf[PrimitiveDataSerializer] should be(true)
 
       val response = IntResponse(responseContext, 123)
       val data = s.dataSerializer.getData(response)
-      data.asInstanceOf[Int] must be(123)
+      data.asInstanceOf[Int] should be(123)
 
       val bytes = s.dataSerializer.serialize(data)
-      new String(bytes, CharsetUtil.UTF_8) must be("123")
+      new String(bytes, CharsetUtil.UTF_8) should be("123")
     }
 
     "Serailize primitive optional int response" in {
@@ -121,23 +121,23 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         SerializerGenericRegistration,
         ru.typeOf[OptionalIntResponse].typeSymbol.asClass)
 
-      s.dataSerializer.isInstanceOf[PrimitiveDataSerializer] must be(true)
+      s.dataSerializer.isInstanceOf[PrimitiveDataSerializer] should be(true)
 
       // Some
       val response = OptionalIntResponse(responseContext, Some(1))
       val i1 = s.dataSerializer.getData(response)
-      i1.asInstanceOf[Option[Int]] must be(Some(1))
+      i1.asInstanceOf[Option[Int]] should be(Some(1))
 
       val b1 = s.dataSerializer.serialize(i1)
-      new String(b1, CharsetUtil.UTF_8) must be("1")
+      new String(b1, CharsetUtil.UTF_8) should be("1")
 
       // None
       val response2 = OptionalIntResponse(responseContext, None)
       val i2 = s.dataSerializer.getData(response2)
-      i2.asInstanceOf[Option[Int]] must be(None)
+      i2.asInstanceOf[Option[Int]] should be(None)
 
       val b2 = s.dataSerializer.serialize(i2)
-      new String(b2, CharsetUtil.UTF_8) must be("")
+      new String(b2, CharsetUtil.UTF_8) should be("")
     }
 
     "Serailize primitive date response" in {
@@ -147,15 +147,15 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         SerializerGenericRegistration,
         ru.typeOf[DateResponse].typeSymbol.asClass)
 
-      s.dataSerializer.isInstanceOf[PrimitiveDataSerializer] must be(true)
+      s.dataSerializer.isInstanceOf[PrimitiveDataSerializer] should be(true)
 
-      val date = DateUtil.parseISO8601Date("2010-01-02T10:20:30Z")
+      val date = DateUtil.parseISO8601Date("2010-01-02T10:20:30Z")            
       val response = DateResponse(responseContext, date)
       val data = s.dataSerializer.getData(response)
-      data.asInstanceOf[Date].getTime must be(date.getTime)
+      data.asInstanceOf[Date].getTime should be(date.getTime)
 
       val bytes = s.dataSerializer.serialize(data)
-      new String(bytes, CharsetUtil.UTF_8) must be("\"2010-01-02T10:20:30.000Z\"")
+      new String(bytes, CharsetUtil.UTF_8) should be("\"2010-01-02T10:20:30.000Z\"")
     }
 
     "Serailize primitive optional date response" in {
@@ -165,25 +165,25 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         SerializerGenericRegistration,
         ru.typeOf[OptionalDateResponse].typeSymbol.asClass)
 
-      s.dataSerializer.isInstanceOf[PrimitiveDataSerializer] must be(true)
+      s.dataSerializer.isInstanceOf[PrimitiveDataSerializer] should be(true)
 
       val date = DateUtil.parseISO8601Date("2010-01-02T10:20:30Z")
 
       // Some
       val response = OptionalDateResponse(responseContext, Some(date))
       val i1 = s.dataSerializer.getData(response)
-      i1.asInstanceOf[Option[Date]] must be(Some(date))
+      i1.asInstanceOf[Option[Date]] should be(Some(date))
 
       val b1 = s.dataSerializer.serialize(i1)
-      new String(b1, CharsetUtil.UTF_8) must be("\"2010-01-02T10:20:30.000Z\"")
+      new String(b1, CharsetUtil.UTF_8) should be("\"2010-01-02T10:20:30.000Z\"")
 
       // None
       val response2 = OptionalDateResponse(responseContext, None)
       val i2 = s.dataSerializer.getData(response2)
-      i2.asInstanceOf[Option[Date]] must be(None)
+      i2.asInstanceOf[Option[Date]] should be(None)
 
       val b2 = s.dataSerializer.serialize(i2)
-      new String(b2, CharsetUtil.UTF_8) must be("")
+      new String(b2, CharsetUtil.UTF_8) should be("")
     }
 
     "Serailize object response" in {
@@ -193,15 +193,15 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         SerializerGenericRegistration,
         ru.typeOf[ObjectResponse].typeSymbol.asClass)
 
-      s.dataSerializer.isInstanceOf[ObjectDataSerializer] must be(true)
+      s.dataSerializer.isInstanceOf[ObjectDataSerializer] should be(true)
 
       val pet = Pet("spot", "dog")
       val response = ObjectResponse(responseContext, pet)
       val data = s.dataSerializer.getData(response).asInstanceOf[AnyRef]
-      data.asInstanceOf[Pet].name must be("spot")
+      data.asInstanceOf[Pet].name should be("spot")
 
       val bytes = s.dataSerializer.serialize(data)
-      new String(bytes, CharsetUtil.UTF_8) must be("{\"name\":\"spot\",\"description\":\"dog\"}")
+      new String(bytes, CharsetUtil.UTF_8) should be("{\"name\":\"spot\",\"description\":\"dog\"}")
     }
 
     "Serailize optional object response" in {
@@ -211,25 +211,25 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         SerializerGenericRegistration,
         ru.typeOf[OptionalObjectResponse].typeSymbol.asClass)
 
-      s.dataSerializer.isInstanceOf[ObjectDataSerializer] must be(true)
+      s.dataSerializer.isInstanceOf[ObjectDataSerializer] should be(true)
 
       val pet = Pet("spot", "dog")
 
       // Some
       val response = OptionalObjectResponse(responseContext, Some(pet))
       val i1 = s.dataSerializer.getData(response).asInstanceOf[AnyRef]
-      i1.asInstanceOf[Option[Pet]] must be(Some(pet))
+      i1.asInstanceOf[Option[Pet]] should be(Some(pet))
 
       val b1 = s.dataSerializer.serialize(i1)
-      new String(b1, CharsetUtil.UTF_8) must be("{\"name\":\"spot\",\"description\":\"dog\"}")
+      new String(b1, CharsetUtil.UTF_8) should be("{\"name\":\"spot\",\"description\":\"dog\"}")
 
       // None
       val response2 = OptionalObjectResponse(responseContext, None)
       val i2 = s.dataSerializer.getData(response2).asInstanceOf[AnyRef]
-      i2.asInstanceOf[Option[Pet]] must be(None)
+      i2.asInstanceOf[Option[Pet]] should be(None)
 
       val b2 = s.dataSerializer.serialize(i2)
-      new String(b2, CharsetUtil.UTF_8) must be("")
+      new String(b2, CharsetUtil.UTF_8) should be("")
     }
 
     "Serailize byte array response" in {
@@ -239,18 +239,18 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         SerializerGenericRegistration,
         ru.typeOf[ByteArrayResponse].typeSymbol.asClass)
 
-      s.dataSerializer.isInstanceOf[ByteArrayDataSerializer] must be(true)
+      s.dataSerializer.isInstanceOf[ByteArrayDataSerializer] should be(true)
 
       val response = ByteArrayResponse(responseContext, Array(1, 2, 3))
       val data = s.dataSerializer.getData(response)
 
-      data.asInstanceOf[Array[Byte]].length must be(3)
+      data.asInstanceOf[Array[Byte]].length should be(3)
 
       val bytes = s.dataSerializer.serialize(data)
-      bytes.length must be(3)
-      bytes(0) must be(1)
-      bytes(1) must be(2)
-      bytes(2) must be(3)
+      bytes.length should be(3)
+      bytes(0) should be(1)
+      bytes(1) should be(2)
+      bytes(2) should be(3)
     }
 
     "Serailize byte sequence response" in {
@@ -260,18 +260,18 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
         SerializerGenericRegistration,
         ru.typeOf[ByteSeqResponse].typeSymbol.asClass)
 
-      s.dataSerializer.isInstanceOf[ByteSeqDataSerializer] must be(true)
+      s.dataSerializer.isInstanceOf[ByteSeqDataSerializer] should be(true)
 
       val response = ByteSeqResponse(responseContext, Seq(1, 2, 3))
       val data = s.dataSerializer.getData(response)
 
-      data.asInstanceOf[Seq[Byte]].length must be(3)
+      data.asInstanceOf[Seq[Byte]].length should be(3)
 
       val bytes = s.dataSerializer.serialize(data)
-      bytes.length must be(3)
-      bytes(0) must be(1)
-      bytes(1) must be(2)
-      bytes(2) must be(3)
+      bytes.length should be(3)
+      bytes(0) should be(1)
+      bytes(1) should be(2)
+      bytes(2) should be(3)
     }
 
     "throw error for Responses where the 1st parameter is not called 'context'" in {
@@ -282,7 +282,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
           SerializerGenericRegistration,
           ru.typeOf[FirstParamNotCalledContextResponse].typeSymbol.asClass)
       }
-      thrown.getMessage must be("First constructor parameter of 'org.mashupbots.socko.rest.FirstParamNotCalledContextResponse' must be called 'context'.")
+      thrown.getMessage should be("First constructor parameter of 'org.mashupbots.socko.rest.FirstParamNotCalledContextResponse' must be called 'context'.")
     }
 
     "throw error for Responses with no constructor params" in {
@@ -293,7 +293,7 @@ class RestResponseSerializerSpec extends WordSpec with MustMatchers with GivenWh
           SerializerGenericRegistration,
           ru.typeOf[NoParamsResponse].typeSymbol.asClass)
       }
-      thrown.getMessage must be("'org.mashupbots.socko.rest.NoParamsResponse' constructor must have parameters.")
+      thrown.getMessage should be("'org.mashupbots.socko.rest.NoParamsResponse' constructor must have parameters.")
     }
 
   }

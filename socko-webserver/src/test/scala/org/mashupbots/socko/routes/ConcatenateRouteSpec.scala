@@ -16,11 +16,11 @@
 package org.mashupbots.socko.routes
 
 import org.mashupbots.socko.events.EndPoint
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
 
-class ConcatenateRouteSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
+class ConcatenateRouteSpec extends WordSpec with Matchers with GivenWhenThen {
 
   "Route concatenation" should {
     "route on exact match" in {

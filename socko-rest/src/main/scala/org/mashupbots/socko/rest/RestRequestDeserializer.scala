@@ -91,10 +91,10 @@ object RestRequestDeserializer {
             requestClassSymbol: ru.ClassSymbol): RestRequestDeserializer = {
 
     val requestClassName = requestClassSymbol.fullName
-    val requestConstructor: ru.MethodSymbol = requestClassSymbol.toType.declaration(ru.nme.CONSTRUCTOR).asMethod
+    val requestConstructor: ru.MethodSymbol = requestClassSymbol.toType.decl(ru.termNames.CONSTRUCTOR).asMethod
     val requestConstructorMirror: ru.MethodMirror = rm.reflectClass(requestClassSymbol).reflectConstructor(requestConstructor)
 
-    val requestConstructorParams: List[ru.TermSymbol] = requestConstructor.paramss(0).map(p => p.asTerm)
+    val requestConstructorParams: List[ru.TermSymbol] = requestConstructor.paramLists(0).map(p => p.asTerm)
 
     // First param better be  RestRequestContext
     if (requestConstructorParams.head.typeSignature != restRequestContextType) {

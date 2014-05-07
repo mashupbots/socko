@@ -15,14 +15,14 @@
 //
 package org.mashupbots.socko.infrastructure
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.WordSpec
 import java.util.Date
 import java.util.GregorianCalendar
 import java.net.InetSocketAddress
 import org.scalatest.GivenWhenThen
 
-class LocalCacheSpec extends WordSpec with ShouldMatchers with GivenWhenThen {
+class LocalCacheSpec extends WordSpec with Matchers with GivenWhenThen {
 
   "LocalCacheSpec" should {
 

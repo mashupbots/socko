@@ -21,12 +21,12 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.Matchers
 import org.mashupbots.socko.events.ImmutableHttpHeaders
 
-class RestRequestContextSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
+class RestRequestContextSpec extends WordSpec with Matchers with GivenWhenThen with Logger {
 
-  "RestRequestContext" must {
+  "RestRequestContext" should {
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
     val config = RestConfig("1.0", "http://localhost/api")
 
@@ -34,8 +34,8 @@ class RestRequestContextSpec extends WordSpec with MustMatchers with GivenWhenTh
       val ctx = RestRequestContext(EndPoint("GET", "localhost", "/api/path/1234"),
         ImmutableHttpHeaders.empty, SockoEventType.HttpRequest, config.requestTimeoutSeconds)
 
-      ctx.timeoutSeconds must be(config.requestTimeoutSeconds)
-      (ctx.timeoutTime.getTime - ctx.startTime.getTime) / 1000 must be(config.requestTimeoutSeconds)
+      ctx.timeoutSeconds should be(config.requestTimeoutSeconds)
+      (ctx.timeoutTime.getTime - ctx.startTime.getTime) / 1000 should be(config.requestTimeoutSeconds)
     }
 
   }

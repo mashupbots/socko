@@ -19,46 +19,46 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.scalatest.Finders
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.Matchers
 
-class RestEndPointSpec extends WordSpec with MustMatchers with GivenWhenThen with Logger {
+class RestEndPointSpec extends WordSpec with Matchers with GivenWhenThen with Logger {
 
   "RestEndPointSpec" should {
 
     "compare endpoint address with different methods" in {
       RestEndPoint("GET", "/api", "/pets").comparePath(
-        RestEndPoint("PUT", "/api", "/pets")) must be(false)
+        RestEndPoint("PUT", "/api", "/pets")) should be(false)
 
       RestEndPoint("PUT", "/api", "/pets/{id}").comparePath(
-        RestEndPoint("POST", "/api", "/pets/{id}")) must be(false)
+        RestEndPoint("POST", "/api", "/pets/{id}")) should be(false)
 
       RestEndPoint("PUT", "/api", "/pets/{id}").comparePath(
-        RestEndPoint("POST", "/api", "/{type}/{id}")) must be(false)
+        RestEndPoint("POST", "/api", "/{type}/{id}")) should be(false)
     }
 
     "compare endpoint address with different paths" in {
       // Same
       RestEndPoint("GET", "/api", "/pets").comparePath(
-        RestEndPoint("GET", "/api", "/pets")) must be(true)
+        RestEndPoint("GET", "/api", "/pets")) should be(true)
 
       // Different - static path segment names pets vs dogs
       RestEndPoint("GET", "/api", "/pets").comparePath(
-        RestEndPoint("GET", "/api", "/dogs")) must be(false)
+        RestEndPoint("GET", "/api", "/dogs")) should be(false)
 
       // Different - number of segments 1 vs 2
       RestEndPoint("GET", "/api", "/pets").comparePath(
-        RestEndPoint("GET", "/api", "/pets/dogs")) must be(false)
+        RestEndPoint("GET", "/api", "/pets/dogs")) should be(false)
 
       // Same
       RestEndPoint("PUT", "/api", "/pets/{id}").comparePath(
-        RestEndPoint("PUT", "/api", "/pets/{id}")) must be(true)
+        RestEndPoint("PUT", "/api", "/pets/{id}")) should be(true)
 
       // Different - Mix of variable and static makes
       RestEndPoint("PUT", "/api", "/pets/{id}").comparePath(
-        RestEndPoint("PUT", "/api", "/{type}/{id}")) must be(false)
+        RestEndPoint("PUT", "/api", "/{type}/{id}")) should be(false)
 
       RestEndPoint("PUT", "/api", "/{type}/{id}").comparePath(
-        RestEndPoint("PUT", "/api", "/pets/{id}")) must be(false)
+        RestEndPoint("PUT", "/api", "/pets/{id}")) should be(false)
 
     }
 

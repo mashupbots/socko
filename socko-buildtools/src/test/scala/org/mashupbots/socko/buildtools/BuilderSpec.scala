@@ -22,12 +22,10 @@ import java.nio.file.Files
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import org.mashupbots.socko.infrastructure.IOUtil
 import org.mashupbots.socko.infrastructure.Logger
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.GivenWhenThen
+import org.scalatest.Matchers
 import org.scalatest.WordSpec
-import org.scalatest.matchers.ShouldMatchers
 
-class BuilderSpec extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll with Logger {
+class BuilderSpec extends WordSpec with Matchers with Logger {
 
   "Builder should watch and build" in {
     val root = IOUtil.createTempDir("BuilderSpec")

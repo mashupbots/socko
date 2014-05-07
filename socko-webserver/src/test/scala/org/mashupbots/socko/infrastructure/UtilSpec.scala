@@ -24,9 +24,9 @@ import scala.reflect.runtime.{universe => ru}
 
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class UtilSpec extends WordSpec with ShouldMatchers with GivenWhenThen with Logger {
+class UtilSpec extends WordSpec with Matchers with GivenWhenThen with Logger {
 
   "DateUtil" should {
     "format dates" in {

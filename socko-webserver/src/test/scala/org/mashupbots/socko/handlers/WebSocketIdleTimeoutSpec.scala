@@ -28,7 +28,7 @@ import org.mashupbots.socko.webserver.WebServerConfig
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
 import com.typesafe.config.ConfigFactory
 
@@ -38,7 +38,7 @@ import akka.actor.Props
 /**
  * Test broadcast.  Need its own test so that broadcast does not interfere with other tests 
  */
-class WebSocketIdleTimeoutSpec extends WordSpec with ShouldMatchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient {
+class WebSocketIdleTimeoutSpec extends WordSpec with Matchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient {
 
   val akkaConfig =
     """
@@ -85,7 +85,7 @@ class WebSocketIdleTimeoutSpec extends WordSpec with ShouldMatchers with BeforeA
     testWebSocket2Closed = (testWebSocket2Id == webSocketId)
   }
   
-  override def beforeAll(configMap: Map[String, Any]) {
+  override def beforeAll() {
     // Make all content compressible to pass our tests
     val httpConfig = HttpConfig(minCompressibleContentSizeInBytes = 0)
     val webLogConfig = Some(WebLogConfig(None, WebLogFormat.Common))
@@ -97,7 +97,7 @@ class WebSocketIdleTimeoutSpec extends WordSpec with ShouldMatchers with BeforeA
     webServer.start()
   }
 
-  override def afterAll(configMap: Map[String, Any]) {
+  override def afterAll() {
     webServer.stop()
   }
 

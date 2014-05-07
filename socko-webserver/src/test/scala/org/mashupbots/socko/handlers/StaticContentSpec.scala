@@ -33,7 +33,7 @@ import org.mashupbots.socko.webserver.WebServerConfig
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.GivenWhenThen
 import org.scalatest.WordSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
 import com.typesafe.config.ConfigFactory
 
@@ -47,7 +47,7 @@ import akka.actor.actorRef2Scala
 import akka.routing.FromConfig
 
 class StaticContentSpec
-  extends WordSpec with ShouldMatchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient with Logger {
+  extends WordSpec with Matchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient with Logger {
 
   val actorConfig = """
 	my-pinned-dispatcher {
@@ -106,7 +106,7 @@ class StaticContentSpec
     }
   })
 
-  override def beforeAll(configMap: Map[String, Any]) {
+  override def beforeAll() {
     // Create root and temp dir
     rootDir = File.createTempFile("Root_", "")
     rootDir.delete()
@@ -131,7 +131,7 @@ class StaticContentSpec
     webServer.start()
   }
 
-  override def afterAll(configMap: Map[String, Any]) {
+  override def afterAll() {
     webServer.stop()
 
     if (router != null) {
