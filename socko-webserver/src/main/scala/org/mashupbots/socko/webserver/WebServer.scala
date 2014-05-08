@@ -93,7 +93,7 @@ class WebServer(
   val allChannels = new DefaultChannelGroup(config.serverName, GlobalEventExecutor.INSTANCE)
 
   /**
-   * Collectino of web socket connections
+   * Collection of web socket connections
    */
   val webSocketConnections = new WebSocketConnections(config.serverName + "-websockets")
   
