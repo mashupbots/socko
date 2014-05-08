@@ -95,22 +95,4 @@ object ReflectUtil extends Logger {
     classes.toList
   }
 
-  /**
-   * Retrieves the value of an argument in an annotation
-   *
-   * @param a Annotation
-   * @param n Name of annotation parameter
-   * @param defaultValue value to return if `n` is not found
-   * @return Value of the annotation if found, `defaultValue` otherwise
-   */
-  def getAnnotationJavaLiteralArg[T](a: ru.Annotation, n: ru.Name, defaultValue: T): T = {
-    val x = a.javaArgs
-    val y = a.scalaArgs
-    val arg = a.javaArgs.get(n)
-    if (arg.isDefined) {
-      arg.get.asInstanceOf[ru.LiteralArgument].value.value.asInstanceOf[T];
-    } else {
-      defaultValue
-    }
-  }
 }

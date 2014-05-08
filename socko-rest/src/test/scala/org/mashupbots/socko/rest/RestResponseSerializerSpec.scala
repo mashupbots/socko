@@ -153,7 +153,7 @@ class RestResponseSerializerSpec extends WordSpec with Matchers with GivenWhenTh
       val response = DateResponse(responseContext, date)
       val data = s.dataSerializer.getData(response)
       data.asInstanceOf[Date].getTime should be(date.getTime)
-
+      
       val bytes = s.dataSerializer.serialize(data)
       new String(bytes, CharsetUtil.UTF_8) should be("\"2010-01-02T10:20:30.000Z\"")
     }

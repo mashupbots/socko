@@ -15,16 +15,21 @@
 //
 package org.mashupbots.socko.rest
 
-import io.netty.handler.codec.http.HttpHeaders
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.TimeZone
 
+import scala.reflect.runtime.universe
 import scala.reflect.runtime.{universe => ru}
 
+import org.json4s.DefaultFormats
 import org.json4s.NoTypeHints
 import org.json4s.native.{Serialization => json}
 import org.mashupbots.socko.events.HttpRequestEvent
-import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.CharsetUtil
+import org.mashupbots.socko.infrastructure.Logger
+
+import io.netty.handler.codec.http.HttpHeaders
 
 /**
  * Serialized outgoing data from a [[org.mashupbots.socko.rest.RestResponse]]
@@ -260,6 +265,8 @@ case class PrimitiveDataSerializer(
  * Companion class
  */
 object PrimitiveDataSerializer {
+  private val UTC = TimeZone.getTimeZone("UTC")
+  
   private def jsonifyString(s: Any): Array[Byte] = {
     implicit val formats = json.formats(NoTypeHints)
     json.write(s.asInstanceOf[String]).getBytes(CharsetUtil.UTF_8)
@@ -278,7 +285,14 @@ object PrimitiveDataSerializer {
     else ss.get.toString.getBytes(CharsetUtil.UTF_8)
   }
   private def jsonifyDate(d: Any): Array[Byte] = {
-    implicit val formats = json.formats(NoTypeHints)
+    implicit val formats =  new DefaultFormats {
+         override def dateFormatter = {
+           val sf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+           sf.setTimeZone(UTC)
+           sf
+         }
+       }
+    
     json.write(d.asInstanceOf[Date]).getBytes(CharsetUtil.UTF_8)
   }
   private def jsonifyOptionDate(a: Any): Array[Byte] = {
