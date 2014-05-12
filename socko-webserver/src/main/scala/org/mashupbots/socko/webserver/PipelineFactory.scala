@@ -24,6 +24,7 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.http.HttpRequestDecoder
 import io.netty.handler.codec.http.HttpResponseEncoder
+import io.netty.handler.logging.LoggingHandler
 import io.netty.handler.ssl.SslHandler
 import io.netty.handler.stream.ChunkedWriteHandler
 import io.netty.handler.timeout.IdleStateHandler
@@ -49,6 +50,10 @@ class PipelineFactory(server: WebServer) extends ChannelInitializer[SocketChanne
         pipeline.addLast("ssl", ssl)
       }
 
+      if (server.config.logNetworkActivity) {
+        pipeline.addLast("log", new LoggingHandler())
+      }
+      
       val httpRequestDecoder = new HttpRequestDecoder(
         httpConfig.maxInitialLineLength,
         httpConfig.maxHeaderSizeInBytes,

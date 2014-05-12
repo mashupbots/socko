@@ -90,17 +90,17 @@ class WebServerConfigSpec extends WordSpec with Matchers with GivenWhenThen with
     }
 
     "validate with no SSL configuration" in {
-      WebServerConfig("test", "0.0.0.0", 80, 0 seconds, None, None, HttpConfig()).validate()
+      WebServerConfig("test", "0.0.0.0", 80, 0 seconds, false, None, None, HttpConfig()).validate()
     }
 
     "validate with server side (keystore) SSL configuration" in {
       WebServerConfig(
-        "test", "0.0.0.0", 80, 0 seconds, None, Some(SslConfig(aFile, "test", None, None)), HttpConfig()).validate()
+        "test", "0.0.0.0", 80, 0 seconds, false, None, Some(SslConfig(aFile, "test", None, None)), HttpConfig()).validate()
     }
 
     "validate with client (truststore) and server side (keystore) SSL configuration" in {
       WebServerConfig(
-        "test", "0.0.0.0", 80, 0 seconds, None, Some(SslConfig(aFile, "test", Some(aFile), Some("test"))), HttpConfig()).validate()
+        "test", "0.0.0.0", 80, 0 seconds, false, None, Some(SslConfig(aFile, "test", Some(aFile), Some("test"))), HttpConfig()).validate()
     }
 
     "throw Exception when server name is not supplied" in {
@@ -197,6 +197,7 @@ class WebServerConfigSpec extends WordSpec with Matchers with GivenWhenThen with
 		  hostname = localhost
 		  port=10000
           idle-connection-timeout=30 seconds
+          log-network-activity=true
           web-log {
             custom-actor-path = "akka://my-system/user/web-log-writer"
             format = Extended
@@ -238,6 +239,7 @@ class WebServerConfigSpec extends WordSpec with Matchers with GivenWhenThen with
       barebones.hostname should equal("localhost")
       barebones.port should equal(8888)
       barebones.idleConnectionTimeout.toSeconds should equal(0)
+      barebones.logNetworkActivity should be(false)
       barebones.webLog should be(None)
       barebones.ssl should equal(None)
       barebones.http.maxLengthInMB should be(4)
@@ -260,6 +262,7 @@ class WebServerConfigSpec extends WordSpec with Matchers with GivenWhenThen with
       all.hostname should equal("localhost")
       all.port should equal(10000)
       all.idleConnectionTimeout.toSeconds should equal(30)
+      all.logNetworkActivity should be(true)
 
       all.webLog.get.format should be(WebLogFormat.Extended)
       all.webLog.get.customActorPath.get should be("akka://my-system/user/web-log-writer")

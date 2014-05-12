@@ -109,7 +109,7 @@ class WebSocketSpec extends WordSpec with Matchers with BeforeAndAfterAll with G
     // Make all content compressible to pass our tests
     val httpConfig = HttpConfig(minCompressibleContentSizeInBytes = 0)
     val webLogConfig = Some(WebLogConfig(None, WebLogFormat.Common))
-    val config = WebServerConfig(port = port, webLog = webLogConfig, http = httpConfig)
+    val config = WebServerConfig(port = port, logNetworkActivity = true, webLog = webLogConfig, http = httpConfig)
 
     webServer = new WebServer(config, routes, actorSystem)
     webServer.start()

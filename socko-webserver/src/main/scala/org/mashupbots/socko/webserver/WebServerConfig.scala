@@ -41,6 +41,7 @@ import akka.actor.Extension
  *     hostname=localhost
  *     port=9000
  *     idle-connection-timeout=0
+ *     log-network-activity=false
  *
  *     # Optional web log. If not supplied, web server activity logging is turned off.
  *     web-log {
@@ -157,6 +158,8 @@ import akka.actor.Extension
  * @param port IP port number to bind to. Defaults to `8888`.
  * @param idleConnectionTimeout If a connection is idle for this duration, it will be closed. The default is `0`, 
  *  which indicates NO timeout and idle connections will NOT be closed.
+ * @param logNetworkActivity Dumps request and response data to the debug logger. To see the output, you need to
+ *  set the logging level for `io.netty.handler.logging.LoggingHandler` to debug. The default is `false`.
  * @param webLog Optional web log configuration.  If `None`, web log events will NOT be generated.
  * @param ssl SSL protocol configuration. If `None`, then SSL will not be turned on.
  *  Defaults to `None`.
@@ -170,6 +173,7 @@ case class WebServerConfig(
   hostname: String = "localhost",
   port: Int = 8888,
   idleConnectionTimeout: Duration = 0 seconds,
+  logNetworkActivity : Boolean = false,
   webLog: Option[WebLogConfig] = None,
   ssl: Option[SslConfig] = None,
   http: HttpConfig = HttpConfig(),
@@ -183,6 +187,7 @@ case class WebServerConfig(
     ConfigUtil.getString(config, prefix + ".hostname", "localhost"),
     ConfigUtil.getInt(config, prefix + ".port", 8888),
     ConfigUtil.getDuration(config, prefix + ".idle-connection-timeout", 0 seconds),    
+    ConfigUtil.getBoolean(config, prefix + ".log-network-activity", false),    
     WebServerConfig.getOptionalWebLogConfig(config, prefix + ".web-log"),
     WebServerConfig.getOptionalSslConfig(config, prefix + ".ssl"),
     WebServerConfig.getHttpConfig(config, prefix + ".http"),

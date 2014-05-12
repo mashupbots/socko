@@ -89,6 +89,11 @@ Common settings are:
    If a connection to the web server is idle (no read or writes) for the specified period of time, it
    will be closed. Defaults to `0` which indicates no timeout - i.e. connections are not closed.
 
+ - `logNetworkActivity`
+ 
+   Dumps request and response data to the debug logger. To see the output, you need to
+   set the logging level for `io.netty.handler.logging.LoggingHandler` to debug. The default is `false`.
+
  - `webLog`
    
    Web server activity log.

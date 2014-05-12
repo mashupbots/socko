@@ -36,6 +36,7 @@ import io.netty.handler.codec.ByteToMessageDecoder
 import io.netty.buffer.ByteBuf
 import io.netty.handler.codec.spdy.SpdyHttpResponseStreamIdHandler
 import io.netty.handler.codec.spdy.SpdyFrameCodec
+import io.netty.handler.logging.LoggingHandler
 
 /**
  * Handler used with SPDY that performs protocol negotiation.
@@ -67,6 +68,9 @@ class ProtocolNegoitationHandler(server: WebServer) extends ByteToMessageDecoder
         httpConfig.maxHeaderSizeInBytes,
         6, 15, 8));    
     pipeline.addLast("spdySessionHandler", new SpdySessionHandler(spdyVersion, true))
+    if (server.config.logNetworkActivity) {
+      pipeline.addLast("log", new LoggingHandler())
+    }
     pipeline.addLast("spdyHttpEncoder", new SpdyHttpEncoder(spdyVersion))
     pipeline.addLast("spdyHttpDecoder", new SpdyHttpDecoder(spdyVersion, httpConfig.maxLengthInBytes))
     pipeline.addLast("spdyStreamIdHandler", new SpdyHttpResponseStreamIdHandler())
@@ -82,6 +86,10 @@ class ProtocolNegoitationHandler(server: WebServer) extends ByteToMessageDecoder
   private def addHttpHandlers(ctx: ChannelHandlerContext) = {
     val pipeline = ctx.pipeline
     val httpConfig = server.config.http
+
+    if (server.config.logNetworkActivity) {
+      pipeline.addLast("log", new LoggingHandler())
+    }
 
     pipeline.addLast("decoder", new HttpRequestDecoder(httpConfig.maxInitialLineLength,
       httpConfig.maxHeaderSizeInBytes, httpConfig.maxChunkSizeInBytes))
