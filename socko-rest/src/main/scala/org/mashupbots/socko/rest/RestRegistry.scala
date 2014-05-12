@@ -147,7 +147,7 @@ object RestRegistry extends Logger {
     })
 
     val swaggerApiDoc = SwaggerApiDocs(restOperations, config, rm)
-    
+
     RestRegistry(restOperations, swaggerApiDoc, config)
   }
 
@@ -167,18 +167,21 @@ object RestRegistry extends Logger {
    * @return An instance of the annotation class or `None` if annotation not found
    */
   def buildRestOperation(rm: ru.Mirror, clz: Class[_], classes: Seq[Class[_]], config: RestConfig): Option[RestOperation] = {
+    log.debug("Checking for REST operation in class {}", clz.getName)
+
     val registration = findRestRegistration(rm, clz, config);
     val req = findRestRequest(registration, rm, clz, classes)
     val resp = findRestResponse(registration, rm, clz, classes);
 
     if (registration.isDefined && req.isDefined && resp.isDefined) {
-      val endPoint = RestEndPoint(config, registration.get) 
+      val endPoint = RestEndPoint(config, registration.get)
       val deserializer = RestRequestDeserializer(config, rm, registration.get, endPoint, req.get.typeSymbol.asClass)
       val serializer = RestResponseSerializer(config, rm, registration.get, resp.get.typeSymbol.asClass)
-      log.info("Registering {} {} {}", endPoint.method, endPoint.fullPath, clz.getName)
+      log.info("Registering {} {} to classs {}", endPoint.method, endPoint.fullPath, clz.getName)
 
       Some(RestOperation(registration.get, endPoint, deserializer, serializer))
     } else {
+      log.debug("NOT registering class {}", clz.getName)
       None
     }
   }
@@ -192,14 +195,20 @@ object RestRegistry extends Logger {
    * @return An instance of the annotation class or `None` if annotation not found
    */
   def findRestRegistration(rm: ru.RuntimeMirror, clz: Class[_], config: RestConfig): Option[RestRegistration] = {
-    val moduleSymbol = rm.moduleSymbol(clz)
-    val moduleType = moduleSymbol.typeSignature
-    if (moduleType <:< typeRestRegistration) {
-      val moduleMirror = rm.reflectModule(moduleSymbol)
-      val obj = moduleMirror.instance
-      Some(obj.asInstanceOf[RestRegistration])
-    } else {
-      None
+    try {
+      val moduleSymbol = rm.moduleSymbol(clz)
+      val moduleType = moduleSymbol.typeSignature
+      if (moduleType <:< typeRestRegistration) {
+        val moduleMirror = rm.reflectModule(moduleSymbol)
+        val obj = moduleMirror.instance
+        Some(obj.asInstanceOf[RestRegistration])
+      } else {
+        None
+      }
+    } catch {
+      case ex: Exception =>
+        log.error("'{}' error finding Rest Registraion in class {}. {}", ex.getMessage, clz.getName, ex.toString)
+        None
     }
   }
 
@@ -223,19 +232,27 @@ object RestRegistry extends Logger {
     clz: Class[_],
     classes: Seq[Class[_]]): Option[ru.Type] = {
 
-    if (registration.isEmpty) {
-      None
-    } else {
-      if (registration.get.request.isEmpty) {
-        val requestClassName = replaceRegistrationInName(clz.getName, "Request")
-        val requestClass = classes.find(c => c.getName == requestClassName && rm.classSymbol(c).toType <:< typeRestRequest)
-        if (requestClass.isEmpty) {
-          throw RestDefintionException(s"Cannot find corresponding RestRequest '${requestClassName}' for RestRegistration '${clz.getName}'")
-        }
-        Some(rm.classSymbol(requestClass.get).toType)
+    try {
+      if (registration.isEmpty) {
+        None
       } else {
-        Some(registration.get.request.get)
+        if (registration.get.request.isEmpty) {
+          val requestClassName = replaceRegistrationInName(clz.getName, "Request")
+          val requestClass = classes.find(c => c.getName == requestClassName && rm.classSymbol(c).toType <:< typeRestRequest)
+          if (requestClass.isEmpty) {
+            throw RestDefintionException(s"Cannot find corresponding RestRequest '${requestClassName}' for RestRegistration '${clz.getName}'")
+          }
+          Some(rm.classSymbol(requestClass.get).toType)
+        } else {
+          Some(registration.get.request.get)
+        }
       }
+    } catch {
+      case rx: RestDefintionException =>
+        throw rx
+      case ex: Exception =>
+        log.error("'{}' error finding Rest Request in class {}. {}", ex.getMessage, clz.getName, ex.toString)
+        None
     }
   }
 
@@ -262,21 +279,29 @@ object RestRegistry extends Logger {
     clz: Class[_],
     classes: Seq[Class[_]]): Option[ru.Type] = {
 
-    if (registration.isEmpty) {
-      None
-    } else {
-      if (registration.get.customSerialization) {
-        Some(typeNoSerializationRestResponse)
-      } else if (registration.get.response.isEmpty) {
-        val responseClassName = replaceRegistrationInName(clz.getName, "Response")
-        val responseClass = classes.find(c => c.getName == responseClassName && rm.classSymbol(c).toType <:< typeRestResponse)
-        if (responseClass.isEmpty) {
-          throw RestDefintionException(s"Cannot find corresponding RestResponse '${responseClassName}' for RestRegistration '${clz.getName}'")
-        }
-        Some(rm.classSymbol(responseClass.get).toType)
+    try {
+      if (registration.isEmpty) {
+        None
       } else {
-        Some(registration.get.response.get)
+        if (registration.get.customSerialization) {
+          Some(typeNoSerializationRestResponse)
+        } else if (registration.get.response.isEmpty) {
+          val responseClassName = replaceRegistrationInName(clz.getName, "Response")
+          val responseClass = classes.find(c => c.getName == responseClassName && rm.classSymbol(c).toType <:< typeRestResponse)
+          if (responseClass.isEmpty) {
+            throw RestDefintionException(s"Cannot find corresponding RestResponse '${responseClassName}' for RestRegistration '${clz.getName}'")
+          }
+          Some(rm.classSymbol(responseClass.get).toType)
+        } else {
+          Some(registration.get.response.get)
+        }
       }
+    } catch {
+      case rx: RestDefintionException =>
+        throw rx
+      case ex: Exception =>
+        log.error("'{}' error finding Rest Response in class {}. {}", ex.getMessage, clz.getName, ex.toString)
+        None
     }
   }
 

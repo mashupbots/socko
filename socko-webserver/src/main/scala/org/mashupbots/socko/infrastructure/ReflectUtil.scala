@@ -38,16 +38,18 @@ object ReflectUtil extends Logger {
   def getClasses(classLoader: ClassLoader, packageName: String): List[Class[_]] = {
 
     val relPath = packageName.replace('.', '/')
+    log.debug("Finding classes in package: {}  (Relative Path: {}) {}", packageName, relPath, "")
+
     val resource = classLoader.getResource(relPath)
     if (resource == null) {
       throw new RuntimeException("No resource for " + relPath);
     }
-    log.debug("Package: {} becomes Path: {} {}", packageName, relPath, "")
 
-    val fullPath = resource.getFile()
-    log.debug("Resource = {}", resource)
+    val fullPath = resource.getFile
+    val uriPath = resource.toURI
+    log.debug("Resource = {}. Full Path = {} {}", resource, fullPath, uriPath)
 
-    val directory = try { new File(resource.toURI()) } catch {
+    val directory = try { new File(uriPath) } catch {
       case ex: URISyntaxException =>
         throw new RuntimeException(packageName + " (" + resource + ") does not appear to be a valid URL / URI.", ex)
       case _: Throwable =>
@@ -60,7 +62,6 @@ object ReflectUtil extends Logger {
       classFiles.map(f => {
         val fileName = f.getName()
         val className = packageName + "." + fileName.substring(0, fileName.length() - 6)
-        log.debug("Found class in directory {}", className)
         className
       })
     } else {
@@ -91,8 +92,13 @@ object ReflectUtil extends Logger {
       className <- classNames;
       clz = getClass(className);
       if (clz.isDefined)
-    ) yield clz.get
-    classes.toList
+    ) yield clz.get   
+
+    if (log.isDebugEnabled) {
+    	log.debug("Found classes:\r\n{}", classes.map(c => c.getName).mkString("\r\n"))
+    }
+    
+    classes
   }
 
 }
