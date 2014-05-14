@@ -67,7 +67,13 @@ object ReflectUtil extends Logger {
     } else {
       // If classes are in a JAR, need to look through the JAR (ignoring classes with $ in their names)
       val jarPath = fullPath.replaceFirst("[.]jar[!].*", ".jar").replaceFirst("file:", "")
+      log.debug("JAR Path {}", jarPath)
+
       val jarFile = new JarFile(jarPath)
+      if (log.isDebugEnabled) {
+        log.debug("JAR Contents:\n{}", jarFile.entries.toIterator.map(c => c.getName).mkString("\n"))
+	  }
+
       jarFile.entries.toIterator
         .map(_.getName)
         .filter(_.endsWith(".class"))
@@ -79,9 +85,10 @@ object ReflectUtil extends Logger {
     // Convert 
     def getClass(className: String): Option[Class[_]] = {
       try {
-        Some(Class.forName(className))
+        Some(classLoader.loadClass(className))
       } catch {
         case e: Throwable => {
+          log.debug("Ignoring class '{}' due to loading error {}{}", className, e.toString, "")
           None
         }
       }
@@ -95,7 +102,7 @@ object ReflectUtil extends Logger {
     ) yield clz.get   
 
     if (log.isDebugEnabled) {
-    	log.debug("Found classes:\r\n{}", classes.map(c => c.getName).mkString("\r\n"))
+    	log.debug("Found classes:\n{}", classes.map(c => c.getName).mkString("\n"))
     }
     
     classes
