@@ -65,6 +65,7 @@ object ReflectUtil extends Logger {
         className
       })
     } else {
+      val regex = """^[\d\w\.]+$""".r // used to ignore those classes with dollar sign ($)
       // If classes are in a JAR, need to look through the JAR (ignoring classes with $ in their names)
       val jarPath = fullPath.replaceFirst("[.]jar[!].*", ".jar").replaceFirst("file:", "")
       log.debug("JAR Path {}", jarPath)
@@ -79,6 +80,7 @@ object ReflectUtil extends Logger {
         .filter(_.endsWith(".class"))
         .map(_.replaceAll("""[/\\]""", ".").replace(".class", ""))
         .filter(_.startsWith(packageName))
+        .filter(regex.pattern.matcher(_).matches) // dollar sign classes make exceptions. filter not.
         .toList
     }
 
