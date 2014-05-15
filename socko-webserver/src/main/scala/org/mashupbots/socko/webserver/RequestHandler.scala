@@ -55,6 +55,9 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.events.HttpLastChunkEvent
 import io.netty.handler.timeout.IdleStateEvent
 import io.netty.handler.timeout.IdleState
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
+import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame
 
 /**
  * Handles incoming HTTP messages from Netty
@@ -155,14 +158,31 @@ class RequestHandler(server: WebServer, routes: PartialFunction[SockoEvent, Unit
 
         log.debug("WS {} CHANNEL={} {}", event.endPoint, ctx.name, "")
 
-        if (wsFrame.isInstanceOf[CloseWebSocketFrame]) {
-          // This will also close the channel
-          wsHandshaker.close(ctx.channel, wsFrame.asInstanceOf[CloseWebSocketFrame])
-        } else if (wsFrame.isInstanceOf[PingWebSocketFrame]) {
-          ctx.writeAndFlush(new PongWebSocketFrame(wsFrame.content))
-        } else {
-          routes(event)
-        }
+        wsFrame match {
+          case f: TextWebSocketFrame =>
+            routes(event)
+
+          case f: BinaryWebSocketFrame =>
+            routes(event)
+          
+          case f: ContinuationWebSocketFrame =>
+            routes(event)
+            
+          case f: CloseWebSocketFrame =>
+          	// This will also close the channel
+          	wsHandshaker.close(ctx.channel, f)
+          	
+          case f: PingWebSocketFrame =>
+            // Send pong frame
+          	ctx.writeAndFlush(new PongWebSocketFrame(f.isFinalFragment, f.rsv, f.content))
+          	
+          case f: PongWebSocketFrame =>
+            // Ignore
+          	wsFrame.release
+          	
+          case _ =>
+            throw new UnsupportedOperationException("Web socket frame not supported: " + wsFrame.getClass.getName) 
+        }       
 
       case _ =>
         throw new UnsupportedOperationException(e.getClass.toString + " not supported")

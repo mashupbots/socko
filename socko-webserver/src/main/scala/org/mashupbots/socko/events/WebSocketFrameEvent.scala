@@ -22,8 +22,8 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import io.netty.handler.codec.http.websocketx.WebSocketFrame
-
 import org.mashupbots.socko.infrastructure.WebLogEvent
+import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame
 
 /**
  * Event fired when a web socket text or binary frame is received.
@@ -64,6 +64,16 @@ case class WebSocketFrameEvent(
    */
   val isBinary = wsFrame.isInstanceOf[BinaryWebSocketFrame]
 
+  /**
+   * Indicates a continuation frame for text or binary data
+   */
+  val isContinuation = wsFrame.isInstanceOf[ContinuationWebSocketFrame]
+
+  /**
+   * Flag to indicate if this frame is the final fragment in a message. The first fragment (frame) may also be the final fragment
+   */
+  val isFinalFragment = wsFrame.isFinalFragment
+  
   /**
    * Web socket version
    */
