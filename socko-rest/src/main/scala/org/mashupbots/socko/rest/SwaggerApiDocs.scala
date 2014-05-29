@@ -21,7 +21,6 @@ import org.json4s.NoTypeHints
 import org.json4s.native.{Serialization => json}
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.CharsetUtil
-import org.mashupbots.socko.events.EndPoint
 
 /**
  * Generated [[https://developers.helloreverb.com/swagger/ Swagger]] API documentation
@@ -190,7 +189,7 @@ object SwaggerApiDeclaration {
    */
   def apply(resourcePath: String, ops: Seq[RestOperation], config: RestConfig, rm: ru.Mirror): SwaggerApiDeclaration = {
     // Context for this resource path
-    val ctx = SwaggerContext(config, SwaggerModelRegistry(rm))
+    val ctx = SwaggerContext(config, SwaggerModelRegistry(rm, config.overrides))
 
     // Group by path so we can list the operations
     val pathGrouping: Map[String, Seq[RestOperation]] = ops.groupBy(op => op.registration.path)
@@ -296,6 +295,11 @@ object SwaggerApiOperation {
         throw new IllegalStateException("Unsupported DataSerializer: " + op.serializer.dataSerializer.toString)
     }
 
+    //val nickname = op.registration.name
+    //require(!nickname.isEmpty,
+    //  s"nickname cannot be blank for method ${op.registration.method.toString} on ${op.registration.path} (override name?)"
+    //)
+    
     SwaggerApiOperation(
       op.registration.method.toString,
       if (op.registration.description.isEmpty) None else Some(op.registration.description),
@@ -305,6 +309,7 @@ object SwaggerApiOperation {
       op.registration.name,
       if (params.isEmpty) None else Some(params),
       if (errors.isEmpty) None else Some(errors.sortBy(e => e.code)))
+      
   }
 }
 
@@ -379,13 +384,13 @@ case class SwaggerModelProperty(
   items: Option[Map[String, String]])
 
 /**
- * A swagger model complex data type
+ * A swagger model complex data type.  This is built from reflection of the passed class type
  *
  * @param id Unique id
  * @param description description
  * @param properties List of properties
  */
-case class SwaggerModel(
+case class SwaggerModel (
   id: String,
   description: Option[String],
   properties: Map[String, SwaggerModelProperty])
@@ -394,8 +399,9 @@ case class SwaggerModel(
  * Registry of swagger models. Makes sure that we don't output a model more than once.
  *
  * @param rm Runtime Mirror
+ * @param overrides Model overrides to be used
  */
-case class SwaggerModelRegistry(rm: ru.Mirror) {
+case class SwaggerModelRegistry(rm: ru.Mirror, overrides: Map[String, SwaggerModel]) {
   val models: HashMap[String, SwaggerModel] = new HashMap[String, SwaggerModel]()
 
   val typeRestModelMetaData = ru.typeOf[RestModelMetaData]
@@ -410,17 +416,22 @@ case class SwaggerModelRegistry(rm: ru.Mirror) {
     // Add to model if not already added
     val name = SwaggerReflector.dataType(thisType)
     if (!models.contains(name)) {
-      // Sub complex types to that may also need reflecting
-      val subModels = collection.mutable.Set[ru.Type]()
+      if (overrides.contains(name)) {
+        // if override exists just use it for the model element
+        models.put(name, overrides.get(name).get)
+      } else {
 
-      // Get properties meta data
-      val propertiesMetaData = locatePropertiesMetaData(thisType)
+        // Sub complex types to that may also need reflecting
+        val subModels = collection.mutable.Set[ru.Type]()
 
-      // Get properties of this model
-      val properties: Map[String, SwaggerModelProperty] =
-        thisType.members
-          .filter(s => s.isTerm && !s.isMethod && !s.isMacro)
-          .map(s => {
+        // Get properties meta data
+        val propertiesMetaData = locatePropertiesMetaData(thisType)
+
+        // Get properties of this model
+        val properties: Map[String, SwaggerModelProperty] =
+          thisType.members
+            .filter(s => s.isTerm && !s.isMethod && !s.isMacro)
+            .map(s => {
             val dot = s.fullName.lastIndexOf('.')
             val termName = if (dot > 0) s.fullName.substring(dot + 1) else s.fullName
             val required = !(s.typeSignature <:< SwaggerReflector.optionAnyRefType)
@@ -439,12 +450,13 @@ case class SwaggerModelRegistry(rm: ru.Mirror) {
             (termName, SwaggerModelProperty(termType, description, termRequired, allowableValues, termItems))
           }).toMap
 
-      // Add model to registry
-      val model = SwaggerModel(name, None, properties)
-      models.put(name, model)
+        // Add model to registry
+        val model = SwaggerModel(name, None, properties)
+        models.put(name, model)
 
-      // Add sub-models - we do this after we add to model to cyclical entries
-      subModels.foreach(sm => register(sm))
+        // Add sub-models - we do this after we add to model to cyclical entries
+        subModels.foreach(sm => register(sm))
+      }
     }
   }
 
@@ -531,6 +543,3 @@ case class SwaggerModelRegistry(rm: ru.Mirror) {
 }
 
 case class SwaggerContext(config: RestConfig, modelRegistry: SwaggerModelRegistry)
-
-    
-                      

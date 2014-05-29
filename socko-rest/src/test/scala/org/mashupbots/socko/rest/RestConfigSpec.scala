@@ -73,6 +73,46 @@ class RestConfigSpec extends WordSpec with Matchers with GivenWhenThen with Logg
       cfg.reportRuntimeException should be(ReportRuntimeException.All)
     }
 
+    "correctly load overrides from akka config" in {
+      val actorConfig = """
+		my-rest-config {
+		  api-version = "1"
+		  root-api-url = "https://localhost:8888/api"
+		  swagger-version = "2"
+          overrides {
+            classes = [{
+              name = TestOverrideClass
+              description = Test Override Description
+              properties = [{
+                name = Property1
+                type = Int
+                description = Description of Property 1 
+                required = true
+              }]
+            }]
+          }        
+		}"""
+
+      val actorSystem = ActorSystem("RestConfigSpec", ConfigFactory.parseString(actorConfig))
+      val cfg = MyRestConfig(actorSystem)
+
+      cfg.apiVersion should be("1")
+      cfg.rootPath should be("/api")
+      cfg.schemeDomainPort should be ("https://localhost:8888")
+      cfg.swaggerVersion should be("2")
+      cfg.overrides.size should be (1)
+      
+      val swaggerModel: SwaggerModel = cfg.overrides.get("TestOverrideClass").get
+      swaggerModel.id should be ("TestOverrideClass")
+      swaggerModel.description.get should be ("Test Override Description")
+      swaggerModel.properties.size should be (1)
+      
+      val swaggerModelProperty: SwaggerModelProperty = swaggerModel.properties.get("Property1").get
+      swaggerModelProperty.`type`  should be ("Int")
+      swaggerModelProperty.description.get should be ("Description of Property 1")
+      swaggerModelProperty.required.get should be (true)      
+    }
+    
   }
 }
 
