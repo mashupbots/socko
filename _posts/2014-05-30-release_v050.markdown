@@ -1,0 +1,26 @@
+---
+layout: post
+title: Release v0.5.0
+summary: Scala 2.11 Release
+author: Vibul
+---
+
+This [release](https://github.com/mashupbots/socko/issues?milestone=13&page=1&state=closed) includes:
+ - Port to Scala 2.11 
+ - Upgrade to Netty 4.0.19 and Akka 2.3.2
+ - Logging of raw incoming and outgoing HTTP
+ - Compliance with [Autobahn](/autobahn/index.html) websocket test suite. 
+ - Override Swagger definition of classes from settings in `.conf` file. (thanks to [dglick](https://github.com/dglick))
+ - Fix to REST reflection of classes within JARs. (thanks to [Chen Wei](https://github.com/chenweiyj))
+ 
+Download [socko-webserver_2.11-0.5.0.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.11/0.5.0/socko-webserver_2.11-0.5.0.jar).
+
+For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
+
+Documentation
+ - [User Guide](/docs/0.5.0/guides/user-guide.html)
+ - [API](/docs/0.5.0/api/)
+ - [Change logs](https://github.com/mashupbots/socko/issues?milestone=13&page=1&state=closed)
+
+
+

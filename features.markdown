@@ -44,8 +44,8 @@ The core socko-webserver module in the upcoming V0.3 has less than 2562 lines of
     
 
 ## Supportive of HTTP and HTML5 Standards
- * HTTP/S and WebSockets
-  
+ * HTTP/S
+
  * HTTP compression
  
  * HTTP streaming (i.e. "chunked" transfer encoding)
@@ -56,6 +56,8 @@ The core socko-webserver module in the upcoming V0.3 has less than 2562 lines of
  
  * Decoding HTTP POST request body, file uploads and query strings
  
+ * WebSockets (tested against [Autobahn](/autobahn/index.html))
+  
  * SPDY
 
 

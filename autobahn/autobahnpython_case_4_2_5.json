@@ -1,0 +1,479 @@
+{
+   "agent": "AutobahnPython",
+   "behavior": "NON-STRICT",
+   "behaviorClose": "OK",
+   "case": 44,
+   "closedByMe": false,
+   "createStats": true,
+   "createWirelog": true,
+   "description": "Send small text message, then send frame with reserved control <b>Opcode = 15</b> and non-empty payload, then send Ping.",
+   "droppedByMe": false,
+   "duration": 3,
+   "expectation": "Echo for first message is received, but then connection is failed immediately, since reserved opcode frame is used. A Pong is not received.",
+   "expected": {
+      "NON-STRICT": [],
+      "OK": [
+         [
+            "message",
+            "Hello, world!",
+            false
+         ]
+      ]
+   },
+   "expectedClose": {
+      "closeCode": [
+         1002
+      ],
+      "closedByMe": false,
+      "requireClean": false
+   },
+   "failedByMe": false,
+   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.6.1-0.8.8\r\nHost: 127.0.0.1:9001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: KqyytQhTaDn2MnFJoN2Jcg==\r\nSec-WebSocket-Version: 13\r\n\r\n",
+   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: u2n1cTlPR0inkm8AXo6lu8Nrpos=\r\n\r\n",
+   "id": "4.2.5",
+   "isServer": false,
+   "localCloseCode": null,
+   "localCloseReason": null,
+   "received": [],
+   "remoteCloseCode": null,
+   "remoteCloseReason": null,
+   "reportCompressionRatio": false,
+   "reportTime": false,
+   "result": "Actual events match at least one expected.",
+   "resultClose": "Connection was properly closed",
+   "rxFrameStats": {},
+   "rxOctetStats": {
+      "129": 1
+   },
+   "started": "2014-05-15T05:05:09Z",
+   "trafficStats": null,
+   "txFrameStats": {
+      "1": 1,
+      "9": 1,
+      "15": 1
+   },
+   "txOctetStats": {
+      "1": 44,
+      "239": 1
+   },
+   "wasClean": false,
+   "wasCloseHandshakeTimeout": false,
+   "wasNotCleanReason": "peer dropped the TCP connection without previous WebSocket closing handshake",
+   "wasOpenHandshakeTimeout": false,
+   "wasServerConnectionDropTimeout": false,
+   "wirelog": [
+      [
+         "TO",
+         [
+            239,
+            "474554202f20485454502f312e310d0a557365722d4167656e743a204175746f6261686e5465737453756974652f302e362e312d302e382e380d0a486f73743a ..."
+         ],
+         false
+      ],
+      [
+         "RO",
+         [
+            129,
+            "485454502f312e312031303120537769746368696e672050726f746f636f6c730d0a557067726164653a20776562736f636b65740d0a436f6e6e656374696f6e ..."
+         ]
+      ],
+      [
+         "TF",
+         [
+            13,
+            "Hello, world!"
+         ],
+         1,
+         true,
+         0,
+         "f6c232a6",
+         null,
+         1,
+         false
+      ],
+      [
+         "TO",
+         [
+            1,
+            "81"
+         ],
+         true
+      ],
+      [
+         "TF",
+         [
+            13,
+            "Hello, world!"
+         ],
+         15,
+         true,
+         0,
+         "75b78e1f",
+         null,
+         1,
+         false
+      ],
+      [
+         "TF",
+         [
+            0,
+            ""
+         ],
+         9,
+         true,
+         0,
+         "e0813fc3",
+         null,
+         1,
+         false
+      ],
+      [
+         "KL",
+         1
+      ],
+      [
+         "TO",
+         [
+            1,
+            "8d"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "f6"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "c2"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "32"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "a6"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "be"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "a7"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "5e"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "ca"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "99"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "ee"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "12"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "d1"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "99"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "b0"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "5e"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "c2"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "d7"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "8f"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "8d"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "75"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "b7"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "8e"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "1f"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "3d"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "d2"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "e2"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "73"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "1a"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "9b"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "ae"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "68"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "1a"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "c5"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "e2"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "7b"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "54"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "89"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "80"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "e0"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "81"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "3f"
+         ],
+         true
+      ],
+      [
+         "TO",
+         [
+            1,
+            "c3"
+         ],
+         true
+      ]
+   ]
+}
