@@ -60,11 +60,12 @@ class PipelineFactory(server: WebServer) extends ChannelInitializer[SocketChanne
         httpConfig.maxChunkSizeInBytes)
       pipeline.addLast("decoder", httpRequestDecoder)
 
+      pipeline.addLast("encoder", new HttpResponseEncoder())
+
       if (httpConfig.aggreateChunks) {
         pipeline.addLast("chunkAggregator", new HttpObjectAggregator(httpConfig.maxLengthInBytes))
       }
 
-      pipeline.addLast("encoder", new HttpResponseEncoder())
       pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
 
       if (server.config.idleConnectionTimeout.toSeconds > 0) {
