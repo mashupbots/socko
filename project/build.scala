@@ -20,7 +20,7 @@ object SockoBuild extends Build {
   lazy val defaultSettings = Defaults.defaultSettings ++ Seq(
     // Info
     organization := "org.mashupbots.socko",
-    version      := "0.5.0",
+    version      := "0.6.0",
     scalaVersion := Dependency.V.Scala,
     organizationHomepage := Some(url("http://www.sockoweb.org")),
 
@@ -165,7 +165,7 @@ object Dependencies {
 
 object Dependency {
   object V {
-    val Scala       = "2.11.0"
+    val Scala       = "2.11.2"
     val Akka        = "2.3.6"
   }
 
