@@ -275,12 +275,14 @@ case class DefaultHttpContent(buffer: ByteBuf, contentType: String) extends Http
    * for that field. Typically, there is is only 1 value for a field.
    */
   def toFormDataMap(): Map[String, List[String]] = {
-    if (contentType != "application/x-www-form-urlencoded") Map.empty
-    else {
+    if (contentType.startsWith("application/x-www-form-urlencoded")) {
       val encodedString = this.toString
       val m = new QueryStringDecoder(encodedString, false).parameters.toMap
       // Map the Java list values to Scala list
-      m.map { case (key, value) => (key, value.toList) }
+      m.map { case (key, value) => (key, value.toList) }      
+    }
+    else {
+      Map.empty
     }
   }
 
