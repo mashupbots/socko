@@ -1,0 +1,352 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>handlers - org.mashupbots.socko.handlers</title>
+          <meta name="description" content="handlers - org.mashupbots.socko.handlers" />
+          <meta name="keywords" content="handlers org.mashupbots.socko.handlers" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'org.mashupbots.socko.handlers.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a href="../../../package.html" class="extype" name="org">org</a>.<a href="../../package.html" class="extype" name="org.mashupbots">mashupbots</a>.<a href="../package.html" class="extype" name="org.mashupbots.socko">socko</a></p>
+        <h1>handlers</h1> <span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.handlers.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">handlers</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="org.mashupbots.socko.handlers.SnoopHandler" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SnoopHandlerextendsActor"></a>
+      <a id="SnoopHandler:SnoopHandler"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SnoopHandler.html"><span class="name">SnoopHandler</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.handlers.package@SnoopHandlerextendsActor" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Sends a response containing information about the received event.</p><div class="fullcomment"><div class="comment cmt"><p>Sends a response containing information about the received event.</p><p>We use this in our testing of Socko
+</p></div></div>
+    </li><li name="org.mashupbots.socko.handlers.StaticContentHandler" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="StaticContentHandlerextendsActor"></a>
+      <a id="StaticContentHandler:StaticContentHandler"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="StaticContentHandler.html"><span class="name">StaticContentHandler</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.handlers.package@StaticContentHandlerextendsActor" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Handles downloading of static files and resources.</p><div class="fullcomment"><div class="comment cmt"><p>Handles downloading of static files and resources.</p><p>To trigger a download, send a <a href="StaticFileRequest.html" class="extype" name="org.mashupbots.socko.handlers.StaticFileRequest">org.mashupbots.socko.handlers.StaticFileRequest</a> or
+<a href="StaticResourceRequest.html" class="extype" name="org.mashupbots.socko.handlers.StaticResourceRequest">org.mashupbots.socko.handlers.StaticResourceRequest</a> message from your routes.</p><p><a href="StaticContentHandler.html" class="extype" name="org.mashupbots.socko.handlers.StaticContentHandler">org.mashupbots.socko.handlers.StaticContentHandler</a> performs HTTP compression and also uses the
+<code>If-Modified-Since</code> header for browser side caching.</p><h4>Configuration</h4><p><a href="StaticContentHandler.html" class="extype" name="org.mashupbots.socko.handlers.StaticContentHandler">org.mashupbots.socko.handlers.StaticContentHandler</a> uses lots of disk IO (blocking code). Please run it using a
+router with <code>PinnedDispatcher</code> (a thread per actor) or <code>BalancingDispatcher</code>.</p><p>For example:</p><pre>router = actorSystem.actorOf(Props(<span class="kw">new</span> StaticContentHandler(StaticContentHandlerConfig()))
+.withRouter(FromConfig()).withDispatcher(<span class="lit">"myDispatcher"</span>), <span class="lit">"myRouter"</span>)</pre><p>Configuration in <code>application.conf</code>:</p><pre>myDispatcher {
+  executor = <span class="lit">"thread-pool-executor"</span>
+  <span class="kw">type</span> = PinnedDispatcher
+}
+
+akka {
+  event-handlers = [<span class="lit">"akka.event.slf4j.Slf4jEventHandler"</span>]
+  loglevel=DEBUG
+  actor {
+    deployment {
+      /myRouter {
+        router = round-robin
+        nr-of-instances = <span class="num">5</span>
+      }
+    }
+  }
+}</pre><h4>Caching Small Files</h4><p>HTTP <code>ETag</code> header is used.</p><pre>Request #<span class="num">1</span> Headers
+------------------
+GET /file1.txt HTTP/<span class="num">1.1</span>
+
+Response #<span class="num">1</span> Headers
+------------------
+HTTP/<span class="num">1.1</span> <span class="num">200</span> OK
+Date:               Tue, <span class="num">01</span> Mar <span class="num">2011</span> <span class="num">22</span>:<span class="num">44</span>:<span class="num">26</span> GMT
+ETag: <span class="lit">"686897696a7c876b7e"</span>
+Expires:            Tue, <span class="num">01</span> Mar <span class="num">2012</span> <span class="num">22</span>:<span class="num">44</span>:<span class="num">26</span> GMT
+Cache-Control:      <span class="kw">private</span>, max-age=<span class="num">31536000</span>
+
+Request #<span class="num">2</span> Headers
+------------------
+GET /file1.txt HTTP/<span class="num">1.1</span>
+If-<span class="std">None</span>-Match: <span class="lit">"686897696a7c876b7e"</span>
+
+Response #<span class="num">2</span> Headers
+------------------
+HTTP/<span class="num">1.1</span> <span class="num">304</span> Not Modified
+Date:               Tue, <span class="num">01</span> Mar <span class="num">2011</span> <span class="num">22</span>:<span class="num">44</span>:<span class="num">28</span> GMT</pre><h4>Caching Big Files</h4><p>HTTP <code>If-Modified-Since</code> header is used</p><pre>Request #<span class="num">1</span> Headers
+------------------
+GET /file1.txt HTTP/<span class="num">1.1</span>
+
+Response #<span class="num">1</span> Headers
+------------------
+HTTP/<span class="num">1.1</span> <span class="num">200</span> OK
+Date:               Tue, <span class="num">01</span> Mar <span class="num">2011</span> <span class="num">22</span>:<span class="num">44</span>:<span class="num">26</span> GMT
+Last-Modified:      Wed, <span class="num">30</span> Jun <span class="num">2010</span> <span class="num">21</span>:<span class="num">36</span>:<span class="num">48</span> GMT
+Expires:            Tue, <span class="num">01</span> Mar <span class="num">2012</span> <span class="num">22</span>:<span class="num">44</span>:<span class="num">26</span> GMT
+Cache-Control:      <span class="kw">private</span>, max-age=<span class="num">31536000</span>
+
+Request #<span class="num">2</span> Headers
+------------------
+GET /file1.txt HTTP/<span class="num">1.1</span>
+If-Modified-Since:  Wed, <span class="num">30</span> Jun <span class="num">2010</span> <span class="num">21</span>:<span class="num">36</span>:<span class="num">48</span> GMT
+
+Response #<span class="num">2</span> Headers
+------------------
+HTTP/<span class="num">1.1</span> <span class="num">304</span> Not Modified
+Date:               Tue, <span class="num">01</span> Mar <span class="num">2011</span> <span class="num">22</span>:<span class="num">44</span>:<span class="num">28</span> GMT</pre><h4>Compression</h4><p>HTTP <code>Accept-Encoding</code> header is used by the caller to nominate their supported compression
+algorithm. We return the compression format used in the <code>Content-Encoding</code> header.</p><pre>Request
+-------
+GET /encrypted-area HTTP/<span class="num">1.1</span>
+Host: www.example.com
+Accept-Encoding: gzip, deflate
+
+Response
+--------
+HTTP/<span class="num">1.1</span> <span class="num">200</span> OK
+Content-Encoding: gzip</pre><h4>Note</h4><p>If a response includes both an Expires header and a max-age directive, the max-age directive overrides the Expires
+header, even if the Expires header is more restrictive</p><p>See <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html" target="_blank">HTTP Header Field Definitions</a>
+</p></div></div>
+    </li><li name="org.mashupbots.socko.handlers.StaticContentHandlerConfig" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="StaticContentHandlerConfigextendsExtensionwithProductwithSerializable"></a>
+      <a id="StaticContentHandlerConfig:StaticContentHandlerConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="StaticContentHandlerConfig.html"><span class="name">StaticContentHandlerConfig</span></a><span class="params">(<span name="rootFilePaths">rootFilePaths: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">Nil</span></span>, <span name="tempDir">tempDir: <span class="extype" name="java.io.File">File</span> = <span class="defval" name="new File(System.getProperty(&quot;java.io.tmpdir&quot;))">...</span></span>, <span name="cache">cache: <a href="../infrastructure/LocalCache.html" class="extype" name="org.mashupbots.socko.infrastructure.LocalCache">LocalCache</a> = <span class="symbol"><span class="name"><a href="../../../package.html">new LocalCache(1000, 16)</a></span></span></span>, <span name="serverCacheMaxFileSize">serverCacheMaxFileSize: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1024 * 100</span></span>, <span name="serverCacheTimeoutSeconds">serverCacheTimeoutSeconds: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">3600</span></span>, <span name="browserCacheTimeoutSeconds">browserCacheTimeoutSeconds: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">3600</span></span>)</span><span class="result"> extends <span class="extype" name="akka.actor.Extension">Extension</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.handlers.package@StaticContentHandlerConfigextendsExtensionwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configuration for <a href="StaticContentHandler.html" class="extype" name="org.mashupbots.socko.handlers.StaticContentHandler">org.mashupbots.socko.handlers.StaticContentHandler</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configuration for <a href="StaticContentHandler.html" class="extype" name="org.mashupbots.socko.handlers.StaticContentHandler">org.mashupbots.socko.handlers.StaticContentHandler</a>.</p><p>This can also be loaded from an externalized AKKA configuration file. For example:</p><pre>static-content-config {
+# CSV list of root paths from <span class="kw">while</span> files can be served.
+root-file-paths=/home/me/path1,/home/me/path2
+
+# Temporary directory where compressed files can be stored.
+# Defaults to the `java.io.tmpdir` system property <span class="kw">if</span> setting is omitted
+temp-dir=localhost
+
+# Max number of files and resources to store in the local in memory cache
+# Defaults to storing <span class="num">1000</span> items <span class="kw">if</span> setting is omitted
+server-cache-max-size=<span class="num">1000</span>
+
+# Maximum size of files (in bytes) to be cached. Files larger than <span class="kw">this</span> will
+# not be cached and will be served from the file system or resorce.
+# Defaults to <span class="num">100</span>K <span class="kw">if</span> setting is omitted
+server-cache-max-file-size=<span class="num">102400</span>
+
+# Number of seconds files will be cached in local memory
+# Defaults to <span class="num">3600</span> <span class="kw">if</span> setting is omitted
+server-cache-timeout=<span class="num">3600</span>
+
+# Number of seconds before a browser should check back <span class="kw">with</span> the server <span class="kw">if</span> a file has been updated.
+# This setting is used to drive the `Expires` and `Cache-Control` HTTP headers.
+# Defaults to <span class="num">3600</span> <span class="kw">if</span> setting is omitted
+browser-cache-timeout=<span class="num">3600</span>
+}</pre><p>can be loaded as follows:</p><pre><span class="kw">object</span> MyStaticContentHandlerConfig <span class="kw">extends</span> ExtensionId[StaticContentHandlerConfig] <span class="kw">with</span> ExtensionIdProvider {
+  <span class="kw">override</span> <span class="kw">def</span> lookup = MyStaticContentHandlerConfig
+  <span class="kw">override</span> <span class="kw">def</span> createExtension(system: ExtendedActorSystem) =
+    <span class="kw">new</span> StaticContentHandlerConfig(system.settings.config, <span class="lit">"static-content-config"</span>)
+}
+
+<span class="kw">val</span> myStaticContentHandlerConfig = MyStaticContentHandlerConfig(actorSystem)</pre></div><dl class="paramcmts block"><dt class="param">rootFilePaths</dt><dd class="cmt"><p>List of root paths from while files can be served.
+  This is enforced to stop relative path type attacks; e.g. <code>../etc/passwd</code>
+</p></dd><dt class="param">tempDir</dt><dd class="cmt"><p>Temporary directory where compressed files can be stored.
+  Defaults to the <code>java.io.tmpdir</code> system property.
+</p></dd><dt class="param">cache</dt><dd class="cmt"><p>Local in memory cache to store file meta and content.
+  Defaults to storing 1000 items.
+</p></dd><dt class="param">serverCacheMaxFileSize</dt><dd class="cmt"><p>Maximum size of file contents to cache in memory
+  The contents of files under this limit is cached in memory for <code>serverCacheTimeoutSeconds</code>. Requests for this file
+  will be served by the contents stored in memory rather than the file system.</p><p>  Files larger than this limit are served by reading from the file system for every request.</p><p>  Defaults to 100K. <code>0</code> indicates that files will not be cached in memory.
+</p></dd><dt class="param">serverCacheTimeoutSeconds</dt><dd class="cmt"><p>Number of seconds file meta data (such as file name, size, timestamp and hash)
+  and file contents will be cached in memory.  After this time, cache data will be removed and file meta data will
+  and contents will have to be read from the file system.</p><p>  Note that if <code>serverCacheMaxFileSize</code> is 0 and <code>serverCacheTimeoutSeconds</code> is &gt; 0, then only file meta data
+  will be cached in memory.</p><p>  Defaults to 1 hour. <code>0</code> means files will NOT be cached.
+</p></dd><dt class="param">browserCacheTimeoutSeconds</dt><dd class="cmt"><p>Number of seconds before a browser should check back with the server if a file has
+  been updated.</p><p>  This setting is used to drive the <code>Expires</code> and <code>Cache-Control</code> HTTP headers.</p><p>  Defaults to 1 hour. <code>0</code> means cache headers will not be sent to the browser.
+</p></dd></dl></div>
+    </li><li name="org.mashupbots.socko.handlers.StaticFileRequest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="StaticFileRequestextendsProductwithSerializable"></a>
+      <a id="StaticFileRequest:StaticFileRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="StaticFileRequest.html"><span class="name">StaticFileRequest</span></a><span class="params">(<span name="event">event: <a href="../events/HttpRequestEvent.html" class="extype" name="org.mashupbots.socko.events.HttpRequestEvent">HttpRequestEvent</a></span>, <span name="file">file: <span class="extype" name="java.io.File">File</span></span>, <span name="serverCacheTimeoutSeconds">serverCacheTimeoutSeconds: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="browserCacheTimeoutSeconds">browserCacheTimeoutSeconds: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.handlers.package@StaticFileRequestextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Message to be sent to <a href="StaticContentHandler.html" class="extype" name="org.mashupbots.socko.handlers.StaticContentHandler">org.mashupbots.socko.handlers.StaticContentHandler</a> for it to download the specified file
+</p><div class="fullcomment"><div class="comment cmt"><p>Message to be sent to <a href="StaticContentHandler.html" class="extype" name="org.mashupbots.socko.handlers.StaticContentHandler">org.mashupbots.socko.handlers.StaticContentHandler</a> for it to download the specified file
+</p></div><dl class="paramcmts block"><dt class="param">event</dt><dd class="cmt"><p>HTTP Request event</p></dd><dt class="param">file</dt><dd class="cmt"><p>File to download to the client</p></dd><dt class="param">serverCacheTimeoutSeconds</dt><dd class="cmt"><p>Number of seconds to cache file meta data and contents. If <code>None</code>, the
+ default value specified in <a href="StaticContentHandlerConfig.html" class="extype" name="org.mashupbots.socko.handlers.StaticContentHandlerConfig">org.mashupbots.socko.handlers.StaticContentHandlerConfig</a> will be used.</p></dd><dt class="param">browserCacheTimeoutSeconds</dt><dd class="cmt"><p>Number of seconds the file is to be cached by the browser. If <code>None</code>, the
+ default value specified in <a href="StaticContentHandlerConfig.html" class="extype" name="org.mashupbots.socko.handlers.StaticContentHandlerConfig">org.mashupbots.socko.handlers.StaticContentHandlerConfig</a> will be used.
+</p></dd></dl></div>
+    </li><li name="org.mashupbots.socko.handlers.StaticResourceRequest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="StaticResourceRequestextendsProductwithSerializable"></a>
+      <a id="StaticResourceRequest:StaticResourceRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="StaticResourceRequest.html"><span class="name">StaticResourceRequest</span></a><span class="params">(<span name="event">event: <a href="../events/HttpRequestEvent.html" class="extype" name="org.mashupbots.socko.events.HttpRequestEvent">HttpRequestEvent</a></span>, <span name="classpath">classpath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="serverCacheTimeoutSeconds">serverCacheTimeoutSeconds: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="browserCacheTimeoutSeconds">browserCacheTimeoutSeconds: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.handlers.package@StaticResourceRequestextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Message to be sent to <a href="StaticContentHandler.html" class="extype" name="org.mashupbots.socko.handlers.StaticContentHandler">org.mashupbots.socko.handlers.StaticContentHandler</a> for it to download the specified file
+</p><div class="fullcomment"><div class="comment cmt"><p>Message to be sent to <a href="StaticContentHandler.html" class="extype" name="org.mashupbots.socko.handlers.StaticContentHandler">org.mashupbots.socko.handlers.StaticContentHandler</a> for it to download the specified file
+</p></div><dl class="paramcmts block"><dt class="param">event</dt><dd class="cmt"><p>HTTP Request event</p></dd><dt class="param">classpath</dt><dd class="cmt"><p>Classpath of resource to load (without a leading &quot;/&quot;). For example: <code>META-INF/mime.types</code>.</p></dd><dt class="param">serverCacheTimeoutSeconds</dt><dd class="cmt"><p>Number of seconds to cache file meta data and contents. If <code>None</code>, the
+ default value specified in <a href="StaticContentHandlerConfig.html" class="extype" name="org.mashupbots.socko.handlers.StaticContentHandlerConfig">org.mashupbots.socko.handlers.StaticContentHandlerConfig</a> will be used.</p></dd><dt class="param">browserCacheTimeoutSeconds</dt><dd class="cmt"><p>Number of seconds the file is to be cached by the browser. If <code>None</code>, the
+ default value specified in <a href="StaticContentHandlerConfig.html" class="extype" name="org.mashupbots.socko.handlers.StaticContentHandlerConfig">org.mashupbots.socko.handlers.StaticContentHandlerConfig</a> will be used.
+</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="org.mashupbots.socko.handlers.HttpDataFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpDataFactory"></a>
+      <a id="HttpDataFactory:HttpDataFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpDataFactory$.html"><span class="name">HttpDataFactory</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.handlers.package@HttpDataFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="org.mashupbots.socko.handlers.SnoopHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SnoopHandler"></a>
+      <a id="SnoopHandler:SnoopHandler"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SnoopHandler$.html"><span class="name">SnoopHandler</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.handlers.package@SnoopHandler" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

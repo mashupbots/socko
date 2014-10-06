@@ -5,12 +5,12 @@ layout: article
 
 ## Latest Release
 
-The latest verison of Socko is **`0.5.0`** released on 30th May 2014.
+The latest verison of Socko is **`0.6.0`** released on 30th May 2014.
 
-Download [socko-webserver_2.11-0.5.0.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.11/0.5.0/socko-webserver_2.11-0.3.1.jar).
+Download [socko-webserver_2.11-0.6.0.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.11/0.6.0/socko-webserver_2.11-0.3.1.jar).
 
-[Change logs](https://github.com/mashupbots/socko/issues/milestones?state=closed) and 
-[road maps](https://github.com/mashupbots/socko/issues/milestones?state=open) are available on our issue tracker.
+[Change logs](https://github.com/mashupbots/socko/milestones?state=closed) and 
+[road maps](https://github.com/mashupbots/socko/milestones?state=open) are available on our issue tracker.
 
 If you have a question or need help, just create a ticket in our [issue register](https://github.com/mashupbots/socko/issues).
 
@@ -39,7 +39,7 @@ Download the source code from GitHub
 
 Please install the following:
  - [Java JDK 7](http://www.oracle.com/technetwork/java/javase/downloads/index.html).
- - [Scala 2.11.0](http://www.scala-lang.org/) or higher
+ - [Scala 2.11.2](http://www.scala-lang.org/) or higher
  - [Simple Build Tool](https://github.com/harrah/xsbt/wiki/Getting-Started-Setup)
 
 

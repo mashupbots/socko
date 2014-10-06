@@ -1,0 +1,372 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>infrastructure - org.mashupbots.socko.infrastructure</title>
+          <meta name="description" content="infrastructure - org.mashupbots.socko.infrastructure" />
+          <meta name="keywords" content="infrastructure org.mashupbots.socko.infrastructure" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'org.mashupbots.socko.infrastructure.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a href="../../../package.html" class="extype" name="org">org</a>.<a href="../../package.html" class="extype" name="org.mashupbots">mashupbots</a>.<a href="../package.html" class="extype" name="org.mashupbots.socko">socko</a></p>
+        <h1>infrastructure</h1> <span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">infrastructure</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Utility classes and objects
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="org.mashupbots.socko.infrastructure"><span>infrastructure</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="org.mashupbots.socko.infrastructure.LocalCache" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LocalCacheextendsAnyRef"></a>
+      <a id="LocalCache:LocalCache"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="LocalCache.html"><span class="name">LocalCache</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@LocalCacheextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Local in-memory cache based on Google's <a href="http://code.google.com/p/concurrentlinkedhashmap" target="_blank">ConcurrentLinkedHashMap</a>.</p>
+    </li><li name="org.mashupbots.socko.infrastructure.Logger" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="LoggerextendsAnyRef"></a>
+      <a id="Logger:Logger"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Logger.html"><span class="name">Logger</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@LoggerextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Adds logging functionality to our classes.</p><div class="fullcomment"><div class="comment cmt"><p>Adds logging functionality to our classes.</p><p>We try not to use this logger too often because it is synchronous.
+Most of Socko's logging is performed inside Akka because it is asynchronous.</p><p>Usage:</p><pre>log.debug(<span class="lit">"Hello"</span>)
+log.error(<span class="lit">"Message: {} {}"</span>, <span class="std">Array</span>[<span class="std">AnyRef</span>](<span class="lit">"value1"</span>, <span class="lit">"value2"</span>))</pre></div></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="WebLogEventextendsProductwithSerializable"></a>
+      <a id="WebLogEvent:WebLogEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebLogEvent.html"><span class="name">WebLogEvent</span></a><span class="params">(<span name="timestamp">timestamp: <span class="extype" name="java.util.Date">Date</span></span>, <span name="serverName">serverName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="channelContextName">channelContextName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="clientAddress">clientAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="serverAddress">serverAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="username">username: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="method">method: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="requestSize">requestSize: <span class="extype" name="scala.Long">Long</span></span>, <span name="responseStatusCode">responseStatusCode: <span class="extype" name="scala.Int">Int</span></span>, <span name="responseSize">responseSize: <span class="extype" name="scala.Long">Long</span></span>, <span name="timeTaken">timeTaken: <span class="extype" name="scala.Long">Long</span></span>, <span name="protocolVersion">protocolVersion: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="userAgent">userAgent: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="referrer">referrer: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@WebLogEventextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A web log event to record
+</p><div class="fullcomment"><div class="comment cmt"><p>A web log event to record
+</p></div><dl class="paramcmts block"><dt class="param">timestamp</dt><dd class="cmt"><p>Timestamp for the event</p></dd><dt class="param">serverName</dt><dd class="cmt"><p>Socko Web Server instance name</p></dd><dt class="param">clientAddress</dt><dd class="cmt"><p>Client's socket address. We don't convert to string here in case JDK performs a blocknig
+ reverse DNS lookup.</p></dd><dt class="param">serverAddress</dt><dd class="cmt"><p>Server's socket address. We don't convert to string here in case JDK performs a blocknig
+ reverse DNS lookup.</p></dd><dt class="param">username</dt><dd class="cmt"><p>Authenticated user name</p></dd><dt class="param">method</dt><dd class="cmt"><p>The action the client was trying to perform (for example, a GET method).</p></dd><dt class="param">uri</dt><dd class="cmt"><p>The resource accessed; for example, Default.htm.</p></dd><dt class="param">requestSize</dt><dd class="cmt"><p>The number of bytes received by the server.</p></dd><dt class="param">responseStatusCode</dt><dd class="cmt"><p>The status of the action, in HTTP or FTP terms.</p></dd><dt class="param">responseSize</dt><dd class="cmt"><p>The number of bytes sent by the server.</p></dd><dt class="param">timeTaken</dt><dd class="cmt"><p>The duration of time, in milliseconds, that this action consumed.</p></dd><dt class="param">protocolVersion</dt><dd class="cmt"><p>The protocol (HTTP, FTP) version used by the client. For HTTP this will be either
+  HTTP/1.0 or HTTP/1.1.</p></dd><dt class="param">userAgent</dt><dd class="cmt"><p>The browser used on the client.</p></dd><dt class="param">referrer</dt><dd class="cmt"><p>The previous site visited by the user. This site provided a link to the current site.
+</p></dd></dl></div>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogWriter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="WebLogWriterextendsActor"></a>
+      <a id="WebLogWriter:WebLogWriter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebLogWriter.html"><span class="name">WebLogWriter</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@WebLogWriterextendsActor" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Default log writer that writes web log events to the AKKA logger.</p><div class="fullcomment"><div class="comment cmt"><p>Default log writer that writes web log events to the AKKA logger.</p><p>AKKA logger is used because it asynchronously writes to the log in a separate thread so it does not slow down
+your app.
+</p></div></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="org.mashupbots.socko.infrastructure.CharsetUtil" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="CharsetUtil"></a>
+      <a id="CharsetUtil:CharsetUtil"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CharsetUtil$.html"><span class="name">CharsetUtil</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@CharsetUtil" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A utility class that provides various constants related with character sets.</p><div class="fullcomment"><div class="comment cmt"><p>A utility class that provides various constants related with character sets.</p><p>This is a copy of the Netty CharsetUtil and is provided so that projects don't
+have to reference Netty directly.
+</p></div></div>
+    </li><li name="org.mashupbots.socko.infrastructure.ConfigUtil" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ConfigUtil"></a>
+      <a id="ConfigUtil:ConfigUtil"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ConfigUtil$.html"><span class="name">ConfigUtil</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@ConfigUtil" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A utility class for reading AKKA configuration
+</p>
+    </li><li name="org.mashupbots.socko.infrastructure.DateUtil" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DateUtil"></a>
+      <a id="DateUtil:DateUtil"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DateUtil$.html"><span class="name">DateUtil</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@DateUtil" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Utility methods associated with dates
+</p>
+    </li><li name="org.mashupbots.socko.infrastructure.HashUtil" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HashUtil"></a>
+      <a id="HashUtil:HashUtil"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HashUtil$.html"><span class="name">HashUtil</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@HashUtil" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="org.mashupbots.socko.infrastructure.IOUtil" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="IOUtil"></a>
+      <a id="IOUtil:IOUtil"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="IOUtil$.html"><span class="name">IOUtil</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@IOUtil" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Utility IO methods
+</p>
+    </li><li name="org.mashupbots.socko.infrastructure.MimeTypes" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MimeTypes"></a>
+      <a id="MimeTypes:MimeTypes"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MimeTypes$.html"><span class="name">MimeTypes</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@MimeTypes" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">MIME types lookup</p><div class="fullcomment"><div class="comment cmt"><p>MIME types lookup</p><p>This implementation uses <a href="http://docs.oracle.com/javase/6/docs/api/javax/activation/MimetypesFileTypeMap.html">
+`MimetypesFileTypeMap`</a> and relies on the presence of the file extension in a <code>mime.types</code> file.</p><p>See</p><ul><li>https://github.com/klacke/yaws/blob/master/src/mime.types</li><li>http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types</li><li>http://download.oracle.com/javaee/5/api/javax/activation/MimetypesFileTypeMap.html</li><li>src/main/resources/META-INF/mime.types
+</li></ul></div></div>
+    </li><li name="org.mashupbots.socko.infrastructure.ReflectUtil" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ReflectUtil"></a>
+      <a id="ReflectUtil:ReflectUtil"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ReflectUtil$.html"><span class="name">ReflectUtil</span></a><span class="result"> extends <a href="Logger.html" class="extype" name="org.mashupbots.socko.infrastructure.Logger">Logger</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@ReflectUtil" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Reflection utility functions
+</p>
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogEvent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WebLogEvent"></a>
+      <a id="WebLogEvent:WebLogEvent"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="WebLogEvent$.html"><span class="name">WebLogEvent</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@WebLogEvent" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="org.mashupbots.socko.infrastructure.WebLogFormat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WebLogFormat"></a>
+      <a id="WebLogFormat:WebLogFormat"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="WebLogFormat$.html"><span class="name">WebLogFormat</span></a><span class="result"> extends <span class="extype" name="scala.Enumeration">Enumeration</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.infrastructure.package@WebLogFormat" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Web Server Activity Log setting
+</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

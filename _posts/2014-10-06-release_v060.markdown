@@ -1,0 +1,22 @@
+---
+layout: post
+title: Release v0.6.0
+summary: Bug Fix release
+author: Vibul
+---
+
+This [release](https://github.com/mashupbots/socko/issues?q=milestone%3Av0.6.0) includes:
+ - Upgrade to Netty 4.0.23.Final, Akka to 2.3.6 and scala to 2.11.2 (thanks to [gfduszynski](https://github.com/gfduszynski))
+ - Fix toFormDataMap(). ((thanks to [gfduszynski](https://github.com/gfduszynski))
+ 
+Download [socko-webserver_2.11-0.6.0.jar](https://oss.sonatype.org/content/groups/public/org/mashupbots/socko/socko-webserver_2.11/0.6.0/socko-webserver_2.11-0.6.0.jar).
+
+For use with Simple Build Tool or to build from source, see our [download](/download.html) page.
+
+Documentation
+ - [User Guide](/docs/0.6.0/guides/user-guide.html)
+ - [API](/docs/0.6.0/api/)
+ - [Change logs](https://github.com/mashupbots/socko/issues?q=milestone%3Av0.6.0)
+
+
+

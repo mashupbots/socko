@@ -1,0 +1,490 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>webserver - org.mashupbots.socko.webserver</title>
+          <meta name="description" content="webserver - org.mashupbots.socko.webserver" />
+          <meta name="keywords" content="webserver org.mashupbots.socko.webserver" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'org.mashupbots.socko.webserver.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a href="../../../package.html" class="extype" name="org">org</a>.<a href="../../package.html" class="extype" name="org.mashupbots">mashupbots</a>.<a href="../package.html" class="extype" name="org.mashupbots.socko">socko</a></p>
+        <h1>webserver</h1> <span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">webserver</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Socko web server built on top of Netty networking and Akka processing.
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="org.mashupbots.socko.webserver"><span>webserver</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="org.mashupbots.socko.webserver.HttpConfig" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="HttpConfigextendsProductwithSerializable"></a>
+      <a id="HttpConfig:HttpConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpConfig.html"><span class="name">HttpConfig</span></a><span class="params">(<span name="maxLengthInMB">maxLengthInMB: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">4</span></span>, <span name="maxInitialLineLength">maxInitialLineLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">4096</span></span>, <span name="maxHeaderSizeInBytes">maxHeaderSizeInBytes: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">8192</span></span>, <span name="maxChunkSizeInBytes">maxChunkSizeInBytes: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">8192</span></span>, <span name="aggreateChunks">aggreateChunks: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="minCompressibleContentSizeInBytes">minCompressibleContentSizeInBytes: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1024</span></span>, <span name="maxCompressibleContentSizeInBytes">maxCompressibleContentSizeInBytes: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1 * 1024 * 1024</span></span>, <span name="compressibleContentTypes">compressibleContentTypes: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="defval" name='<span class="name"><a href="WebServerConfig$.html">WebServerConfig.defaultCompressibleContentTypes</a></span>'>...</span></span>, <span name="spdyEnabled">spdyEnabled: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package@HttpConfigextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">HTTP protocol handling configuration</p><div class="fullcomment"><div class="comment cmt"><p>HTTP protocol handling configuration</p><p>HTTP compression parameters only applies to HTTP request and responses and not web sockets.
+</p></div><dl class="paramcmts block"><dt class="param">maxLengthInMB</dt><dd class="cmt"><p>Maximum size of HTTP request in megabytes. Defaults to 4MB.</p></dd><dt class="param">maxInitialLineLength</dt><dd class="cmt"><p>Maximum size the initial line. Defaults to 4096 characters.</p></dd><dt class="param">maxHeaderSizeInBytes</dt><dd class="cmt"><p>Maximum size of HTTP headers. Defaults to 8192 bytes.</p></dd><dt class="param">maxChunkSizeInBytes</dt><dd class="cmt"><p>Maximum size of HTTP chunks. Defaults to 8192 bytes.</p></dd><dt class="param">aggreateChunks</dt><dd class="cmt"><p>Flag to indicate if we want to aggregate chunks. If <code>false</code>, your processor actors must be
+ able to handle <code>HttpChunkProcessingContext</code></p></dd><dt class="param">minCompressibleContentSizeInBytes</dt><dd class="cmt"><p>Minimum number of bytes before HTTP content will be compressed if requested
+  by the client. Set to <code>-1</code> to turn off compression for all files; <code>0</code> to make all content compressible.</p></dd><dt class="param">maxCompressibleContentSizeInBytes</dt><dd class="cmt"><p>Maximum number of bytes before HTTP content will be not be compressed if
+  requested by the client. Defaults to 1MB otherwise too much CPU maybe taken up for compression.</p></dd><dt class="param">compressibleContentTypes</dt><dd class="cmt"><p>List of MIME types of that can be compressed. If not supplied, defaults to
+  HTML, CSS, JSON, XML and Javascript files.</p></dd><dt class="param">spdyEnabled</dt><dd class="cmt"><p>Support SPDY protocol or not. Defaults to <code>false</code>.
+</p></dd></dl></div>
+    </li><li name="org.mashupbots.socko.webserver.PipelineFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PipelineFactoryextendsChannelInitializer[io.netty.channel.socket.SocketChannel]withLogger"></a>
+      <a id="PipelineFactory:PipelineFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="PipelineFactory.html"><span class="name">PipelineFactory</span></a><span class="result"> extends <span class="extype" name="io.netty.channel.ChannelInitializer">ChannelInitializer</span>[<span class="extype" name="io.netty.channel.socket.SocketChannel">SocketChannel</span>] with <a href="../infrastructure/Logger.html" class="extype" name="org.mashupbots.socko.infrastructure.Logger">Logger</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package@PipelineFactoryextendsChannelInitializer[io.netty.channel.socket.SocketChannel]withLogger" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Creates a new channel pipeline for each Netty channel (network connection)
+</p>
+    </li><li name="org.mashupbots.socko.webserver.ProtocolNegoitationHandler" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ProtocolNegoitationHandlerextendsByteToMessageDecoderwithLogger"></a>
+      <a id="ProtocolNegoitationHandler:ProtocolNegoitationHandler"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ProtocolNegoitationHandler.html"><span class="name">ProtocolNegoitationHandler</span></a><span class="result"> extends <span class="extype" name="io.netty.handler.codec.ByteToMessageDecoder">ByteToMessageDecoder</span> with <a href="../infrastructure/Logger.html" class="extype" name="org.mashupbots.socko.infrastructure.Logger">Logger</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package@ProtocolNegoitationHandlerextendsByteToMessageDecoderwithLogger" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Handler used with SPDY that performs protocol negotiation.</p><div class="fullcomment"><div class="comment cmt"><p>Handler used with SPDY that performs protocol negotiation.</p><p>Once Jetty's <code>NextProtoNego</code> returns the selected protocol, we setup the pipeline accordingly.</p><p>Code ported from post form <a href="http://www.smartjava.org/content/using-spdy-and-http-transparently-using-netty" target="_blank">Jos Dirksen</a>
+and Netty SpdyOrHttpChooser class
+</p></div></div>
+    </li><li name="org.mashupbots.socko.webserver.RequestHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequestHandlerextendsChannelInboundHandlerAdapterwithLogger"></a>
+      <a id="RequestHandler:RequestHandler"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RequestHandler.html"><span class="name">RequestHandler</span></a><span class="result"> extends <span class="extype" name="io.netty.channel.ChannelInboundHandlerAdapter">ChannelInboundHandlerAdapter</span> with <a href="../infrastructure/Logger.html" class="extype" name="org.mashupbots.socko.infrastructure.Logger">Logger</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package@RequestHandlerextendsChannelInboundHandlerAdapterwithLogger" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Handles incoming HTTP messages from Netty
+</p>
+    </li><li name="org.mashupbots.socko.webserver.SslConfig" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SslConfigextendsProductwithSerializable"></a>
+      <a id="SslConfig:SslConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SslConfig.html"><span class="name">SslConfig</span></a><span class="params">(<span name="keyStoreFile">keyStoreFile: <span class="extype" name="java.io.File">File</span></span>, <span name="keyStorePassword">keyStorePassword: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="trustStoreFile">trustStoreFile: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="java.io.File">File</span>]</span>, <span name="trustStorePassword">trustStorePassword: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package@SslConfigextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">SSL Configuration
+</p><div class="fullcomment"><div class="comment cmt"><p>SSL Configuration
+</p></div><dl class="paramcmts block"><dt class="param">keyStoreFile</dt><dd class="cmt"><p>Path to server private key store file (server certificates)</p></dd><dt class="param">keyStorePassword</dt><dd class="cmt"><p>Password to access server private key store file.</p></dd><dt class="param">trustStoreFile</dt><dd class="cmt"><p>Path to key store file for trusted remote public keys (client certificates).
+	This is optional.</p></dd><dt class="param">trustStorePassword</dt><dd class="cmt"><p>Password to access the key store for trusted remote public keys (client certificates).
+	This is optional.
+</p></dd></dl></div>
+    </li><li name="org.mashupbots.socko.webserver.SslManager" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SslManagerextendsAnyRef"></a>
+      <a id="SslManager:SslManager"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SslManager.html"><span class="name">SslManager</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package@SslManagerextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Manages reading key stores and trust stores for TLS/SSL connections
+</p>
+    </li><li name="org.mashupbots.socko.webserver.TcpConfig" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TcpConfigextendsProductwithSerializable"></a>
+      <a id="TcpConfig:TcpConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="TcpConfig.html"><span class="name">TcpConfig</span></a><span class="params">(<span name="noDelay">noDelay: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">None</span></span>, <span name="sendBufferSize">sendBufferSize: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="receiveBufferSize">receiveBufferSize: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="keepAlive">keepAlive: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">None</span></span>, <span name="reuseAddress">reuseAddress: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">None</span></span>, <span name="soLinger">soLinger: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="trafficClass">trafficClass: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="acceptBackLog">acceptBackLog: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package@TcpConfigextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">TCP IP configuration as per Netty.</p><div class="fullcomment"><div class="comment cmt"><p>TCP IP configuration as per Netty.</p><p>See <a href="http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html" target="_blank">javadoc</a> and
+<a href="http://netty.io/docs/stable/api/org/jboss/netty/channel/socket/SocketChannelConfig.html" target="_blank">netty doc</a> for more
+information.</p><p>Netty and JVM defaults are used until overriden here.
+</p></div><dl class="paramcmts block"><dt class="param">noDelay</dt><dd class="cmt"><p>Disable Nagle's algorithm. Defaults to <code>true</code> if not supplied.</p></dd><dt class="param">sendBufferSize</dt><dd class="cmt"><p>Set a hint the size of the underlying buffers for outgoing network I/O.</p></dd><dt class="param">receiveBufferSize</dt><dd class="cmt"><p>Get the size of the buffer actually used by the platform when receiving in data on this
+  socket.</p></dd><dt class="param">keepAlive</dt><dd class="cmt"><p>Turn on socket keep-alive. Defaults to <code>false</code> if not supplied.</p></dd><dt class="param">reuseAddress</dt><dd class="cmt"><p>Enable reuse address for a socket and not throw an &quot;already bind exception&quot;
+  The default value is JVM specific.</p></dd><dt class="param">soLinger</dt><dd class="cmt"><p>Specify a linger-on-close timeout.</p></dd><dt class="param">trafficClass</dt><dd class="cmt"><p>Sets the type-of-service or traffic class field in the IP header for a TCP or UDP socket. \
+  The default value is JVM specific.</p></dd><dt class="param">acceptBackLog</dt><dd class="cmt"><p>The number of requests that can be queued. Useful in managing sudden bursts in requests.
+  If take an example with a socket server invoker that has max pool set to 300, accept threads is 2, and backlog is
+  200, will be able to make 502 concurrent client calls. The 503rd client request will get an exception immediately.
+  However, this does not mean all 502 requests will be guaranteed to be processed, only the first 300 (as they have
+  server threads available to do the processing). If 202 of the server threads finish processing their requests from
+  their initial client connections and the connection is released before the timeout for the other 202 that are
+  waiting (200 for backlog and 2 for accept thread), then they will be processed (of course this is a request by
+  request determination).
+</p></dd></dl></div>
+    </li><li name="org.mashupbots.socko.webserver.WebLogConfig" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="WebLogConfigextendsProductwithSerializable"></a>
+      <a id="WebLogConfig:WebLogConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebLogConfig.html"><span class="name">WebLogConfig</span></a><span class="params">(<span name="customActorPath">customActorPath: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="format">format: <a href="../infrastructure/WebLogFormat$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="org.mashupbots.socko.infrastructure.WebLogFormat.Value">infrastructure.WebLogFormat.Value</a> = <span class="symbol"><span class="name"><a href="../../../package.html">WebLogFormat.Common</a></span></span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package@WebLogConfigextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configuration for web server activity logs.</p><div class="fullcomment"><div class="comment cmt"><p>Configuration for web server activity logs.
+</p></div><dl class="paramcmts block"><dt class="param">customActorPath</dt><dd class="cmt"><p>Optional path of actor to which <a href="../infrastructure/WebLogEvent.html" class="extype" name="org.mashupbots.socko.infrastructure.WebLogEvent">org.mashupbots.socko.infrastructure.WebLogEvent</a> will be sent for writing.
+  If this path is not present, <a href="../infrastructure/WebLogWriter.html" class="extype" name="org.mashupbots.socko.infrastructure.WebLogWriter">org.mashupbots.socko.infrastructure.WebLogWriter</a> will be used.</p></dd><dt class="param">format</dt><dd class="cmt"><p>Format of the web log. Defaults to <code>Common</code>.
+</p></dd></dl></div>
+    </li><li name="org.mashupbots.socko.webserver.WebServer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="WebServerextendsLogger"></a>
+      <a id="WebServer:WebServer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebServer.html"><span class="name">WebServer</span></a><span class="result"> extends <a href="../infrastructure/Logger.html" class="extype" name="org.mashupbots.socko.infrastructure.Logger">Logger</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package@WebServerextendsLogger" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Socko Web Server</p><div class="fullcomment"><div class="comment cmt"><p>Socko Web Server</p><pre><span class="kw">val</span> webServer = <span class="kw">new</span> WebServer(myWebServerConfig, actorSystem, { server <span class="kw">=&gt;</span> <span class="kw">new</span> RequestHandler(server, routes) })
+webServer.start()
+...
+
+webServer.stop()</pre></div></div>
+    </li><li name="org.mashupbots.socko.webserver.WebServerConfig" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="WebServerConfigextendsExtensionwithProductwithSerializable"></a>
+      <a id="WebServerConfig:WebServerConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebServerConfig.html"><span class="name">WebServerConfig</span></a><span class="params">(<span name="serverName">serverName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;WebServer&quot;</span></span>, <span name="hostname">hostname: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;localhost&quot;</span></span>, <span name="port">port: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">8888</span></span>, <span name="idleConnectionTimeout">idleConnectionTimeout: <span class="extype" name="scala.concurrent.duration.Duration">Duration</span> = <span class="symbol">0 seconds</span></span>, <span name="logNetworkActivity">logNetworkActivity: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="webLog">webLog: <span class="extype" name="scala.Option">Option</span>[<a href="WebLogConfig.html" class="extype" name="org.mashupbots.socko.webserver.WebLogConfig">WebLogConfig</a>] = <span class="symbol">None</span></span>, <span name="ssl">ssl: <span class="extype" name="scala.Option">Option</span>[<a href="SslConfig.html" class="extype" name="org.mashupbots.socko.webserver.SslConfig">SslConfig</a>] = <span class="symbol">None</span></span>, <span name="http">http: <a href="HttpConfig.html" class="extype" name="org.mashupbots.socko.webserver.HttpConfig">HttpConfig</a> = <span class="symbol">HttpConfig()</span></span>, <span name="tcp">tcp: <a href="TcpConfig.html" class="extype" name="org.mashupbots.socko.webserver.TcpConfig">TcpConfig</a> = <span class="symbol">TcpConfig()</span></span>)</span><span class="result"> extends <span class="extype" name="akka.actor.Extension">Extension</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package@WebServerConfigextendsExtensionwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Web server configuration</p><div class="fullcomment"><div class="comment cmt"><p>Web server configuration</p><p>The configuration can be optionally loaded from Akka's application.conf<code> file.</code></p><p>The following example configuration file:</p><pre>akka-config-example {
+server-name=AkkaConfigExample
+hostname=localhost
+port=<span class="num">9000</span>
+idle-connection-timeout=<span class="num">0</span>
+log-network-activity=<span class="kw">false</span>
+
+# Optional web log. If not supplied, web server activity logging is turned off.
+web-log {
+
+  # Optional path of actor to which web log events will be sent <span class="kw">for</span> writing. If not specified, the default
+  # web log writer will be created
+  custom-actor-path = <span class="lit">"akka://my-system/user/web-log-writer"</span>
+
+  # Optional web log format <span class="kw">for</span> the default web log writer: Common, Combined or Extended.
+  # If no specified, Common is the default.
+  format = Common
+}
+
+# Optional SSL. If not supplied, ssl is turned off.
+ssl {
+
+  # Path to key store (server cert.)
+  key-store-file=/tmp/ks.dat
+
+  # Password to key store
+  key-store-password=kspwd
+
+  # Optional path to trust store (client cert.)
+  trust-store-file=/tmp/ts.dat
+
+  # Optional password to trust store
+  trust-store-password=tspwd
+}
+
+# Optional HTTP protocol configuration. If not supplied, defaults are used.
+http {
+
+  # Maximum size of HTTP request. Defaults to <span class="num">4</span>MB.
+  max-length-in-mb=<span class="num">4</span>
+
+  # Maximum length of the HTTP initial line. Defaults to <span class="num">4096</span> bytes (<span class="num">4</span>K).
+  max-initial-line-length=<span class="num">4096</span>
+
+  # Maximum size of HTTP headers. Defaults to <span class="num">8192</span> bytes (<span class="num">8</span>K).
+  max-header-size-in-bytes=<span class="num">8192</span>
+
+  # Maximum size of HTTP chunks. Defaults to <span class="num">8192</span> bytes (<span class="num">8</span>K).
+  max-chunk-size-in-bytes=<span class="num">8192</span>
+
+  # Flag to indicate <span class="kw">if</span> HTTP chunk requests should be aggregated and presented
+  # as a single HTTP request. Defaults to <span class="kw">true</span>.
+  aggregate-chunks=<span class="kw">true</span>
+
+  # Content under <span class="kw">this</span> size is not compressed. Defaults to <span class="num">1024</span> bytes (<span class="num">1</span>K).
+  # <span class="std">Set</span> to -<span class="num">1</span> to turn off compression; or <span class="num">0</span> to compress all content.
+  min-compressible-content-size-in-bytes=<span class="num">1024</span>
+
+  # Content over <span class="kw">this</span> size is not compressed. Defaults to <span class="num">1</span>MB
+  max-compressible-content-size-in-bytes=<span class="num">60</span>
+
+  # Only content <span class="kw">with</span> the specified MIME <span class="kw">type</span> will be compressed
+  compressible-content-types=[
+    <span class="lit">"text/plain"</span>, <span class="lit">"text/html"</span>, <span class="lit">"text/xml"</span>, <span class="lit">"text/css"</span>,
+    <span class="lit">"application/xml"</span>, <span class="lit">"application/xhtml+xml"</span>, <span class="lit">"application/rss+xml"</span>,
+    <span class="lit">"application/json"</span>, <span class="lit">"application/jsonml+json"</span>,
+    <span class="lit">"application/javascript"</span>, <span class="lit">"application/x-javascript"</span>]
+
+  # Enable SPDY protocol or not. Defaults to `<span class="kw">false</span>`. If `<span class="kw">true</span>`, you must also enable SSL.
+  spdy=<span class="kw">false</span>
+}
+
+# Optional TCP protocol configuration. If not supplied, defaults are used.
+tcp {
+
+  # Disable Nagle's algorithm. Defaults to `<span class="kw">true</span>` <span class="kw">if</span> not supplied.
+  no-delay=
+
+  # <span class="std">Set</span> a hint the size of the underlying buffers <span class="kw">for</span> outgoing network I/O.
+  send-buffer-size=
+
+  # Get the size of the buffer actually used by the platform when receiving in data on <span class="kw">this</span> socket
+  receive-buffer-size=
+
+  # Turn on socket keep-alive. `<span class="kw">true</span>` or `<span class="kw">false</span>`.
+  keep-alive=
+
+  # Enable reuse address <span class="kw">for</span> a socket and not <span class="kw">throw</span> an <span class="lit">"already bind exception"</span>. `<span class="kw">true</span>` or `<span class="kw">false</span>`.
+  reuse-address=
+
+  # Specify a linger-on-close timeout.
+  so-linger=
+
+  # Sets the <span class="kw">type</span>-of-service or traffic <span class="kw">class</span> field in the IP header <span class="kw">for</span> a TCP or UDP socket.
+  traffic-<span class="kw">class</span>=
+
+  # The number of requests that can be queued.
+  accept-backlog=
+}
+}</pre><p>can be loaded as follows:</p><pre><span class="kw">object</span> MyWebServerConfig <span class="kw">extends</span> ExtensionId[WebServerConfig] <span class="kw">with</span> ExtensionIdProvider {
+  <span class="kw">override</span> <span class="kw">def</span> lookup = MyWebServerConfig
+  <span class="kw">override</span> <span class="kw">def</span> createExtension(system: ExtendedActorSystem) =
+    <span class="kw">new</span> WebServerConfig(system.settings.config, <span class="lit">"akka-config-example"</span>)
+}
+
+<span class="kw">val</span> myWebServerConfig = MyWebServerConfig(actorSystem)
+<span class="kw">val</span> webServer = <span class="kw">new</span> WebServer(myWebServerConfig, routes)
+webServer.start()</pre></div><dl class="paramcmts block"><dt class="param">serverName</dt><dd class="cmt"><p>Human friendly name of this server. Defaults to <code>WebServer</code>.</p></dd><dt class="param">hostname</dt><dd class="cmt"><p>Hostname or IP address to bind. <code>0.0.0.0</code> will bind to all addresses.
+	You can also specify comma separated hostnames/ip address like <code>localhost,192.168.1.1</code>.
+ Defaults to <code>localhost</code>.</p></dd><dt class="param">port</dt><dd class="cmt"><p>IP port number to bind to. Defaults to <code>8888</code>.</p></dd><dt class="param">idleConnectionTimeout</dt><dd class="cmt"><p>If a connection is idle for this duration, it will be closed. The default is <code>0</code>,
+ which indicates NO timeout and idle connections will NOT be closed.</p></dd><dt class="param">logNetworkActivity</dt><dd class="cmt"><p>Dumps request and response data to the debug logger. To see the output, you need to
+ set the logging level for <code>io.netty.handler.logging.LoggingHandler</code> to debug. The default is <code>false</code>.</p></dd><dt class="param">webLog</dt><dd class="cmt"><p>Optional web log configuration.  If <code>None</code>, web log events will NOT be generated.</p></dd><dt class="param">ssl</dt><dd class="cmt"><p>SSL protocol configuration. If <code>None</code>, then SSL will not be turned on.
+ Defaults to <code>None</code>.</p></dd><dt class="param">http</dt><dd class="cmt"><p>HTTP protocol configuration. Defaults to an instance of
+ <a href="HttpConfig.html" class="extype" name="org.mashupbots.socko.webserver.HttpConfig">org.mashupbots.socko.webserver.HttpConfig</a> with default settings.</p></dd><dt class="param">tcp</dt><dd class="cmt"><p>TCP IP protocol configuration. Defaults to an instance of
+ <a href="TcpConfig.html" class="extype" name="org.mashupbots.socko.webserver.TcpConfig">org.mashupbots.socko.webserver.TcpConfig</a> with default settings.
+</p></dd></dl></div>
+    </li><li name="org.mashupbots.socko.webserver.WebSocketConnections" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="WebSocketConnectionsextendsAnyRef"></a>
+      <a id="WebSocketConnections:WebSocketConnections"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="WebSocketConnections.html"><span class="name">WebSocketConnections</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package@WebSocketConnectionsextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Manages all web socket connections</p><div class="fullcomment"><div class="comment cmt"><p>Manages all web socket connections</p><p>Acts as a wrapper for Netty's channel group.  A TODO is to optimize performance by using a
+hash lookup.
+</p></div></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="org.mashupbots.socko.webserver.WebServerConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WebServerConfig"></a>
+      <a id="WebServerConfig:WebServerConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="WebServerConfig$.html"><span class="name">WebServerConfig</span></a><span class="result"> extends <a href="../infrastructure/Logger.html" class="extype" name="org.mashupbots.socko.infrastructure.Logger">Logger</a> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#org.mashupbots.socko.webserver.package@WebServerConfig" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Methods for reading configuration from Akka.</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>
