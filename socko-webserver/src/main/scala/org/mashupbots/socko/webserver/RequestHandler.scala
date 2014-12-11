@@ -113,7 +113,12 @@ class RequestHandler(server: WebServer, routes: PartialFunction[SockoEvent, Unit
    * @param e Message to process
    */
   override def channelRead(ctx: ChannelHandlerContext, e: AnyRef) {
+    def isInvalid(httpRequest: HttpRequest): Boolean = HttpHeaders.getHost(httpRequest) == null
+
     e match {
+      case httpRequest: FullHttpRequest if isInvalid(httpRequest) =>
+        writeErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, new NullPointerException)
+
       case httpRequest: FullHttpRequest =>
         val event = HttpRequestEvent(ctx, httpRequest, httpConfig)
 
@@ -127,6 +132,9 @@ class RequestHandler(server: WebServer, routes: PartialFunction[SockoEvent, Unit
         } else {
           routes(event)
         }
+
+      case httpRequest: HttpRequest if isInvalid(httpRequest) =>
+        writeErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, new NullPointerException)
 
       case httpRequest: HttpRequest =>
         val event = HttpRequestEvent(ctx, httpRequest, httpConfig)
