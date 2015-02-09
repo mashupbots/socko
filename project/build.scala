@@ -154,7 +154,7 @@ object Dependencies {
   )  
 
   val rest = Seq(
-    Dependency.json4s, Dependency.logback, 
+    Dependency.json4s, Dependency.json4sExt, Dependency.logback, 
     Dependency.scalatest, Dependency.akkaTestKit
   )  
 
@@ -178,7 +178,8 @@ object Dependency {
   val logback       = "ch.qos.logback"                          % "logback-classic"              % "1.0.9" % "runtime"
   val netty         = "io.netty"                                % "netty-all"                    % "4.0.23.Final"
   val nextProtoNeg  = "org.eclipse.jetty.npn"                   % "npn-api"                      % "1.1.0.v20120525"
-  val json4s        = "org.json4s"                              %% "json4s-native"               % "3.2.9"
+  val json4s        = "org.json4s"                              %% "json4s-native"               % "3.2.11"
+  val json4sExt        = "org.json4s"                              %% "json4s-ext"               % "3.2.11"
   val scalatest     = "org.scalatest"                           % "scalatest_2.11"               % "2.2.1" % "test"
 }
 
