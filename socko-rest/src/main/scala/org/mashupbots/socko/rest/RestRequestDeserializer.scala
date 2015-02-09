@@ -21,6 +21,7 @@ import scala.reflect.runtime.{ universe => ru }
 
 import org.json4s.NoTypeHints
 import org.json4s.native.{ Serialization => json }
+import org.json4s.ext._
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.infrastructure.DateUtil
 
@@ -514,7 +515,7 @@ case class BodyBinding(
         } else {
           val s = content.toString()
           try {
-            val formats = json.formats(NoTypeHints)
+            val formats = json.formats(NoTypeHints) ++ JavaTypesSerializers.all
             val scalaType = org.json4s.reflect.Reflector.scalaTypeOf(objectClass.get)
             val scalaManifest = org.json4s.reflect.ManifestFactory.manifestOf(scalaType)
             val data = json.read(s)(formats, scalaManifest)
