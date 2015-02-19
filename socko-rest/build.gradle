@@ -1,0 +1,98 @@
+apply plugin: 'java'
+apply plugin: 'scala'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'git-repo'
+
+description = 'socko-rest_2.11'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+    maven { url "${System.env.HOME}/.m2/repository" }
+    github("layerhq", "maven-private", "master", "releases")
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-reflect', version: '2.11.2'
+    compile group: 'com.typesafe.akka', name: "akka-actor_$scalaVersion", version: '2.3.7'
+    compile group: 'com.typesafe.akka', name: "akka-slf4j_$scalaVersion", version: '2.3.7'
+    compile group: 'com.typesafe.akka', name: "akka-testkit_$scalaVersion", version: '2.3.7'
+    compile group: 'org.apache.ant',    name: "ant", version: '1.8.4'
+    compile group: 'com.googlecode.concurrentlinkedhashmap', name: "concurrentlinkedhashmap-lru", version: '1.3.2'
+    runtime group: 'ch.qos.logback', name: "logback-classic", version: '1.0.9'
+    compile group: 'io.netty', name: "netty-all", version: '4.0.23.Final'
+    compile group: 'org.eclipse.jetty.npn',    name: "npn-api", version: '1.1.0.v20120525'
+    compile group: 'org.json4s', name: "json4s-native_$scalaVersion", version: '3.2.11'
+    compile group: 'org.json4s', name: "json4s-ext_$scalaVersion", version: '3.2.11'
+    compile group: 'org.mashupbots.socko', name: "socko-webserver_$scalaVersion", version: '0.6.0'
+    testCompile group: 'org.scalatest', name: "scalatest_2.11", version: '2.2.1'
+}
+
+jar {
+    baseName = 'socko-rest_2.11'
+    version =  '0.6.0'
+}
+
+sourceSets.main.java.srcDirs = ["src/main/java", "src/main/scala"]
+
+/*************************************************
+ * Uploading
+ * e.g. > gradle clean build publish
+ ************************************************/
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allScala
+    from sourceSets.main.allJava
+}
+
+task testJar(type: Jar) {
+    from sourceSets.test.output
+    //exclude "**/*Test*"
+}
+
+task testSourceJar(type: Jar) {
+    from sourceSets.test.allJava
+    from sourceSets.test.allScala
+}
+
+public String getLocalGit() {
+    return "$rootProject.ext.gitRepoHome/$rootProject.ext.org/$rootProject.ext.repo"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = group
+            artifactId = 'socko-rest_2.11'
+            version = rootProject.version
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+
+            artifact testJar {
+                classifier "test"
+            }
+
+            artifact testSourceJar {
+                classifier "testsources"
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "file://${getLocalGit()}/releases"
+        }
+    }
+}
+
+task cleanLocalGit(type: Delete) {
+    doFirst {
+        println "Deleting local git repo `${getLocalGit()}`..."
+        delete "${getLocalGit()}"
+    }
+}

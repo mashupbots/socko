@@ -1,0 +1,6 @@
+rootProject.name = 'parent'
+include ':socko-webserver'
+include ':socko-rest'
+
+project(':socko-webserver').projectDir = "$rootDir/socko-webserver" as File
+project(':socko-rest').projectDir = "$rootDir/socko-rest" as File
