@@ -311,7 +311,7 @@ class RequestHandler(server: WebServer, routes: PartialFunction[SockoEvent, Unit
     val wsFactory = new WebSocketServerHandshakerFactory(
       createWebSocketLocation(event),
       if (event.authorizedSubprotocols == "") null else event.authorizedSubprotocols,
-      false,
+      true,
       event.maxFrameSize)
     wsHandshaker = wsFactory.newHandshaker(event.nettyHttpRequest)
     if (wsHandshaker == null) {
