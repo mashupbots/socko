@@ -16,6 +16,7 @@
 package org.mashupbots.socko.netty;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.FileRegion;
 import io.netty.handler.codec.http.DefaultHttpContent;
@@ -157,23 +158,29 @@ public class HttpChunkedFile implements ChunkedInput<HttpContent> {
         file.close();
     }
 
+    @Deprecated
     @Override
     public HttpContent readChunk(ChannelHandlerContext ctx) throws Exception {
+        return readChunk(ctx.alloc());
+    }
+
+    @Override
+    public HttpContent readChunk(ByteBufAllocator allocator) throws Exception {
         long offset = this.offset;
         if (offset >= endOffset) {
-        	if (sentLastChunk){
-                return null;        		
-        	} else {
-        		// Send last chunk for this file
-        		sentLastChunk = true;
-        		return new DefaultLastHttpContent();
-        	}
+            if (sentLastChunk){
+                return null;
+            } else {
+                // Send last chunk for this file
+                sentLastChunk = true;
+                return new DefaultLastHttpContent();
+            }
         }
 
         int chunkSize = (int) Math.min(this.chunkSize, endOffset - offset);
         // Check if the buffer is backed by an byte array. If so we can optimize it a bit an safe a copy
 
-        ByteBuf buf = ctx.alloc().heapBuffer(chunkSize);
+        ByteBuf buf = allocator.heapBuffer(chunkSize);
         boolean release = true;
         try {
             file.readFully(buf.array(), buf.arrayOffset(), chunkSize);
@@ -186,6 +193,15 @@ public class HttpChunkedFile implements ChunkedInput<HttpContent> {
                 buf.release();
             }
         }
-        
+    }
+
+    @Override
+    public long length() {
+        return endOffset - startOffset;
+    }
+
+    @Override
+    public long progress() {
+        return offset - startOffset;
     }
 }
