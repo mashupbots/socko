@@ -16,7 +16,6 @@
 package org.mashupbots.socko.netty;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.FileRegion;
 import io.netty.handler.codec.http.DefaultHttpContent;

@@ -67,7 +67,6 @@ class PipelineFactory(server: WebServer) extends ChannelInitializer[SocketChanne
         pipeline.addLast("chunkAggregator", new HttpObjectAggregator(httpConfig.maxLengthInBytes))
       }
 
-
       pipeline.addLast("chunkWriter", new ChunkedWriteHandler())
 
       if (server.config.idleConnectionTimeout.toSeconds > 0) {
