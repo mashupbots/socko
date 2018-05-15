@@ -120,6 +120,9 @@ class WebServer(
     Some(actorRef)
   }
 
+  val bossGroup = new NioEventLoopGroup
+  val workerGroup = new NioEventLoopGroup
+
   /**
    * Starts the server
    */
@@ -127,8 +130,6 @@ class WebServer(
     
     allChannels.clear()
 
-    val bossGroup = new NioEventLoopGroup
-    val workerGroup = new NioEventLoopGroup
     val bootstrap = new ServerBootstrap()
     .group(bossGroup, workerGroup)
     .channel(classOf[NioServerSocketChannel])
@@ -194,6 +195,9 @@ class WebServer(
     future.awaitUninterruptibly()
 
     allChannels.clear()
+
+	workerGroup.shutdownGracefully();
+	bossGroup.shutdownGracefully();
 
     log.info("Socko server '{}' stopped", config.serverName)
   }
