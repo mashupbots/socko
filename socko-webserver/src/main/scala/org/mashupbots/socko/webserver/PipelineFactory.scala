@@ -24,6 +24,7 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.http.HttpRequestDecoder
 import io.netty.handler.codec.http.HttpResponseEncoder
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler
 import io.netty.handler.logging.LoggingHandler
 import io.netty.handler.ssl.SslHandler
 import io.netty.handler.stream.ChunkedWriteHandler
@@ -71,6 +72,8 @@ class PipelineFactory(server: WebServer) extends ChannelInitializer[SocketChanne
       if (server.config.idleConnectionTimeout.toSeconds > 0) {
         pipeline.addLast("idleStateHandler", new IdleStateHandler(0, 0, server.config.idleConnectionTimeout.toSeconds.toInt))
       }
+
+      pipeline.addLast("websocketCompression", new WebSocketServerCompressionHandler())
 
       pipeline.addLast("handler", server.handler())
 
