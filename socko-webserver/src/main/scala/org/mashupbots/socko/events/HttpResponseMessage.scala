@@ -127,7 +127,7 @@ case class HttpResponseMessage(event: HttpEvent) {
 
     // Headers
     HttpResponseMessage.setDateHeader(response)
-    headers.foreach { h => response.headers.set(h.name, h.value) }
+    headers.foreach { h => response.headers.add(h.name, h.value) }
 
     if (request.isKeepAlive) {
       // Add 'Content-Length' header only for a keep-alive connection.
@@ -417,7 +417,7 @@ case class HttpResponseMessage(event: HttpEvent) {
 
     // Headers
     HttpResponseMessage.setDateHeader(response)
-    this.headers.foreach { h => response.headers.set(h.name, h.value) }
+    this.headers.foreach { h => response.headers.add(h.name, h.value) }
     if (request.isKeepAlive) {
       // Add keep alive header as per HTTP 1.1 specifications
       HttpResponseMessage.setKeepAliveHeader(response, request.isKeepAlive)
