@@ -1,5 +1,7 @@
 # SOCKO
 
+## This repository is not maintained or supported by Asana, and is not accepting patches
+
 Socko is an embedded [Scala](http://www.scala-lang.org/) web server powered by
 [Netty](http://netty.io/) networking and [Akka](http://akka.io/) processing.
 
