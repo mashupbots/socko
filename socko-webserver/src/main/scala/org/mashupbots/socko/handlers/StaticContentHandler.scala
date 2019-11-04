@@ -673,59 +673,6 @@ class StaticContentHandler(defaultConfig: StaticContentHandlerConfig) extends Ac
     }
   }
 
-  /**
-   * Data structure that we use for caching
-   *
-   * @param path The path to the file or resource
-   * @param contentType MIME content type
-   */
-  private[StaticContentHandler] trait CachedContent {
-    def path: String
-    def contentType: String
-  }
-
-  /**
-   * Data structure that we use for caching resources
-   *
-   * @param path The path to the file or resource
-   * @param contentType MIME content type
-   * @param etag Hash id of the file or resource content
-   * @param content In memory store of the contents
-   */
-  private[StaticContentHandler] case class CachedResource(
-    path: String,
-    contentType: String,
-    etag: String,
-    content: Array[Byte]) extends CachedContent
-
-  /**
-   * Data structure that we use for caching small files which has content loaded into memory
-   *
-   * @param path The path to the file or resource
-   * @param contentType MIME content type
-   * @param etag Hash id of the file or resource content
-   * @param lastModified Date when this object was last modified
-   * @param content In memory store of the contents
-   */
-  private[StaticContentHandler] case class CachedSmallFile(
-    path: String,
-    contentType: String,
-    etag: String,
-    lastModified: Date,
-    content: Array[Byte]) extends CachedContent
-
-  /**
-   * Data structure that we use for caching information about big file that are stored in the file system
-   *
-   * @param path The path to the file or resource
-   * @param contentType MIME content type
-   * @param lastModified Date when this object was last modified
-   */
-  private[StaticContentHandler] case class CachedBigFile(
-    path: String,
-    contentType: String,
-    lastModified: Date) extends CachedContent
-
 }
 
 /**
@@ -864,3 +811,58 @@ case class StaticContentHandlerConfig(
     ConfigUtil.getInt(config, prefix + ".server-cache-timeout", 3600),
     ConfigUtil.getInt(config, prefix + ".browser-cache-timeout", 3600))
 }
+
+
+
+/**
+ * Data structure that we use for caching
+ *
+ * @param path The path to the file or resource
+ * @param contentType MIME content type
+ */
+private sealed trait CachedContent {
+  def path: String
+  def contentType: String
+}
+
+/**
+ * Data structure that we use for caching resources
+ *
+ * @param path The path to the file or resource
+ * @param contentType MIME content type
+ * @param etag Hash id of the file or resource content
+ * @param content In memory store of the contents
+ */
+private case class CachedResource(
+  path: String,
+  contentType: String,
+  etag: String,
+  content: Array[Byte]) extends CachedContent
+
+/**
+ * Data structure that we use for caching small files which has content loaded into memory
+ *
+ * @param path The path to the file or resource
+ * @param contentType MIME content type
+ * @param etag Hash id of the file or resource content
+ * @param lastModified Date when this object was last modified
+ * @param content In memory store of the contents
+ */
+private case class CachedSmallFile(
+  path: String,
+  contentType: String,
+  etag: String,
+  lastModified: Date,
+  content: Array[Byte]) extends CachedContent
+
+/**
+ * Data structure that we use for caching information about big file that are stored in the file system
+ *
+ * @param path The path to the file or resource
+ * @param contentType MIME content type
+ * @param lastModified Date when this object was last modified
+ */
+private case class CachedBigFile(
+  path: String,
+  contentType: String,
+  lastModified: Date) extends CachedContent
