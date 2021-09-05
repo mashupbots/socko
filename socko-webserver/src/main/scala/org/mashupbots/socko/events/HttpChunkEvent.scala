@@ -17,6 +17,7 @@ package org.mashupbots.socko.events
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.HttpHeaders
+import io.netty.util.AttributeMap
 import org.mashupbots.socko.infrastructure.WebLogEvent
 
 /**
@@ -33,7 +34,7 @@ import org.mashupbots.socko.infrastructure.WebLogEvent
  * @param config Processing configuration
  */
 case class HttpChunkEvent(
-  context: ChannelHandlerContext,
+  context: ChannelHandlerContext with AttributeMap,
   initialHttpRequest: InitialHttpRequestMessage,
   nettyHttpChunk: NettyHttpContent,
   config: HttpEventConfig) extends HttpEvent {

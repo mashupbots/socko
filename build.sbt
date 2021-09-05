@@ -16,11 +16,12 @@
 val shared = Seq(
   // Info
   organization := "com.github.asana.socko-asana-fork",
-  version      := "0.6.2",
-  crossScalaVersions := Seq("2.11.12", "2.12.7"),
+  version      := "0.6.3",
+  crossScalaVersions := Seq("2.12.14", "2.13.6"),
 
   // Repositories
-  resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+  resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/",
+  resolvers += "Asana Maven" at "s3://asana-oss-cache/maven/release",
   credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
   
   Test / fork := true,
@@ -32,8 +33,8 @@ libraryDependencies ++= Seq(
 
 // Compile settings
 lazy val compileJdkSettings = Seq(
-  scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-optimize", "-feature", "-language:postfixOps"),
-  javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.7", "-target", "1.7")
+  scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-opt:l:inline", "-opt-inline-from:**", "-feature", "-language:postfixOps"),
+  javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation")
 )
   
 //
@@ -41,7 +42,7 @@ lazy val compileJdkSettings = Seq(
 //
 lazy val root = (project in file("."))
   .settings(shared ++ compileJdkSettings ++ Seq(
-    skip in publish := true
+    publish / skip := true
     )
   ).aggregate(webserver)
 
@@ -56,11 +57,8 @@ lazy val webserver = (project in file("socko-webserver"))
         ),
       homepage := Some(url("https://github.com/Asana/socko-asana-fork")),
       publishMavenStyle := true,
-      publishArtifact in Test := false,
-      bintrayOrganization := Some("asana"),
-      bintrayRepository := "maven",
-      bintrayPackage := "socko-asana-fork",
-      bintrayReleaseOnPublish in ThisBuild := true,
+      publishTo := Some("Asana Maven" at "s3://asana-oss-cache/maven/release"),
+      Test / publishArtifact := false,
     )
   )
 

@@ -145,7 +145,7 @@ case class MutableHttpHeaders() extends Iterable[HttpHeader] {
    * @return Sequence of matching values
    */
   def getAll(name: String): Seq[String] = {
-    values.filter(h => h.name.equalsIgnoreCase(name)).map(h => h.value)
+    values.filter(h => h.name.equalsIgnoreCase(name)).toSeq.map(h => h.value)
   }
 
   /**

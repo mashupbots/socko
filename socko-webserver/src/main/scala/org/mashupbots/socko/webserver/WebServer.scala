@@ -15,7 +15,7 @@
 //
 package org.mashupbots.socko.webserver
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelFuture
@@ -171,7 +171,7 @@ class WebServer(
         }
       })
 
-    allChannels.addAll(bindFutures.map(_.channel).toList)
+    allChannels.addAll(bindFutures.map(_.channel).toList.asJava)
 
     // Wait until the bound ports are ready to accept connections.
     // This is required to avoid connection refused exceptions during testing.

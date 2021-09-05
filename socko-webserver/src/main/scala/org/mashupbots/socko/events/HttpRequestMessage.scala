@@ -18,13 +18,14 @@ package org.mashupbots.socko.events
 import java.util.Date
 import java.nio.charset.Charset
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http.FullHttpRequest
 import io.netty.handler.codec.http.HttpHeaders
 import io.netty.handler.codec.http.HttpRequest
+import io.netty.handler.codec.http.HttpUtil
 import io.netty.handler.codec.http.LastHttpContent
 import io.netty.handler.codec.http.QueryStringDecoder
 import org.mashupbots.socko.infrastructure.CharsetUtil
@@ -120,13 +121,13 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
   /**
    * HTTP request headers
    */
-  lazy val headers: ImmutableHttpHeaders = ImmutableHttpHeaders(nettyHttpRequest.headers.map(f => (f.getKey, f.getValue)))
+  lazy val headers: ImmutableHttpHeaders = ImmutableHttpHeaders(nettyHttpRequest.headers.asScala.map(f => (f.getKey, f.getValue)))
 
   /**
    * HTTP End point for this request
    */
-  lazy val endPoint = EndPoint(nettyHttpRequest.getMethod.toString,
-    HttpHeaders.getHost(nettyHttpRequest), nettyHttpRequest.getUri)
+  lazy val endPoint = EndPoint(nettyHttpRequest.method.toString,
+    nettyHttpRequest.headers.get("Host"), nettyHttpRequest.uri)
 
   /**
    * `True` if and only if is connection is to be kept alive and the channel should NOT be closed
@@ -137,7 +138,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
    * Connection: keep-alive
    * }}}
    */
-  lazy val isKeepAlive = HttpHeaders.isKeepAlive(nettyHttpRequest)
+  lazy val isKeepAlive = HttpUtil.isKeepAlive(nettyHttpRequest)
 
   /**
    * Array of accepted encoding for content compression from the HTTP header
@@ -168,12 +169,12 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
   /**
    * HTTP version
    */
-  lazy val httpVersion = nettyHttpRequest.getProtocolVersion.toString
+  lazy val httpVersion = nettyHttpRequest.protocolVersion.toString
 
   /**
    * `True` if and only if 100 continue is expected to be returned
    */
-  lazy val is100ContinueExpected = HttpHeaders.is100ContinueExpected(nettyHttpRequest)
+  lazy val is100ContinueExpected = HttpUtil.is100ContinueExpected(nettyHttpRequest)
 
   /**
    * Returns the If-Modified-Since header as Some(Date). None is returned if the header
@@ -199,7 +200,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
    * Note that if `True`, this HTTP request will NOT have any content. The content will be coming
    * in subsequent HTTP chunks and sent for processing as `HttpChunkEvent`.
    */
-  val isChunked: Boolean = HttpHeaders.isTransferEncodingChunked(nettyHttpRequest)
+  val isChunked: Boolean = HttpUtil.isTransferEncodingChunked(nettyHttpRequest)
 
   /**
    * `True` if and only if this is a request to upgrade to a websocket connection
@@ -225,7 +226,7 @@ case class CurrentHttpRequestMessage(nettyHttpRequest: HttpRequest) extends Http
   /**
    * Returns the length of the content from the `Content-Length` header. If not set, `0` is returned.
    */
-  lazy val contentLength = HttpHeaders.getContentLength(nettyHttpRequest, 0)
+  lazy val contentLength = HttpUtil.getContentLength(nettyHttpRequest, 0)
 
   /**
    * Body of the HTTP request
@@ -277,9 +278,9 @@ case class DefaultHttpContent(buffer: ByteBuf, contentType: String) extends Http
   def toFormDataMap(): Map[String, List[String]] = {
     if (contentType.startsWith("application/x-www-form-urlencoded")) {
       val encodedString = this.toString
-      val m = new QueryStringDecoder(encodedString, false).parameters.toMap
+      val m = new QueryStringDecoder(encodedString, false).parameters.asScala.toMap
       // Map the Java list values to Scala list
-      m.map { case (key, value) => (key, value.toList) }      
+      m.map { case (key, value) => (key, value.asScala.toList) }      
     }
     else {
       Map.empty
@@ -402,5 +403,5 @@ case class HttpLastChunkMessage(nettyHttpLastChunk: NettyHttpLastContent) {
   /**
    * Trailing headers associated with the last chunk
    */
-  val trailingHeaders: ImmutableHttpHeaders = ImmutableHttpHeaders(nettyHttpLastChunk.trailingHeaders.map(f => (f.getKey, f.getValue)))
+  val trailingHeaders: ImmutableHttpHeaders = ImmutableHttpHeaders(nettyHttpLastChunk.trailingHeaders.asScala.map(f => (f.getKey, f.getValue)))
 }
