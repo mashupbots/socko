@@ -137,7 +137,7 @@ case class HttpResponseMessage(event: HttpEvent) {
     }
 
     // Write web log
-    event.writeWebLog(response.getStatus.code, response.content.readableBytes)
+    event.writeWebLog(response.status.code, response.content.readableBytes)
 
     // Write the response.
     val future = event.context.writeAndFlush(response)
@@ -540,7 +540,7 @@ case class HttpResponseMessage(event: HttpEvent) {
       response.headers.set(HttpHeaders.Names.CONTENT_LENGTH, 0)
     }
 
-    event.writeWebLog(response.getStatus.code, 0)
+    event.writeWebLog(response.status.code, 0)
 
     val future = event.context.writeAndFlush(response)
 

@@ -15,7 +15,7 @@
 //
 package org.mashupbots.socko.events
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.mashupbots.socko.infrastructure.CharsetUtil
 import io.netty.handler.codec.http.QueryStringDecoder
 
@@ -69,9 +69,9 @@ case class EndPoint(
    * Provides Map access to query string parameters
    */
   lazy val queryStringMap: Map[String, List[String]] = {
-    val m = new QueryStringDecoder(uri, CharsetUtil.UTF_8).parameters.toMap
+    val m = new QueryStringDecoder(uri, CharsetUtil.UTF_8).parameters.asScala.toMap
     // Map the Java list values to Scala list
-    m.map { case (key, value) => (key, value.toList) }
+    m.map { case (key, value) => (key, value.asScala.toList) }
   }
 
   /**
@@ -86,7 +86,7 @@ case class EndPoint(
       if (v == null)
         None
       else
-        Some(v.get(0))
+        Some(v.head)
     } catch {
       case ex: NoSuchElementException => None
     }

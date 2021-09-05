@@ -16,7 +16,7 @@
 
 package org.mashupbots.socko.handlers
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConverters._
 import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
 import io.netty.handler.codec.http.multipart.Attribute
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory
@@ -77,12 +77,12 @@ class SnoopHandler extends Actor {
     buf.append("Socko Snoop Processor\r\n")
     buf.append("=====================\r\n")
 
-    buf.append("VERSION: " + request.getProtocolVersion + "\r\n")
+    buf.append("VERSION: " + request.protocolVersion + "\r\n")
     buf.append("METHOD: " + event.endPoint.method + "\r\n")
     buf.append("HOSTNAME: " + event.endPoint.host + "\r\n")
     buf.append("REQUEST_URI: " + event.endPoint.path + "\r\n\r\n")
 
-    val headers = request.headers.entries
+    val headers = request.headers.entries.asScala
     headers.foreach(h => buf.append("HEADER: " + h.getKey() + " = " + h.getValue() + "\r\n"))
 
     val params = event.endPoint.queryStringMap
@@ -100,7 +100,7 @@ class SnoopHandler extends Actor {
     if (contentType.startsWith("multipart/form-data")) {
       buf.append("MULTIPART FORM DATA\r\n")
       val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, event.nettyHttpRequest)
-      val dataList = decoder.getBodyHttpDatas().toList
+      val dataList = decoder.getBodyHttpDatas().asScala.toList
 
       dataList.foreach(data => {
           log.debug(data.toString)
@@ -140,10 +140,10 @@ class SnoopHandler extends Actor {
     // Accumulate chunk info in a string buffer stored in the channel context
     val context = event.context
     val buf = {
-      val storedBuf = context.attr(SnoopHandler.key).get
+      val storedBuf = context.channel.attr(SnoopHandler.key).get
       if (storedBuf == null) {
         val newBuf = new StringBuilder
-        context.attr(SnoopHandler.key).set(newBuf)
+        context.channel.attr(SnoopHandler.key).set(newBuf)
         newBuf
       } else {
         storedBuf
@@ -162,10 +162,10 @@ class SnoopHandler extends Actor {
     // Accumulate chunk info in a string buffer stored in the channel context
     val context = event.context
     val buf = {
-      val storedBuf = context.attr(SnoopHandler.key).get
+      val storedBuf = context.channel.attr(SnoopHandler.key).get
       if (storedBuf == null) {
         val newBuf = new StringBuilder
-        context.attr(SnoopHandler.key).set(newBuf)
+        context.channel.attr(SnoopHandler.key).set(newBuf)
         newBuf
       } else {
         storedBuf

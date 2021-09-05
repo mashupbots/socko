@@ -16,7 +16,7 @@
 package org.mashupbots.socko.infrastructure
 
 import java.io.File
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import com.typesafe.config.Config
 import java.util.concurrent.TimeUnit
@@ -194,7 +194,7 @@ object ConfigUtil {
    */
   def getListString(config: Config, name: String): List[String] = {
     try {
-      val v = config.getStringList(name)
+      val v = config.getStringList(name).asScala
       if (v == null || v.length == 0) {
         Nil
       } else {
