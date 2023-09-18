@@ -271,10 +271,6 @@ The following example illustrates:
   //
   val routes = Routes({
     case HttpRequest(request) => request match {
-      case PathSegments("swagger-ui" :: relativePath) => {
-        // Serve the static swagger-ui content from resources
-        staticContentHandlerRouter ! new StaticResourceRequest(request, relativePath.mkString("swaggerui/", "/", ""))
-      }
       case PathSegments("api" :: relativePath) => {
         // REST API - just pass the request to the handler for processing
         restRouter ! request

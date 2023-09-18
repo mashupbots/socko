@@ -141,7 +141,7 @@ other actors can continue processing on other threads.
 
 
 The following code is taken from our [file upload example app](https://github.com/mashupbots/socko/tree/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/fileupload).
-Because `StaticContentHandler` and `FileUploadHandler` actors read and write lots of files, we have set them up 
+Because `FileUploadHandler` actors read and write lots of files, we have set them up 
 to use a `PinnedDispatcher`. Note that we have only allocated 5 threads to each processor. To scale, you may wish 
 to allocate more threads.
 
@@ -156,10 +156,6 @@ to allocate more threads.
         loglevel=DEBUG
         actor {
           deployment {
-            /static-file-router {
-              router = round-robin-pool
-              nr-of-instances = 5
-            }
             /file-upload-router {
               router = round-robin-pool
               nr-of-instances = 5
@@ -169,9 +165,6 @@ to allocate more threads.
       }"""
 
     val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
-
-    val staticContentHandlerRouter = actorSystem.actorOf(Props[StaticContentHandler]
-      .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
     
     val fileUploadHandlerRouter = actorSystem.actorOf(Props[FileUploadHandler]
       .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "file-upload-router")
