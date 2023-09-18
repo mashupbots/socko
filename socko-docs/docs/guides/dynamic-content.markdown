@@ -252,7 +252,7 @@ The following example illustrates:
 	  actor {
 	    deployment {
 	      /rest-router {
-	        router = round-robin
+	        router = round-robin-pool
 	        nr-of-instances = 5
 	      }
 	    }

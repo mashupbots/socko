@@ -61,7 +61,7 @@ object BuilderApp extends Logger {
 	  actor {
 	    deployment {
 	      /static-file-router {
-	        router = round-robin
+	        router = round-robin-pool
 	        nr-of-instances = 20
 	      }
 	    }

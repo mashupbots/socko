@@ -81,15 +81,15 @@ object RestApp extends Logger {
 	  actor {
 	    deployment {
 	      /static-file-router {
-	        router = round-robin
+	        router = round-robin-pool
 	        nr-of-instances = 5
 	      }
 	      /rest-router {
-	        router = round-robin
+	        router = round-robin-pool
 	        nr-of-instances = 5
 	      }
 	      /user-api-router {
-	        router = round-robin
+	        router = round-robin-pool
 	        nr-of-instances = 5
 	      }
 	    }

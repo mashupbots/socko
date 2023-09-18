@@ -14,7 +14,7 @@ object Dependencies {
   val webserver = Seq(
     Dependency.akkaActor, Dependency.akkaSlf4j, Dependency.akkaTestKit,
     Dependency.netty, Dependency.concurrentmap, Dependency.nextProtoNeg,
-    Dependency.logback, Dependency.scalatest, Dependency.jakartaActivation
+    Dependency.logback, Dependency.scalatest
   )
   
   val buildtools = Seq(
@@ -33,7 +33,7 @@ object Dependencies {
 
 object Dependency {
   object V {
-    val Akka        = "2.5.23"
+    val Akka        = "2.6.20"
   }
   val akkaActor     = "com.typesafe.akka"                       %% "akka-actor"                  % V.Akka
   val akkaSlf4j     = "com.typesafe.akka"                       %% "akka-slf4j"                  % V.Akka
@@ -45,5 +45,4 @@ object Dependency {
   val nextProtoNeg  = "org.eclipse.jetty.npn"                   % "npn-api"                      % "1.1.0.v20120525"
   val json4s        = "org.json4s"                              %% "json4s-native"               % "3.4.2"
   val scalatest     = "org.scalatest"                           %% "scalatest"                   % "3.0.8" % "test"
-  val jakartaActivation = "jakarta.activation"                  % "jakarta.activation-api"       % "1.2.1"
 }
