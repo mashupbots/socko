@@ -18,8 +18,6 @@ title: Socko User Guide
    - [Web Logs](configuration.html#WebLogs)
    - [SPDY](configuration.html#SPDY)
 
- - [Serving Static Http Content](static-content.html)
-
  - [Serving Dynamic Http Content](dynamic-content.html)
    - [Parsing Query String, Form Data and File Uploads](dynamic-content.html#ParsingData)
    - [RESTful Web Services](dynamic-content.html#Rest)

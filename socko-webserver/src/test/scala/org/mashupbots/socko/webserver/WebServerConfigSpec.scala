@@ -292,7 +292,7 @@ class WebServerConfigSpec extends WordSpec with Matchers with GivenWhenThen with
       all.tcp.trafficClass should be(Some(4))
       all.tcp.acceptBackLog should be(Some(5))
 
-      actorSystem.shutdown()
+      actorSystem.terminate()
     }
   }
 }
