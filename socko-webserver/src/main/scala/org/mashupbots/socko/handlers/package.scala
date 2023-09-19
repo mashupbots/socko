@@ -16,7 +16,7 @@
 package org.mashupbots.socko
 
 /**
- * Handlers are Akka actors that receives and processes [[org.mashupbots.socko.events.SockoEvent]]s
+ * Handlers are Pekko actors that receives and processes [[org.mashupbots.socko.events.SockoEvent]]s
  * sent by the routes.
  * 
  * This package contains our "pre-fabricated" handlers.

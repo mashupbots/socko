@@ -9,7 +9,7 @@ title: Socko User Guide
  - [Quick Start](quick-start.html)
 
  - [Basics](basics.html)
-   - [Step 1. Define Actors and Start Akka](basics.html#Step1)
+   - [Step 1. Define Actors and Start Pekko](basics.html#Step1)
    - [Step 2. Define Routes](basics.html#Step2)
    - [Step 3. Start/Stop Web Server](basics.html#Step3)
 

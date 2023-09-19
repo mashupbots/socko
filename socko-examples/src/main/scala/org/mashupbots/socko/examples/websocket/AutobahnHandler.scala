@@ -21,8 +21,8 @@ import java.util.GregorianCalendar
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
-import akka.actor.Actor
-import akka.event.Logging
+import org.apache.pekko.actor.Actor
+import org.apache.pekko.event.Logging
 
 /**
  * Echo web socket frames for the Autobahn test suite

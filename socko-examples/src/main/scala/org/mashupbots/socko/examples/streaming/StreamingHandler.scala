@@ -20,7 +20,7 @@ import java.util.Date
 import io.netty.util.CharsetUtil
 import org.mashupbots.socko.events.HttpRequestEvent
 
-import akka.actor.Actor
+import org.apache.pekko.actor.Actor
 
 /**
  * Streams a greeting and stops.

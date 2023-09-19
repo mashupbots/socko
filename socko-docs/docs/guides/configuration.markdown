@@ -30,7 +30,7 @@ Socko configuration settings can be grouped as:
 ## Loading Configuration
 
 Configuration can be changed in [code](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/config/CodedConfigApp.scala)
-or in the project's [Akka configuration file](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/config/AkkaConfigApp.scala).
+or in the project's [Pekko configuration file](https://github.com/mashupbots/socko/blob/master/socko-examples/src/main/scala/org/mashupbots/socko/examples/config/PekkoConfigApp.scala).
 
 For example, to change the port from the default `8888` to `7777` in code:
 
@@ -38,27 +38,27 @@ For example, to change the port from the default `8888` to `7777` in code:
     val webServer = new WebServer(WebServerConfig(port=7777), routes)
 {% endhighlight %}
 
-To change the port to `9999` in your Akka configuration file, first define an object to load the settings
-from `application.conf`. Note the setting will be named `akka-config-example`.
+To change the port to `9999` in your Pekko configuration file, first define an object to load the settings
+from `application.conf`. Note the setting will be named `pekko-config-example`.
 
 {% highlight scala %}
     object MyWebServerConfig extends ExtensionId[WebServerConfig] with ExtensionIdProvider {
       override def lookup = MyWebServerConfig
       override def createExtension(system: ExtendedActorSystem) =
-        new WebServerConfig(system.settings.config, "akka-config-example")
+        new WebServerConfig(system.settings.config, "pekko-config-example")
     }
 {% endhighlight %}
 
 Then, start the actor system and load the configuration from that system.
 
 {% highlight scala %}
-    val actorSystem = ActorSystem("AkkaConfigActorSystem")
+    val actorSystem = ActorSystem("PekkoConfigActorSystem")
     val myWebServerConfig = MyWebServerConfig(actorSystem)
 {% endhighlight %}
     
 Lastly, add the following your `application.conf`
 
-    akka-config-example {
+    pekko-config-example {
         port=9999
     }
 
@@ -144,8 +144,8 @@ By default, web logs are turned **OFF**.
 
 To turn web logs on, add the following `web-log` section to your `application.conf`
  
-    akka-config-example {
-      server-name=AkkaConfigExample
+    pekko-config-example {
+      server-name=PekkoConfigExample
       hostname=localhost
       port=9000
       
@@ -170,14 +170,14 @@ You can also turn it on programmatically as illustrated in the [web log example 
     val webServer = new WebServer(config, routes, actorSystem)
 {% endhighlight %}
     
-When turned on, the default behaviour is to write web logs to your installed [Akka logger](http://doc.akka.io/docs/akka/2.0.1/scala/logging.html) 
-using {{ page.WebLogWriterClass }}. The Akka logger asynchronously writes to the log so it will not slow down 
+When turned on, the default behaviour is to write web logs to your installed Pekko logger
+using {{ page.WebLogWriterClass }}. The Pekko logger asynchronously writes to the log so it will not slow down 
 your application down.
 
-To activate Akka logging, add the following to `application.conf`:
+To activate Pekko logging, add the following to `application.conf`:
 
-    akka {
-      event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+    pekko {
+      event-handlers = ["org.apache.pekko.event.slf4j.Slf4jEventHandler"]
       loglevel = "DEBUG"
     }
 
@@ -188,7 +188,7 @@ You can configure where web logs are written by configuring your installed logge
     <configuration>
       <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-          <pattern>%d{HH:mm:ss.SSS} [%thread] [%X{sourceThread}] %-5level %logger{36} %X{akkaSource} - %msg%n</pattern>
+          <pattern>%d{HH:mm:ss.SSS} [%thread] [%X{sourceThread}] %-5level %logger{36} %X{pekkoSource} - %msg%n</pattern>
         </encoder>
       </appender>
 
@@ -249,12 +249,12 @@ Web log events can be recorded via the processing context.
 If you prefer to use your own method and/or format of writing web logs, you can specify the path of a custom actor 
 to recieve {{ page.WebLogEventClass }} messages in your `application.conf`.
 
-    akka-config-example {
-      server-name=AkkaConfigExample
+    pekko-config-example {
+      server-name=PekkoConfigExample
       hostname=localhost
       port=9000
       web-log {
-        custom-actor-path = "akka://my-system/user/my-web-log-writer"
+        custom-actor-path = "pekko://my-system/user/my-web-log-writer"
       }
     }
 

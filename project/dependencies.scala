@@ -12,7 +12,7 @@ object Dependencies {
   import Dependency._
 
   val webserver = Seq(
-    Dependency.akkaActor, Dependency.akkaSlf4j, Dependency.akkaTestKit,
+    Dependency.pekkoActor, Dependency.pekkoSlf4j, Dependency.pekkoTestKit,
     Dependency.netty, Dependency.concurrentmap, Dependency.nextProtoNeg,
     Dependency.logback, Dependency.scalatest
   )
@@ -23,7 +23,7 @@ object Dependencies {
 
   val rest = Seq(
     Dependency.json4s, Dependency.logback, 
-    Dependency.scalatest, Dependency.akkaTestKit
+    Dependency.scalatest, Dependency.pekkoTestKit
   )  
 
   val examples = Seq(
@@ -33,11 +33,11 @@ object Dependencies {
 
 object Dependency {
   object V {
-    val Akka        = "2.6.20"
+    val Pekko        = "1.0.0"
   }
-  val akkaActor     = "com.typesafe.akka"                       %% "akka-actor"                  % V.Akka
-  val akkaSlf4j     = "com.typesafe.akka"                       %% "akka-slf4j"                  % V.Akka
-  val akkaTestKit   = "com.typesafe.akka"                       %% "akka-testkit"                % V.Akka % "test"
+  val pekkoActor     = "org.apache.pekko"                       %% "pekko-actor"                  % V.Pekko
+  val pekkoSlf4j     = "org.apache.pekko"                       %% "pekko-slf4j"                  % V.Pekko
+  val pekkoTestKit   = "org.apache.pekko"                       %% "pekko-testkit"                % V.Pekko % "test"
   val ant           = "org.apache.ant"                          % "ant"                          % "1.8.4"
   val concurrentmap = "com.googlecode.concurrentlinkedhashmap"  % "concurrentlinkedhashmap-lru"  % "1.3.2"
   val logback       = "ch.qos.logback"                          % "logback-classic"              % "1.2.3" % "runtime"

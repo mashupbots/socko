@@ -21,20 +21,20 @@ import org.mashupbots.socko.webserver.WebLogConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
-import akka.actor.ActorSystem
-import akka.actor.Props
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.Props
 
 /**
  * This example shows how to turn on logging.
  */
 object WebLogApp extends Logger {
   //
-  // STEP #1 - Define Actors and Start Akka
+  // STEP #1 - Define Actors and Start Pekko
   // 
   // Make sure your application.conf contains:
   //
-  // akka {
-  //   event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+  // pekko {
+  //   event-handlers = ["org.apache.pekko.event.slf4j.Slf4jEventHandler"]
   //   loglevel = "DEBUG"
   // }  
   //

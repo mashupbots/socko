@@ -3,7 +3,7 @@
 ## This repository is not maintained or supported by Asana, and is not accepting patches
 
 Socko is an embedded [Scala](http://www.scala-lang.org/) web server powered by
-[Netty](http://netty.io/) networking and [Akka](http://akka.io/) processing.
+[Netty](http://netty.io/) networking and [Pekko](http://pekko.apache.org/) processing.
 
 **Please see our [web site](http://sockoweb.org/) for documentaiton and more information**
 
@@ -12,7 +12,7 @@ Socko is an embedded [Scala](http://www.scala-lang.org/) web server powered by
 ```scala
     object HelloApp extends Logger {
       //
-      // STEP #1 - Define Actors and Start Akka
+      // STEP #1 - Define Actors and Start Pekko
       // See `HelloHandler`
       //
       val actorSystem = ActorSystem("HelloExampleActorSystem")

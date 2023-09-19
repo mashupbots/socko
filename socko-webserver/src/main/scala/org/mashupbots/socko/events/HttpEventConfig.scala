@@ -15,7 +15,7 @@
 //
 package org.mashupbots.socko.events
 
-import akka.actor.ActorRef
+import org.apache.pekko.actor.ActorRef
 
 /**
  * HTTP event configuration used in the processing of [[org.mashupbots.socko.events.HttpEvent]]s.

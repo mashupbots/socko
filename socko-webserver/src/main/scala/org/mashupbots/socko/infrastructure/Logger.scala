@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory
  * Adds logging functionality to our classes.
  * 
  * We try not to use this logger too often because it is synchronous. 
- * Most of Socko's logging is performed inside Akka because it is asynchronous.
+ * Most of Socko's logging is performed inside Pekko because it is asynchronous.
  * 
  * Usage:
  * {{{

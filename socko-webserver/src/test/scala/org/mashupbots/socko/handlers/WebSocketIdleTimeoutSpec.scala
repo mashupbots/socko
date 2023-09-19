@@ -32,22 +32,22 @@ import org.scalatest.Matchers
 
 import com.typesafe.config.ConfigFactory
 
-import akka.actor.ActorSystem
-import akka.actor.Props
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.Props
 
 /**
  * Test broadcast.  Need its own test so that broadcast does not interfere with other tests 
  */
 class WebSocketIdleTimeoutSpec extends WordSpec with Matchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient {
 
-  val akkaConfig =
+  val pekkoConfig =
     """
-      akka {
-        event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+      pekko {
+        event-handlers = ["org.apache.pekko.event.slf4j.Slf4jEventHandler"]
         loglevel = "DEBUG"
 	  }    
     """
-  val actorSystem = ActorSystem("IdleTimeoutActorSystem", ConfigFactory.parseString(akkaConfig))
+  val actorSystem = ActorSystem("IdleTimeoutActorSystem", ConfigFactory.parseString(pekkoConfig))
   var webServer: WebServer = null
   val port = 9004
   val path = "http://localhost:" + port + "/"

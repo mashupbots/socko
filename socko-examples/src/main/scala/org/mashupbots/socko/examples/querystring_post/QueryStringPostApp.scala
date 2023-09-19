@@ -20,8 +20,8 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
-import akka.actor.ActorSystem
-import akka.actor.Props
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.Props
 
 /**
  * This example shows how to parse query string and `application/x-www-form-urlencoded` data.
@@ -30,7 +30,7 @@ import akka.actor.Props
  */
 object QueryStringPostApp extends Logger {
   //
-  // STEP #1 - Define Actors and Start Akka
+  // STEP #1 - Define Actors and Start Pekko
   //
   val actorSystem = ActorSystem("QueryStringPostExampleActorSystem")
 

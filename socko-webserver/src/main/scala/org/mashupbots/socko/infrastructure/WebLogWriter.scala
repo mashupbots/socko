@@ -16,13 +16,13 @@
 
 package org.mashupbots.socko.infrastructure
 
-import akka.actor.Actor
-import akka.event.Logging
+import org.apache.pekko.actor.Actor
+import org.apache.pekko.event.Logging
 
 /**
- * Default log writer that writes web log events to the AKKA logger.
+ * Default log writer that writes web log events to the Pekko logger.
  *
- * AKKA logger is used because it asynchronously writes to the log in a separate thread so it does not slow down
+ * Pekko logger is used because it asynchronously writes to the log in a separate thread so it does not slow down
  * your app.
  * 
  * @param format Web log format
