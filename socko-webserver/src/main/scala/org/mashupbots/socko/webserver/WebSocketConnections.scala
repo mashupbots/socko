@@ -26,7 +26,7 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import io.netty.util.concurrent.GlobalEventExecutor
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * Manages all web socket connections
@@ -130,7 +130,7 @@ class WebSocketConnections(val name: String) {
    * @return `True` if connected, `False` if the channel has been closed.
    */
   def isConnected(webSocketId: String): Boolean = {
-    allWebSocketChannels.iterator().exists(c => c.attr(WebSocketEventConfig.webSocketIdKey).get() == webSocketId)
+    allWebSocketChannels.iterator().asScala.exists(c => c.attr(WebSocketEventConfig.webSocketIdKey).get() == webSocketId)
   }
   
   /**

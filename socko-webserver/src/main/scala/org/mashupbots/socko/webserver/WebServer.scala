@@ -15,7 +15,7 @@
 //
 package org.mashupbots.socko.webserver
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelFuture
@@ -120,6 +120,9 @@ class WebServer(
     Some(actorRef)
   }
 
+  val bossGroup = new NioEventLoopGroup
+  val workerGroup = new NioEventLoopGroup
+
   /**
    * Starts the server
    */
@@ -127,8 +130,6 @@ class WebServer(
     
     allChannels.clear()
 
-    val bossGroup = new NioEventLoopGroup
-    val workerGroup = new NioEventLoopGroup
     val bootstrap = new ServerBootstrap()
     .group(bossGroup, workerGroup)
     .channel(classOf[NioServerSocketChannel])
@@ -170,7 +171,7 @@ class WebServer(
         }
       })
 
-    allChannels.addAll(bindFutures.map(_.channel).toList)
+    allChannels.addAll(bindFutures.map(_.channel).toList.asJava)
 
     // Wait until the bound ports are ready to accept connections.
     // This is required to avoid connection refused exceptions during testing.
@@ -194,6 +195,9 @@ class WebServer(
     future.awaitUninterruptibly()
 
     allChannels.clear()
+
+	workerGroup.shutdownGracefully();
+	bossGroup.shutdownGracefully();
 
     log.info("Socko server '{}' stopped", config.serverName)
   }

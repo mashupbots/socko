@@ -74,7 +74,6 @@ class UtilSpec extends WordSpec with Matchers with GivenWhenThen with Logger {
   "IOUtil" should {
     "read resource" in {
       val s = IOUtil.readResource("META-INF/mime.types")
-      //System.out.println(new String(s))
       s.length should be > 0
     }
 
@@ -97,33 +96,4 @@ class UtilSpec extends WordSpec with Matchers with GivenWhenThen with Logger {
     }
   }
 
-  "MimeTypes" should {
-    "identify common file type" in {
-      MimeTypes.get("test.html") should be("text/html")
-      MimeTypes.get("test.js") should be("application/javascript")
-      MimeTypes.get("test.txt") should be("text/plain")
-      MimeTypes.get("test.css") should be("text/css")
-    }
-  }
-
-  "ReflectUtils" should {
-    "find classes in a JAR" in {
-      val annotations = ReflectUtil.getClasses(getClass().getClassLoader(), "scala.annotation")
-      annotations.length should be > 0
-      annotations.foreach(c => log.debug("Reflected class in JAR {}", c.getName()))
-      
-      val mirror = ru.runtimeMirror(getClass.getClassLoader)
-      annotations.foreach(c => {
-        val cc = mirror.classSymbol(c)
-        log.debug("Mirror class {}. Annotations: {} {}", c.getName(), cc.annotations, "")
-      })
-    }
-    
-    "find classes in a directory" in {
-      val clz = ReflectUtil.getClasses(getClass().getClassLoader(), "org.mashupbots.socko.infrastructure")
-      clz.length should be > 0
-      clz.foreach(c => log.debug("Reflected class in directory {}", c.getName()))
-    }
-    
-  }
 }

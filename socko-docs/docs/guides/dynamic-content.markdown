@@ -252,7 +252,7 @@ The following example illustrates:
 	  actor {
 	    deployment {
 	      /rest-router {
-	        router = round-robin
+	        router = round-robin-pool
 	        nr-of-instances = 5
 	      }
 	    }
@@ -271,10 +271,6 @@ The following example illustrates:
   //
   val routes = Routes({
     case HttpRequest(request) => request match {
-      case PathSegments("swagger-ui" :: relativePath) => {
-        // Serve the static swagger-ui content from resources
-        staticContentHandlerRouter ! new StaticResourceRequest(request, relativePath.mkString("swaggerui/", "/", ""))
-      }
       case PathSegments("api" :: relativePath) => {
         // REST API - just pass the request to the handler for processing
         restRouter ! request

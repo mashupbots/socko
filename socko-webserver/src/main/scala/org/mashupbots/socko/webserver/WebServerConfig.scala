@@ -17,7 +17,7 @@ package org.mashupbots.socko.webserver
 
 import java.io.File
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 
 import org.mashupbots.socko.infrastructure.ConfigUtil
@@ -515,7 +515,7 @@ object WebServerConfig extends Logger {
    */
   def getCompressibleContentTypes(config: Config, name: String): List[String] = {
     try {
-      val v = config.getStringList(name).toList
+      val v = config.getStringList(name).asScala.toList
       if (v == null || v.isEmpty) {
         defaultCompressibleContentTypes
       } else {
