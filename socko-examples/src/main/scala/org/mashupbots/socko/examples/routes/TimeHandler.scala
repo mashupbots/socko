@@ -21,8 +21,8 @@ import java.util.TimeZone
 
 import org.mashupbots.socko.events.HttpRequestEvent
 
-import akka.actor.Actor
-import akka.event.Logging
+import org.apache.pekko.actor.Actor
+import org.apache.pekko.event.Logging
 
 /**
  * Returns the current time in the response

@@ -16,7 +16,7 @@
 package org.mashupbots.socko.examples
 
 /**
- * Illustrates how to route (dispatch) requests to your Akka actors using HTTP method, host, 
+ * Illustrates how to route (dispatch) requests to your Pekko actors using HTTP method, host,
  * path and querystring.
  */
 package object routes {

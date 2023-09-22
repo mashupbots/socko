@@ -27,17 +27,17 @@ import org.mashupbots.socko.infrastructure.WebLogFormat
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigException
 
-import akka.actor.Extension
+import org.apache.pekko.actor.Extension
 
 /**
  * Web server configuration
  *
- * The configuration can be optionally loaded from Akka's application.conf` file.
+ * The configuration can be optionally loaded from Pekko's application.conf` file.
  *
  * The following example configuration file:
  * {{{
- *   akka-config-example {
- *     server-name=AkkaConfigExample
+ *   pekko-config-example {
+ *     server-name=PekkoConfigExample
  *     hostname=localhost
  *     port=9000
  *     idle-connection-timeout=0
@@ -48,7 +48,7 @@ import akka.actor.Extension
  *
  *       # Optional path of actor to which web log events will be sent for writing. If not specified, the default
  *       # web log writer will be created
- *       custom-actor-path = "akka://my-system/user/web-log-writer"
+ *       custom-actor-path = "pekko://my-system/user/web-log-writer"
  *
  *       # Optional web log format for the default web log writer: Common, Combined or Extended.
  *       # If no specified, Common is the default.
@@ -143,7 +143,7 @@ import akka.actor.Extension
  *   object MyWebServerConfig extends ExtensionId[WebServerConfig] with ExtensionIdProvider {
  *     override def lookup = MyWebServerConfig
  *     override def createExtension(system: ExtendedActorSystem) =
- *       new WebServerConfig(system.settings.config, "akka-config-example")
+ *       new WebServerConfig(system.settings.config, "pekko-config-example")
  *   }
  *
  *   val myWebServerConfig = MyWebServerConfig(actorSystem)
@@ -180,7 +180,7 @@ case class WebServerConfig(
   tcp: TcpConfig = TcpConfig()) extends Extension {
 
   /**
-   * Read configuration from AKKA's `application.conf`
+   * Read configuration from Pekko's `application.conf`
    */
   def this(config: Config, prefix: String) = this(
     ConfigUtil.getString(config, prefix + ".server-name", "WebServer"),
@@ -277,7 +277,7 @@ case class SslConfig(
   trustStorePassword: Option[String]) {
 
   /**
-   * Read configuration from AKKA's `application.conf`
+   * Read configuration from Pekko's `application.conf`
    */
   def this(config: Config, prefix: String) = this(
     new File(config.getString(prefix + ".key-store-file")),
@@ -326,7 +326,7 @@ case class TcpConfig(
   acceptBackLog: Option[Int] = None) {
 
   /**
-   * Read configuration from AKKA's `application.conf`. Supply default values to use if setting not present
+   * Read configuration from Pekko's `application.conf`. Supply default values to use if setting not present
    */
   def this(config: Config, prefix: String) = this(
     ConfigUtil.getOptionalBoolean(config, prefix + ".no-delay"),
@@ -372,7 +372,7 @@ case class HttpConfig(
   val maxLengthInBytes = maxLengthInMB * 1024 * 1024
 
   /**
-   * Read configuration from AKKA's `application.conf`. Supply default values to use if setting not present
+   * Read configuration from Pekko's `application.conf`. Supply default values to use if setting not present
    */
   def this(config: Config, prefix: String) = this(
     ConfigUtil.getInt(config, prefix + ".max-length-in-mb", 4),
@@ -398,7 +398,7 @@ case class WebLogConfig(
   format: WebLogFormat.Value = WebLogFormat.Common) {
 
   /**
-   * Read configuration from AKKA's `application.conf`
+   * Read configuration from Pekko's `application.conf`
    */
   def this(config: Config, prefix: String) = this(
     ConfigUtil.getOptionalString(config, prefix + ".custom-actor-path"),
@@ -406,7 +406,7 @@ case class WebLogConfig(
 }
 
 /**
- * Methods for reading configuration from Akka.
+ * Methods for reading configuration from Pekko.
  */
 object WebServerConfig extends Logger {
   

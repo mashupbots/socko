@@ -23,8 +23,8 @@ import org.mashupbots.socko.webserver.SslConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
-import akka.actor.ActorSystem
-import akka.actor.Props
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.Props
 
 /**
  * This is a clone of the quick start `HelloApp` ... but using HTTPS.
@@ -48,7 +48,7 @@ import akka.actor.Props
  */      
 object SecureApp extends Logger {
   //
-  // STEP #1 - Define Actors and Start Akka
+  // STEP #1 - Define Actors and Start Pekko
   // See `HelloHandler`
   //
   val actorSystem = ActorSystem("SecureExampleActorSystem")

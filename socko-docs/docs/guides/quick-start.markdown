@@ -29,7 +29,7 @@ The [Quick Start](https://github.com/mashupbots/socko/tree/master/socko-examples
 example app starts a web server on `localhost:8888` that returns _"Hello from Socko"_ in response to a HTTP GET request.
 
 It illustrates the 3 steps that you have to follow to get Socko working for you.
- - [Step 1. Define Actors and Start Akka](#Step1)
+ - [Step 1. Define Actors and Start Pekko](#Step1)
  - [Step 2. Define Routes](#Step2)
  - [Step 3. Start/Stop Web Server](#Step3)
 
@@ -42,24 +42,24 @@ It illustrates the 3 steps that you have to follow to get Socko working for you.
   import org.mashupbots.socko.webserver.WebServer
   import org.mashupbots.socko.webserver.WebServerConfig
 
-  import akka.actor.ActorSystem
-  import akka.actor.Props
+  import org.apache.pekko.actor.ActorSystem
+  import org.apache.pekko.actor.Props
 
   /**
    * This example shows how to setup a simple route and create a simple processor actor.
    *  - Run this class as a Scala Application
    *  - Open your browser and navigate to `http://localhost:8888/`
    *
-   * Socko uses Netty to handle incoming requests and Akka to process them
+   * Socko uses Netty to handle incoming requests and Pekko to process them
    *  - Incoming requests are converted into Socko events using threads from the Netty thread pool
    *  - Your `routes` are then called to dispatch the event for processing
    *  - Inside our route definition, we instance a new `HelloHandler` actor and pass the event to it
-   *  - The `HelloHandler` actor is executed in Akka default thread pool. This frees up the Netty thread pool to 
+   *  - The `HelloHandler` actor is executed in Pekko default thread pool. This frees up the Netty thread pool to 
    *    undertake more networking activities.
    */
   object HelloApp extends Logger {
     //
-    // STEP #1 - Define Actors and Start Akka
+    // STEP #1 - Define Actors and Start Pekko
     // See `HelloHandler`
     //
     val actorSystem = ActorSystem("HelloExampleActorSystem")
@@ -96,7 +96,7 @@ It illustrates the 3 steps that you have to follow to get Socko working for you.
   package org.mashupbots.socko.examples.quickstart
 
   import org.mashupbots.socko.events.HttpRequestEvent
-  import akka.actor.Actor
+  import org.apache.pekko.actor.Actor
   import java.util.Date
 
   /**
@@ -112,15 +112,15 @@ It illustrates the 3 steps that you have to follow to get Socko working for you.
 {% endhighlight %}
 
 
-## Step 1. Define Actors and Start Akka <a class="blank" id="Step1"></a>
+## Step 1. Define Actors and Start Pekko <a class="blank" id="Step1"></a>
 
-Socko assumes that you have your business rules implemented as Akka v2 Actors.
+Socko assumes that you have your business rules implemented as Pekko v2 Actors.
 
 Incoming messages received by Socko will be wrapped within a {{ page.SockoEventClass }} and passed to your routes
-for dispatching to your Akka actor handlers. Your actors use {{ page.SockoEventClass }} to read incoming data and 
+for dispatching to your Pekko actor handlers. Your actors use {{ page.SockoEventClass }} to read incoming data and 
 write outgoing data.
 
-In this exmaple, we have defined an actor called `HelloHandler` and started an Akka
+In this exmaple, we have defined an actor called `HelloHandler` and started an Pekko
 system called `HelloExampleActorSystem`.  The `HttpRequestEvent` is used by the `HelloHandler`
 to write a response to the client.
     

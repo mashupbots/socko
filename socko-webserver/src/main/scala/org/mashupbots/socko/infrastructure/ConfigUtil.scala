@@ -22,7 +22,7 @@ import com.typesafe.config.Config
 import java.util.concurrent.TimeUnit
 
 /**
- * A utility class for reading AKKA configuration
+ * A utility class for reading Pekko configuration
  */
 object ConfigUtil {
 

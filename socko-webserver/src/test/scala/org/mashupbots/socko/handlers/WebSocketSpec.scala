@@ -30,8 +30,8 @@ import org.scalatest.Matchers
 
 import com.typesafe.config.ConfigFactory
 
-import akka.actor.ActorSystem
-import akka.actor.Props
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.Props
 
 /**
  * Basic web socket tests performed in SnoopSpec.
@@ -40,14 +40,14 @@ import akka.actor.Props
  */
 class WebSocketSpec extends WordSpec with Matchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient {
 
-  val akkaConfig =
+  val pekkoConfig =
     """
-      akka {
-        event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+      pekko {
+        event-handlers = ["org.apache.pekko.event.slf4j.Slf4jEventHandler"]
         loglevel = "DEBUG"
 	  }    
     """
-  val actorSystem = ActorSystem("WsActorSystem", ConfigFactory.parseString(akkaConfig))
+  val actorSystem = ActorSystem("WsActorSystem", ConfigFactory.parseString(pekkoConfig))
   var webServer: WebServer = null
   val port = 9002
   val path = "http://localhost:" + port + "/"

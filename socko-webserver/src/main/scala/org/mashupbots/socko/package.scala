@@ -16,7 +16,7 @@
 package org.mashupbots
 
 /**
- * Socko is a Scala web server powered by Netty networking and Akka processing.
+ * Socko is a Scala web server powered by Netty networking and Pekko processing.
  * 
  * Package dependency hierarchy
  * {{{
@@ -33,7 +33,7 @@ package org.mashupbots
  *  - **infrastructure** - utility classes 
  *  - **events** - events are created by Socko and dispatched by your routes to your handlers
  *  - **routes** - extractors to assist with pattern matching in your routes
- *  - **handlers** - akka actors that executes business logic
+ *  - **handlers** - pekko actors that executes business logic
  *  - **webserver** - web server and its configuration
  */
 package object socko {

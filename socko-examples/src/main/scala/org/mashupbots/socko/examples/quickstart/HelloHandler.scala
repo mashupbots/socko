@@ -16,7 +16,7 @@
 package org.mashupbots.socko.examples.quickstart
 
 import org.mashupbots.socko.events.HttpRequestEvent
-import akka.actor.Actor
+import org.apache.pekko.actor.Actor
 import java.util.Date
 
 /**

@@ -22,8 +22,8 @@ import org.mashupbots.socko.webserver.WebLogConfig
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
-import akka.actor.ActorSystem
-import akka.actor.Props
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.Props
 
 /**
  * This example shows how use route extractors.
@@ -37,7 +37,7 @@ import akka.actor.Props
  */
 object RouteApp extends Logger {
   //
-  // STEP #1 - Define Actors and Start Akka
+  // STEP #1 - Define Actors and Start Pekko
   // See `TimeHandler`
   //
   val actorSystem = ActorSystem("RouteExampleActorSystem")

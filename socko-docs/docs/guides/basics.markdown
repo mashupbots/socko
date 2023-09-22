@@ -16,9 +16,9 @@ WebServerClass: <code><a href="../api/#org.mashupbots.socko.webserver.WebServer"
 
 Let's deep dive into the 3 steps to Socko success:
 
- - [Step 1. Define Actors and Start Akka](#Step1)
+ - [Step 1. Define Actors and Start Pekko](#Step1)
    - [Handling Socko Events](#SockoEvents)
-   - [Akka Dispatchers and Thread Pools](#AkkaDispatchers)
+   - [Pekko Dispatchers and Thread Pools](#PekkoDispatchers)
  - [Step 2. Define Routes](#Step2)
    - [Socko Event Extractors](#SockoEventExtractors)
    - [Host Extractors](#HostExtractors)
@@ -29,22 +29,22 @@ Let's deep dive into the 3 steps to Socko success:
  - [Step 3. Start/Stop Web Server](#Step3)
 
 
-## Step 1. Define Actors and Start Akka <a class="blank" id="Step1"></a>
+## Step 1. Define Actors and Start Pekko <a class="blank" id="Step1"></a>
 
-Socko assumes that you have your business rules implemented as Akka v2 Actors.
+Socko assumes that you have your business rules implemented as Pekko v2 Actors.
 
 Incoming messages received by Socko will be wrapped within a {{ page.SockoEventClass }} and passed to your routes
-for dispatching to your Akka actor handlers. Your actors use {{ page.SockoEventClass }} to read incoming data and 
+for dispatching to your Pekko actor handlers. Your actors use {{ page.SockoEventClass }} to read incoming data and 
 write outgoing data.
 
-In the following `HelloApp` example, we have defined an actor called `HelloHandler` and started an Akka
+In the following `HelloApp` example, we have defined an actor called `HelloHandler` and started an Pekko
 system called `HelloExampleActorSystem`.  The `HttpRequestEvent` is used by the `HelloHandler`
 to write a response to the client.
 
 {% highlight scala %}
     object HelloApp extends Logger {
       //
-      // STEP #1 - Define Actors and Start Akka
+      // STEP #1 - Define Actors and Start Pekko
       // See `HelloHandler`
       //
       val actorSystem = ActorSystem("HelloExampleActorSystem")
@@ -62,9 +62,9 @@ to write a response to the client.
     }
 {% endhighlight %}
     
-For maximum scalability and performance, you will need to carefully choose your Akka dispatchers.
+For maximum scalability and performance, you will need to carefully choose your Pekko dispatchers.
 The default dispatcher is optimized for non blocking code. If your code blocks though reading from and writing to 
-database and/or file system, then it is advisable to configure Akka to use dispatchers based on thread pools.
+database and/or file system, then it is advisable to configure Pekko to use dispatchers based on thread pools.
 
 ### Handling Socko Events <a class="blank" id="SockoEvents"></a>
 
@@ -128,12 +128,12 @@ There are 4 types of {{ page.SockoEventClass }}:
 All {{ page.SockoEventClass }}s must be used by **local actors** only.
 
 
-### Akka Dispatchers and Thread Pools <a class="blank" id="AkkaDispatchers"></a>
+### Pekko Dispatchers and Thread Pools <a class="blank" id="PekkoDispatchers"></a>
 
-Akka [dispatchers](http://doc.akka.io/docs/akka/2.0.1/scala/dispatchers.html) controls how your Akka 
+Pekko dispatchers controls how your Pekko 
 actors process messages.
 
-Akka's default dispatcher is optimized for non blocking code.
+Pekko's default dispatcher is optimized for non blocking code.
 
 However, if your actors have blocking operations like database read/write or file system read/write, 
 we recommend that you run these actors with a different dispatcher.  In this way, while these actors block a thread,
@@ -151,8 +151,8 @@ to allocate more threads.
         type=PinnedDispatcher
         executor=thread-pool-executor
       }
-      akka {
-        event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+      pekko {
+        event-handlers = ["org.apache.pekko.event.slf4j.Slf4jEventHandler"]
         loglevel=DEBUG
         actor {
           deployment {
@@ -575,7 +575,7 @@ For example, for a Scala console application:
     }
 {% endhighlight %}
 
-For a [AKKA microkernel](http://doc.akka.io/docs/akka/2.1.2/scala/microkernel.html) application:
+For a Pekko microkernel application:
 
 {% highlight scala %}
     class SockoKernel extends Bootable {

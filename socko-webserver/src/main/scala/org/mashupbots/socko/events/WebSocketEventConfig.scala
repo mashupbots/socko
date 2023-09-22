@@ -15,7 +15,7 @@
 //
 package org.mashupbots.socko.events
 
-import akka.actor.ActorRef
+import org.apache.pekko.actor.ActorRef
 import io.netty.util.AttributeKey
 
 /**

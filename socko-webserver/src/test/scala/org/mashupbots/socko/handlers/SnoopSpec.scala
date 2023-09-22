@@ -34,20 +34,20 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.Matchers
 import org.scalatest.WordSpec
 import com.typesafe.config.ConfigFactory
-import akka.actor.actorRef2Scala
-import akka.actor.ActorSystem
-import akka.actor.Props
+import org.apache.pekko.actor.actorRef2Scala
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.Props
 
 class SnoopSpec extends WordSpec with Matchers with BeforeAndAfterAll with GivenWhenThen with TestHttpClient {
 
-  val akkaConfig =
+  val pekkoConfig =
     """
-      akka {
-        event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+      pekko {
+        event-handlers = ["org.apache.pekko.event.slf4j.Slf4jEventHandler"]
         loglevel = "DEBUG"
 	  }    
     """
-  val actorSystem = ActorSystem("SnoopActorSystem", ConfigFactory.parseString(akkaConfig))
+  val actorSystem = ActorSystem("SnoopActorSystem", ConfigFactory.parseString(pekkoConfig))
   var webServer: WebServer = null
   val port = 9000
   val path = "http://localhost:" + port + "/"

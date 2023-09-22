@@ -21,14 +21,14 @@ the License.
 Licenses for dependency projects
 ================================
 
-AKKA
+Pekko
 ----
-This product uses the Akka project:
+This product uses the Pekko project:
 
   * LICENSE FILE:
-    * LICENSE.akka.txt (Apache 2)
+    * LICENSE.pekko.txt (Apache 2)
   * HOMEPAGE:
-    * [http://akka.io/]
+    * [https://pekko.apache.org/]
     
     
 Netty

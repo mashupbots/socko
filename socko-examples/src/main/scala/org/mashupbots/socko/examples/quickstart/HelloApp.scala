@@ -20,24 +20,24 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
-import akka.actor.ActorSystem
-import akka.actor.Props
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.Props
 
 /**
  * This example shows how to setup a simple route and create a simple processor actor.
  *  - Run this class as a Scala Application
  *  - Open your browser and navigate to `http://localhost:8888/`
  *
- * Socko uses Netty to handle incoming requests and Akka to process them
+ * Socko uses Netty to handle incoming requests and Pekko to process them
  *  - Incoming requests are converted into Socko events using threads from the Netty thread pool
  *  - Your `routes` are then called to dispatch the event for processing
  *  - Inside our route definition, we instance a new `HelloHandler` actor and pass the event to it
- *  - The `HelloHandler` actor is executed in Akka default thread pool. This frees up the Netty thread pool to 
+ *  - The `HelloHandler` actor is executed in Pekko default thread pool. This frees up the Netty thread pool to
  *    undertake more networking activities.
  */
 object HelloApp extends Logger {
   //
-  // STEP #1 - Define Actors and Start Akka
+  // STEP #1 - Define Actors and Start Pekko
   // See `HelloHandler`
   //
   val actorSystem = ActorSystem("HelloExampleActorSystem")

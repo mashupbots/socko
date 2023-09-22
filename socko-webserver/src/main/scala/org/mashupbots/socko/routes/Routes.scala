@@ -24,7 +24,7 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
 
 /**
- * Routes define the rules for dispatching events to its intended Akka handlers. It is implemented as a
+ * Routes define the rules for dispatching events to its intended Pekko handlers. It is implemented as a
  * list of PartialFunctions.
  *
  * To assist with routing, Socko has the following extractors:

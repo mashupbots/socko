@@ -21,24 +21,24 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
-import akka.actor.ActorSystem
-import akka.actor.ExtendedActorSystem
-import akka.actor.ExtensionId
-import akka.actor.ExtensionIdProvider
-import akka.actor.Props
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.ExtendedActorSystem
+import org.apache.pekko.actor.ExtensionId
+import org.apache.pekko.actor.ExtensionIdProvider
+import org.apache.pekko.actor.Props
 
 /**
- * This example shows how load your web server configuration from AKKA's `application.conf`. 
+ * This example shows how load your web server configuration from Pekko's `application.conf`.
  * It is found in the root class path.  The source file is found in `src/main/resources`.
  *  - Run this class as a Scala Application
  *  - Open your browser and navigate to `http://localhost:9000/`
  */
-object AkkaConfigApp extends Logger {
+object PekkoConfigApp extends Logger {
   //
-  // STEP #1 - Define Actors and Start Akka
+  // STEP #1 - Define Actors and Start Pekko
   // See `HelloHandler`
   //
-  val actorSystem = ActorSystem("AkkaConfigActorSystem")
+  val actorSystem = ActorSystem("PekkoConfigActorSystem")
 
   //
   // STEP #2 - Define Routes
@@ -72,13 +72,13 @@ object AkkaConfigApp extends Logger {
 /**
  * Store of our web server configuration.
  *
- * Note that `WebServerConfig` is instanced with the setting named `akka-config-example`. This name must correspond
+ * Note that `WebServerConfig` is instanced with the setting named `pekko-config-example`. This name must correspond
  * with `application.conf`.  
  * 
  * For example:
  * {{{
- * akka-config-example {
- *   server-name=AkkaConfigExample
+ * pekko-config-example {
+ *   server-name=PekkoConfigExample
  *   hostname=localhost
  *   port=9000
  * }
@@ -87,5 +87,5 @@ object AkkaConfigApp extends Logger {
 object MyWebServerConfig extends ExtensionId[WebServerConfig] with ExtensionIdProvider {
   override def lookup = MyWebServerConfig
   override def createExtension(system: ExtendedActorSystem) =
-    new WebServerConfig(system.settings.config, "akka-config-example")
+    new WebServerConfig(system.settings.config, "pekko-config-example")
 }

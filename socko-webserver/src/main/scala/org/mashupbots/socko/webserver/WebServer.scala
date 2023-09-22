@@ -32,8 +32,8 @@ import org.mashupbots.socko.events.SockoEvent
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.infrastructure.WebLogWriter
 
-import akka.actor.{ActorRefFactory, ActorRef, Props}
-import akka.util.Timeout
+import org.apache.pekko.actor.{ActorRefFactory, ActorRef, Props}
+import org.apache.pekko.util.Timeout
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

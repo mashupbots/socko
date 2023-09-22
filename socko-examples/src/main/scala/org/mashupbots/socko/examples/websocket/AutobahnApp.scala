@@ -21,8 +21,8 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
-import akka.actor.ActorSystem
-import akka.actor.Props
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.Props
 
 /**
  * This example can be used to run against the Autobahn test suite
@@ -34,7 +34,7 @@ object AutobahnApp extends Logger {
   val actorSystem = ActorSystem("AutobahnActorSystem")
   
   // Instance a singleton handler so that frames are echo'ed in sequence.
-  // If we instance a new handler for each frame, Akka may not echo the incoming frames sequentially
+  // If we instance a new handler for each frame, Pekko may not echo the incoming frames sequentially
   // because instancing a new handler is not guaranteed to be sequential.
   // This is important for passing the Autobahn test suite.
   val handler = actorSystem.actorOf(Props[AutobahnHandler])

@@ -21,8 +21,8 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
-import akka.actor.ActorSystem
-import akka.actor.Props
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.Props
 
 /**
  * This example shows how load your web server configuration from code when instancing 
@@ -32,7 +32,7 @@ import akka.actor.Props
  */
 object CodedConfigApp extends Logger {
   //
-  // STEP #1 - Define Actors and Start Akka
+  // STEP #1 - Define Actors and Start Pekko
   // See `HelloHandler`
   //
   val actorSystem = ActorSystem("CodeConfigActorSystem")

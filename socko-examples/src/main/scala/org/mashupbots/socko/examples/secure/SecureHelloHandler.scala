@@ -19,7 +19,7 @@ import java.util.Date
 
 import org.mashupbots.socko.events.HttpRequestEvent
 
-import akka.actor.Actor
+import org.apache.pekko.actor.Actor
 
 /**
  * Writes a greeting and terminates.

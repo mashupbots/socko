@@ -17,7 +17,7 @@ package org.mashupbots.socko
 
 /**
  * Socko events are raised by Socko and passed into your routes for dispatching to your handlers.
- * Socko events provides a bridge between Netty and Akka.
+ * Socko events provides a bridge between Netty and Pekko.
  * 
  * There are 4 types of [[org.mashupbots.socko.events.SockoEvent]]
  *  - [[org.mashupbots.socko.events.HttpRequestEvent]] - Fired when a HTTP request is received

@@ -105,8 +105,8 @@ for more details.
 
 ## RESTful Web Services <a class="blank" id="Rest"></a>
 
-Socko's {{ page.RestHandlerClass }} class provides a quick way to expose your Akka actors as REST end points. You 
-will be able to invoke your Akka actors using Javascript in a web browser app and from other HTTP clients.
+Socko's {{ page.RestHandlerClass }} class provides a quick way to expose your Pekko actors as REST end points. You 
+will be able to invoke your Pekko actors using Javascript in a web browser app and from other HTTP clients.
 
 It also natively supports [Swagger](https://developers.helloreverb.com/swagger/).  With Swagger, you will be able to 
 provide your users with your API documentation straight from your code.
@@ -168,7 +168,7 @@ The following is an example implementation of a REST operation that returns a `P
   case class GetPetRequest(context: RestRequestContext, petId: Long) extends RestRequest
   case class GetPetResponse(context: RestResponseContext, pet: Option[Pet]) extends RestResponse
 
-  class PetProcessor() extends Actor with akka.actor.ActorLogging {
+  class PetProcessor() extends Actor with org.apache.pekko.actor.ActorLogging {
     def receive = {
       case req: GetPetRequest =>
         val pet = PetData.getPetById(req.petId)
@@ -235,7 +235,7 @@ we have provided 3 example scenarios:
 In order to use {{ page.RestHandlerClass }}, you must first instance {{ page.RestRegistryClass }}. The registry 
 will search the code base for your {{ page.RestRegistrationClass }}s.
 
-Using an Akka router, you can then instance {{ page.RestHandlerClass }} with the {{ page.RestRegistryClass }}.
+Using an Pekko router, you can then instance {{ page.RestHandlerClass }} with the {{ page.RestRegistryClass }}.
 
 Finally, add the {{ page.RestHandlerClass }} to your route and start Socko web server.
 
@@ -243,11 +243,11 @@ The following example illustrates:
 
 {% highlight scala %}
   //
-  // STEP #1 - Define Actors and Start Akka
+  // STEP #1 - Define Actors and Start Pekko
   //
   val actorConfig = """
-	akka {
-	  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+	pekko {
+	  event-handlers = ["org.apache.pekko.event.slf4j.Slf4jEventHandler"]
 	  loglevel=DEBUG
 	  actor {
 	    deployment {
@@ -317,7 +317,7 @@ Required settings are:
    on the local server. It needs to take into consideration the path to {{ page.RestHandlerClass }} as set in your route. 
    In the above example, the route is set to `api` so `rootApiUrl` must be set to `http://yourdomain.com/api`.
 
-Like other settings, you can set the values programmatically or via an external Akka configuration file. See
+Like other settings, you can set the values programmatically or via an external Pekko configuration file. See
 {{ page.RestConfigClass }} for more details. 
 
 

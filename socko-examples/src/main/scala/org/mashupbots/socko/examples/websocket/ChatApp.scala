@@ -21,10 +21,10 @@ import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes._
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
-import akka.actor.ActorSystem
-import akka.actor.Props
-import akka.actor.actorRef2Scala
-import akka.dispatch.OnComplete
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.Props
+import org.apache.pekko.actor.actorRef2Scala
+import org.apache.pekko.dispatch.OnComplete
 
 /**
  * This example shows how to use web sockets, specifically `org.mashupbots.socko.processors.WebSocketBroadcaster`,
@@ -40,7 +40,7 @@ import akka.dispatch.OnComplete
  */
 object ChatApp extends Logger {
   //
-  // STEP #1 - Define Actors and Start Akka
+  // STEP #1 - Define Actors and Start Pekko
   // `ChatHandler` is created in the route and is self-terminating
   //
   val actorSystem = ActorSystem("ChatExampleActorSystem")
